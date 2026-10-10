@@ -32,9 +32,9 @@ ready-to-send text.
 
 ## Get it
 
-Download the latest `Dictate-<version>.zip` from
-[Releases](https://github.com/moifort/dictate/releases/latest), move
-`Dictate.app` to Applications and open it. A short setup walks you through the
+Download the latest `Dictate-<version>.dmg` from
+[Releases](https://github.com/moifort/dictate/releases/latest), open it, drag
+Dictate onto Applications and launch it. A short setup walks you through the
 permissions. Dictate then keeps itself up to date.
 
 Requires macOS 27 on Apple Silicon.

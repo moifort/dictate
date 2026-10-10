@@ -6,8 +6,9 @@ name: Release
 #   git push origin v0.2.0
 #
 # Tests, builds the app, signs it with Developer ID, notarizes it and publishes
-# a GitHub release with the zipped app. A manual run stops before publishing and
-# leaves the zip as a run artifact.
+# a GitHub release with a disk image (manual installs) and a zip (the in-app
+# updater). A manual run stops before publishing and leaves both as run
+# artifacts.
 #
 # Dictate cannot ship on the Mac App Store: its event tap, Accessibility access
 # and the `claude` subprocess are all incompatible with the sandbox.
@@ -131,6 +132,24 @@ jobs:
             --sign "$IDENTITY" "$APP"
           codesign --verify --strict --verbose=2 "$APP"
 
+      # The disk image is for people installing by hand: open it, drag the app
+      # onto the Applications alias. The updater keeps downloading the zip.
+      - name: Build the disk image
+        run: |
+          set -euo pipefail
+          DMG="Dictate-$MARKETING.dmg"
+          STAGING="$RUNNER_TEMP/dmg"
+          mkdir -p "$STAGING"
+          ditto "$APP" "$STAGING/Dictate.app"
+          ln -s /Applications "$STAGING/Applications"
+          diskutil image create from --format ULFO --volumeName Dictate \
+            "$STAGING" "$DMG"
+          if [ "$SIGNED" = "true" ]; then
+            codesign --force --timestamp --sign "Developer ID Application" "$DMG"
+          fi
+          echo "DMG=$DMG" >> "$GITHUB_ENV"
+
+      # One submission covers both: the image's ticket also holds the app's.
       # `notarytool --wait` can exit 0 on a rejected submission: read the status.
       - name: Notarize and staple
         if: env.SIGNED == 'true'
@@ -142,8 +161,7 @@ jobs:
           set -euo pipefail
           KEY="$RUNNER_TEMP/AuthKey.p8"
           printf '%s' "$ASC_KEY_P8" > "$KEY"
-          ditto -c -k --keepParent "$APP" "$RUNNER_TEMP/notarize.zip"
-          xcrun notarytool submit "$RUNNER_TEMP/notarize.zip" \
+          xcrun notarytool submit "$DMG" \
             --key "$KEY" --key-id "$ASC_KEY_ID" --issuer "$ASC_ISSUER_ID" \
             --wait --timeout 30m --output-format json | tee "$RUNNER_TEMP/notary.json"
           STATUS=$(plutil -extract status raw "$RUNNER_TEMP/notary.json")
@@ -156,9 +174,11 @@ jobs:
           fi
           rm -f "$KEY"
           xcrun stapler staple "$APP"
+          xcrun stapler staple "$DMG"
           spctl --assess --type execute --verbose "$APP"
+          spctl --assess --type open --context context:primary-signature --verbose "$DMG"
 
-      - name: Package
+      - name: Package the zip for the updater
         run: |
           set -euo pipefail
           ZIP="Dictate-$MARKETING.zip"
@@ -177,7 +197,7 @@ jobs:
             git tag -l --format='%(contents:subject)' "$GITHUB_REF_NAME" > notes.txt
           fi
           if [ "$SIGNED" != "true" ]; then
-            printf '\n> Build non notarisé : au premier lancement, clic droit sur Dictate → Ouvrir.\n' >> notes.txt
+            printf '\n> Not notarized: on first launch, right-click Dictate → Open.\n' >> notes.txt
           fi
           echo "---- Notes ----"; cat notes.txt
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
@@ -185,13 +205,15 @@ jobs:
           else
             gh release create "$GITHUB_REF_NAME" --title "Dictate $MARKETING" --notes-file notes.txt
           fi
-          gh release upload "$GITHUB_REF_NAME" "$ZIP" --clobber
+          gh release upload "$GITHUB_REF_NAME" "$DMG" "$ZIP" --clobber
 
-      - name: Archive the zip as a run artifact
+      - name: Archive the packages as a run artifact
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: Dictate-zip
-          path: Dictate-*.zip
+          name: Dictate
+          path: |
+            Dictate-*.dmg
+            Dictate-*.zip
           if-no-files-found: ignore
           retention-days: 14

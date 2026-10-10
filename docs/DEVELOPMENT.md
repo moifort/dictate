@@ -40,7 +40,8 @@ update themselves.
   `main` and on pull requests, on GitHub's `xcode-27` runner (macOS 27).
 - **Releases** ([release.yml](../.github/workflows/release.yml)) run on every
   `v*` tag: tests, Release build, Developer ID signing, notarization, then a
-  GitHub release with `Dictate-<version>.zip`. The notes come from the tag
+  GitHub release with `Dictate-<version>.dmg` for manual installs and
+  `Dictate-<version>.zip` for the in-app updater. The notes come from the tag
   annotation:
 
   ```bash
