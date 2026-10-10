@@ -27,8 +27,17 @@ if [ ! -f "$P12" ]; then
 fi
 
 read -rsp "Password of the .p12: " P12_PASSWORD; echo
-if ! openssl pkcs12 -in "$P12" -passin "pass:$P12_PASSWORD" -noout 2>/dev/null; then
+# Checked the way the release workflow imports it: the bundled LibreSSL cannot
+# read the AES-encrypted .p12 files Keychain Access exports.
+CHECK_DIR="$(mktemp -d)"
+trap 'security delete-keychain "$CHECK_DIR/check.keychain-db" 2>/dev/null; rm -rf "$CHECK_DIR"' EXIT
+security create-keychain -p check "$CHECK_DIR/check.keychain-db"
+if ! security import "$P12" -P "$P12_PASSWORD" -f pkcs12 -k "$CHECK_DIR/check.keychain-db" >/dev/null; then
   echo "Wrong password, or not a .p12 file." >&2
+  exit 1
+fi
+if ! security find-identity -v -p codesigning "$CHECK_DIR/check.keychain-db" | grep -q "Developer ID Application"; then
+  echo "This .p12 holds no Developer ID Application identity." >&2
   exit 1
 fi
 
