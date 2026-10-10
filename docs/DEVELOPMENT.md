@@ -1,7 +1,5 @@
 # Development
 
-Design: [docs/superpowers/specs/2026-10-10-push-to-talk-dictation-design.md](superpowers/specs/2026-10-10-push-to-talk-dictation-design.md)
-
 ## Requirements
 
 - macOS 27, Apple Silicon, Xcode 27
