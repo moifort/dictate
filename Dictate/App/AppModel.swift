@@ -9,6 +9,7 @@ final class AppModel {
     let transcriber = WhisperKitTranscriber()
     let controller: DictationController
     let indicator: RecordingIndicator
+    let updater = Updater()
 
     private(set) var claudeCLIPath: URL?
     private(set) var hotkeyActive = false
@@ -62,6 +63,7 @@ final class AppModel {
         Task { await transcriber.load() }
         startHotkey()
         pollSetupUntilComplete()
+        updater.startPeriodicChecks { [settings] in settings.autoUpdate }
     }
 
     func refreshSetup() {

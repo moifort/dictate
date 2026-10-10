@@ -17,6 +17,11 @@ final class AppSettings {
         didSet { defaults.set(enhancementEnabled, forKey: Keys.enhancementEnabled) }
     }
 
+    /// Install new releases as soon as they are found, without asking.
+    var autoUpdate: Bool {
+        didSet { defaults.set(autoUpdate, forKey: Keys.autoUpdate) }
+    }
+
     var cliPathOverride: String {
         didSet { defaults.set(cliPathOverride, forKey: Keys.cliPathOverride) }
     }
@@ -42,12 +47,14 @@ final class AppSettings {
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         enhancementEnabled = defaults.object(forKey: Keys.enhancementEnabled) as? Bool ?? true
+        autoUpdate = defaults.object(forKey: Keys.autoUpdate) as? Bool ?? true
         cliPathOverride = defaults.string(forKey: Keys.cliPathOverride) ?? ""
         vocabularyText = defaults.string(forKey: Keys.vocabulary) ?? Self.defaultVocabulary.joined(separator: "\n")
     }
 
     private enum Keys {
         static let enhancementEnabled = "enhancementEnabled"
+        static let autoUpdate = "autoUpdate"
         static let cliPathOverride = "cliPathOverride"
         static let vocabulary = "vocabulary"
     }

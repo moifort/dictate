@@ -13,6 +13,9 @@ struct MenuContent: View {
         if !model.setup.isComplete {
             Button("Terminer la configuration…") { open { openWindow(id: "setup") } }
         }
+        if let release = model.updater.available {
+            Button("Mettre à jour vers \(release.version)…") { open { openWindow(id: "update") } }
+        }
         Divider()
         Toggle("Amélioration par Claude", isOn: Bindable(model.settings).enhancementEnabled)
             .onChange(of: model.settings.enhancementEnabled) { model.settingsChanged() }

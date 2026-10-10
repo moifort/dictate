@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @Bindable var model: AppModel
     @State private var launchAtLogin = false
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         Form {
@@ -39,6 +40,27 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
             }
 
+            Section("Mises à jour") {
+                Toggle("Installer les mises à jour automatiquement", isOn: Bindable(model.settings).autoUpdate)
+                LabeledContent("Version \(model.updater.currentVersion)") {
+                    HStack {
+                        if let release = model.updater.available {
+                            Button("Installer \(release.version)") { open { openWindow(id: "update") } }
+                        } else {
+                            Button("Rechercher") { Task { await model.updater.check() } }
+                                .disabled(model.updater.isBusy)
+                        }
+                        if model.updater.state == .checking {
+                            ProgressView().controlSize(.small)
+                        } else if let lastCheck = model.updater.lastCheck, model.updater.available == nil {
+                            Text("À jour, vérifié \(lastCheck.formatted(.relative(presentation: .named)))")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+
             Section("Général") {
                 Toggle("Lancer Dictate à l'ouverture de session", isOn: $launchAtLogin)
                     .onChange(of: launchAtLogin) {
@@ -51,5 +73,11 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .frame(width: 480)
         .onAppear { launchAtLogin = model.settings.launchAtLogin }
+    }
+
+    /// An accessory app must be activated for its windows to come forward.
+    private func open(_ action: () -> Void) {
+        NSApp.activate()
+        action()
     }
 }

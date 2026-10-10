@@ -30,6 +30,16 @@ xcodebuild -project Dictate.xcodeproj -scheme Dictate -derivedDataPath build -de
 The Whisper integration test only runs once the model has been downloaded by
 the app.
 
+## Updates
+
+Dictate checks GitHub releases shortly after launch and every six hours. A
+newer release is installed automatically (Settings → "Installer les mises à
+jour automatiquement", on by default) or offered in the menu. The downloaded
+bundle is verified with `codesign` — same identifier, and same Team ID when the
+running copy is signed with a real certificate — before it replaces the
+installed one and the app relaunches. Copies run from a build folder never
+update themselves.
+
 ## CI and releases
 
 - **Tests** ([test.yml](.github/workflows/test.yml)) run on every push to

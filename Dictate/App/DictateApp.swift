@@ -23,6 +23,13 @@ struct DictateApp: App {
         .windowResizability(.contentSize)
         .windowStyle(.hiddenTitleBar)
         .defaultLaunchBehavior(appDelegate.needsSetup ? .presented : .suppressed)
+
+        Window("Mise à jour", id: "update") {
+            UpdateView(updater: appDelegate.model.updater)
+        }
+        .windowResizability(.contentSize)
+        .windowStyle(.hiddenTitleBar)
+        .defaultLaunchBehavior(.suppressed)
     }
 
     private var menuBarSymbol: String {
