@@ -71,10 +71,19 @@ final class AppModel {
             inputMonitoring: Permissions.inputMonitoring || hotkeyActive,
             accessibility: Permissions.accessibility,
             fnKeyFree: Permissions.fnKeyFree,
-            whisperModel: transcriber.state == .ready || WhisperKitTranscriber.isModelDownloaded(),
+            whisperModel: whisperReady,
             claude: !settings.enhancementEnabled || claudeCLIPath != nil
         )
         if checklist != setup { setup = checklist }
+    }
+
+    /// Ready, or on disk and still being compiled: launch must not wait for that.
+    private var whisperReady: Bool {
+        switch transcriber.state {
+        case .ready: true
+        case .failed, .downloading: false
+        case .notLoaded, .loading: WhisperKitTranscriber.isModelDownloaded()
+        }
     }
 
     /// Dictation without Claude inserts the raw Whisper transcript.
@@ -123,6 +132,8 @@ final class AppModel {
     /// Called when the vocabulary or CLI path changes: the waiting process has a stale prompt.
     func settingsChanged() {
         refreshClaudeCLI()
+        refreshSetup()
+        pollSetupUntilComplete()
         resetEnhancerTask?.cancel()
         resetEnhancerTask = Task {
             try? await Task.sleep(for: .seconds(2))

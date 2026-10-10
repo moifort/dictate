@@ -378,7 +378,9 @@ private struct TryItPage: View {
         case .enhancing:
             Label("Correction par Claude…", systemImage: "sparkles").foregroundStyle(.secondary)
         case .idle:
-            if model.transcriber.state != .ready {
+            if case .failed(let message) = model.transcriber.state {
+                Label(message, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+            } else if model.transcriber.state != .ready {
                 Label("Whisper se prépare, encore un instant…", systemImage: "hourglass").foregroundStyle(.secondary)
             } else if !text.isEmpty, case .pasted = model.controller.lastOutcome {
                 Label("Ça marche !", systemImage: "checkmark.circle.fill").foregroundStyle(.green)

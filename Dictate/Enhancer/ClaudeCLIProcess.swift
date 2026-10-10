@@ -1,3 +1,4 @@
+import Darwin
 import Foundation
 
 nonisolated enum ClaudeCLIError: LocalizedError, Equatable {
@@ -35,6 +36,8 @@ nonisolated final class ClaudeCLIProcess: @unchecked Sendable {
         process.standardInput = input
         process.standardOutput = output
         process.standardError = errors
+        // Writing to a process that already exited must throw EPIPE, not kill the app with SIGPIPE.
+        _ = fcntl(input.fileHandleForWriting.fileDescriptor, F_SETNOSIGPIPE, 1)
         errors.fileHandleForReading.readabilityHandler = { [stderrBuffer] handle in
             stderrBuffer.append(handle.availableData)
         }

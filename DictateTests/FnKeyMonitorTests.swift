@@ -18,6 +18,11 @@ struct FnKeyMonitorTests {
         #expect(FnKeyMonitor.classify(type: .keyDown, keyCode: 0, flags: .maskSecondaryFn, time: 0) == .otherKeyDown)
     }
 
+    @Test func modifierReleaseIsIgnored() {
+        #expect(FnKeyMonitor.classify(type: .flagsChanged, keyCode: 56, flags: [], time: 0) == nil)
+        #expect(FnKeyMonitor.classify(type: .flagsChanged, keyCode: 56, flags: .maskSecondaryFn, time: 0) == nil)
+    }
+
     @Test func unrelatedEventsAreIgnored() {
         #expect(FnKeyMonitor.classify(type: .keyUp, keyCode: 0, flags: [], time: 0) == nil)
     }

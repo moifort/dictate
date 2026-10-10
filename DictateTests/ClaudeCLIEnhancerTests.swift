@@ -120,3 +120,19 @@ private extension Array where Element: Equatable {
         return (0...(count - sequence.count)).contains { Array(self[$0..<$0 + sequence.count]) == sequence }
     }
 }
+
+@MainActor
+struct ClaudeCLIProcessTests {
+    @Test func writingToAnExitedProcessThrowsInsteadOfCrashing() async throws {
+        let dir = FileManager.default.temporaryDirectory.appending(path: "process-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        let cli = dir.appending(path: "claude")
+        try Data("#!/bin/bash\nexit 1\n".utf8).write(to: cli)
+        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: cli.path)
+
+        let process = try ClaudeCLIProcess(executable: cli, arguments: [], workingDirectory: dir)
+        try await Task.sleep(for: .milliseconds(500))
+        #expect(!process.isRunning)
+        await #expect(throws: (any Error).self) { try await process.send("hello") }
+    }
+}

@@ -8,6 +8,7 @@ struct SettingsView: View {
         Form {
             Section("Amélioration") {
                 Toggle("Nettoyer le texte avec Claude (Haiku)", isOn: Bindable(model.settings).enhancementEnabled)
+                    .onChange(of: model.settings.enhancementEnabled) { model.settingsChanged() }
                 LabeledContent("CLI claude") {
                     Text(model.claudeCLIPath?.path ?? "Introuvable")
                         .font(.caption.monospaced())
@@ -16,7 +17,7 @@ struct SettingsView: View {
                         .truncationMode(.middle)
                 }
                 TextField("Chemin personnalisé (optionnel)", text: Bindable(model.settings).cliPathOverride)
-                    .onSubmit { model.settingsChanged() }
+                    .onChange(of: model.settings.cliPathOverride) { model.settingsChanged() }
                 HStack {
                     Button("Tester") { Task { await model.testClaude() } }
                     if let result = model.claudeTestResult {
@@ -40,7 +41,11 @@ struct SettingsView: View {
 
             Section("Général") {
                 Toggle("Lancer Dictate à l'ouverture de session", isOn: $launchAtLogin)
-                    .onChange(of: launchAtLogin) { model.settings.launchAtLogin = launchAtLogin }
+                    .onChange(of: launchAtLogin) {
+                        model.settings.launchAtLogin = launchAtLogin
+                        // Registration can be refused: show what macOS actually did.
+                        launchAtLogin = model.settings.launchAtLogin
+                    }
             }
         }
         .formStyle(.grouped)

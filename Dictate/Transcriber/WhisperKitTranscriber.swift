@@ -82,22 +82,42 @@ actor WhisperEngine {
         self.downloadBase = downloadBase
     }
 
+    private var loading: Task<Void, Error>?
+
+    /// Concurrent callers share one load: a dictation during startup must not
+    /// trigger a second download or a second copy of the model in memory.
     func load(progress: @escaping @Sendable (Double) -> Void = { _ in }) async throws {
         guard pipeline == nil else { return }
+        if let loading { return try await loading.value }
+        let task = Task { try await performLoad(progress: progress) }
+        loading = task
+        defer { loading = nil }
+        try await task.value
+    }
+
+    private func performLoad(progress: @escaping @Sendable (Double) -> Void) async throws {
         try FileManager.default.createDirectory(at: downloadBase, withIntermediateDirectories: true)
-        let folder: URL
         if WhisperKitTranscriber.isModelDownloaded(in: downloadBase) {
-            folder = WhisperKitTranscriber.modelFolder(in: downloadBase)
-        } else {
-            folder = try await WhisperKit.download(variant: modelName, downloadBase: downloadBase) {
-                progress($0.fractionCompleted)
+            do {
+                pipeline = try await makePipeline(folder: WhisperKitTranscriber.modelFolder(in: downloadBase))
+                return
+            } catch {
+                // An interrupted download leaves partial folders behind: let the hub complete them.
+                Logging.debug("Local model failed to load, downloading again: \(error)")
             }
         }
+        let folder = try await WhisperKit.download(variant: modelName, downloadBase: downloadBase) {
+            progress($0.fractionCompleted)
+        }
+        pipeline = try await makePipeline(folder: folder)
+    }
+
+    private func makePipeline(folder: URL) async throws -> WhisperKit {
         let config = WhisperKitConfig(
             model: modelName, downloadBase: downloadBase, modelFolder: folder.path,
             verbose: false, prewarm: true, load: true, download: false
         )
-        pipeline = try await WhisperKit(config)
+        return try await WhisperKit(config)
     }
 
     func transcribe(samples: [Float], vocabulary: [String]) async throws -> String {

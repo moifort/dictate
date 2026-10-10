@@ -20,6 +20,8 @@ final class FocusInspector: FocusInspecting {
     func hasEditableFocus() -> Bool {
         guard let app = NSWorkspace.shared.frontmostApplication else { return false }
         let appElement = AXUIElementCreateApplication(app.processIdentifier)
+        // A busy app would otherwise block the dictation for the default 6 s.
+        AXUIElementSetMessagingTimeout(appElement, 0.5)
         guard let focused = copyElement(appElement, kAXFocusedUIElementAttribute) else { return false }
 
         if let role = copyString(focused, kAXRoleAttribute), Self.textRoles.contains(role) {
@@ -36,6 +38,7 @@ final class FocusInspector: FocusInspecting {
         guard !electronEnabledPIDs.contains(pid) else { return }
         electronEnabledPIDs.insert(pid)
         let element = AXUIElementCreateApplication(pid)
+        AXUIElementSetMessagingTimeout(element, 0.5)
         AXUIElementSetAttributeValue(element, "AXManualAccessibility" as CFString, kCFBooleanTrue)
     }
 

@@ -67,7 +67,10 @@ final class FnKeyMonitor {
         switch type {
         case .flagsChanged where keyCode == fnKeyCode:
             flags.contains(.maskSecondaryFn) ? .fnDown(at: time) : .fnUp(at: time)
-        case .flagsChanged, .keyDown:
+        case .flagsChanged:
+            // Only a modifier going down counts: releasing Shift mid-dictation is not a shortcut.
+            flags.isDisjoint(with: [.maskShift, .maskControl, .maskAlternate, .maskCommand]) ? nil : .otherKeyDown
+        case .keyDown:
             .otherKeyDown
         default:
             nil
