@@ -30,10 +30,6 @@ ready-to-send text.
 - **Discreet.** A small pill at the bottom of the screen shows that Dictate is
   listening, then working, and disappears.
 
-<p align="center">
-  <img src="docs/assets/recording.png" width="600" alt="The recording pill at the bottom of the screen, with a red dot and the voice level">
-</p>
-
 ## Get it
 
 Download the latest `Dictate-<version>.zip` from
