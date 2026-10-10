@@ -16,6 +16,12 @@ struct MenuContent: View {
         }
         if let release = model.updater.available {
             Button("Mettre à jour vers \(release.version)…") { open { openWindow(id: "update") } }
+        } else {
+            Button("Rechercher des mises à jour…") {
+                Task { await model.updater.check() }
+                open { openWindow(id: "update") }
+            }
+            .disabled(model.updater.isBusy)
         }
         Divider()
         Toggle("Amélioration par Claude", isOn: Bindable(model.settings).enhancementEnabled)

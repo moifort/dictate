@@ -44,7 +44,8 @@ struct UpdateView: View {
     }
 
     private var title: String {
-        updater.available.map { "Dictate \($0.version)" } ?? "Dictate est à jour"
+        if updater.state == .checking { return "Recherche en cours" }
+        return updater.available.map { "Dictate \($0.version)" } ?? "Dictate est à jour"
     }
 
     private var notes: AttributedString {
@@ -58,6 +59,11 @@ struct UpdateView: View {
     @ViewBuilder
     private var status: some View {
         switch updater.state {
+        case .checking:
+            HStack(spacing: 8) {
+                ProgressView().controlSize(.small)
+                Text("Recherche de mises à jour…").font(.caption).foregroundStyle(.secondary)
+            }
         case .downloading(let fraction):
             ProgressView(value: fraction) { Text("Téléchargement…").font(.caption).foregroundStyle(.secondary) }
         case .installing:
