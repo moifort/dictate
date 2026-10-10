@@ -74,6 +74,7 @@ final class RecordingIndicator {
         let origin = CGPoint(x: visible.midX - Self.size.width / 2, y: visible.minY + 16)
         panel.setFrameOrigin(origin)
         panel.orderFrontRegardless()
+        Log.app.info("indicator shown at \(String(describing: origin), privacy: .public), visible: \(self.panel.isVisible)")
     }
 }
 
@@ -105,14 +106,15 @@ private struct IndicatorView: View {
     let state: RecordingIndicator.State
 
     private enum Mode: Equatable {
-        case hidden, recording, processing
+        case hidden, recording, transcribing, enhancing
         case flash(RecordingIndicator.Flash)
     }
 
     private var mode: Mode {
         switch controller.phase {
         case .recording: .recording
-        case .processing: .processing
+        case .transcribing: .transcribing
+        case .enhancing: .enhancing
         case .idle: state.flash.map(Mode.flash) ?? .hidden
         }
     }
@@ -139,10 +141,12 @@ private struct IndicatorView: View {
                 Circle().fill(.red).frame(width: 8, height: 8)
                 LevelBars(level: CGFloat(recorder.level))
             }
-        case .processing:
+        case .transcribing:
             Image(systemName: "waveform")
                 .foregroundStyle(.white.opacity(0.85))
                 .symbolEffect(.variableColor.iterative.dimInactiveLayers)
+        case .enhancing:
+            Spinner()
         case .flash(.copied(let raw)):
             HStack(spacing: 6) {
                 Image(systemName: "doc.on.clipboard").foregroundStyle(.white)
@@ -156,6 +160,24 @@ private struct IndicatorView: View {
         case .flash(.failed):
             Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
         }
+    }
+}
+
+/// Rotating arc shown while Claude corrects the text.
+private struct Spinner: View {
+    @State private var rotation: Angle = .zero
+
+    var body: some View {
+        Circle()
+            .trim(from: 0, to: 0.7)
+            .stroke(.white.opacity(0.9), style: StrokeStyle(lineWidth: 2, lineCap: .round))
+            .frame(width: 14, height: 14)
+            .rotationEffect(rotation)
+            .onAppear {
+                withAnimation(.linear(duration: 0.8).repeatForever(autoreverses: false)) {
+                    rotation = .degrees(360)
+                }
+            }
     }
 }
 

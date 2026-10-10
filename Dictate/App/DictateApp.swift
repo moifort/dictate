@@ -26,7 +26,8 @@ struct DictateApp: App {
         switch appDelegate.model.controller.phase {
         case .idle: "mic"
         case .recording: "mic.fill"
-        case .processing: "waveform"
+        case .transcribing: "waveform"
+        case .enhancing: "sparkles"
         }
     }
 }

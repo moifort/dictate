@@ -16,9 +16,16 @@ struct SetupView: View {
             row("Micro", ok: Permissions.microphone, action: "Autoriser") {
                 Task { _ = await Permissions.requestMicrophone() }
             }
-            row("Surveillance de l'entrée (touche fn)", ok: Permissions.inputMonitoring, action: "Autoriser") {
+            row("Surveillance de l'entrée (touche fn)", ok: Permissions.inputMonitoring || model.hotkeyActive, action: "Autoriser") {
                 Permissions.requestInputMonitoring()
                 Permissions.openPrivacySettings("Privacy_ListenEvent")
+                // macOS does not always list development builds: let the user drag the app in.
+                NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL])
+            }
+            if !(Permissions.inputMonitoring || model.hotkeyActive) {
+                Text("Si Dictate n'apparaît pas dans la liste, glissez l'app affichée dans le Finder sur la liste, ou ajoutez-la avec le bouton +.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
             row("Accessibilité (insertion du texte)", ok: Permissions.accessibility, action: "Autoriser") {
                 Permissions.requestAccessibility()

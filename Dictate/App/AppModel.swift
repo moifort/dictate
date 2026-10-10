@@ -40,10 +40,18 @@ final class AppModel {
         )
         indicator = RecordingIndicator(controller: controller, recorder: recorder)
         controller.onOutcome = { [weak self] outcome in self?.handle(outcome) }
-        fnMonitor.onGesture = { [weak self] gesture in self?.controller.handle(gesture) }
+        fnMonitor.onGesture = { [weak self] gesture in
+            guard let self else { return }
+            Log.hotkey.info("gesture \(String(describing: gesture), privacy: .public) in phase \(String(describing: self.controller.phase), privacy: .public)")
+            self.controller.handle(gesture)
+        }
     }
 
     func start() {
+        Log.app.info("""
+            start — microphone: \(Permissions.microphone), inputMonitoring: \(Permissions.inputMonitoring), \
+            accessibility: \(Permissions.accessibility), fnKeyFree: \(Permissions.fnKeyFree)
+            """)
         refreshClaudeCLI()
         enhancer.prewarm()
         Task { await transcriber.load() }
@@ -53,12 +61,14 @@ final class AppModel {
     /// The event tap only works once Input Monitoring is granted: keep retrying.
     func startHotkey() {
         hotkeyActive = fnMonitor.start()
+        Log.hotkey.info("event tap active: \(self.hotkeyActive)")
         guard !hotkeyActive, hotkeyRetry == nil else { return }
         hotkeyRetry = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated {
                 guard let self else { return }
                 self.hotkeyActive = self.fnMonitor.start()
                 if self.hotkeyActive {
+                    Log.hotkey.info("event tap active after retry")
                     self.hotkeyRetry?.invalidate()
                     self.hotkeyRetry = nil
                 }
@@ -102,6 +112,7 @@ final class AppModel {
     }
 
     private func handle(_ outcome: DictationOutcome) {
+        Log.dictation.info("outcome \(String(describing: outcome), privacy: .public)")
         switch outcome {
         case .failed(let message):
             lastError = message

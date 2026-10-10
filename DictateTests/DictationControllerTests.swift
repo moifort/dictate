@@ -125,9 +125,20 @@ struct DictationControllerTests {
         controller.handle(.pressed)
         controller.handle(.released)
         controller.handle(.pressed)
-        #expect(controller.phase == .processing)
+        #expect(controller.phase == .transcribing)
         await controller.waitUntilIdle()
         #expect(fakes.recorder.startCount == 1)
+    }
+
+    @Test func phaseIsEnhancingWhileClaudeCorrects() async throws {
+        let (controller, _) = makeController(enhancerDelay: .milliseconds(150))
+        controller.handle(.pressed)
+        controller.handle(.released)
+        #expect(controller.phase == .transcribing)
+        try await Task.sleep(for: .milliseconds(50))
+        #expect(controller.phase == .enhancing)
+        await controller.waitUntilIdle()
+        #expect(controller.phase == .idle)
     }
 
     @Test func recorderFailureReportsFailure() {

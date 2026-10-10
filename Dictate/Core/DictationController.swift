@@ -4,7 +4,12 @@ import Observation
 enum DictationPhase: Equatable {
     case idle
     case recording
-    case processing
+    /// Whisper is turning the audio into text.
+    case transcribing
+    /// Claude is cleaning up the transcript.
+    case enhancing
+
+    var isBusy: Bool { self == .transcribing || self == .enhancing }
 }
 
 enum DictationOutcome: Equatable {
@@ -79,7 +84,7 @@ final class DictationController {
         case .released:
             guard phase == .recording else { return }
             let samples = recorder.stop()
-            phase = .processing
+            phase = .transcribing
             processing = Task { await process(samples) }
         }
     }
@@ -106,6 +111,7 @@ final class DictationController {
         var text = transcript
         var raw = false
         if enhancementEnabled() {
+            phase = .enhancing
             if let enhanced = await enhanceWithTimeout(transcript), !enhanced.isEmpty {
                 text = enhanced
             } else {
