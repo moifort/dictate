@@ -4,3 +4,4 @@ DerivedData/
 *.xcodeproj/
 .build/
 xcuserdata/
+.claude/worktrees/
