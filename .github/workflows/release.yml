@@ -1,0 +1,197 @@
+name: Release
+
+# One release per tag:
+#
+#   git tag -a v0.2.0 -m "What changes in this version…"
+#   git push origin v0.2.0
+#
+# Tests, builds the app, signs it with Developer ID, notarizes it and publishes
+# a GitHub release with the zipped app. A manual run stops before publishing and
+# leaves the zip as a run artifact.
+#
+# Dictate cannot ship on the Mac App Store: its event tap, Accessibility access
+# and the `claude` subprocess are all incompatible with the sandbox.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write   # publish the tag's GitHub release
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: 📦 Test, build, sign & publish
+    runs-on: xcode-27
+    timeout-minutes: 60
+    env:
+      # Without a Developer ID certificate the app is still published, ad-hoc
+      # signed and not notarized: Gatekeeper then asks for a right-click → Open.
+      SIGNED: ${{ secrets.DEVELOPER_ID_P12 != '' }}
+      APP: build/Build/Products/Release/Dictate.app
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # the build number and the tag annotation depend on it
+
+      - name: Select Xcode 27
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest
+
+      - name: Compute version numbers
+        run: |
+          set -euo pipefail
+          BUILD=$(git rev-list --count HEAD)
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            MARKETING="${GITHUB_REF_NAME#v}"
+          else
+            MARKETING="0.0.0-$(git rev-parse --short HEAD)"
+          fi
+          echo "BUILD=$BUILD" >> "$GITHUB_ENV"
+          echo "MARKETING=$MARKETING" >> "$GITHUB_ENV"
+          echo "Releasing Dictate $MARKETING ($BUILD)"
+
+      - name: Generate the Xcode project
+        run: |
+          set -euo pipefail
+          brew install xcodegen
+          xcodegen generate
+
+      - name: Restore Swift packages
+        uses: actions/cache@v6
+        with:
+          path: build/SourcePackages
+          key: spm-${{ runner.os }}-${{ hashFiles('project.yml') }}
+
+      - name: Run the unit tests
+        run: |
+          set -euo pipefail
+          xcodebuild test \
+            -project Dictate.xcodeproj -scheme Dictate \
+            -destination 'platform=macOS' \
+            -derivedDataPath build \
+            CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=
+
+      # Signed by hand after the build rather than by Xcode: no provisioning
+      # profile, no team lookup, and the same command for both signing modes.
+      - name: Build the app
+        run: |
+          set -euo pipefail
+          xcodebuild build \
+            -project Dictate.xcodeproj -scheme Dictate -configuration Release \
+            -destination 'generic/platform=macOS' \
+            -derivedDataPath build \
+            ARCHS=arm64 \
+            MARKETING_VERSION="$MARKETING" CURRENT_PROJECT_VERSION="$BUILD" \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Import the Developer ID identity
+        if: env.SIGNED == 'true'
+        env:
+          DEVELOPER_ID_P12: ${{ secrets.DEVELOPER_ID_P12 }}
+          DEVELOPER_ID_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+        run: |
+          set -euo pipefail
+          # A throwaway keychain: the login keychain is locked on a runner and
+          # codesign would wait for a password nobody will type.
+          KEYCHAIN="$RUNNER_TEMP/dictate-signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(uuidgen)"
+          CERT="$RUNNER_TEMP/developer-id.p12"
+          printf '%s' "$DEVELOPER_ID_P12" | base64 -d > "$CERT"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$CERT" -P "$DEVELOPER_ID_P12_PASSWORD" \
+            -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          security set-key-partition-list -S apple-tool:,apple: \
+            -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" >/dev/null
+          security list-keychains -d user -s "$KEYCHAIN" \
+            $(security list-keychains -d user | sed 's/["[:space:]]//g')
+          rm -f "$CERT"
+          security find-identity -v -p codesigning "$KEYCHAIN"
+
+      - name: Sign the app
+        run: |
+          set -euo pipefail
+          if [ "$SIGNED" = "true" ]; then
+            IDENTITY="Developer ID Application"
+            TIMESTAMP=--timestamp
+          else
+            echo "::warning::DEVELOPER_ID_P12 is not set: publishing an ad-hoc signed, non-notarized build"
+            IDENTITY=-
+            TIMESTAMP=
+          fi
+          codesign --force --options runtime $TIMESTAMP \
+            --entitlements Dictate/Resources/Dictate.entitlements \
+            --sign "$IDENTITY" "$APP"
+          codesign --verify --strict --verbose=2 "$APP"
+
+      # `notarytool --wait` can exit 0 on a rejected submission: read the status.
+      - name: Notarize and staple
+        if: env.SIGNED == 'true'
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          set -euo pipefail
+          KEY="$RUNNER_TEMP/AuthKey.p8"
+          printf '%s' "$ASC_KEY_P8" > "$KEY"
+          ditto -c -k --keepParent "$APP" "$RUNNER_TEMP/notarize.zip"
+          xcrun notarytool submit "$RUNNER_TEMP/notarize.zip" \
+            --key "$KEY" --key-id "$ASC_KEY_ID" --issuer "$ASC_ISSUER_ID" \
+            --wait --timeout 30m --output-format json | tee "$RUNNER_TEMP/notary.json"
+          STATUS=$(plutil -extract status raw "$RUNNER_TEMP/notary.json")
+          if [ "$STATUS" != "Accepted" ]; then
+            ID=$(plutil -extract id raw "$RUNNER_TEMP/notary.json")
+            xcrun notarytool log "$ID" --key "$KEY" --key-id "$ASC_KEY_ID" --issuer "$ASC_ISSUER_ID"
+            rm -f "$KEY"
+            echo "::error::Notarization $STATUS"
+            exit 1
+          fi
+          rm -f "$KEY"
+          xcrun stapler staple "$APP"
+          spctl --assess --type execute --verbose "$APP"
+
+      - name: Package
+        run: |
+          set -euo pipefail
+          ZIP="Dictate-$MARKETING.zip"
+          ditto -c -k --keepParent "$APP" "$ZIP"
+          echo "ZIP=$ZIP" >> "$GITHUB_ENV"
+
+      - name: Publish the GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # The notes live with the tag rather than in a CHANGELOG.
+          git tag -l --format='%(contents:body)' "$GITHUB_REF_NAME" > notes.txt
+          if [ ! -s notes.txt ]; then
+            git tag -l --format='%(contents:subject)' "$GITHUB_REF_NAME" > notes.txt
+          fi
+          if [ "$SIGNED" != "true" ]; then
+            printf '\n> Build non notarisé : au premier lancement, clic droit sur Dictate → Ouvrir.\n' >> notes.txt
+          fi
+          echo "---- Notes ----"; cat notes.txt
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release edit "$GITHUB_REF_NAME" --title "Dictate $MARKETING" --notes-file notes.txt
+          else
+            gh release create "$GITHUB_REF_NAME" --title "Dictate $MARKETING" --notes-file notes.txt
+          fi
+          gh release upload "$GITHUB_REF_NAME" "$ZIP" --clobber
+
+      - name: Archive the zip as a run artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: Dictate-zip
+          path: Dictate-*.zip
+          if-no-files-found: ignore
+          retention-days: 14

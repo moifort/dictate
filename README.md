@@ -30,6 +30,30 @@ xcodebuild -project Dictate.xcodeproj -scheme Dictate -derivedDataPath build -de
 The Whisper integration test only runs once the model has been downloaded by
 the app.
 
+## CI and releases
+
+- **Tests** ([test.yml](.github/workflows/test.yml)) run on every push to
+  `main` and on pull requests, on GitHub's `xcode-27` runner (macOS 27).
+- **Releases** ([release.yml](.github/workflows/release.yml)) run on every
+  `v*` tag: tests, Release build, Developer ID signing, notarization, then a
+  GitHub release with `Dictate-<version>.zip`. The notes come from the tag
+  annotation:
+
+  ```bash
+  git tag -a v0.2.0 -m "What changes in this version"
+  git push origin v0.2.0
+  ```
+
+Repository secrets for a signed, notarized build (without them the release is
+ad-hoc signed and Gatekeeper asks for right-click → Open):
+
+| Secret | Content |
+|---|---|
+| `DEVELOPER_ID_P12` | "Developer ID Application" certificate and key, `.p12` in base64 |
+| `DEVELOPER_ID_P12_PASSWORD` | Password of that `.p12` |
+| `ASC_KEY_ID`, `ASC_ISSUER_ID` | App Store Connect API key, used by `notarytool` |
+| `ASC_KEY_P8` | Content of that key's `.p8` file |
+
 ## First launch
 
 An onboarding window opens at every launch until everything below is ready.

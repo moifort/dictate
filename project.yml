@@ -12,6 +12,9 @@ settings:
     DEVELOPMENT_TEAM: 46C337T7YN
     CODE_SIGN_STYLE: Automatic
     MACOSX_DEPLOYMENT_TARGET: "27.0"
+    # Overridden by the release workflow from the tag and the commit count.
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
 packages:
   WhisperKit:
     url: https://github.com/argmaxinc/WhisperKit
