@@ -20,21 +20,7 @@ struct SettingsView: View {
             Section("Amélioration") {
                 Toggle("Nettoyer le texte avec Claude (Haiku)", isOn: Bindable(model.settings).enhancementEnabled)
                     .onChange(of: model.settings.enhancementEnabled) { model.settingsChanged() }
-                LabeledContent("CLI claude") {
-                    Text(model.claudeCLIPath?.path ?? "Introuvable")
-                        .font(.caption.monospaced())
-                        .textSelection(.enabled)
-                        .lineLimit(2)
-                        .truncationMode(.middle)
-                }
-                TextField("Chemin personnalisé (optionnel)", text: Bindable(model.settings).cliPathOverride)
-                    .onChange(of: model.settings.cliPathOverride) { model.settingsChanged() }
-                HStack {
-                    Button("Tester") { Task { await model.testClaude() } }
-                    if let result = model.claudeTestResult {
-                        Text(result).font(.caption).foregroundStyle(.secondary)
-                    }
-                }
+                claudeCLIRow
             }
 
             Section {
@@ -93,6 +79,89 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .frame(width: 480)
         .onAppear { launchAtLogin = model.settings.launchAtLogin }
+    }
+
+    /// Status, short path and actions of the `claude` CLI on a single row.
+    private var claudeCLIRow: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            LabeledContent {
+                HStack {
+                    Button("Tester") { Task { await model.testClaude() } }
+                        .disabled(model.claudeCLIPath == nil)
+                    Button("Choisir…", action: chooseClaudeCLI)
+                }
+            } label: {
+                HStack(spacing: 8) {
+                    claudeCLIStatusIcon
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(claudeCLITitle)
+                        if let path = model.claudeCLIPath {
+                            Text(model.claudeCLIDisplayPath(path))
+                                .font(.caption.monospaced())
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                                .help(path.path)
+                        }
+                    }
+                }
+            }
+            if overrideIgnored {
+                Text("Le fichier choisi n'est pas exécutable : détection automatique utilisée.")
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+            }
+            if !model.settings.cliPathOverride.isEmpty {
+                Button("Revenir à la détection automatique") {
+                    model.settings.cliPathOverride = ""
+                    model.settingsChanged()
+                }
+                .buttonStyle(.link)
+                .font(.caption)
+            }
+            if let result = model.claudeTestResult {
+                Text(result).font(.caption).foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var claudeCLIStatusIcon: some View {
+        if model.isProbingClaudeCLI {
+            ProgressView().controlSize(.small)
+        } else if model.claudeCLIVersion != nil {
+            Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+        } else {
+            Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+        }
+    }
+
+    private var claudeCLITitle: String {
+        if model.claudeCLIPath == nil { return "CLI claude introuvable" }
+        if let version = model.claudeCLIVersion { return "CLI claude \(version)" }
+        return model.isProbingClaudeCLI ? "CLI claude" : "CLI claude : ne répond pas"
+    }
+
+    private var overrideIgnored: Bool {
+        let override = model.settings.cliPathOverride
+        return !override.isEmpty && model.claudeCLIPath?.path != override
+    }
+
+    private func chooseClaudeCLI() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        // The bundled CLI lives inside claude.app, and standalone installs in ~/.local.
+        panel.treatsFilePackagesAsDirectories = true
+        panel.showsHiddenFiles = true
+        panel.directoryURL = model.claudeCLIPath?.deletingLastPathComponent()
+        panel.message = "Choisissez l'exécutable claude"
+        panel.prompt = "Choisir"
+        NSApp.activate()
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        model.settings.cliPathOverride = url.path
+        model.settingsChanged()
     }
 
     /// An accessory app must be activated for its windows to come forward.

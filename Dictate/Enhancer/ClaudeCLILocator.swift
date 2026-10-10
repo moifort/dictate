@@ -34,6 +34,38 @@ nonisolated struct ClaudeCLILocator: Sendable {
         return nil
     }
 
+    /// Short form for the settings: the bundled copy hides deep inside the desktop app.
+    func displayPath(of url: URL) -> String {
+        if url.path.contains("/Claude/claude-code/") { return "App Claude" }
+        let homePath = home.path
+        return url.path.hasPrefix(homePath + "/") ? "~" + url.path.dropFirst(homePath.count) : url.path
+    }
+
+    /// Runs `claude --version`; nil when the binary does not answer like Claude Code.
+    static func version(of executable: URL) async -> String? {
+        await Task.detached {
+            let process = Process()
+            let output = Pipe()
+            process.executableURL = executable
+            process.arguments = ["--version"]
+            process.standardOutput = output
+            process.standardError = FileHandle.nullDevice
+            guard (try? process.run()) != nil else { return nil }
+            let data = output.fileHandleForReading.readDataToEndOfFile()
+            process.waitUntilExit()
+            guard process.terminationStatus == 0 else { return nil }
+            return parseVersion(String(decoding: data, as: UTF8.self))
+        }.value
+    }
+
+    /// `2.1.3 (Claude Code)` → `2.1.3`.
+    static func parseVersion(_ output: String) -> String? {
+        guard let first = output.split(whereSeparator: \.isWhitespace).first, first.first?.isNumber == true else {
+            return nil
+        }
+        return String(first)
+    }
+
     private func isExecutable(_ url: URL) -> Bool {
         FileManager.default.isExecutableFile(atPath: url.path)
     }

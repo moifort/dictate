@@ -12,6 +12,9 @@ final class AppModel {
     let updater = Updater()
 
     private(set) var claudeCLIPath: URL?
+    /// Version reported by `claude --version`: nil while probing or when the binary does not answer.
+    private(set) var claudeCLIVersion: String?
+    private(set) var isProbingClaudeCLI = false
     private(set) var hotkeyActive = false
     private(set) var lastError: String?
     private(set) var claudeTestResult: String?
@@ -24,6 +27,7 @@ final class AppModel {
     @ObservationIgnored private var hotkeyRetry: Timer?
     @ObservationIgnored private var setupPoll: Timer?
     @ObservationIgnored private var resetEnhancerTask: Task<Void, Never>?
+    @ObservationIgnored private var probeTask: Task<Void, Never>?
 
     init() {
         let settings = AppSettings()
@@ -60,6 +64,7 @@ final class AppModel {
             accessibility: \(Permissions.accessibility), fnKeyFree: \(Permissions.fnKeyFree)
             """)
         refreshClaudeCLI()
+        probeClaudeCLI()
         enhancer.prewarm()
         Task { await transcriber.load() }
         startHotkey()
@@ -136,7 +141,30 @@ final class AppModel {
     }
 
     func refreshClaudeCLI() {
-        claudeCLIPath = locator.locate(override: settings.cliPathOverride)
+        let path = locator.locate(override: settings.cliPathOverride)
+        guard path != claudeCLIPath else { return }
+        claudeCLIPath = path
+        probeClaudeCLI()
+    }
+
+    func claudeCLIDisplayPath(_ url: URL) -> String {
+        locator.displayPath(of: url)
+    }
+
+    private func probeClaudeCLI() {
+        probeTask?.cancel()
+        claudeCLIVersion = nil
+        guard let path = claudeCLIPath else {
+            isProbingClaudeCLI = false
+            return
+        }
+        isProbingClaudeCLI = true
+        probeTask = Task {
+            let version = await ClaudeCLILocator.version(of: path)
+            guard !Task.isCancelled else { return }
+            claudeCLIVersion = version
+            isProbingClaudeCLI = false
+        }
     }
 
     /// Called when the vocabulary or CLI path changes: the waiting process has a stale prompt.

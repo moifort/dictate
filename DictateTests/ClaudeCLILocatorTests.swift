@@ -54,4 +54,24 @@ struct ClaudeCLILocatorTests {
         let locator = ClaudeCLILocator(home: home, systemDirectories: [])
         #expect(locator.locate(override: "/nope/claude") == standalone)
     }
+
+    @Test func parsesTheVersionLine() {
+        #expect(ClaudeCLILocator.parseVersion("2.1.293 (Claude Code)\n") == "2.1.293")
+        #expect(ClaudeCLILocator.parseVersion("command not found") == nil)
+        #expect(ClaudeCLILocator.parseVersion("") == nil)
+    }
+
+    @Test func readsTheVersionFromTheBinary() async throws {
+        let script = home.appending(path: "claude")
+        try Data("#!/bin/sh\necho '2.1.293 (Claude Code)'\n".utf8).write(to: script)
+        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: script.path)
+        #expect(await ClaudeCLILocator.version(of: script) == "2.1.293")
+    }
+
+    @Test func shortensDisplayedPaths() {
+        let locator = ClaudeCLILocator(home: home, systemDirectories: [])
+        #expect(locator.displayPath(of: home.appending(path: ".local/bin/claude")) == "~/.local/bin/claude")
+        #expect(locator.displayPath(of: home.appending(path: bundled("2.1.293"))) == "App Claude")
+        #expect(locator.displayPath(of: URL(filePath: "/opt/homebrew/bin/claude")) == "/opt/homebrew/bin/claude")
+    }
 }
