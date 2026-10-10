@@ -32,7 +32,8 @@ the app.
 
 ## First launch
 
-The setup window lists what is missing:
+An onboarding window opens at every launch until everything below is ready.
+It shows one step at a time and moves on by itself as each one is granted:
 
 1. **Microphone** permission.
 2. **Input Monitoring** permission, to watch the `fn` key.
@@ -40,7 +41,10 @@ The setup window lists what is missing:
 4. **System Settings → Keyboard → "Press 🌐 key to": Do Nothing**, otherwise
    macOS opens the emoji picker or its own dictation.
 5. The Whisper model (~630 MB) downloads into
-   `~/Library/Application Support/Dictate/Models`.
+   `~/Library/Application Support/Dictate/Models`, with its progress shown.
+6. The `claude` CLI, optional: dictation also works without Claude.
+
+The last page has a scratch field to try a dictation end to end.
 
 ## How it works
 

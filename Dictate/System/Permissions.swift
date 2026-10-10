@@ -20,10 +20,13 @@ enum Permissions {
         UserDefaults(suiteName: "com.apple.HIToolbox")?.object(forKey: "AppleFnUsageType") as? Int == 0
     }
 
-    static var allGranted: Bool { microphone && inputMonitoring && accessibility }
-
-    static func requestMicrophone() async -> Bool {
-        await AVCaptureDevice.requestAccess(for: .audio)
+    /// The system prompt only appears once: after a refusal, only System Settings can grant it.
+    static func requestMicrophone() async {
+        if AVCaptureDevice.authorizationStatus(for: .audio) == .notDetermined {
+            _ = await AVCaptureDevice.requestAccess(for: .audio)
+        } else {
+            openPrivacySettings("Privacy_Microphone")
+        }
     }
 
     static func requestInputMonitoring() {

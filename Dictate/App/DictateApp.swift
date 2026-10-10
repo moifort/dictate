@@ -15,11 +15,11 @@ struct DictateApp: App {
             SettingsView(model: appDelegate.model)
         }
 
-        Window("Configuration", id: "setup") {
+        Window("Configuration de Dictate", id: "setup") {
             SetupView(model: appDelegate.model)
         }
         .windowResizability(.contentSize)
-        .defaultLaunchBehavior(AppDelegate.needsSetup ? .presented : .suppressed)
+        .defaultLaunchBehavior(appDelegate.needsSetup ? .presented : .suppressed)
     }
 
     private var menuBarSymbol: String {
@@ -39,14 +39,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
     }
 
-    static var needsSetup: Bool {
-        !isRunningTests && (!Permissions.allGranted || !Permissions.fnKeyFree)
+    /// The onboarding opens at every launch until the checklist is complete.
+    var needsSetup: Bool {
+        !Self.isRunningTests && !model.setup.isComplete
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         guard !Self.isRunningTests else { return }
         model.start()
-        if Self.needsSetup { NSApp.activate() }
+        if needsSetup { NSApp.activate() }
     }
 
     func applicationWillTerminate(_ notification: Notification) {

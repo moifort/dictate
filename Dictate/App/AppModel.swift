@@ -14,11 +14,14 @@ final class AppModel {
     private(set) var hotkeyActive = false
     private(set) var lastError: String?
     private(set) var claudeTestResult: String?
+    /// What the onboarding still needs. Polled, because macOS does not notify permission changes.
+    private(set) var setup = SetupChecklist()
 
     @ObservationIgnored private let enhancer: ClaudeCLIEnhancer
     @ObservationIgnored private let fnMonitor = FnKeyMonitor()
     @ObservationIgnored private let locator = ClaudeCLILocator()
     @ObservationIgnored private var hotkeyRetry: Timer?
+    @ObservationIgnored private var setupPoll: Timer?
     @ObservationIgnored private var resetEnhancerTask: Task<Void, Never>?
 
     init() {
@@ -45,6 +48,8 @@ final class AppModel {
             Log.hotkey.info("gesture \(String(describing: gesture), privacy: .public) in phase \(String(describing: self.controller.phase), privacy: .public)")
             self.controller.handle(gesture)
         }
+        claudeCLIPath = locator.locate(override: settings.cliPathOverride)
+        refreshSetup()
     }
 
     func start() {
@@ -56,6 +61,41 @@ final class AppModel {
         enhancer.prewarm()
         Task { await transcriber.load() }
         startHotkey()
+        pollSetupUntilComplete()
+    }
+
+    func refreshSetup() {
+        if settings.enhancementEnabled, claudeCLIPath == nil { refreshClaudeCLI() }
+        let checklist = SetupChecklist(
+            microphone: Permissions.microphone,
+            inputMonitoring: Permissions.inputMonitoring || hotkeyActive,
+            accessibility: Permissions.accessibility,
+            fnKeyFree: Permissions.fnKeyFree,
+            whisperModel: transcriber.state == .ready || WhisperKitTranscriber.isModelDownloaded(),
+            claude: !settings.enhancementEnabled || claudeCLIPath != nil
+        )
+        if checklist != setup { setup = checklist }
+    }
+
+    /// Dictation without Claude inserts the raw Whisper transcript.
+    func continueWithoutClaude() {
+        settings.enhancementEnabled = false
+        refreshSetup()
+    }
+
+    private func pollSetupUntilComplete() {
+        guard !setup.isComplete, setupPoll == nil else { return }
+        setupPoll = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                self.refreshSetup()
+                if self.setup.isComplete {
+                    Log.app.info("setup complete")
+                    self.setupPoll?.invalidate()
+                    self.setupPoll = nil
+                }
+            }
+        }
     }
 
     /// The event tap only works once Input Monitoring is granted: keep retrying.
@@ -104,6 +144,10 @@ final class AppModel {
         } catch {
             claudeTestResult = error.localizedDescription
         }
+    }
+
+    func retryWhisper() {
+        Task { await transcriber.load() }
     }
 
     func shutdown() {

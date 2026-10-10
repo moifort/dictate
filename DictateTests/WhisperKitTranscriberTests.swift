@@ -5,9 +5,7 @@ import Testing
 /// Needs the Whisper model already downloaded by the app; skipped otherwise.
 @MainActor
 struct WhisperKitTranscriberTests {
-    nonisolated static var modelAvailable: Bool {
-        FileManager.default.fileExists(atPath: WhisperKitTranscriber.defaultModelDirectory.path)
-    }
+    nonisolated static var modelAvailable: Bool { WhisperKitTranscriber.isModelDownloaded() }
 
     private func synthesize(_ sentence: String) throws -> [Float] {
         let url = FileManager.default.temporaryDirectory.appending(path: "\(UUID().uuidString).aiff")

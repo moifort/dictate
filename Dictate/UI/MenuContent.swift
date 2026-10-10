@@ -10,7 +10,7 @@ struct MenuContent: View {
         if let error = model.lastError {
             Text(error)
         }
-        if !Permissions.allGranted || !model.hotkeyActive || !Permissions.fnKeyFree {
+        if !model.setup.isComplete {
             Button("Terminer la configuration…") { open { openWindow(id: "setup") } }
         }
         Divider()
@@ -25,6 +25,7 @@ struct MenuContent: View {
     private var statusLine: String {
         switch model.transcriber.state {
         case .notLoaded, .loading: "Chargement de Whisper…"
+        case .downloading(let fraction): "Téléchargement de Whisper… \(fraction.formatted(.percent.precision(.fractionLength(0))))"
         case .failed(let message): "Whisper indisponible : \(message)"
         case .ready: model.hotkeyActive ? "Prêt — maintenez fn pour dicter" : "Touche fn inactive"
         }

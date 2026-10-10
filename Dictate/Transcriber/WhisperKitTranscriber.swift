@@ -7,12 +7,14 @@ import WhisperKit
 final class WhisperKitTranscriber: Transcriber {
     enum State: Equatable {
         case notLoaded
+        /// First launch only: fraction of the ~630 MB model downloaded.
+        case downloading(Double)
         case loading
         case ready
         case failed(String)
     }
 
-    static let modelName = "openai_whisper-large-v3-v20240930_turbo_632MB"
+    nonisolated static let modelName = "openai_whisper-large-v3-v20240930_turbo_632MB"
 
     private(set) var state: State = .notLoaded
     @ObservationIgnored private let engine: WhisperEngine
@@ -25,12 +27,38 @@ final class WhisperKitTranscriber: Transcriber {
         URL.applicationSupportDirectory.appending(path: "Dictate/Models", directoryHint: .isDirectory)
     }
 
+    /// Where WhisperKit's hub snapshot puts the model inside the download base.
+    nonisolated static func modelFolder(in base: URL) -> URL {
+        base.appending(path: "models/argmaxinc/whisperkit-coreml/\(modelName)", directoryHint: .isDirectory)
+    }
+
+    /// True once every compiled model is on disk, so launch needs no network.
+    nonisolated static func isModelDownloaded(in base: URL = defaultModelDirectory) -> Bool {
+        let folder = modelFolder(in: base)
+        return ["MelSpectrogram", "AudioEncoder", "TextDecoder"].allSatisfy {
+            FileManager.default.fileExists(atPath: folder.appending(path: "\($0).mlmodelc").path)
+        }
+    }
+
+    var isBusy: Bool {
+        switch state {
+        case .downloading, .loading: true
+        default: false
+        }
+    }
+
     /// Downloads the model on first launch (~630 MB), then loads it in memory.
     func load() async {
-        guard state != .loading, state != .ready else { return }
+        guard !isBusy, state != .ready else { return }
         state = .loading
         do {
-            try await engine.load()
+            try await engine.load { [weak self] fraction in
+                Task { @MainActor in
+                    guard let self, self.isBusy else { return }
+                    // The download is over: what remains is compiling the model for this Mac.
+                    self.state = fraction < 1 ? .downloading(fraction) : .loading
+                }
+            }
             state = .ready
         } catch {
             state = .failed(error.localizedDescription)
@@ -54,10 +82,21 @@ actor WhisperEngine {
         self.downloadBase = downloadBase
     }
 
-    func load() async throws {
+    func load(progress: @escaping @Sendable (Double) -> Void = { _ in }) async throws {
         guard pipeline == nil else { return }
         try FileManager.default.createDirectory(at: downloadBase, withIntermediateDirectories: true)
-        let config = WhisperKitConfig(model: modelName, downloadBase: downloadBase, verbose: false, prewarm: true, load: true)
+        let folder: URL
+        if WhisperKitTranscriber.isModelDownloaded(in: downloadBase) {
+            folder = WhisperKitTranscriber.modelFolder(in: downloadBase)
+        } else {
+            folder = try await WhisperKit.download(variant: modelName, downloadBase: downloadBase) {
+                progress($0.fractionCompleted)
+            }
+        }
+        let config = WhisperKitConfig(
+            model: modelName, downloadBase: downloadBase, modelFolder: folder.path,
+            verbose: false, prewarm: true, load: true, download: false
+        )
         pipeline = try await WhisperKit(config)
     }
 
