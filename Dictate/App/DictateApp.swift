@@ -9,6 +9,8 @@ struct DictateApp: App {
             MenuContent(model: appDelegate.model)
         } label: {
             Image(systemName: menuBarSymbol)
+                .contentTransition(.symbolEffect(.replace))
+                .animation(.snappy, value: appDelegate.model.controller.phase)
         }
 
         Settings {
@@ -19,6 +21,7 @@ struct DictateApp: App {
             SetupView(model: appDelegate.model)
         }
         .windowResizability(.contentSize)
+        .windowStyle(.hiddenTitleBar)
         .defaultLaunchBehavior(appDelegate.needsSetup ? .presented : .suppressed)
     }
 

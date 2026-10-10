@@ -20,8 +20,11 @@ final class RecordingIndicator {
     private let state = State()
     private let panel: IndicatorPanel
     private var flashTask: Task<Void, Never>?
+    private var hideTask: Task<Void, Never>?
 
-    private static let size = CGSize(width: 120, height: 44)
+    private static let size = CGSize(width: 140, height: 56)
+    /// Long enough for the fade-out in `IndicatorView` to finish.
+    private static let hideDelay: Duration = .milliseconds(450)
 
     init(controller: DictationController, recorder: AudioRecorder) {
         self.controller = controller
@@ -29,7 +32,7 @@ final class RecordingIndicator {
         panel.contentView = NSHostingView(
             rootView: IndicatorView(controller: controller, recorder: recorder, state: state)
         )
-        observePhase()
+        observeVisibility()
     }
 
     /// Briefly shows how a finished dictation ended, when it needs attention.
@@ -44,24 +47,46 @@ final class RecordingIndicator {
         state.flash = flash
         guard flash != nil else { return }
         flashTask = Task {
-            try? await Task.sleep(for: .seconds(1.5))
+            try? await Task.sleep(for: .seconds(1.6))
             guard !Task.isCancelled else { return }
             state.flash = nil
         }
     }
 
-    private func observePhase() {
+    private var shouldBeVisible: Bool {
+        controller.phase != .idle || state.flash != nil
+    }
+
+    private func observeVisibility() {
         withObservationTracking {
             _ = controller.phase
+            _ = state.flash
         } onChange: { [weak self] in
             Task { @MainActor in
                 guard let self else { return }
                 if self.controller.phase == .recording {
                     self.flashTask?.cancel()
                     self.state.flash = nil
-                    self.presentOnActiveScreen()
                 }
-                self.observePhase()
+                self.updateVisibility()
+                self.observeVisibility()
+            }
+        }
+    }
+
+    /// The window exists only while something is shown: an invisible panel at
+    /// status-bar level would still appear in screen recordings and Mission Control.
+    private func updateVisibility() {
+        if shouldBeVisible {
+            hideTask?.cancel()
+            hideTask = nil
+            if !panel.isVisible { presentOnActiveScreen() }
+        } else if hideTask == nil {
+            hideTask = Task {
+                try? await Task.sleep(for: Self.hideDelay)
+                defer { hideTask = nil }
+                guard !Task.isCancelled, !shouldBeVisible else { return }
+                panel.orderOut(nil)
             }
         }
     }
@@ -74,7 +99,6 @@ final class RecordingIndicator {
         let origin = CGPoint(x: visible.midX - Self.size.width / 2, y: visible.minY + 16)
         panel.setFrameOrigin(origin)
         panel.orderFrontRegardless()
-        Log.app.info("indicator shown at \(String(describing: origin), privacy: .public), visible: \(self.panel.isVisible)")
     }
 }
 
@@ -120,15 +144,21 @@ private struct IndicatorView: View {
     }
 
     var body: some View {
-        content
-            .frame(height: 30)
-            .padding(.horizontal, 14)
-            .background(Color.black.opacity(0.78), in: Capsule())
-            .overlay(Capsule().strokeBorder(.white.opacity(0.12)))
-            .opacity(mode == .hidden ? 0 : 1)
-            .scaleEffect(mode == .hidden ? 0.85 : 1)
-            .animation(.spring(duration: 0.25), value: mode)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        let hidden = mode == .hidden
+        ZStack {
+            content
+                .transition(.blurReplace.combined(with: .scale(0.7)))
+        }
+        .frame(height: 32)
+        .padding(.horizontal, 16)
+        .foregroundStyle(.primary)
+        .glassEffect(.regular, in: .capsule)
+        .opacity(hidden ? 0 : 1)
+        .scaleEffect(hidden ? 0.85 : 1, anchor: .bottom)
+        .offset(y: hidden ? 10 : 0)
+        .animation(.spring(duration: 0.35, bounce: 0.3), value: mode)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+        .padding(.bottom, 6)
     }
 
     @ViewBuilder
@@ -137,29 +167,69 @@ private struct IndicatorView: View {
         case .hidden:
             Color.clear.frame(width: 30)
         case .recording:
-            HStack(spacing: 8) {
-                Circle().fill(.red).frame(width: 8, height: 8)
+            HStack(spacing: 10) {
+                PulsingDot()
                 LevelBars(level: CGFloat(recorder.level))
             }
+            .id("recording")
         case .transcribing:
             Image(systemName: "waveform")
-                .foregroundStyle(.white.opacity(0.85))
                 .symbolEffect(.variableColor.iterative.dimInactiveLayers)
+                .id("transcribing")
         case .enhancing:
-            Spinner()
+            Spinner().id("enhancing")
         case .flash(.copied(let raw)):
             HStack(spacing: 6) {
-                Image(systemName: "doc.on.clipboard").foregroundStyle(.white)
+                BouncingSymbol(name: "doc.on.clipboard", color: .primary)
                 if raw { Circle().fill(.orange).frame(width: 6, height: 6) }
             }
+            .id("copied")
         case .flash(.rawPasted):
             HStack(spacing: 6) {
-                Image(systemName: "text.cursor").foregroundStyle(.white)
+                BouncingSymbol(name: "text.cursor", color: .primary)
                 Circle().fill(.orange).frame(width: 6, height: 6)
             }
+            .id("rawPasted")
         case .flash(.failed):
-            Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+            BouncingSymbol(name: "exclamationmark.triangle.fill", color: .orange)
+                .id("failed")
         }
+    }
+}
+
+/// Plays the symbol's bounce once when it comes on screen.
+private struct BouncingSymbol: View {
+    let name: String
+    let color: Color
+    @State private var appeared = false
+
+    var body: some View {
+        Image(systemName: name)
+            .foregroundStyle(color)
+            .symbolEffect(.bounce, options: .nonRepeating, value: appeared)
+            .onAppear { appeared = true }
+    }
+}
+
+/// Red recording dot with a soft expanding ring.
+private struct PulsingDot: View {
+    @State private var pulsing = false
+
+    var body: some View {
+        Circle()
+            .fill(.red)
+            .frame(width: 7, height: 7)
+            .overlay {
+                Circle()
+                    .stroke(.red.opacity(0.7), lineWidth: 1.5)
+                    .scaleEffect(pulsing ? 2.4 : 1)
+                    .opacity(pulsing ? 0 : 1)
+            }
+            .onAppear {
+                withAnimation(.easeOut(duration: 1.2).repeatForever(autoreverses: false)) {
+                    pulsing = true
+                }
+            }
     }
 }
 
@@ -170,7 +240,7 @@ private struct Spinner: View {
     var body: some View {
         Circle()
             .trim(from: 0, to: 0.7)
-            .stroke(.white.opacity(0.9), style: StrokeStyle(lineWidth: 2, lineCap: .round))
+            .stroke(.primary, style: StrokeStyle(lineWidth: 2, lineCap: .round))
             .frame(width: 14, height: 14)
             .rotationEffect(rotation)
             .onAppear {
@@ -181,18 +251,24 @@ private struct Spinner: View {
     }
 }
 
+/// Thin bars following the microphone level, each with its own slight sway so
+/// they never move as one block.
 private struct LevelBars: View {
     let level: CGFloat
-    private let weights: [CGFloat] = [0.5, 0.8, 1, 0.8, 0.5]
+    private let weights: [CGFloat] = [0.45, 0.7, 0.9, 1, 0.9, 0.7, 0.45]
 
     var body: some View {
-        HStack(spacing: 3) {
-            ForEach(weights.indices, id: \.self) { index in
-                Capsule()
-                    .fill(.white.opacity(0.9))
-                    .frame(width: 3, height: 4 + 14 * min(1, level * weights[index]))
+        TimelineView(.animation(minimumInterval: 1 / 30)) { context in
+            let time = context.date.timeIntervalSinceReferenceDate
+            HStack(alignment: .center, spacing: 3) {
+                ForEach(weights.indices, id: \.self) { index in
+                    let sway = 0.85 + 0.15 * sin(time * 9 + Double(index) * 1.3)
+                    Capsule()
+                        .fill(.primary.opacity(0.85))
+                        .frame(width: 1.5, height: 3 + 13 * min(1, level * weights[index] * sway))
+                }
             }
         }
-        .animation(.easeOut(duration: 0.08), value: level)
+        .animation(.interactiveSpring(response: 0.12, dampingFraction: 0.65), value: level)
     }
 }

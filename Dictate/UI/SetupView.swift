@@ -17,17 +17,34 @@ struct SetupView: View {
         picked ?? model.setup.current.map(Page.step) ?? .tryIt
     }
 
+    /// Selecting the step that is already current means "follow the checklist again".
+    private var selection: Binding<Page?> {
+        Binding(
+            get: { page },
+            set: { selected in
+                guard let selected else { return }
+                picked = selected == model.setup.current.map(Page.step) ? nil : selected
+            }
+        )
+    }
+
     var body: some View {
-        HStack(spacing: 0) {
+        NavigationSplitView {
             sidebar
-                .frame(width: 230)
-                .background(.fill.quinary)
-            Divider()
-            detail
-                .padding(32)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        } detail: {
+            ZStack(alignment: .topLeading) {
+                detail
+                    .id(page)
+                    .transition(.asymmetric(
+                        insertion: .move(edge: .trailing).combined(with: .opacity),
+                        removal: .move(edge: .leading).combined(with: .opacity)
+                    ))
+            }
+            .animation(.snappy(duration: 0.4), value: page)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .clipped()
         }
-        .frame(width: 740, height: 480)
+        .frame(width: 720, height: 460)
         .onChange(of: model.setup) { old, new in
             // A step was just granted: follow the next missing one.
             if case .step(let step) = picked, new.isDone(step), !old.isDone(step) {
@@ -39,56 +56,36 @@ struct SetupView: View {
     // MARK: Sidebar
 
     private var sidebar: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            VStack(alignment: .leading, spacing: 8) {
-                Image(systemName: "mic.circle.fill")
-                    .font(.system(size: 36))
-                    .foregroundStyle(.tint)
-                Text("Bienvenue dans Dictate").font(.headline)
+        List(selection: selection) {
+            Section {
+                ForEach(SetupStep.allCases) { step in
+                    Label {
+                        Text(step.title)
+                    } icon: {
+                        StatusIcon(done: model.setup.isDone(step), current: step == model.setup.current)
+                    }
+                    .tag(Page.step(step))
+                }
+            }
+            Section {
+                Label("Essayer", systemImage: "waveform")
+                    .tag(Page.tryIt)
+            }
+        }
+        .listStyle(.sidebar)
+        .navigationSplitViewColumnWidth(200)
+        .toolbar(removing: .sidebarToggle)
+        .safeAreaInset(edge: .bottom) {
+            VStack(alignment: .leading, spacing: 6) {
                 ProgressView(value: Double(model.setup.completedCount), total: Double(SetupStep.allCases.count))
-                Text("\(model.setup.completedCount) sur \(SetupStep.allCases.count) prêts")
+                    .animation(.smooth(duration: 0.5), value: model.setup.completedCount)
+                Text("\(model.setup.completedCount) sur \(SetupStep.allCases.count)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .contentTransition(.numericText())
+                    .animation(.snappy, value: model.setup.completedCount)
             }
-            .padding(.bottom, 12)
-
-            ForEach(SetupStep.allCases) { step in
-                sidebarRow(.step(step), title: step.title, icon: statusIcon(for: step))
-            }
-            Divider().padding(.vertical, 6)
-            sidebarRow(.tryIt, title: "Essayer", icon: Image(systemName: "sparkles"))
-
-            Spacer()
-        }
-        .padding(16)
-    }
-
-    private func sidebarRow(_ target: Page, title: String, icon: some View) -> some View {
-        Button {
-            picked = target == model.setup.current.map(Page.step) ? nil : target
-        } label: {
-            HStack(spacing: 8) {
-                icon.frame(width: 18)
-                Text(title).lineLimit(1)
-                Spacer(minLength: 0)
-            }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 6)
-            .contentShape(.rect)
-            .background(page == target ? AnyShapeStyle(.selection) : AnyShapeStyle(.clear), in: .rect(cornerRadius: 6))
-        }
-        .buttonStyle(.plain)
-    }
-
-    private func statusIcon(for step: SetupStep) -> some View {
-        Group {
-            if model.setup.isDone(step) {
-                Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
-            } else if step == model.setup.current {
-                Image(systemName: "circle.circle.fill").foregroundStyle(.tint)
-            } else {
-                Image(systemName: "circle").foregroundStyle(.secondary)
-            }
+            .padding(16)
         }
     }
 
@@ -110,74 +107,75 @@ struct SetupView: View {
     private func content(for step: SetupStep) -> some View {
         switch step {
         case .microphone:
-            Text("Dictate n'écoute que pendant que vous maintenez fn. L'audio est transcrit sur ce Mac et n'en sort jamais.")
-            Button("Autoriser le micro") { Task { await Permissions.requestMicrophone() } }
-                .buttonStyle(.borderedProminent)
+            Actions {
+                Button("Autoriser le micro") { Task { await Permissions.requestMicrophone() } }
+                    .buttonStyle(.glassProminent)
+            }
 
         case .inputMonitoring:
-            Text("macOS appelle cette autorisation « Surveillance de l'entrée ». Dictate s'en sert pour savoir quand fn est enfoncée ; aucune frappe n'est enregistrée.")
             Instructions([
-                "Ouvrez les Réglages avec le bouton ci-dessous.",
-                "Activez Dictate dans la liste.",
-                "S'il n'y figure pas, glissez l'app depuis le Finder dans la liste, ou ajoutez-la avec +.",
+                "Ouvrez les Réglages et activez Dictate dans la liste.",
+                "S'il n'y figure pas, glissez l'app depuis le Finder dans la liste.",
             ])
-            HStack {
+            Actions {
                 Button("Ouvrir les Réglages") {
                     Permissions.requestInputMonitoring()
                     Permissions.openPrivacySettings("Privacy_ListenEvent")
                 }
-                .buttonStyle(.borderedProminent)
-                Button("Montrer Dictate dans le Finder") {
+                .buttonStyle(.glassProminent)
+                Button("Montrer dans le Finder") {
                     NSWorkspace.shared.activateFileViewerSelecting([Bundle.main.bundleURL])
                 }
+                .buttonStyle(.glass)
             }
 
         case .accessibility:
-            Text("Pour repérer le champ de texte actif et y coller votre dictée. Sans champ actif, le texte est laissé dans le presse-papiers.")
-            HStack {
+            Actions {
                 Button("Autoriser") { Permissions.requestAccessibility() }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.glassProminent)
                 Button("Ouvrir les Réglages") { Permissions.openPrivacySettings("Privacy_Accessibility") }
+                    .buttonStyle(.glass)
             }
 
         case .fnKey:
-            Text("Par défaut, macOS ouvre les emoji ou sa propre dictée quand on appuie sur 🌐 fn, ce qui gênerait Dictate.")
             Instructions([
-                "Ouvrez Réglages Système → Clavier.",
-                "Réglez « Appuyer sur la touche 🌐 pour » sur « Ne rien faire ».",
+                "Réglages Système → Clavier.",
+                "« Appuyer sur la touche 🌐 pour » → « Ne rien faire ».",
             ])
-            Button("Ouvrir les réglages Clavier") { Permissions.openKeyboardSettings() }
-                .buttonStyle(.borderedProminent)
+            Actions {
+                Button("Ouvrir les réglages Clavier") { Permissions.openKeyboardSettings() }
+                    .buttonStyle(.glassProminent)
+            }
 
         case .whisperModel:
-            Text("Whisper large-v3 turbo transcrit votre voix sur ce Mac, sans réseau. Le modèle se télécharge une seule fois (environ 630 Mo).")
             WhisperProgress(model: model)
 
         case .claude:
-            Text("Claude Haiku retire les hésitations, corrige la ponctuation et l'orthographe de votre jargon, avec votre abonnement Claude. Dictate utilise la commande claude installée avec Claude Code ou l'app Claude.")
             if !model.settings.enhancementEnabled {
-                Text("Dictate insère le texte brut de Whisper. Vous pourrez activer Claude dans les Réglages.")
+                Text("Dictate insère le texte brut de Whisper. Claude s'active dans les Réglages.")
                     .foregroundStyle(.secondary)
             } else if let path = model.claudeCLIPath {
                 Text(path.path)
                     .font(.caption.monospaced())
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.tertiary)
                     .lineLimit(1)
                     .truncationMode(.middle)
                     .textSelection(.enabled)
             } else {
-                HStack {
-                    Link("Télécharger l'app Claude", destination: URL(string: "https://claude.ai/download")!)
-                        .buttonStyle(.borderedProminent)
+                Actions {
+                    Link("Télécharger Claude", destination: URL(string: "https://claude.ai/download")!)
+                        .buttonStyle(.glassProminent)
                     Button("Revérifier") {
                         model.refreshClaudeCLI()
                         model.refreshSetup()
                     }
+                    .buttonStyle(.glass)
                     Button("Continuer sans Claude") { model.continueWithoutClaude() }
+                        .buttonStyle(.glass)
                 }
                 Text("Connectez-vous une fois dans Claude Code ou l'app Claude, puis revérifiez.")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.tertiary)
             }
         }
     }
@@ -192,14 +190,14 @@ private extension SetupStep {
         case .inputMonitoring: "Touche fn"
         case .accessibility: "Accessibilité"
         case .fnKey: "Touche 🌐"
-        case .whisperModel: "Modèle Whisper"
+        case .whisperModel: "Whisper"
         case .claude: "Claude"
         }
     }
 
     var heading: String {
         switch self {
-        case .microphone: "Accès au micro"
+        case .microphone: "Micro"
         case .inputMonitoring: "Surveillance de la touche fn"
         case .accessibility: "Insertion du texte"
         case .fnKey: "Libérer la touche 🌐"
@@ -208,15 +206,47 @@ private extension SetupStep {
         }
     }
 
+    var explanation: String {
+        switch self {
+        case .microphone:
+            "Dictate n'écoute que pendant que vous maintenez fn. L'audio est transcrit sur ce Mac et n'en sort jamais."
+        case .inputMonitoring:
+            "macOS appelle cette autorisation « Surveillance de l'entrée ». Elle sert à savoir quand fn est enfoncée ; aucune frappe n'est enregistrée."
+        case .accessibility:
+            "Pour repérer le champ de texte actif et y coller votre dictée. Sans champ actif, le texte reste dans le presse-papiers."
+        case .fnKey:
+            "Par défaut, macOS ouvre les emoji ou sa propre dictée quand on appuie sur 🌐 fn."
+        case .whisperModel:
+            "Whisper large-v3 turbo transcrit votre voix sur ce Mac, sans réseau. Le modèle se télécharge une seule fois, environ 630 Mo."
+        case .claude:
+            "Claude Haiku retire les hésitations et corrige la ponctuation et votre jargon, avec votre abonnement Claude, via la commande claude de Claude Code ou de l'app Claude."
+        }
+    }
+
     var symbol: String {
         switch self {
-        case .microphone: "mic.fill"
+        case .microphone: "mic"
         case .inputMonitoring: "keyboard"
         case .accessibility: "accessibility"
         case .fnKey: "globe"
         case .whisperModel: "waveform"
         case .claude: "sparkles"
         }
+    }
+}
+
+/// Sidebar bullet: empty, current or done, morphing between the three.
+private struct StatusIcon: View {
+    let done: Bool
+    let current: Bool
+
+    var body: some View {
+        Image(systemName: done ? "checkmark.circle.fill" : current ? "circle.circle" : "circle")
+            .foregroundStyle(done ? AnyShapeStyle(.green) : current ? AnyShapeStyle(.tint) : AnyShapeStyle(.quaternary))
+            .contentTransition(.symbolEffect(.replace))
+            .symbolEffect(.bounce, options: .nonRepeating, value: done)
+            .animation(.snappy, value: done)
+            .animation(.snappy, value: current)
     }
 }
 
@@ -227,46 +257,70 @@ private struct StepPage<Content: View>: View {
     @ViewBuilder let content: Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Image(systemName: step.symbol)
-                .font(.system(size: 28, weight: .medium))
-                .foregroundStyle(.white)
-                .frame(width: 56, height: 56)
-                .background(.tint, in: .rect(cornerRadius: 14))
+        VStack(alignment: .leading, spacing: 20) {
+            Image(systemName: done ? "checkmark.circle.fill" : step.symbol)
+                .font(.system(size: 40, weight: .light))
+                .foregroundStyle(done ? AnyShapeStyle(.green) : AnyShapeStyle(.tint))
+                .contentTransition(.symbolEffect(.replace.downUp))
+                .symbolEffect(.bounce, options: .nonRepeating, value: done)
+                .frame(height: 48)
 
-            HStack(alignment: .firstTextBaseline) {
-                Text(step.heading).font(.title2.bold())
-                if step.isOptional {
-                    Text("Facultatif")
-                        .font(.caption)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(.fill.secondary, in: .capsule)
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(alignment: .firstTextBaseline, spacing: 10) {
+                    Text(step.heading).font(.title.weight(.semibold))
+                    if step.isOptional {
+                        Text("facultatif")
+                            .font(.callout)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                ZStack(alignment: .topLeading) {
+                    if done {
+                        Text("C'est fait.")
+                            .foregroundStyle(.green)
+                            .transition(.blurReplace)
+                    } else {
+                        Text(step.explanation)
+                            .foregroundStyle(.secondary)
+                            .transition(.blurReplace)
+                    }
                 }
             }
 
-            if done {
-                Label("C'est fait", systemImage: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
-                    .font(.headline)
+            if !done {
+                content
+                    .transition(.opacity.combined(with: .offset(y: 8)))
             }
-
-            content
-                .fixedSize(horizontal: false, vertical: true)
 
             Spacer()
 
             HStack {
-                Text("Étape \(step.rawValue + 1) sur \(SetupStep.allCases.count)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Text("\(step.rawValue + 1) / \(SetupStep.allCases.count)")
+                    .font(.caption.monospacedDigit())
+                    .foregroundStyle(.tertiary)
                 Spacer()
                 if done {
                     Button("Continuer", action: onContinue)
+                        .buttonStyle(.glassProminent)
                         .keyboardShortcut(.defaultAction)
+                        .transition(.scale(0.9).combined(with: .opacity))
                 }
             }
         }
+        .padding(36)
+        .animation(.spring(duration: 0.45, bounce: 0.2), value: done)
+    }
+}
+
+/// One glass container per group of buttons, so neighbouring glass can merge.
+private struct Actions<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        GlassEffectContainer(spacing: 10) {
+            HStack(spacing: 10) { content }
+        }
+        .controlSize(.large)
     }
 }
 
@@ -278,11 +332,10 @@ private struct Instructions: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             ForEach(Array(lines.enumerated()), id: \.offset) { index, line in
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                HStack(alignment: .firstTextBaseline, spacing: 10) {
                     Text("\(index + 1)")
-                        .font(.caption.bold().monospacedDigit())
-                        .frame(width: 18, height: 18)
-                        .background(.fill.secondary, in: .circle)
+                        .font(.callout.monospacedDigit())
+                        .foregroundStyle(.tertiary)
                     Text(line)
                 }
             }
@@ -294,30 +347,42 @@ private struct WhisperProgress: View {
     let model: AppModel
 
     var body: some View {
-        switch model.transcriber.state {
-        case .downloading(let fraction):
-            VStack(alignment: .leading, spacing: 6) {
-                ProgressView(value: fraction)
-                Text("\(fraction.formatted(.percent.precision(.fractionLength(0)))) — environ \(Int(fraction * 630)) Mo sur 630")
-                    .font(.caption.monospacedDigit())
-                    .foregroundStyle(.secondary)
+        ZStack(alignment: .leading) {
+            switch model.transcriber.state {
+            case .downloading(let fraction):
+                VStack(alignment: .leading, spacing: 8) {
+                    ProgressView(value: fraction)
+                        .animation(.smooth, value: fraction)
+                    Text("\(Int(fraction * 630)) Mo sur 630")
+                        .font(.caption.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                        .contentTransition(.numericText())
+                        .animation(.snappy, value: Int(fraction * 630))
+                }
+                .frame(maxWidth: 320)
+                .id("downloading")
+            case .loading, .notLoaded:
+                HStack(spacing: 10) {
+                    ProgressView().controlSize(.small)
+                    Text(model.setup.whisperModel ? "Préparation du modèle pour ce Mac…" : "Connexion…")
+                        .foregroundStyle(.secondary)
+                }
+                .id("loading")
+            case .failed(let message):
+                VStack(alignment: .leading, spacing: 12) {
+                    Label(message, systemImage: "exclamationmark.triangle")
+                        .foregroundStyle(.orange)
+                    Button("Réessayer") { model.retryWhisper() }
+                        .buttonStyle(.glassProminent)
+                        .controlSize(.large)
+                }
+                .id("failed")
+            case .ready:
+                EmptyView()
             }
-        case .loading, .notLoaded:
-            HStack(spacing: 8) {
-                ProgressView().controlSize(.small)
-                Text(model.setup.whisperModel ? "Préparation du modèle pour ce Mac…" : "Connexion…")
-                    .foregroundStyle(.secondary)
-            }
-        case .failed(let message):
-            VStack(alignment: .leading, spacing: 8) {
-                Label(message, systemImage: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.orange)
-                Button("Réessayer") { model.retryWhisper() }
-                    .buttonStyle(.borderedProminent)
-            }
-        case .ready:
-            EmptyView()
         }
+        .transition(.blurReplace)
+        .animation(.snappy, value: model.transcriber.state)
     }
 }
 
@@ -329,64 +394,93 @@ private struct TryItPage: View {
     @FocusState private var focused: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Image(systemName: model.setup.isComplete ? "checkmark.seal.fill" : "sparkles")
-                .font(.system(size: 28, weight: .medium))
-                .foregroundStyle(.white)
-                .frame(width: 56, height: 56)
-                .background(model.setup.isComplete ? AnyShapeStyle(.green) : AnyShapeStyle(.tint), in: .rect(cornerRadius: 14))
+        VStack(alignment: .leading, spacing: 20) {
+            Image(systemName: model.setup.isComplete ? "checkmark.seal.fill" : "waveform")
+                .font(.system(size: 40, weight: .light))
+                .foregroundStyle(model.setup.isComplete ? AnyShapeStyle(.green) : AnyShapeStyle(.tint))
+                .contentTransition(.symbolEffect(.replace))
+                .frame(height: 48)
 
-            Text(model.setup.isComplete ? "Tout est prêt" : "Essayer").font(.title2.bold())
-            Text("Cliquez dans le champ, maintenez fn, parlez, puis relâchez. Le texte apparaît là où se trouve le curseur, dans n'importe quelle app.")
-                .fixedSize(horizontal: false, vertical: true)
+            VStack(alignment: .leading, spacing: 6) {
+                Text(model.setup.isComplete ? "Tout est prêt" : "Essayer").font(.title.weight(.semibold))
+                Text("Cliquez dans le champ, maintenez fn, parlez, relâchez.")
+                    .foregroundStyle(.secondary)
+            }
 
             TextEditor(text: $text)
                 .font(.body)
                 .focused($focused)
                 .scrollContentBackground(.hidden)
-                .padding(8)
+                .padding(10)
                 .frame(height: 110)
-                .background(.background, in: .rect(cornerRadius: 8))
-                .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(.separator))
+                .background(.fill.tertiary, in: .rect(cornerRadius: 12))
 
             status
                 .font(.callout)
+                .id(statusKey)
+                .transition(.blurReplace)
 
             Spacer()
 
             HStack {
-                if !model.setup.isComplete {
-                    Text("\(model.setup.pending.count) étape(s) restante(s)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
                 Spacer()
                 Button(model.setup.isComplete ? "Commencer" : "Plus tard", action: onFinish)
+                    .buttonStyle(model.setup.isComplete ? AnyPrimitiveButtonStyle(.glassProminent) : AnyPrimitiveButtonStyle(.glass))
+                    .controlSize(.large)
                     .keyboardShortcut(.defaultAction)
             }
         }
+        .padding(36)
+        .animation(.snappy, value: statusKey)
+        .animation(.snappy, value: model.setup.isComplete)
         .onAppear { focused = true }
+    }
+
+    private var statusKey: String {
+        switch model.controller.phase {
+        case .recording: "recording"
+        case .transcribing: "transcribing"
+        case .enhancing: "enhancing"
+        case .idle:
+            if case .failed = model.transcriber.state { "failed" }
+            else if model.transcriber.state != .ready { "preparing" }
+            else if !text.isEmpty, case .pasted = model.controller.lastOutcome { "success" }
+            else { "ready" }
+        }
     }
 
     @ViewBuilder
     private var status: some View {
-        switch model.controller.phase {
-        case .recording:
+        switch statusKey {
+        case "recording":
             Label("Je vous écoute…", systemImage: "mic.fill").foregroundStyle(.red)
-        case .transcribing:
+        case "transcribing":
             Label("Transcription…", systemImage: "waveform").foregroundStyle(.secondary)
-        case .enhancing:
+        case "enhancing":
             Label("Correction par Claude…", systemImage: "sparkles").foregroundStyle(.secondary)
-        case .idle:
+        case "failed":
             if case .failed(let message) = model.transcriber.state {
-                Label(message, systemImage: "exclamationmark.triangle.fill").foregroundStyle(.orange)
-            } else if model.transcriber.state != .ready {
-                Label("Whisper se prépare, encore un instant…", systemImage: "hourglass").foregroundStyle(.secondary)
-            } else if !text.isEmpty, case .pasted = model.controller.lastOutcome {
-                Label("Ça marche !", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
-            } else {
-                Label("Maintenez fn pour dicter", systemImage: "globe").foregroundStyle(.secondary)
+                Label(message, systemImage: "exclamationmark.triangle").foregroundStyle(.orange)
             }
+        case "preparing":
+            Label("Whisper se prépare, encore un instant…", systemImage: "hourglass").foregroundStyle(.secondary)
+        case "success":
+            Label("Ça marche.", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
+        default:
+            Label("Maintenez fn pour dicter", systemImage: "globe").foregroundStyle(.secondary)
         }
+    }
+}
+
+/// Lets one button switch between glass styles without duplicating the view.
+private struct AnyPrimitiveButtonStyle: PrimitiveButtonStyle {
+    private let make: (Configuration) -> AnyView
+
+    init<S: PrimitiveButtonStyle>(_ style: S) {
+        make = { AnyView(style.makeBody(configuration: $0)) }
+    }
+
+    func makeBody(configuration: Configuration) -> some View {
+        make(configuration)
     }
 }
