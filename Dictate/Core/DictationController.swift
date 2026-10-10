@@ -38,7 +38,6 @@ final class DictationController {
     @ObservationIgnored private let enhancementEnabled: () -> Bool
     @ObservationIgnored private let enhancementTimeout: Duration
     @ObservationIgnored private var category: AppCategory = .other
-    @ObservationIgnored private var live: (any LiveTranscription)?
     @ObservationIgnored private var processing: Task<Void, Never>?
 
     /// Called once per finished dictation, after `phase` returns to idle.
@@ -71,33 +70,23 @@ final class DictationController {
         case .pressed:
             guard phase == .idle else { return }
             category = AppCategory(bundleID: focus.frontmostBundleID())
-            // Whisper starts on the speech while it is still being recorded.
-            let live = transcriber.startLive(vocabulary: whisperVocabulary())
-            recorder.onSamples = { live.append($0) }
             do {
                 try recorder.start()
-                self.live = live
                 phase = .recording
             } catch {
-                live.cancel()
                 finish(.failed("Micro indisponible : \(error.localizedDescription)"))
             }
 
         case .cancelled:
             guard phase == .recording else { return }
             _ = recorder.stop()
-            recorder.onSamples = nil
-            live?.cancel()
-            live = nil
             phase = .idle
 
         case .released:
-            guard phase == .recording, let live else { return }
+            guard phase == .recording else { return }
             let samples = recorder.stop()
-            recorder.onSamples = nil
-            self.live = nil
             phase = .transcribing
-            processing = Task { await process(samples, live) }
+            processing = Task { await process(samples) }
         }
     }
 
@@ -106,9 +95,8 @@ final class DictationController {
         await processing?.value
     }
 
-    private func process(_ samples: [Float], _ live: any LiveTranscription) async {
+    private func process(_ samples: [Float]) async {
         guard samples.count >= Self.minimumSampleCount, !AudioAnalysis.isSilent(samples) else {
-            live.cancel()
             return finish(.discarded)
         }
 
@@ -116,7 +104,7 @@ final class DictationController {
         let transcript: String
         do {
             let start = clock.now
-            transcript = try await live.finish()
+            transcript = try await transcriber.transcribe(samples: samples, vocabulary: whisperVocabulary())
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             Log.dictation.info("transcribed \(Double(samples.count) / Double(AudioAnalysis.sampleRate), format: .fixed(precision: 1)) s of audio in \(Self.milliseconds(since: start, clock)) ms")
         } catch {

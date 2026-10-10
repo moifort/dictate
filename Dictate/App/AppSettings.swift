@@ -18,8 +18,8 @@ final class AppSettings {
     }
 
     /// Also give the vocabulary to Whisper as a decoding prompt. More accurate
-    /// on jargon, but each prompt token costs a decoder pass: about 2 s on the
-    /// final pass of each dictation with the default list on an M1 Pro.
+    /// on jargon, but each prompt token costs a decoder pass: about 2 s per
+    /// dictation with the default list on an M1 Pro.
     var guideWhisperWithVocabulary: Bool {
         didSet { defaults.set(guideWhisperWithVocabulary, forKey: Keys.guideWhisperWithVocabulary) }
     }

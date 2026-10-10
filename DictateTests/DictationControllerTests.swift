@@ -53,8 +53,6 @@ struct DictationControllerTests {
         #expect(fakes.inserter.pasted == ["Fais un push."])
         #expect(fakes.enhancer.received.first?.category == .code)
         #expect(fakes.transcriber.receivedVocabulary == ["push"])
-        #expect(fakes.transcriber.live?.appended == speech)
-        #expect(fakes.transcriber.live?.finished == true)
         #expect(controller.lastOutcome == .pasted(raw: false))
         #expect(controller.phase == .idle)
     }
@@ -95,15 +93,13 @@ struct DictationControllerTests {
         controller.handle(.cancelled)
         #expect(controller.phase == .idle)
         #expect(!fakes.recorder.isRecording)
-        #expect(fakes.transcriber.live?.cancelled == true)
-        #expect(fakes.transcriber.live?.finished == false)
+        #expect(fakes.transcriber.callCount == 0)
     }
 
     @Test func silentAudioInsertsNothing() async {
         let (controller, fakes) = makeController(samples: [Float](repeating: 0, count: 16_000))
         await dictate(controller)
-        #expect(fakes.transcriber.live?.cancelled == true)
-        #expect(fakes.transcriber.live?.finished == false)
+        #expect(fakes.transcriber.callCount == 0)
         #expect(controller.lastOutcome == .discarded)
     }
 
@@ -172,7 +168,6 @@ private struct Fakes {
 @MainActor
 private final class FakeRecorder: AudioRecording {
     let samples: [Float]
-    var onSamples: (@Sendable ([Float]) -> Void)?
     var isRecording = false
     var startCount = 0
     var startError: Error?
@@ -187,8 +182,6 @@ private final class FakeRecorder: AudioRecording {
 
     func stop() -> [Float] {
         isRecording = false
-        // The whole recording arrives as one chunk.
-        onSamples?(samples)
         return samples
     }
 }
@@ -196,40 +189,16 @@ private final class FakeRecorder: AudioRecording {
 @MainActor
 private final class FakeTranscriber: Transcriber {
     let result: Result<String, Error>
+    var callCount = 0
     var receivedVocabulary: [String] = []
-    var live: FakeLiveTranscription?
 
     init(result: Result<String, Error>) { self.result = result }
 
-    func startLive(vocabulary: [String]) -> any LiveTranscription {
+    func transcribe(samples: [Float], vocabulary: [String]) async throws -> String {
+        callCount += 1
         receivedVocabulary = vocabulary
-        let live = FakeLiveTranscription(result: result)
-        self.live = live
-        return live
-    }
-}
-
-private final class FakeLiveTranscription: LiveTranscription, @unchecked Sendable {
-    let result: Result<String, Error>
-    private let lock = NSLock()
-    private var _appended: [Float] = []
-    private var _finished = false
-    private var _cancelled = false
-
-    init(result: Result<String, Error>) { self.result = result }
-
-    var appended: [Float] { lock.withLock { _appended } }
-    var finished: Bool { lock.withLock { _finished } }
-    var cancelled: Bool { lock.withLock { _cancelled } }
-
-    func append(_ samples: [Float]) { lock.withLock { _appended += samples } }
-
-    func finish() async throws -> String {
-        lock.withLock { _finished = true }
         return try result.get()
     }
-
-    func cancel() { lock.withLock { _cancelled = true } }
 }
 
 @MainActor

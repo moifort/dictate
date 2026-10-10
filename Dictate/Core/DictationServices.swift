@@ -2,29 +2,15 @@ import Foundation
 
 /// Captures microphone audio as 16 kHz mono samples.
 protocol AudioRecording: AnyObject {
-    /// Receives every captured chunk while recording, on an arbitrary thread.
-    /// Set before `start()`.
-    var onSamples: (@Sendable ([Float]) -> Void)? { get set }
     func start() throws
     /// Stops recording and returns everything captured since `start()`.
     func stop() -> [Float]
 }
 
 @MainActor protocol Transcriber: AnyObject, Sendable {
-    /// Starts transcribing audio while it is still being recorded.
     /// `vocabulary` biases decoding towards the listed spellings, at a cost
     /// of one decoder pass per prompt token; pass `[]` for the fastest result.
-    func startLive(vocabulary: [String]) -> any LiveTranscription
-}
-
-/// One dictation being transcribed as it is spoken: audio is appended as it
-/// arrives, and `finish()` returns the text once the last of it is decoded.
-nonisolated protocol LiveTranscription: AnyObject, Sendable {
-    func append(_ samples: [Float])
-    /// Decodes whatever has not been decoded yet and returns the whole text.
-    func finish() async throws -> String
-    /// Drops the dictation; nothing more will be decoded.
-    func cancel()
+    func transcribe(samples: [Float], vocabulary: [String]) async throws -> String
 }
 
 @MainActor protocol Enhancer: AnyObject, Sendable {
@@ -62,48 +48,11 @@ nonisolated enum AudioAnalysis {
         var index = 0
         while index < samples.count {
             let end = min(index + window, samples.count)
-            if rms(samples[index..<end]) > threshold { return false }
+            var sum: Float = 0
+            for i in index..<end { sum += samples[i] * samples[i] }
+            if (sum / Float(end - index)).squareRoot() > threshold { return false }
             index = end
         }
         return true
-    }
-
-    /// Where a live transcription can cut the audio: the latest point, after
-    /// `start`, where a pause of `minimumPause` seconds has just completed and
-    /// at least `minimumSpeech` seconds of speech were heard since `start`.
-    /// Decoded chunks therefore end in silence, never in the middle of a word.
-    static func chunkBoundary(
-        in samples: [Float],
-        from start: Int,
-        minimumSpeech: Double = 3,
-        minimumPause: Double = 0.5,
-        threshold: Float = 0.01
-    ) -> Int? {
-        let window = sampleRate / 10
-        let pauseWindows = Int((minimumPause * 10).rounded(.up))
-        let speechWindows = Int((minimumSpeech * 10).rounded(.up))
-        var boundary: Int?
-        var speech = 0
-        var silence = 0
-        var index = start
-        while index + window <= samples.count {
-            let end = index + window
-            if rms(samples[index..<end]) > threshold {
-                speech += 1
-                silence = 0
-            } else {
-                silence += 1
-                if silence == pauseWindows, speech >= speechWindows { boundary = end }
-            }
-            index = end
-        }
-        return boundary
-    }
-
-    private static func rms(_ samples: ArraySlice<Float>) -> Float {
-        guard !samples.isEmpty else { return 0 }
-        var sum: Float = 0
-        for sample in samples { sum += sample * sample }
-        return (sum / Float(samples.count)).squareRoot()
     }
 }
