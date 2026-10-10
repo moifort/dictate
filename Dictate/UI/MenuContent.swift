@@ -6,6 +6,7 @@ struct MenuContent: View {
     @Environment(\.openSettings) private var openSettings
 
     var body: some View {
+        Text("Dictate \(model.updater.currentVersion)")
         Text(statusLine)
         if let error = model.lastError {
             Text(error)
