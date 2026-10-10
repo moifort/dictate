@@ -33,6 +33,11 @@ nonisolated final class ClaudeCLIProcess: @unchecked Sendable {
         process.executableURL = executable
         process.arguments = arguments
         process.currentDirectoryURL = workingDirectory
+        // Cleaning up a transcript needs no extended thinking; with thinking on,
+        // a cold Haiku request was measured at 4.6 s instead of 1.5 s.
+        var environment = ProcessInfo.processInfo.environment
+        environment["MAX_THINKING_TOKENS"] = "0"
+        process.environment = environment
         process.standardInput = input
         process.standardOutput = output
         process.standardError = errors
