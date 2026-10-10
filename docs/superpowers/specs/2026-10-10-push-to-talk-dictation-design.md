@@ -17,7 +17,7 @@ push, merge, PR…).
 | Platform | Native Swift/SwiftUI menu bar app (`LSUIElement`), macOS 27, Apple Silicon |
 | Trigger | `fn` key, push-to-talk (hold to record, release to process) |
 | Live display | None. Text appears only once transcription + enhancement are done |
-| Transcription | Local, WhisperKit, `large-v3-turbo`, language forced to French, vocabulary as prompt |
+| Transcription | Local, WhisperKit, `large-v3-turbo`, language forced to French, vocabulary as prompt only on request (each prompt token costs a decoder pass, ~2 s for the default list) |
 | Enhancement | Claude Haiku through the official `claude` CLI (subscription), pre-warmed process |
 | Local LLM fallback | None. On Claude failure, the raw Whisper transcript is used |
 | Enhancement level | Light cleanup + light per-app tone adaptation, no rewriting |

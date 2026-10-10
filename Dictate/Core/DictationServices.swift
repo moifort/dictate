@@ -8,6 +8,8 @@ protocol AudioRecording: AnyObject {
 }
 
 @MainActor protocol Transcriber: AnyObject, Sendable {
+    /// `vocabulary` biases decoding towards the listed spellings, at a cost
+    /// of one decoder pass per prompt token; pass `[]` for the fastest result.
     func transcribe(samples: [Float], vocabulary: [String]) async throws -> String
 }
 

@@ -17,6 +17,13 @@ final class AppSettings {
         didSet { defaults.set(enhancementEnabled, forKey: Keys.enhancementEnabled) }
     }
 
+    /// Also give the vocabulary to Whisper as a decoding prompt. More accurate
+    /// on jargon, but each prompt token costs a decoder pass: about 2 s per
+    /// dictation with the default list on an M1 Pro.
+    var guideWhisperWithVocabulary: Bool {
+        didSet { defaults.set(guideWhisperWithVocabulary, forKey: Keys.guideWhisperWithVocabulary) }
+    }
+
     /// Install new releases as soon as they are found, without asking.
     var autoUpdate: Bool {
         didSet { defaults.set(autoUpdate, forKey: Keys.autoUpdate) }
@@ -37,6 +44,11 @@ final class AppSettings {
             .filter { !$0.isEmpty }
     }
 
+    /// Without Claude, Whisper is the only chance to spell the jargon right.
+    var whisperVocabulary: [String] {
+        guideWhisperWithVocabulary || !enhancementEnabled ? vocabulary : []
+    }
+
     var launchAtLogin: Bool {
         get { SMAppService.mainApp.status == .enabled }
         set {
@@ -47,6 +59,7 @@ final class AppSettings {
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         enhancementEnabled = defaults.object(forKey: Keys.enhancementEnabled) as? Bool ?? true
+        guideWhisperWithVocabulary = defaults.bool(forKey: Keys.guideWhisperWithVocabulary)
         autoUpdate = defaults.object(forKey: Keys.autoUpdate) as? Bool ?? true
         cliPathOverride = defaults.string(forKey: Keys.cliPathOverride) ?? ""
         vocabularyText = defaults.string(forKey: Keys.vocabulary) ?? Self.defaultVocabulary.joined(separator: "\n")
@@ -54,6 +67,7 @@ final class AppSettings {
 
     private enum Keys {
         static let enhancementEnabled = "enhancementEnabled"
+        static let guideWhisperWithVocabulary = "guideWhisperWithVocabulary"
         static let autoUpdate = "autoUpdate"
         static let cliPathOverride = "cliPathOverride"
         static let vocabulary = "vocabulary"

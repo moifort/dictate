@@ -33,7 +33,8 @@ final class DictationController {
     @ObservationIgnored private let enhancer: Enhancer
     @ObservationIgnored private let focus: FocusInspecting
     @ObservationIgnored private let inserter: TextInserting
-    @ObservationIgnored private let vocabulary: () -> [String]
+    /// Vocabulary handed to Whisper; empty when Claude alone handles the jargon.
+    @ObservationIgnored private let whisperVocabulary: () -> [String]
     @ObservationIgnored private let enhancementEnabled: () -> Bool
     @ObservationIgnored private let enhancementTimeout: Duration
     @ObservationIgnored private var category: AppCategory = .other
@@ -50,7 +51,7 @@ final class DictationController {
         enhancer: Enhancer,
         focus: FocusInspecting,
         inserter: TextInserting,
-        vocabulary: @escaping () -> [String],
+        whisperVocabulary: @escaping () -> [String],
         enhancementEnabled: @escaping () -> Bool,
         enhancementTimeout: Duration = .seconds(8)
     ) {
@@ -59,7 +60,7 @@ final class DictationController {
         self.enhancer = enhancer
         self.focus = focus
         self.inserter = inserter
-        self.vocabulary = vocabulary
+        self.whisperVocabulary = whisperVocabulary
         self.enhancementEnabled = enhancementEnabled
         self.enhancementTimeout = enhancementTimeout
     }
@@ -99,10 +100,13 @@ final class DictationController {
             return finish(.discarded)
         }
 
+        let clock = ContinuousClock()
         let transcript: String
         do {
-            transcript = try await transcriber.transcribe(samples: samples, vocabulary: vocabulary())
+            let start = clock.now
+            transcript = try await transcriber.transcribe(samples: samples, vocabulary: whisperVocabulary())
                 .trimmingCharacters(in: .whitespacesAndNewlines)
+            Log.dictation.info("transcribed \(Double(samples.count) / Double(AudioAnalysis.sampleRate), format: .fixed(precision: 1)) s of audio in \(Self.milliseconds(since: start, clock)) ms")
         } catch {
             return finish(.failed("Transcription impossible : \(error.localizedDescription)"))
         }
@@ -112,20 +116,29 @@ final class DictationController {
         var raw = false
         if enhancementEnabled() {
             phase = .enhancing
+            let start = clock.now
             if let enhanced = await enhanceWithTimeout(transcript), !enhanced.isEmpty {
                 text = enhanced
             } else {
                 raw = true
             }
+            Log.dictation.info("enhanced in \(Self.milliseconds(since: start, clock)) ms, raw: \(raw)")
         }
 
+        let start = clock.now
         if focus.hasEditableFocus() {
             await inserter.paste(text)
+            Log.dictation.info("pasted in \(Self.milliseconds(since: start, clock)) ms")
             finish(.pasted(raw: raw))
         } else {
             inserter.copyToPasteboard(text)
             finish(.copied(raw: raw))
         }
+    }
+
+    private static func milliseconds(since start: ContinuousClock.Instant, _ clock: ContinuousClock) -> Int {
+        let elapsed = clock.now - start
+        return Int(elapsed.components.seconds * 1_000) + Int(elapsed.components.attoseconds / 1_000_000_000_000_000)
     }
 
     private func enhanceWithTimeout(_ transcript: String) async -> String? {

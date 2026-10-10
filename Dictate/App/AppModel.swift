@@ -39,7 +39,7 @@ final class AppModel {
             enhancer: enhancer,
             focus: FocusInspector(),
             inserter: TextInserter(),
-            vocabulary: { settings.vocabulary },
+            whisperVocabulary: { settings.whisperVocabulary },
             enhancementEnabled: { settings.enhancementEnabled }
         )
         indicator = RecordingIndicator(controller: controller, recorder: recorder)

@@ -136,7 +136,9 @@ actor WhisperEngine {
         )
         if let tokenizer = pipeline.tokenizer, !vocabulary.isEmpty {
             // Whisper uses the prompt as preceding context: listing the jargon
-            // biases decoding towards its expected spelling.
+            // biases decoding towards its expected spelling. Each prompt token
+            // costs one decoder pass (~30 ms on an M1 Pro): the default
+            // vocabulary is 68 tokens, about 2 s per dictation.
             options.promptTokens = tokenizer.encode(text: " " + vocabulary.joined(separator: ", "))
                 .filter { $0 < tokenizer.specialTokens.specialTokenBegin }
         }

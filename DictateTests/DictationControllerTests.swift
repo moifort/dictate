@@ -27,7 +27,7 @@ struct DictationControllerTests {
             enhancer: fakes.enhancer,
             focus: fakes.focus,
             inserter: fakes.inserter,
-            vocabulary: { ["push"] },
+            whisperVocabulary: { ["push"] },
             enhancementEnabled: { enhancementEnabled },
             enhancementTimeout: .milliseconds(200)
         )
