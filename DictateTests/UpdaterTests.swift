@@ -161,7 +161,7 @@ struct UpdaterFlowTests {
         let updater = Updater(
             currentVersion: "0.1.0",
             bundleURL: installed,
-            expectation: .init(bundleIdentifier: "com.thibautmottet.dictate", teamIdentifier: nil),
+            expectation: .init(bundleIdentifier: try #require(Bundle.main.bundleIdentifier), teamIdentifier: nil),
             fetch: { _ in Data(feed.utf8) },
             download: { url, progress in progress(1); return url },
             finish: { relaunched = $0 }
@@ -184,7 +184,9 @@ struct UpdaterFlowTests {
 
     @Test func thisBuildExpectsItsOwnIdentifierAndTeam() {
         let expectation = Updater.expectation()
-        #expect(expectation.bundleIdentifier == "com.thibautmottet.dictate")
+        // Debug builds carry a `.dev` suffix, so compare with the running bundle.
+        #expect(expectation.bundleIdentifier == Bundle.main.bundleIdentifier)
+        #expect(expectation.bundleIdentifier.hasPrefix("com.thibautmottet.dictate"))
         // Signed with an Apple certificate locally, ad hoc on CI.
         if let team = expectation.teamIdentifier { #expect(team == "46C337T7YN") }
     }

@@ -37,6 +37,12 @@ targets:
         ENABLE_HARDENED_RUNTIME: YES
         GENERATE_INFOPLIST_FILE: NO
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      # macOS ties each privacy grant to the signature it was given to: a dev
+      # build sharing the release identifier would silently void the installed
+      # app's Accessibility and Input Monitoring grants.
+      configs:
+        Debug:
+          PRODUCT_BUNDLE_IDENTIFIER: com.thibautmottet.dictate.dev
   DictateTests:
     type: bundle.unit-test
     platform: macOS

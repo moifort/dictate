@@ -15,6 +15,11 @@ xcodebuild -project Dictate.xcodeproj -scheme Dictate -derivedDataPath build bui
 open build/Build/Products/Debug/Dictate.app
 ```
 
+Debug builds use the `com.thibautmottet.dictate.dev` identifier, so they ask
+for their own permissions and settings instead of overwriting those of the
+installed release: macOS ties each privacy grant to the signature it was given
+to.
+
 Tests:
 
 ```bash
