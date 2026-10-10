@@ -9,16 +9,16 @@ struct AppSettingsTests {
         return AppSettings(defaults: defaults)
     }
 
-    @Test func whisperGetsNoVocabularyByDefaultWhenClaudeCleansUp() {
+    @Test func whisperGetsTheVocabularyByDefault() {
         let settings = makeSettings()
-        #expect(settings.enhancementEnabled)
-        #expect(settings.whisperVocabulary.isEmpty)
+        #expect(settings.guideWhisperWithVocabulary)
+        #expect(settings.whisperVocabulary == settings.vocabulary)
     }
 
-    @Test func whisperGetsTheVocabularyOnRequest() {
+    @Test func whisperGetsNoVocabularyWhenClaudeAloneHandlesTheJargon() {
         let settings = makeSettings()
-        settings.guideWhisperWithVocabulary = true
-        #expect(settings.whisperVocabulary == settings.vocabulary)
+        settings.guideWhisperWithVocabulary = false
+        #expect(settings.whisperVocabulary.isEmpty)
     }
 
     @Test func whisperGetsTheVocabularyWithoutClaude() {

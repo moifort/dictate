@@ -43,7 +43,7 @@ struct SettingsView: View {
             } footer: {
                 Text("""
                     Un terme par ligne, utilisé par Claude pour orthographier correctement votre jargon. \
-                    Le donner aussi à Whisper le rend plus précis mais ajoute environ 2 s par dictée ; \
+                    Le donner aussi à Whisper le rend plus précis mais ajoute environ 2 s à la fin de chaque dictée ; \
                     c'est toujours le cas quand Claude est désactivé.
                     """)
                     .font(.caption)

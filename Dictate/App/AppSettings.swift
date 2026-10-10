@@ -18,8 +18,8 @@ final class AppSettings {
     }
 
     /// Also give the vocabulary to Whisper as a decoding prompt. More accurate
-    /// on jargon, but each prompt token costs a decoder pass: about 2 s per
-    /// dictation with the default list on an M1 Pro.
+    /// on jargon, but each prompt token costs a decoder pass: about 2 s on the
+    /// final pass of each dictation with the default list on an M1 Pro.
     var guideWhisperWithVocabulary: Bool {
         didSet { defaults.set(guideWhisperWithVocabulary, forKey: Keys.guideWhisperWithVocabulary) }
     }
@@ -59,7 +59,7 @@ final class AppSettings {
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         enhancementEnabled = defaults.object(forKey: Keys.enhancementEnabled) as? Bool ?? true
-        guideWhisperWithVocabulary = defaults.bool(forKey: Keys.guideWhisperWithVocabulary)
+        guideWhisperWithVocabulary = defaults.object(forKey: Keys.guideWhisperWithVocabulary) as? Bool ?? true
         autoUpdate = defaults.object(forKey: Keys.autoUpdate) as? Bool ?? true
         cliPathOverride = defaults.string(forKey: Keys.cliPathOverride) ?? ""
         vocabularyText = defaults.string(forKey: Keys.vocabulary) ?? Self.defaultVocabulary.joined(separator: "\n")
