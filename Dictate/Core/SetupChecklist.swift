@@ -2,6 +2,7 @@ import Foundation
 
 /// One thing Dictate needs before the first dictation, in the order the onboarding asks for it.
 nonisolated enum SetupStep: Int, CaseIterable, Identifiable, Sendable {
+    case language
     case microphone
     case inputMonitoring
     case accessibility
@@ -17,6 +18,8 @@ nonisolated enum SetupStep: Int, CaseIterable, Identifiable, Sendable {
 
 /// A snapshot of what is ready. Built from the system by `AppModel`, kept pure for tests.
 nonisolated struct SetupChecklist: Equatable, Sendable {
+    /// The user confirmed the dictation language.
+    var language = false
     var microphone = false
     var inputMonitoring = false
     var accessibility = false
@@ -27,6 +30,7 @@ nonisolated struct SetupChecklist: Equatable, Sendable {
 
     func isDone(_ step: SetupStep) -> Bool {
         switch step {
+        case .language: language
         case .microphone: microphone
         case .inputMonitoring: inputMonitoring
         case .accessibility: accessibility

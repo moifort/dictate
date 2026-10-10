@@ -6,10 +6,11 @@ import Foundation
 /// everything that depends on the dictation itself (app category, text) goes
 /// into the user message.
 nonisolated enum PromptBuilder {
-    static func systemPrompt(vocabulary: [String]) -> String {
+    /// `language` is the ISO 639-1 code of the dictated language.
+    static func systemPrompt(vocabulary: [String], language: String) -> String {
         var prompt = """
-        Tu nettoies une dictée vocale transcrite automatiquement. Le texte est surtout en français, \
-        avec du vocabulaire technique anglais (développement logiciel).
+        Tu nettoies une dictée vocale transcrite automatiquement. Le texte est surtout en \
+        \(DictationLanguage.name(of: language)), avec du vocabulaire technique anglais (développement logiciel).
 
         Règles :
         - Corrige uniquement : ponctuation, majuscules, hésitations (euh, ben, du coup parasites), \

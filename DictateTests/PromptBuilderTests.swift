@@ -3,14 +3,19 @@ import Testing
 
 struct PromptBuilderTests {
     @Test func systemPromptListsVocabulary() {
-        let prompt = PromptBuilder.systemPrompt(vocabulary: ["CI/CD", "rebase"])
+        let prompt = PromptBuilder.systemPrompt(vocabulary: ["CI/CD", "rebase"], language: "fr")
         #expect(prompt.contains("CI/CD"))
         #expect(prompt.contains("rebase"))
     }
 
     @Test func systemPromptOmitsVocabularySectionWhenEmpty() {
-        let prompt = PromptBuilder.systemPrompt(vocabulary: [])
+        let prompt = PromptBuilder.systemPrompt(vocabulary: [], language: "fr")
         #expect(!prompt.contains("<vocabulary>"))
+    }
+
+    @Test func systemPromptNamesTheDictatedLanguage() {
+        #expect(PromptBuilder.systemPrompt(vocabulary: [], language: "fr").contains("surtout en français"))
+        #expect(PromptBuilder.systemPrompt(vocabulary: [], language: "en").contains("surtout en anglais"))
     }
 
     @Test func userMessageWrapsTranscriptAndCarriesCategory() {
@@ -21,6 +26,6 @@ struct PromptBuilderTests {
 
     @Test(arguments: [AppCategory.code, .mail, .chat, .other])
     func everyCategoryIsDescribedInSystemPrompt(category: AppCategory) {
-        #expect(PromptBuilder.systemPrompt(vocabulary: []).contains("- \(category.rawValue):"))
+        #expect(PromptBuilder.systemPrompt(vocabulary: [], language: "fr").contains("- \(category.rawValue):"))
     }
 }

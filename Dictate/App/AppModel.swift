@@ -31,7 +31,7 @@ final class AppModel {
         let locator = locator
         enhancer = ClaudeCLIEnhancer(
             locate: { locator.locate(override: settings.cliPathOverride) },
-            systemPrompt: { PromptBuilder.systemPrompt(vocabulary: settings.vocabulary) }
+            systemPrompt: { PromptBuilder.systemPrompt(vocabulary: settings.vocabulary, language: settings.language) }
         )
         controller = DictationController(
             recorder: recorder,
@@ -40,6 +40,7 @@ final class AppModel {
             focus: FocusInspector(),
             inserter: TextInserter(),
             whisperVocabulary: { settings.whisperVocabulary },
+            language: { settings.language },
             enhancementEnabled: { settings.enhancementEnabled }
         )
         indicator = RecordingIndicator(controller: controller, recorder: recorder)
@@ -69,6 +70,7 @@ final class AppModel {
     func refreshSetup() {
         if settings.enhancementEnabled, claudeCLIPath == nil { refreshClaudeCLI() }
         let checklist = SetupChecklist(
+            language: settings.languageConfirmed,
             microphone: Permissions.microphone,
             inputMonitoring: Permissions.inputMonitoring || hotkeyActive,
             accessibility: Permissions.accessibility,
@@ -86,6 +88,12 @@ final class AppModel {
         case .failed, .downloading: false
         case .notLoaded, .loading: WhisperKitTranscriber.isModelDownloaded()
         }
+    }
+
+    /// The onboarding showed the detected language and the user agreed.
+    func confirmLanguage() {
+        settings.languageConfirmed = true
+        refreshSetup()
     }
 
     /// Dictation without Claude inserts the raw Whisper transcript.

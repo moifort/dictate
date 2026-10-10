@@ -106,6 +106,17 @@ struct SetupView: View {
     @ViewBuilder
     private func content(for step: SetupStep) -> some View {
         switch step {
+        case .language:
+            VStack(alignment: .leading, spacing: 16) {
+                LanguagePicker(model: model)
+                    .frame(maxWidth: 320)
+                Actions {
+                    Button("C'est la bonne langue") { model.confirmLanguage() }
+                        .buttonStyle(.glassProminent)
+                        .keyboardShortcut(.defaultAction)
+                }
+            }
+
         case .microphone:
             Actions {
                 Button("Autoriser le micro") { Task { await Permissions.requestMicrophone() } }
@@ -186,6 +197,7 @@ struct SetupView: View {
 private extension SetupStep {
     var title: String {
         switch self {
+        case .language: "Langue"
         case .microphone: "Micro"
         case .inputMonitoring: "Touche fn"
         case .accessibility: "Accessibilité"
@@ -197,6 +209,7 @@ private extension SetupStep {
 
     var heading: String {
         switch self {
+        case .language: "Langue de dictée"
         case .microphone: "Micro"
         case .inputMonitoring: "Surveillance de la touche fn"
         case .accessibility: "Insertion du texte"
@@ -208,6 +221,8 @@ private extension SetupStep {
 
     var explanation: String {
         switch self {
+        case .language:
+            "Whisper transcrit mieux quand il sait à l'avance dans quelle langue vous parlez. Dictate a repris celle de macOS ; changez-la si vous dictez dans une autre. Les termes techniques anglais restent reconnus."
         case .microphone:
             "Dictate n'écoute que pendant que vous maintenez fn. L'audio est transcrit sur ce Mac et n'en sort jamais."
         case .inputMonitoring:
@@ -225,6 +240,7 @@ private extension SetupStep {
 
     var symbol: String {
         switch self {
+        case .language: "character.bubble"
         case .microphone: "mic"
         case .inputMonitoring: "keyboard"
         case .accessibility: "accessibility"

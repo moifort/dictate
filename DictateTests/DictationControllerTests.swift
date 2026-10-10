@@ -28,6 +28,7 @@ struct DictationControllerTests {
             focus: fakes.focus,
             inserter: fakes.inserter,
             whisperVocabulary: { ["push"] },
+            language: { "fr" },
             enhancementEnabled: { enhancementEnabled },
             enhancementTimeout: .milliseconds(200)
         )
@@ -53,6 +54,7 @@ struct DictationControllerTests {
         #expect(fakes.inserter.pasted == ["Fais un push."])
         #expect(fakes.enhancer.received.first?.category == .code)
         #expect(fakes.transcriber.receivedVocabulary == ["push"])
+        #expect(fakes.transcriber.receivedLanguage == "fr")
         #expect(controller.lastOutcome == .pasted(raw: false))
         #expect(controller.phase == .idle)
     }
@@ -191,12 +193,14 @@ private final class FakeTranscriber: Transcriber {
     let result: Result<String, Error>
     var callCount = 0
     var receivedVocabulary: [String] = []
+    var receivedLanguage = ""
 
     init(result: Result<String, Error>) { self.result = result }
 
-    func transcribe(samples: [Float], vocabulary: [String]) async throws -> String {
+    func transcribe(samples: [Float], vocabulary: [String], language: String) async throws -> String {
         callCount += 1
         receivedVocabulary = vocabulary
+        receivedLanguage = language
         return try result.get()
     }
 }

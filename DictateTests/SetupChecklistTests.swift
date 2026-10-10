@@ -3,13 +3,13 @@ import Testing
 
 struct SetupChecklistTests {
     private let ready = SetupChecklist(
-        microphone: true, inputMonitoring: true, accessibility: true,
+        language: true, microphone: true, inputMonitoring: true, accessibility: true,
         fnKeyFree: true, whisperModel: true, claude: true
     )
 
-    @Test func freshInstallStartsWithTheMicrophone() {
+    @Test func freshInstallStartsWithTheLanguage() {
         let checklist = SetupChecklist()
-        #expect(checklist.current == .microphone)
+        #expect(checklist.current == .language)
         #expect(checklist.pending == SetupStep.allCases)
         #expect(!checklist.isComplete)
         #expect(checklist.completedCount == 0)
@@ -21,7 +21,7 @@ struct SetupChecklistTests {
         checklist.claude = false
         #expect(checklist.current == .fnKey)
         #expect(checklist.pending == [.fnKey, .claude])
-        #expect(checklist.completedCount == 4)
+        #expect(checklist.completedCount == 5)
     }
 
     @Test func completeWhenEverythingIsReady() {

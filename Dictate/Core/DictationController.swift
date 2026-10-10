@@ -35,6 +35,8 @@ final class DictationController {
     @ObservationIgnored private let inserter: TextInserting
     /// Vocabulary handed to Whisper; empty when Claude alone handles the jargon.
     @ObservationIgnored private let whisperVocabulary: () -> [String]
+    /// ISO 639-1 code of the language being dictated.
+    @ObservationIgnored private let language: () -> String
     @ObservationIgnored private let enhancementEnabled: () -> Bool
     @ObservationIgnored private let enhancementTimeout: Duration
     @ObservationIgnored private var category: AppCategory = .other
@@ -52,6 +54,7 @@ final class DictationController {
         focus: FocusInspecting,
         inserter: TextInserting,
         whisperVocabulary: @escaping () -> [String],
+        language: @escaping () -> String,
         enhancementEnabled: @escaping () -> Bool,
         enhancementTimeout: Duration = .seconds(8)
     ) {
@@ -61,6 +64,7 @@ final class DictationController {
         self.focus = focus
         self.inserter = inserter
         self.whisperVocabulary = whisperVocabulary
+        self.language = language
         self.enhancementEnabled = enhancementEnabled
         self.enhancementTimeout = enhancementTimeout
     }
@@ -104,7 +108,7 @@ final class DictationController {
         let transcript: String
         do {
             let start = clock.now
-            transcript = try await transcriber.transcribe(samples: samples, vocabulary: whisperVocabulary())
+            transcript = try await transcriber.transcribe(samples: samples, vocabulary: whisperVocabulary(), language: language())
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             Log.dictation.info("transcribed \(Double(samples.count) / Double(AudioAnalysis.sampleRate), format: .fixed(precision: 1)) s of audio in \(Self.milliseconds(since: start, clock)) ms")
         } catch {

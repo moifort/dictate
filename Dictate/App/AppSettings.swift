@@ -13,6 +13,17 @@ final class AppSettings {
 
     @ObservationIgnored private let defaults: UserDefaults
 
+    /// ISO 639-1 code of the dictated language, for Whisper and the Claude
+    /// prompt. Starts as the OS language.
+    var language: String {
+        didSet { defaults.set(language, forKey: Keys.language) }
+    }
+
+    /// The user has seen the detected language in the onboarding and agreed.
+    var languageConfirmed: Bool {
+        didSet { defaults.set(languageConfirmed, forKey: Keys.languageConfirmed) }
+    }
+
     var enhancementEnabled: Bool {
         didSet { defaults.set(enhancementEnabled, forKey: Keys.enhancementEnabled) }
     }
@@ -58,6 +69,8 @@ final class AppSettings {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+        language = defaults.string(forKey: Keys.language) ?? DictationLanguage.preferred()
+        languageConfirmed = defaults.bool(forKey: Keys.languageConfirmed)
         enhancementEnabled = defaults.object(forKey: Keys.enhancementEnabled) as? Bool ?? true
         guideWhisperWithVocabulary = defaults.object(forKey: Keys.guideWhisperWithVocabulary) as? Bool ?? true
         autoUpdate = defaults.object(forKey: Keys.autoUpdate) as? Bool ?? true
@@ -66,6 +79,8 @@ final class AppSettings {
     }
 
     private enum Keys {
+        static let language = "language"
+        static let languageConfirmed = "languageConfirmed"
         static let enhancementEnabled = "enhancementEnabled"
         static let guideWhisperWithVocabulary = "guideWhisperWithVocabulary"
         static let autoUpdate = "autoUpdate"

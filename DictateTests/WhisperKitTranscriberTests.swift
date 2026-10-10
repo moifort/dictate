@@ -23,7 +23,7 @@ struct WhisperKitTranscriberTests {
         #expect(samples.count > 16_000)
 
         let transcriber = WhisperKitTranscriber()
-        let text = try await transcriber.transcribe(samples: samples, vocabulary: ["push", "main", "CI"])
+        let text = try await transcriber.transcribe(samples: samples, vocabulary: ["push", "main", "CI"], language: "fr")
         let lowered = text.lowercased()
         #expect(lowered.contains("push"), "got: \(text)")
         // The synthetic voice is too rough to assert exact French spelling; the jargon is what matters.

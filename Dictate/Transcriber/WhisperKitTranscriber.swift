@@ -65,9 +65,9 @@ final class WhisperKitTranscriber: Transcriber {
         }
     }
 
-    func transcribe(samples: [Float], vocabulary: [String]) async throws -> String {
+    func transcribe(samples: [Float], vocabulary: [String], language: String) async throws -> String {
         if state != .ready { await load() }
-        return try await engine.transcribe(samples: samples, vocabulary: vocabulary)
+        return try await engine.transcribe(samples: samples, vocabulary: vocabulary, language: language)
     }
 }
 
@@ -120,13 +120,13 @@ actor WhisperEngine {
         return try await WhisperKit(config)
     }
 
-    func transcribe(samples: [Float], vocabulary: [String]) async throws -> String {
+    func transcribe(samples: [Float], vocabulary: [String], language: String) async throws -> String {
         try await load()
         guard let pipeline else { return "" }
 
         var options = DecodingOptions(
             task: .transcribe,
-            language: "fr",
+            language: language,
             temperature: 0,
             usePrefillPrompt: true,
             detectLanguage: false,

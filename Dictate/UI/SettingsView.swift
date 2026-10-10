@@ -7,6 +7,16 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
+            Section {
+                LanguagePicker(model: model)
+            } header: {
+                Text("Langue")
+            } footer: {
+                Text("Langue annoncée à Whisper et à Claude. Les termes techniques anglais sont reconnus quelle que soit la langue.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
             Section("Amélioration") {
                 Toggle("Nettoyer le texte avec Claude (Haiku)", isOn: Bindable(model.settings).enhancementEnabled)
                     .onChange(of: model.settings.enhancementEnabled) { model.settingsChanged() }
