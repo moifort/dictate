@@ -32,6 +32,14 @@ protocol TextInserting: AnyObject {
 nonisolated enum AudioAnalysis {
     static let sampleRate = 16_000
 
+    /// Maps an RMS value to a 0...1 meter level on a decibel scale: quiet
+    /// speech (-45 dB) barely registers, normal speech (-25 dB) sits mid-way,
+    /// and anything above -10 dB is full scale.
+    static func meterLevel(rms: Float) -> Float {
+        let decibels = 20 * log10(max(rms, 1e-6))
+        return min(1, max(0, (decibels + 50) / 40))
+    }
+
     /// True when no 100 ms window rises above the speech energy threshold.
     static func isSilent(_ samples: [Float], threshold: Float = 0.01) -> Bool {
         let window = sampleRate / 10

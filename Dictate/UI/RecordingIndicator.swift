@@ -6,8 +6,8 @@ import SwiftUI
 /// held and while the dictation is processed.
 final class RecordingIndicator {
     enum Flash: Equatable {
-        case copied(raw: Bool)
-        case rawPasted
+        /// No field had focus: the text waits in the pasteboard.
+        case copied
         case failed
     }
 
@@ -38,10 +38,9 @@ final class RecordingIndicator {
     /// Briefly shows how a finished dictation ended, when it needs attention.
     func show(_ outcome: DictationOutcome) {
         let flash: Flash? = switch outcome {
-        case .copied(let raw): .copied(raw: raw)
-        case .pasted(raw: true): .rawPasted
+        case .copied: .copied
         case .failed: .failed
-        case .pasted(raw: false), .discarded: nil
+        case .pasted, .discarded: nil
         }
         flashTask?.cancel()
         state.flash = flash
@@ -130,15 +129,14 @@ private struct IndicatorView: View {
     let state: RecordingIndicator.State
 
     private enum Mode: Equatable {
-        case hidden, recording, transcribing, enhancing
+        case hidden, recording, processing
         case flash(RecordingIndicator.Flash)
     }
 
     private var mode: Mode {
         switch controller.phase {
         case .recording: .recording
-        case .transcribing: .transcribing
-        case .enhancing: .enhancing
+        case .transcribing, .enhancing: .processing
         case .idle: state.flash.map(Mode.flash) ?? .hidden
         }
     }
@@ -172,24 +170,11 @@ private struct IndicatorView: View {
                 LevelBars(level: CGFloat(recorder.level))
             }
             .id("recording")
-        case .transcribing:
-            Image(systemName: "waveform")
-                .symbolEffect(.variableColor.iterative.dimInactiveLayers)
-                .id("transcribing")
-        case .enhancing:
-            Spinner().id("enhancing")
-        case .flash(.copied(let raw)):
-            HStack(spacing: 6) {
-                BouncingSymbol(name: "doc.on.clipboard", color: .primary)
-                if raw { Circle().fill(.orange).frame(width: 6, height: 6) }
-            }
-            .id("copied")
-        case .flash(.rawPasted):
-            HStack(spacing: 6) {
-                BouncingSymbol(name: "text.cursor", color: .primary)
-                Circle().fill(.orange).frame(width: 6, height: 6)
-            }
-            .id("rawPasted")
+        case .processing:
+            Spinner().id("processing")
+        case .flash(.copied):
+            BouncingSymbol(name: "doc.on.clipboard", color: .white)
+                .id("copied")
         case .flash(.failed):
             BouncingSymbol(name: "exclamationmark.triangle.fill", color: .orange)
                 .id("failed")
@@ -240,7 +225,7 @@ private struct Spinner: View {
     var body: some View {
         Circle()
             .trim(from: 0, to: 0.7)
-            .stroke(.primary, style: StrokeStyle(lineWidth: 2, lineCap: .round))
+            .stroke(.white, style: StrokeStyle(lineWidth: 2, lineCap: .round))
             .frame(width: 14, height: 14)
             .rotationEffect(rotation)
             .onAppear {
@@ -251,24 +236,25 @@ private struct Spinner: View {
     }
 }
 
-/// Thin bars following the microphone level, each with its own slight sway so
-/// they never move as one block.
+/// Thin white bars following the microphone level, each with its own slight
+/// sway so they never move as one block.
 private struct LevelBars: View {
     let level: CGFloat
-    private let weights: [CGFloat] = [0.45, 0.7, 0.9, 1, 0.9, 0.7, 0.45]
+    private let weights: [CGFloat] = [0.5, 0.75, 0.9, 1, 0.9, 0.75, 0.5]
 
     var body: some View {
         TimelineView(.animation(minimumInterval: 1 / 30)) { context in
             let time = context.date.timeIntervalSinceReferenceDate
             HStack(alignment: .center, spacing: 3) {
                 ForEach(weights.indices, id: \.self) { index in
-                    let sway = 0.85 + 0.15 * sin(time * 9 + Double(index) * 1.3)
+                    let sway = 0.8 + 0.2 * sin(time * 11 + Double(index) * 1.7)
                     Capsule()
-                        .fill(.primary.opacity(0.85))
-                        .frame(width: 1.5, height: 3 + 13 * min(1, level * weights[index] * sway))
+                        .fill(.white)
+                        .frame(width: 2, height: 3 + 23 * min(1, level * weights[index] * sway))
                 }
             }
         }
-        .animation(.interactiveSpring(response: 0.12, dampingFraction: 0.65), value: level)
+        .frame(height: 26)
+        .animation(.interactiveSpring(response: 0.1, dampingFraction: 0.7), value: level)
     }
 }

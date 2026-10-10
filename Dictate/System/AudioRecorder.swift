@@ -51,6 +51,7 @@ nonisolated final class TapProcessor: @unchecked Sendable {
     private let onLevel: @Sendable (Float) -> Void
     private let lock = NSLock()
     private var samples: [Float] = []
+    private var smoothedLevel: Float = 0
 
     init(inputFormat: AVAudioFormat, onLevel: @escaping @Sendable (Float) -> Void) throws {
         resampler = try AudioResampler(inputFormat: inputFormat)
@@ -70,8 +71,10 @@ nonisolated final class TapProcessor: @unchecked Sendable {
 
         var sum: Float = 0
         for sample in chunk { sum += sample * sample }
-        let rms = (sum / Float(chunk.count)).squareRoot()
-        onLevel(min(1, rms * 8))
+        let level = AudioAnalysis.meterLevel(rms: (sum / Float(chunk.count)).squareRoot())
+        // Rises instantly, falls over a few buffers: the meter breathes instead of flickering.
+        smoothedLevel = max(level, smoothedLevel * 0.8)
+        onLevel(smoothedLevel)
     }
 
     func drain() -> [Float] {
