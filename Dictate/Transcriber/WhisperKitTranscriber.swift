@@ -65,14 +65,22 @@ final class WhisperKitTranscriber: Transcriber {
         }
     }
 
+    func startLive(vocabulary: [String]) -> any LiveTranscription {
+        if state != .ready { Task { await load() } }
+        let live = LiveChunkTranscription(engine: engine, vocabulary: vocabulary)
+        Task { await live.start() }
+        return live
+    }
+
+    /// Whole recording in one pass.
     func transcribe(samples: [Float], vocabulary: [String]) async throws -> String {
         if state != .ready { await load() }
-        return try await engine.transcribe(samples: samples, vocabulary: vocabulary)
+        return try await engine.transcribe(chunk: samples, vocabulary: vocabulary)
     }
 }
 
 /// Owns the non-Sendable WhisperKit pipeline away from the main actor.
-actor WhisperEngine {
+actor WhisperEngine: ChunkTranscribing {
     private let modelName: String
     private let downloadBase: URL
     private var pipeline: WhisperKit?
@@ -120,7 +128,7 @@ actor WhisperEngine {
         return try await WhisperKit(config)
     }
 
-    func transcribe(samples: [Float], vocabulary: [String]) async throws -> String {
+    func transcribe(chunk samples: [Float], vocabulary: [String]) async throws -> String {
         try await load()
         guard let pipeline else { return "" }
 
@@ -143,7 +151,33 @@ actor WhisperEngine {
                 .filter { $0 < tokenizer.specialTokens.specialTokenBegin }
         }
 
-        let results = try await pipeline.transcribe(audioArray: samples, decodeOptions: options)
-        return results.map(\.text).joined(separator: " ")
+        // WhisperKit checks the task's cancellation at every decoder step, but
+        // runs the progress callback on a detached task: give it its own flag.
+        let stop = StopFlag()
+        return try await withTaskCancellationHandler {
+            let results = try await pipeline.transcribe(audioArray: samples, decodeOptions: options) { _ in !stop.isSet }
+            // An early stop returns a partial result: never hand that out.
+            try Task.checkCancellation()
+            return results.map(\.text).joined(separator: " ")
+        } onCancel: {
+            stop.set()
+        }
+    }
+}
+
+nonisolated final class StopFlag: @unchecked Sendable {
+    private let lock = NSLock()
+    private var flag = false
+
+    var isSet: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return flag
+    }
+
+    func set() {
+        lock.lock()
+        flag = true
+        lock.unlock()
     }
 }

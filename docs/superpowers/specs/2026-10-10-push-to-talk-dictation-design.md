@@ -50,7 +50,7 @@ Units, each with one responsibility:
   (`FnKeyGesture`) is separated from the event tap for testing.
 - **AudioRecorder** — AVAudioEngine input tap, converted to 16 kHz mono
   `Float`, kept in memory. Publishes the current level (RMS) for the indicator.
-- **Transcriber** (protocol) — `transcribe(samples:vocabulary:) async throws -> String`.
+- **Transcriber** (protocol) — `startLive(vocabulary:) -> LiveTranscription`: audio is appended while `fn` is held, `finish()` returns the whole text.
   Implementation `WhisperKitTranscriber`: model loaded at launch and kept in
   memory; first launch downloads the model.
 - **Enhancer** (protocol) — `enhance(text:context:) async throws -> String`.
@@ -85,7 +85,7 @@ Units, each with one responsibility:
 
 1. `fn` pressed → remember frontmost app, start mic, show indicator (recording).
 2. `fn` released → stop mic, indicator switches to processing.
-3. Whisper transcribes (~1 s).
+3. Whisper has already decoded everything up to the last pause while `fn` was held (chunks are cut after 3 s of speech and a 0.5 s pause); only the tail remains.
 4. Raw text + app category sent to the pre-warmed `claude` process (~3.5 s).
 5. If a focused editable field exists → paste and restore the pasteboard;
    otherwise leave the text in the pasteboard and show 📋. Hide indicator.

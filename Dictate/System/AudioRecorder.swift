@@ -7,6 +7,7 @@ final class AudioRecorder: AudioRecording {
     /// Recent input level in 0...1, for the recording indicator.
     private(set) var level: Float = 0
 
+    @ObservationIgnored var onSamples: (@Sendable ([Float]) -> Void)?
     @ObservationIgnored private let engine = AVAudioEngine()
     @ObservationIgnored private var tap: TapProcessor?
 
@@ -21,7 +22,7 @@ final class AudioRecorder: AudioRecording {
         let format = input.outputFormat(forBus: 0)
         guard format.sampleRate > 0, format.channelCount > 0 else { throw RecorderError.noInputDevice }
 
-        let processor = try TapProcessor(inputFormat: format) { [weak self] level in
+        let processor = try TapProcessor(inputFormat: format, onSamples: onSamples) { [weak self] level in
             Task { @MainActor in self?.level = level }
         }
         tap = processor
@@ -48,13 +49,19 @@ final class AudioRecorder: AudioRecording {
 /// Runs on the audio thread: resamples each buffer and accumulates samples.
 nonisolated final class TapProcessor: @unchecked Sendable {
     private let resampler: AudioResampler
+    private let onSamples: (@Sendable ([Float]) -> Void)?
     private let onLevel: @Sendable (Float) -> Void
     private let lock = NSLock()
     private var samples: [Float] = []
     private var smoothedLevel: Float = 0
 
-    init(inputFormat: AVAudioFormat, onLevel: @escaping @Sendable (Float) -> Void) throws {
+    init(
+        inputFormat: AVAudioFormat,
+        onSamples: (@Sendable ([Float]) -> Void)? = nil,
+        onLevel: @escaping @Sendable (Float) -> Void
+    ) throws {
         resampler = try AudioResampler(inputFormat: inputFormat)
+        self.onSamples = onSamples
         self.onLevel = onLevel
     }
 
@@ -68,6 +75,7 @@ nonisolated final class TapProcessor: @unchecked Sendable {
         lock.lock()
         samples.append(contentsOf: chunk)
         lock.unlock()
+        onSamples?(chunk)
 
         var sum: Float = 0
         for sample in chunk { sum += sample * sample }
