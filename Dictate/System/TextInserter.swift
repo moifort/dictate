@@ -17,10 +17,14 @@ final class TextInserter: TextInserting {
         let ourChange = pasteboard.changeCount
 
         postCommandV()
-        // Give the target app time to read the pasteboard before restoring it.
-        try? await Task.sleep(for: .milliseconds(400))
-        guard pasteboard.changeCount == ourChange else { return }
-        restore(saved)
+        // The dictation is over for the user once Cmd+V is posted. The target
+        // app needs a moment to read the pasteboard, so it is restored later,
+        // off the critical path.
+        Task { [self] in
+            try? await Task.sleep(for: .milliseconds(400))
+            guard pasteboard.changeCount == ourChange else { return }
+            restore(saved)
+        }
     }
 
     func copyToPasteboard(_ text: String) {
