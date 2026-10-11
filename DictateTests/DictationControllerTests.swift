@@ -13,7 +13,8 @@ struct DictationControllerTests {
         enhancerDelay: Duration = .zero,
         editableFocus: Bool = true,
         enhancementEnabled: Bool = true,
-        shareFieldContext: Bool = true
+        shareFieldContext: Bool = true,
+        engine: TranscriptionEngine = .whisper
     ) -> (DictationController, Fakes) {
         let fakes = Fakes(
             recorder: FakeRecorder(samples: samples ?? speech),
@@ -32,6 +33,7 @@ struct DictationControllerTests {
             language: { "fr" },
             enhancementEnabled: { enhancementEnabled },
             shareFieldContext: { shareFieldContext },
+            transcriptionEngine: { engine },
             enhancementTimeout: .milliseconds(200)
         )
         return (controller, fakes)
@@ -174,6 +176,14 @@ struct DictationControllerTests {
         #expect(records.first?.words == 3)
         #expect(records.first?.audio == 1)
         #expect(records.first?.enhancement != nil)
+    }
+
+    @Test func dictationIsRecordedWithItsEngine() async {
+        let (controller, _) = makeController(engine: .parakeet)
+        var records: [DictationRecord] = []
+        controller.onRecord = { records.append($0) }
+        await dictate(controller)
+        #expect(records.first?.engine == .parakeet)
     }
 
     @Test func dictationWithoutClaudeIsRecordedWithoutEnhancement() async {

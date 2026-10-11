@@ -18,7 +18,7 @@ nonisolated struct DictationStats {
         let date: Date
         let words: Int
         let dictations: Int
-        /// Median Whisper time of the day, in seconds.
+        /// Median transcription time of the day, in seconds.
         let transcription: TimeInterval
         /// Median Claude time of the day, insertion included, in seconds.
         let enhancement: TimeInterval

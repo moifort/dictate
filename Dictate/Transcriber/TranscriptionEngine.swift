@@ -2,7 +2,7 @@ import Foundation
 import Observation
 
 /// The speech-to-text model run on this Mac.
-nonisolated enum TranscriptionEngine: String, CaseIterable, Identifiable, Sendable {
+nonisolated enum TranscriptionEngine: String, CaseIterable, Codable, Identifiable, Sendable {
     /// Whisper large-v3 turbo: every language, takes the vocabulary as a prompt.
     case whisper
     /// Parakeet TDT Ultra: several times faster, 25 European languages, no vocabulary.

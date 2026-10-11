@@ -130,28 +130,46 @@ struct DailyWordsCard: View {
     private var total: Int { days.reduce(0) { $0 + metric.value($1) } }
 }
 
-/// How long the text took to appear after `fn` was released, day by day:
-/// Transcription stacked under Claude, the day's median total above its column.
+/// How long the text took to appear after `fn` was released, day by day, for
+/// one transcription engine at a time: their speeds differ too much for a
+/// shared median to mean anything. The engine's time is stacked under
+/// Claude's, the day's median total above its column.
 struct DailyLatencyCard: View {
-    let days: [DictationStats.Day]
-    /// Median over the last seven days.
-    let recent: Double?
+    let records: [DictationRecord]
+    let now: Date
+    /// Nil until the user picks one: the engine of the latest dictation.
+    @State private var picked: TranscriptionEngine?
+
+    private var engine: TranscriptionEngine { picked ?? records.last?.engine ?? .whisper }
 
     var body: some View {
+        let stats = DictationStats(records: records.filter { $0.engine == engine }, now: now)
+        let days = stats.days
         WidgetCard(title: "Délai d'affichage") {
             HStack(spacing: 12) {
-                legend("Transcription", color: StatsPalette.whisper)
+                legend(LocalizedStringKey(engine.displayName), color: StatsPalette.whisper)
                 legend("Claude", color: StatsPalette.claude)
             }
             .font(.caption)
             .foregroundStyle(.secondary)
         } content: {
             VStack(alignment: .leading, spacing: 10) {
-                StatsFigure(
-                    value: recent.map { "\(StatsFormat.seconds($0)) s" } ?? "—",
-                    caption: "médiane sur 7 jours",
-                    color: StatsPalette.whisper
-                )
+                HStack(alignment: .firstTextBaseline) {
+                    StatsFigure(
+                        value: stats.latency.recent.map { "\(StatsFormat.seconds($0)) s" } ?? "—",
+                        caption: "médiane sur 7 jours",
+                        color: StatsPalette.whisper
+                    )
+                    Spacer()
+                    Picker("Moteur", selection: Binding(get: { engine }, set: { picked = $0 })) {
+                        ForEach(TranscriptionEngine.allCases) { engine in
+                            Text(engine.displayName).tag(engine)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .labelsHidden()
+                    .fixedSize()
+                }
                 Chart(Array(days.enumerated()), id: \.element.id) { index, day in
                     BarMark(
                         x: .value("Jour", DailyChart.column(index)),

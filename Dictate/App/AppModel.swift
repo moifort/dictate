@@ -33,7 +33,8 @@ final class AppModel {
     init() {
         let settings = AppSettings()
         self.settings = settings
-        transcriber = SwitchableTranscriber(engine: settings.transcriptionEngine)
+        let transcriber = SwitchableTranscriber(engine: settings.transcriptionEngine)
+        self.transcriber = transcriber
         let locator = locator
         enhancer = ClaudeCLIEnhancer(
             locate: { locator.locate(override: settings.cliPathOverride) },
@@ -48,7 +49,8 @@ final class AppModel {
             whisperVocabulary: { settings.whisperVocabulary },
             language: { settings.language },
             enhancementEnabled: { settings.enhancementEnabled },
-            shareFieldContext: { settings.shareFieldContext }
+            shareFieldContext: { settings.shareFieldContext },
+            transcriptionEngine: { [transcriber] in transcriber.engine }
         )
         indicator = RecordingIndicator(controller: controller, recorder: recorder)
         controller.onOutcome = { [weak self] outcome in self?.handle(outcome) }

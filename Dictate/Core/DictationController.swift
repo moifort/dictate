@@ -40,6 +40,8 @@ final class DictationController {
     @ObservationIgnored private let enhancementEnabled: () -> Bool
     /// Whether the text before the cursor may be sent to Claude.
     @ObservationIgnored private let shareFieldContext: () -> Bool
+    /// The engine behind `transcriber`, for the statistics.
+    @ObservationIgnored private let transcriptionEngine: () -> TranscriptionEngine
     @ObservationIgnored private let enhancementTimeout: Duration
     @ObservationIgnored private var context = DictationContext()
     @ObservationIgnored private var processing: Task<Void, Never>?
@@ -63,6 +65,7 @@ final class DictationController {
         language: @escaping () -> String,
         enhancementEnabled: @escaping () -> Bool,
         shareFieldContext: @escaping () -> Bool,
+        transcriptionEngine: @escaping () -> TranscriptionEngine = { .whisper },
         enhancementTimeout: Duration = .seconds(8)
     ) {
         self.recorder = recorder
@@ -74,6 +77,7 @@ final class DictationController {
         self.language = language
         self.enhancementEnabled = enhancementEnabled
         self.shareFieldContext = shareFieldContext
+        self.transcriptionEngine = transcriptionEngine
         self.enhancementTimeout = enhancementTimeout
     }
 
@@ -125,6 +129,7 @@ final class DictationController {
         let audio = Double(samples.count) / Double(AudioAnalysis.sampleRate)
         let transcript: String
         let transcription: Duration
+        let engine = transcriptionEngine()
         do {
             let start = clock.now
             transcript = try await transcriber.transcribe(samples: samples, vocabulary: whisperVocabulary(), language: language())
@@ -167,6 +172,7 @@ final class DictationController {
             date: .now,
             words: DictationRecord.wordCount(of: text),
             audio: audio,
+            engine: engine,
             transcription: Self.seconds(transcription),
             enhancement: enhancement.map(Self.seconds),
             insertion: Self.seconds(insertion)

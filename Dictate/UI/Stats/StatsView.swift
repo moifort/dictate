@@ -22,7 +22,7 @@ struct StatsView: View {
                         VStack(spacing: 12) {
                             TodayCard(day: stats.today)
                             DailyWordsCard(days: stats.days)
-                            DailyLatencyCard(days: stats.days, recent: stats.latency.recent)
+                            DailyLatencyCard(records: history.records, now: context.date)
                             TrendsCard(stats: stats)
                         }
                         .padding(16)
