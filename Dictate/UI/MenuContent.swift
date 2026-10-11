@@ -26,6 +26,7 @@ struct MenuContent: View {
         Divider()
         Toggle("Amélioration par Claude", isOn: Bindable(model.settings).enhancementEnabled)
             .onChange(of: model.settings.enhancementEnabled) { model.settingsChanged() }
+        Button("Statistiques…") { open { openWindow(id: "stats") } }
         Button("Réglages…") { open { openSettings() } }
             .keyboardShortcut(",")
         Divider()

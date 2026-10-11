@@ -24,6 +24,12 @@ struct DictateApp: App {
         .windowStyle(.hiddenTitleBar)
         .defaultLaunchBehavior(appDelegate.needsSetup ? .presented : .suppressed)
 
+        Window("Statistiques", id: "stats") {
+            StatsView(history: appDelegate.model.history)
+        }
+        .defaultSize(width: 560, height: 860)
+        .defaultLaunchBehavior(.suppressed)
+
         Window("Mise à jour", id: "update") {
             UpdateView(updater: appDelegate.model.updater)
         }

@@ -91,6 +91,12 @@ The last page has a scratch field to try a dictation end to end.
 | Insertion | `FocusInspector` + `TextInserter` (paste then restore the pasteboard, or pasteboard only when no field has focus) |
 | Orchestration | `DictationController` |
 | Bottom-centre pill | `RecordingIndicator` |
+| Statistics (menu → Statistiques…) | `DictationHistory` → `DictationStats` → `StatsView` |
+
+Every inserted dictation appends one JSON line — date, word count, audio
+length, Whisper, Claude and insertion times, never the text — to
+`~/Library/Application Support/Dictate/Statistics/<bundle id>.jsonl`, so
+Debug builds keep their own history.
 
 If Claude fails or takes longer than 8 s, the raw Whisper transcript is
 inserted and the pill shows an orange dot.
