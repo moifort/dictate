@@ -12,7 +12,8 @@ struct DictationControllerTests {
         enhanced: Result<String, Error> = .success("Fais un push."),
         enhancerDelay: Duration = .zero,
         editableFocus: Bool = true,
-        enhancementEnabled: Bool = true
+        enhancementEnabled: Bool = true,
+        shareFieldContext: Bool = true
     ) -> (DictationController, Fakes) {
         let fakes = Fakes(
             recorder: FakeRecorder(samples: samples ?? speech),
@@ -30,6 +31,7 @@ struct DictationControllerTests {
             whisperVocabulary: { ["push"] },
             language: { "fr" },
             enhancementEnabled: { enhancementEnabled },
+            shareFieldContext: { shareFieldContext },
             enhancementTimeout: .milliseconds(200)
         )
         return (controller, fakes)
@@ -52,7 +54,8 @@ struct DictationControllerTests {
         let (controller, fakes) = makeController()
         await dictate(controller)
         #expect(fakes.inserter.pasted == ["Fais un push."])
-        #expect(fakes.enhancer.received.first?.category == .code)
+        #expect(fakes.enhancer.received.first?.context.category == .code)
+        #expect(fakes.enhancer.received.first?.context.appName == "Terminal")
         #expect(fakes.transcriber.receivedVocabulary == ["push"])
         #expect(fakes.transcriber.receivedLanguage == "fr")
         #expect(controller.lastOutcome == .pasted(raw: false))
@@ -65,6 +68,25 @@ struct DictationControllerTests {
         #expect(fakes.inserter.pasted.isEmpty)
         #expect(fakes.inserter.copied == ["Fais un push."])
         #expect(controller.lastOutcome == .copied(raw: false))
+    }
+
+    @Test func precedingTextReachesTheEnhancer() async {
+        let (controller, fakes) = makeController()
+        await dictate(controller)
+        #expect(fakes.enhancer.received.first?.context.precedingText == "Salut Guillaume,")
+    }
+
+    @Test func precedingTextIsNotReadWhenSharingIsOff() async {
+        let (controller, fakes) = makeController(shareFieldContext: false)
+        await dictate(controller)
+        #expect(fakes.focus.precedingTextReads == 0)
+        #expect(fakes.enhancer.received.first?.context.precedingText == nil)
+    }
+
+    @Test func precedingTextIsNotReadWithoutClaude() async {
+        let (controller, fakes) = makeController(enhancementEnabled: false)
+        await dictate(controller)
+        #expect(fakes.focus.precedingTextReads == 0)
     }
 
     @Test func enhancerErrorFallsBackToRawTranscript() async {
@@ -237,15 +259,15 @@ private final class FakeTranscriber: Transcriber {
 private final class FakeEnhancer: Enhancer {
     let result: Result<String, Error>
     let delay: Duration
-    var received: [(transcript: String, category: AppCategory)] = []
+    var received: [(transcript: String, context: DictationContext)] = []
 
     init(result: Result<String, Error>, delay: Duration) {
         self.result = result
         self.delay = delay
     }
 
-    func enhance(transcript: String, category: AppCategory) async throws -> String {
-        received.append((transcript, category))
+    func enhance(transcript: String, context: DictationContext) async throws -> String {
+        received.append((transcript, context))
         try await Task.sleep(for: delay)
         return try result.get()
     }
@@ -255,6 +277,8 @@ private final class FakeEnhancer: Enhancer {
 private final class FakeFocus: FocusInspecting {
     let editable: Bool
     let bundleID: String?
+    var precedingText: String? = "Salut Guillaume,"
+    private(set) var precedingTextReads = 0
 
     init(editable: Bool, bundleID: String?) {
         self.editable = editable
@@ -262,7 +286,13 @@ private final class FakeFocus: FocusInspecting {
     }
 
     func frontmostBundleID() -> String? { bundleID }
+    func frontmostAppName() -> String? { "Terminal" }
     func hasEditableFocus() -> Bool { editable }
+
+    func precedingText(maxLength: Int) -> String? {
+        precedingTextReads += 1
+        return precedingText.map { String($0.suffix(maxLength)) }
+    }
 }
 
 @MainActor

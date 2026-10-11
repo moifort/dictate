@@ -38,8 +38,10 @@ final class DictationController {
     /// ISO 639-1 code of the language being dictated.
     @ObservationIgnored private let language: () -> String
     @ObservationIgnored private let enhancementEnabled: () -> Bool
+    /// Whether the text before the cursor may be sent to Claude.
+    @ObservationIgnored private let shareFieldContext: () -> Bool
     @ObservationIgnored private let enhancementTimeout: Duration
-    @ObservationIgnored private var category: AppCategory = .other
+    @ObservationIgnored private var context = DictationContext()
     @ObservationIgnored private var processing: Task<Void, Never>?
 
     /// Called once per finished dictation, after `phase` returns to idle.
@@ -48,6 +50,8 @@ final class DictationController {
     @ObservationIgnored var onRecord: ((DictationRecord) -> Void)?
 
     private static let minimumSampleCount = AudioAnalysis.sampleRate * 3 / 10
+    /// Enough for the names and tone of the current message, small enough to stay fast.
+    private static let precedingTextLength = 500
 
     init(
         recorder: AudioRecording,
@@ -58,6 +62,7 @@ final class DictationController {
         whisperVocabulary: @escaping () -> [String],
         language: @escaping () -> String,
         enhancementEnabled: @escaping () -> Bool,
+        shareFieldContext: @escaping () -> Bool,
         enhancementTimeout: Duration = .seconds(8)
     ) {
         self.recorder = recorder
@@ -68,6 +73,7 @@ final class DictationController {
         self.whisperVocabulary = whisperVocabulary
         self.language = language
         self.enhancementEnabled = enhancementEnabled
+        self.shareFieldContext = shareFieldContext
         self.enhancementTimeout = enhancementTimeout
     }
 
@@ -75,7 +81,10 @@ final class DictationController {
         switch gesture {
         case .pressed:
             guard phase == .idle else { return }
-            category = AppCategory(bundleID: focus.frontmostBundleID())
+            context = DictationContext(
+                category: AppCategory(bundleID: focus.frontmostBundleID()),
+                appName: focus.frontmostAppName()
+            )
             do {
                 try recorder.start()
                 phase = .recording
@@ -91,6 +100,12 @@ final class DictationController {
         case .released:
             guard phase == .recording else { return }
             let samples = recorder.stop()
+            // Read on release rather than press: Electron apps only build their
+            // accessibility tree once asked, which happens on press.
+            if enhancementEnabled(), shareFieldContext() {
+                context.precedingText = focus.precedingText(maxLength: Self.precedingTextLength)
+                Log.dictation.info("preceding text: \(self.context.precedingText?.count ?? 0) characters")
+            }
             phase = .transcribing
             processing = Task { await process(samples) }
         }
@@ -168,8 +183,8 @@ final class DictationController {
     }
 
     private func enhanceWithTimeout(_ transcript: String) async -> String? {
-        let work = Task { [enhancer, category] in
-            try await enhancer.enhance(transcript: transcript, category: category)
+        let work = Task { [enhancer, context] in
+            try await enhancer.enhance(transcript: transcript, context: context)
         }
         let timer = Task { [enhancementTimeout] in
             try await Task.sleep(for: enhancementTimeout)

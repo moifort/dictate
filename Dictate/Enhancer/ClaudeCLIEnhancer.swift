@@ -66,7 +66,7 @@ final class ClaudeCLIEnhancer: Enhancer {
         warm = nil
     }
 
-    func enhance(transcript: String, category: AppCategory) async throws -> String {
+    func enhance(transcript: String, context: DictationContext) async throws -> String {
         let process: ClaudeCLIProcess
         if let warm, warm.isRunning {
             process = warm
@@ -75,7 +75,7 @@ final class ClaudeCLIEnhancer: Enhancer {
         }
         warm = nil
         defer { prewarm() }
-        return try await process.send(PromptBuilder.userMessage(transcript: transcript, category: category))
+        return try await process.send(PromptBuilder.userMessage(transcript: transcript, context: context))
     }
 
     private func spawn() throws -> ClaudeCLIProcess {

@@ -16,11 +16,15 @@ protocol AudioRecording: AnyObject {
 
 @MainActor protocol Enhancer: AnyObject, Sendable {
     /// Must honour task cancellation: the controller cancels on timeout.
-    func enhance(transcript: String, category: AppCategory) async throws -> String
+    func enhance(transcript: String, context: DictationContext) async throws -> String
 }
 
 protocol FocusInspecting: AnyObject {
     func frontmostBundleID() -> String?
+    func frontmostAppName() -> String?
+    /// Up to `maxLength` characters before the cursor in the focused field.
+    /// Nil for password fields and when the app does not expose its text.
+    func precedingText(maxLength: Int) -> String?
     /// Whether the focused UI element accepts text input.
     func hasEditableFocus() -> Bool
 }

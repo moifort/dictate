@@ -46,7 +46,8 @@ final class AppModel {
             inserter: TextInserter(),
             whisperVocabulary: { settings.whisperVocabulary },
             language: { settings.language },
-            enhancementEnabled: { settings.enhancementEnabled }
+            enhancementEnabled: { settings.enhancementEnabled },
+            shareFieldContext: { settings.shareFieldContext }
         )
         indicator = RecordingIndicator(controller: controller, recorder: recorder)
         controller.onOutcome = { [weak self] outcome in self?.handle(outcome) }
@@ -188,7 +189,7 @@ final class AppModel {
         do {
             let result = try await enhancer.enhance(
                 transcript: "euh bon ben je vais faire un pouche sur la branche main",
-                category: .code
+                context: DictationContext(category: .code)
             )
             let elapsed = (ContinuousClock.now - start).formatted(.units(allowed: [.seconds, .milliseconds], width: .narrow))
             claudeTestResult = "« \(result) » en \(elapsed)"

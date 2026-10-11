@@ -25,6 +25,14 @@ struct AppSettingsTests {
         #expect(reloaded.languageConfirmed)
     }
 
+    @Test func fieldContextIsSharedByDefaultAndPersists() {
+        let suite = "AppSettingsTests-\(UUID().uuidString)"
+        let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!)
+        #expect(settings.shareFieldContext)
+        settings.shareFieldContext = false
+        #expect(!AppSettings(defaults: UserDefaults(suiteName: suite)!).shareFieldContext)
+    }
+
     @Test func whisperGetsTheVocabularyByDefault() {
         let settings = makeSettings()
         #expect(settings.guideWhisperWithVocabulary)

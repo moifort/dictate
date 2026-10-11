@@ -30,14 +30,14 @@ struct ClaudeCLIEnhancerTests {
         echo '{"type":"system","subtype":"init"}'
         echo '{"type":"result","subtype":"success","is_error":false,"result":"Fais un push."}'
         """)
-        let result = try await makeEnhancer(cli).enhance(transcript: "fais un pouche", category: .code)
+        let result = try await makeEnhancer(cli).enhance(transcript: "fais un pouche", context: DictationContext(category: .code))
         #expect(result == "Fais un push.")
 
         let sent = try String(contentsOf: stdinCopy, encoding: .utf8)
         let json = try #require(try JSONSerialization.jsonObject(with: Data(sent.utf8)) as? [String: Any])
         #expect(json["type"] as? String == "user")
         let content = (json["message"] as? [String: Any])?["content"] as? String
-        #expect(content == PromptBuilder.userMessage(transcript: "fais un pouche", category: .code))
+        #expect(content == PromptBuilder.userMessage(transcript: "fais un pouche", context: DictationContext(category: .code)))
     }
 
     @Test func errorResultThrows() async throws {
@@ -46,27 +46,27 @@ struct ClaudeCLIEnhancerTests {
         echo '{"type":"result","subtype":"success","is_error":true,"result":"Please run /login"}'
         """)
         await #expect(throws: ClaudeCLIError.self) {
-            try await makeEnhancer(cli).enhance(transcript: "x", category: .other)
+            try await makeEnhancer(cli).enhance(transcript: "x", context: DictationContext())
         }
     }
 
     @Test func exitWithoutResultThrows() async throws {
         let cli = try fakeCLI("cat > /dev/null; echo 'boom' >&2; exit 1")
         await #expect(throws: ClaudeCLIError.self) {
-            try await makeEnhancer(cli).enhance(transcript: "x", category: .other)
+            try await makeEnhancer(cli).enhance(transcript: "x", context: DictationContext())
         }
     }
 
     @Test func missingCLIThrowsNotFound() async {
         await #expect(throws: ClaudeCLIError.notFound) {
-            try await makeEnhancer(nil).enhance(transcript: "x", category: .other)
+            try await makeEnhancer(nil).enhance(transcript: "x", context: DictationContext())
         }
     }
 
     @Test func cancellationTerminatesProcessQuickly() async throws {
         let cli = try fakeCLI("cat > /dev/null; sleep 30")
         let enhancer = makeEnhancer(cli)
-        let task = Task { try await enhancer.enhance(transcript: "x", category: .other) }
+        let task = Task { try await enhancer.enhance(transcript: "x", context: DictationContext()) }
         try await Task.sleep(for: .milliseconds(200))
         let start = ContinuousClock.now
         task.cancel()
@@ -87,7 +87,7 @@ struct ClaudeCLIEnhancerTests {
         try await Task.sleep(for: .milliseconds(300))
         #expect(try String(contentsOf: starts, encoding: .utf8).count(of: "started") == 1)
 
-        _ = try await enhancer.enhance(transcript: "x", category: .other)
+        _ = try await enhancer.enhance(transcript: "x", context: DictationContext())
         try await Task.sleep(for: .milliseconds(300))
         #expect(try String(contentsOf: starts, encoding: .utf8).count(of: "started") == 2)
         enhancer.shutdown()

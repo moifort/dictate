@@ -35,6 +35,12 @@ final class AppSettings {
         didSet { defaults.set(guideWhisperWithVocabulary, forKey: Keys.guideWhisperWithVocabulary) }
     }
 
+    /// Send the text before the cursor to Claude, so names and tone match
+    /// what is already written. Password fields are never read.
+    var shareFieldContext: Bool {
+        didSet { defaults.set(shareFieldContext, forKey: Keys.shareFieldContext) }
+    }
+
     /// Install new releases as soon as they are found, without asking.
     var autoUpdate: Bool {
         didSet { defaults.set(autoUpdate, forKey: Keys.autoUpdate) }
@@ -73,6 +79,7 @@ final class AppSettings {
         languageConfirmed = defaults.bool(forKey: Keys.languageConfirmed)
         enhancementEnabled = defaults.object(forKey: Keys.enhancementEnabled) as? Bool ?? true
         guideWhisperWithVocabulary = defaults.object(forKey: Keys.guideWhisperWithVocabulary) as? Bool ?? true
+        shareFieldContext = defaults.object(forKey: Keys.shareFieldContext) as? Bool ?? true
         autoUpdate = defaults.object(forKey: Keys.autoUpdate) as? Bool ?? true
         cliPathOverride = defaults.string(forKey: Keys.cliPathOverride) ?? ""
         vocabularyText = defaults.string(forKey: Keys.vocabulary) ?? Self.defaultVocabulary.joined(separator: "\n")
@@ -83,6 +90,7 @@ final class AppSettings {
         static let languageConfirmed = "languageConfirmed"
         static let enhancementEnabled = "enhancementEnabled"
         static let guideWhisperWithVocabulary = "guideWhisperWithVocabulary"
+        static let shareFieldContext = "shareFieldContext"
         static let autoUpdate = "autoUpdate"
         static let cliPathOverride = "cliPathOverride"
         static let vocabulary = "vocabulary"

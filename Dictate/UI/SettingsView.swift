@@ -20,6 +20,11 @@ struct SettingsView: View {
             Section("Amélioration") {
                 Toggle("Nettoyer le texte avec Claude (Haiku)", isOn: Bindable(model.settings).enhancementEnabled)
                     .onChange(of: model.settings.enhancementEnabled) { model.settingsChanged() }
+                Toggle(isOn: Bindable(model.settings).shareFieldContext) {
+                    Text("Envoyer à Claude le texte qui précède le curseur")
+                    Text("Les 500 derniers caractères du champ, pour orthographier les noms comme vous et garder le ton. Jamais les mots de passe.")
+                }
+                .disabled(!model.settings.enhancementEnabled)
                 claudeCLIRow
             }
 
