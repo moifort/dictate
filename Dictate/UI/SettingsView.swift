@@ -12,7 +12,28 @@ struct SettingsView: View {
             } header: {
                 Text("Langue")
             } footer: {
-                Text("Langue annoncée à Whisper et à Claude. Les termes techniques anglais sont reconnus quelle que soit la langue.")
+                Text("Langue annoncée au moteur de transcription et à Claude. Les termes techniques anglais sont reconnus quelle que soit la langue.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section {
+                Picker("Moteur", selection: Bindable(model.settings).transcriptionEngine) {
+                    ForEach(TranscriptionEngine.allCases) { engine in
+                        Text(engine.displayName).tag(engine)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .onChange(of: model.settings.transcriptionEngine) { model.transcriptionEngineChanged() }
+                if !model.settings.transcriptionEngine.supports(language: model.settings.language) {
+                    Text("Parakeet ne connaît pas le \(DictationLanguage.name(of: model.settings.language)) : choisissez Whisper pour cette langue.")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                }
+            } header: {
+                Text("Transcription")
+            } footer: {
+                Text(transcriptionFooter)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -34,11 +55,15 @@ struct SettingsView: View {
                     .frame(minHeight: 160)
                     .onChange(of: model.settings.vocabularyText) { model.settingsChanged() }
                 // Shown as on when Claude is off: Whisper then always gets the vocabulary.
+                // Parakeet has no prompt: shown as off.
                 Toggle("Guider aussi Whisper avec ce vocabulaire", isOn: Binding(
-                    get: { model.settings.guideWhisperWithVocabulary || !model.settings.enhancementEnabled },
+                    get: {
+                        model.settings.transcriptionEngine.acceptsVocabulary
+                            && (model.settings.guideWhisperWithVocabulary || !model.settings.enhancementEnabled)
+                    },
                     set: { model.settings.guideWhisperWithVocabulary = $0 }
                 ))
-                .disabled(!model.settings.enhancementEnabled)
+                .disabled(!model.settings.enhancementEnabled || !model.settings.transcriptionEngine.acceptsVocabulary)
             } header: {
                 Text("Vocabulaire")
             } footer: {
@@ -84,6 +109,15 @@ struct SettingsView: View {
         .formStyle(.grouped)
         .frame(width: 480)
         .onAppear { launchAtLogin = model.settings.launchAtLogin }
+    }
+
+    private var transcriptionFooter: String {
+        switch model.settings.transcriptionEngine {
+        case .whisper:
+            "Whisper large-v3 turbo : toutes les langues, guidé par votre vocabulaire. Environ 1,5 s par dictée sur un M1 Pro, 3,5 s avec le vocabulaire."
+        case .parakeet:
+            "Parakeet : plusieurs fois plus rapide, 25 langues européennes. Il ne lit pas le vocabulaire : Claude seul corrige votre jargon. Premier usage : téléchargement d'environ 610 Mo."
+        }
     }
 
     /// Status, short path and actions of the `claude` CLI on a single row.

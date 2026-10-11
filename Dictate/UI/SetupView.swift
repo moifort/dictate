@@ -135,12 +135,12 @@ struct SetupView: View {
                     .buttonStyle(.glassProminent)
             }
 
-        case .whisperModel:
-            WhisperProgress(model: model)
+        case .transcriptionModel:
+            TranscriptionModelProgress(model: model)
 
         case .claude:
             if !model.settings.enhancementEnabled {
-                Text("Dictate insère le texte brut de Whisper. Claude s'active dans les Réglages.")
+                Text("Dictate insère le texte brut transcrit. Claude s'active dans les Réglages.")
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
             } else if let path = model.claudeCLIPath {
@@ -178,7 +178,7 @@ private extension SetupStep {
         case .inputMonitoring: "Surveillance de la touche fn"
         case .accessibility: "Insertion du texte"
         case .fnKey: "Libérer la touche 🌐"
-        case .whisperModel: "Modèle de transcription"
+        case .transcriptionModel: "Modèle de transcription"
         case .claude: "Correction par Claude"
         }
     }
@@ -186,7 +186,7 @@ private extension SetupStep {
     var explanation: String {
         switch self {
         case .language:
-            "Whisper transcrit mieux quand il sait à l'avance dans quelle langue vous parlez. Dictate a repris celle de macOS ; changez-la si vous dictez dans une autre. Les termes techniques anglais restent reconnus."
+            "La transcription est plus fiable quand elle sait à l'avance dans quelle langue vous parlez. Dictate a repris celle de macOS ; changez-la si vous dictez dans une autre. Les termes techniques anglais restent reconnus."
         case .microphone:
             "Dictate n'écoute que pendant que vous maintenez fn. L'audio est transcrit sur ce Mac et n'en sort jamais."
         case .inputMonitoring:
@@ -195,8 +195,8 @@ private extension SetupStep {
             "Pour repérer le champ de texte actif et y coller votre dictée. Sans champ actif, le texte reste dans le presse-papiers."
         case .fnKey:
             "Par défaut, macOS ouvre les emoji ou sa propre dictée quand on appuie sur 🌐 fn."
-        case .whisperModel:
-            "Whisper large-v3 turbo transcrit votre voix sur ce Mac, sans réseau. Le modèle se télécharge une seule fois, environ 630 Mo."
+        case .transcriptionModel:
+            "Un modèle de transcription tourne sur ce Mac, sans réseau. Il se télécharge une seule fois, environ 630 Mo."
         case .claude:
             "Claude Haiku retire les hésitations et corrige la ponctuation et votre jargon, avec votre abonnement Claude, via la commande claude de Claude Code ou de l'app Claude."
         }
@@ -209,7 +209,7 @@ private extension SetupStep {
         case .inputMonitoring: "keyboard"
         case .accessibility: "accessibility"
         case .fnKey: "globe"
-        case .whisperModel: "waveform"
+        case .transcriptionModel: "waveform"
         case .claude: "sparkles"
         }
     }
@@ -346,7 +346,7 @@ private struct WelcomePage: View {
         } content: {
             VStack(alignment: .leading, spacing: 22) {
                 FeatureRow(symbol: "lock.shield", title: "Transcription sur ce Mac",
-                           detail: "Whisper tourne en local. Votre voix ne quitte pas l'ordinateur.")
+                           detail: "Le modèle tourne en local. Votre voix ne quitte pas l'ordinateur.")
                 FeatureRow(symbol: "sparkles", title: "Nettoyage par Claude",
                            detail: "Hésitations, ponctuation et jargon corrigés avec votre abonnement Claude.")
                 FeatureRow(symbol: "keyboard", title: "Une seule touche",
@@ -503,7 +503,7 @@ private struct TryItPage: View {
                 Label(message, systemImage: "exclamationmark.triangle").foregroundStyle(.orange)
             }
         case "preparing":
-            Label("Whisper se prépare, encore un instant…", systemImage: "hourglass").foregroundStyle(.secondary)
+            Label("\(model.transcriber.engine.displayName) se prépare, encore un instant…", systemImage: "hourglass").foregroundStyle(.secondary)
         case "success":
             Label("Ça marche.", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
         default:
@@ -547,8 +547,10 @@ private struct Instructions: View {
     }
 }
 
-private struct WhisperProgress: View {
+private struct TranscriptionModelProgress: View {
     let model: AppModel
+
+    private var size: Int { model.transcriber.engine.downloadSize }
 
     var body: some View {
         ZStack {
@@ -557,18 +559,18 @@ private struct WhisperProgress: View {
                 VStack(spacing: 8) {
                     ProgressView(value: fraction)
                         .animation(.smooth, value: fraction)
-                    Text("\(Int(fraction * 630)) Mo sur 630")
+                    Text("\(Int(fraction * Double(size))) Mo sur \(size)")
                         .font(.caption.monospacedDigit())
                         .foregroundStyle(.secondary)
                         .contentTransition(.numericText())
-                        .animation(.snappy, value: Int(fraction * 630))
+                        .animation(.snappy, value: Int(fraction * Double(size)))
                 }
                 .frame(width: 320)
                 .id("downloading")
             case .loading, .notLoaded:
                 HStack(spacing: 10) {
                     ProgressView().controlSize(.small)
-                    Text(model.setup.whisperModel ? "Préparation du modèle pour ce Mac…" : "Connexion…")
+                    Text(model.setup.transcriptionModel ? "Préparation du modèle pour ce Mac…" : "Connexion…")
                         .foregroundStyle(.secondary)
                 }
                 .id("loading")
@@ -576,7 +578,7 @@ private struct WhisperProgress: View {
                 VStack(spacing: 12) {
                     Label(message, systemImage: "exclamationmark.triangle")
                         .foregroundStyle(.orange)
-                    Button("Réessayer") { model.retryWhisper() }
+                    Button("Réessayer") { model.retryTranscriber() }
                         .buttonStyle(.glassProminent)
                         .controlSize(.large)
                 }

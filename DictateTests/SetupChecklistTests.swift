@@ -4,7 +4,7 @@ import Testing
 struct SetupChecklistTests {
     private let ready = SetupChecklist(
         language: true, microphone: true, inputMonitoring: true, accessibility: true,
-        fnKeyFree: true, whisperModel: true, claude: true
+        fnKeyFree: true, transcriptionModel: true, claude: true
     )
 
     @Test func freshInstallStartsWithTheLanguage() {

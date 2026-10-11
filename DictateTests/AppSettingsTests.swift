@@ -33,6 +33,14 @@ struct AppSettingsTests {
         #expect(!AppSettings(defaults: UserDefaults(suiteName: suite)!).shareFieldContext)
     }
 
+    @Test func transcriptionEngineIsWhisperByDefaultAndPersists() {
+        let suite = "AppSettingsTests-\(UUID().uuidString)"
+        let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!)
+        #expect(settings.transcriptionEngine == .whisper)
+        settings.transcriptionEngine = .parakeet
+        #expect(AppSettings(defaults: UserDefaults(suiteName: suite)!).transcriptionEngine == .parakeet)
+    }
+
     @Test func whisperGetsTheVocabularyByDefault() {
         let settings = makeSettings()
         #expect(settings.guideWhisperWithVocabulary)

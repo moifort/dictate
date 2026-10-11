@@ -19,6 +19,9 @@ packages:
   WhisperKit:
     url: https://github.com/argmaxinc/WhisperKit
     from: 1.1.1
+  FluidAudio:
+    url: https://github.com/FluidInference/FluidAudio
+    from: 0.17.7
 targets:
   Dictate:
     type: application
@@ -27,6 +30,7 @@ targets:
       - Dictate
     dependencies:
       - package: WhisperKit
+      - package: FluidAudio
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.thibautmottet.dictate

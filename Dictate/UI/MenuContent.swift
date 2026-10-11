@@ -35,10 +35,11 @@ struct MenuContent: View {
     }
 
     private var statusLine: String {
-        switch model.transcriber.state {
-        case .notLoaded, .loading: "Chargement de Whisper…"
-        case .downloading(let fraction): "Téléchargement de Whisper… \(fraction.formatted(.percent.precision(.fractionLength(0))))"
-        case .failed(let message): "Whisper indisponible : \(message)"
+        let engine = model.transcriber.engine.displayName
+        return switch model.transcriber.state {
+        case .notLoaded, .loading: "Chargement de \(engine)…"
+        case .downloading(let fraction): "Téléchargement de \(engine)… \(fraction.formatted(.percent.precision(.fractionLength(0))))"
+        case .failed(let message): "\(engine) indisponible : \(message)"
         case .ready: model.hotkeyActive ? "Prêt — maintenez fn pour dicter" : "Touche fn inactive"
         }
     }

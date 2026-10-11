@@ -26,8 +26,8 @@ Tests:
 xcodebuild -project Dictate.xcodeproj -scheme Dictate -derivedDataPath build -destination 'platform=macOS' test
 ```
 
-The Whisper integration test only runs once the model has been downloaded by
-the app.
+The Whisper and Parakeet integration tests only run once the matching model
+has been downloaded by the app.
 
 ## Updates
 
@@ -74,7 +74,7 @@ It shows one step at a time and moves on by itself as each one is granted:
 3. **Accessibility** permission, to detect the focused field and paste.
 4. **System Settings → Keyboard → "Press 🌐 key to": Do Nothing**, otherwise
    macOS opens the emoji picker or its own dictation.
-5. The Whisper model (~630 MB) downloads into
+5. The transcription model (~630 MB) downloads into
    `~/Library/Application Support/Dictate/Models`, with its progress shown.
 6. The `claude` CLI, optional: dictation also works without Claude.
 
@@ -86,7 +86,7 @@ The last page has a scratch field to try a dictation end to end.
 |---|---|
 | `fn` held / released | `FnKeyMonitor` → `FnKeyGesture` |
 | Microphone → 16 kHz mono | `AudioRecorder` |
-| Local transcription | `WhisperKitTranscriber` (large-v3 turbo) |
+| Local transcription | `SwitchableTranscriber`, routing to the engine picked in Settings → Transcription: `WhisperKitTranscriber` (large-v3 turbo, default) or `ParakeetTranscriber` (Parakeet TDT Ultra through FluidAudio, faster, 25 European languages, no vocabulary prompt). Only the active engine's model stays in memory. |
 | Cleanup | `ClaudeCLIEnhancer`: one pre-warmed `claude -p --model haiku` process per dictation |
 | Insertion | `FocusInspector` + `TextInserter` (paste then restore the pasteboard, or pasteboard only when no field has focus) |
 | Orchestration | `DictationController` |
@@ -94,9 +94,9 @@ The last page has a scratch field to try a dictation end to end.
 | Statistics (menu → Statistiques…) | `DictationHistory` → `DictationStats` → `StatsView` |
 
 Every inserted dictation appends one JSON line — date, word count, audio
-length, Whisper, Claude and insertion times, never the text — to
+length, transcription, Claude and insertion times, never the text — to
 `~/Library/Application Support/Dictate/Statistics/<bundle id>.jsonl`, so
 Debug builds keep their own history.
 
-If Claude fails or takes longer than 8 s, the raw Whisper transcript is
+If Claude fails or takes longer than 8 s, the raw transcript is
 inserted and the pill shows an orange dot.

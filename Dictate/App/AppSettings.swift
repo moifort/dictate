@@ -24,6 +24,12 @@ final class AppSettings {
         didSet { defaults.set(languageConfirmed, forKey: Keys.languageConfirmed) }
     }
 
+    /// The model that turns speech into text. Whisper by default: it covers
+    /// every language and takes the vocabulary as a prompt.
+    var transcriptionEngine: TranscriptionEngine {
+        didSet { defaults.set(transcriptionEngine.rawValue, forKey: Keys.transcriptionEngine) }
+    }
+
     var enhancementEnabled: Bool {
         didSet { defaults.set(enhancementEnabled, forKey: Keys.enhancementEnabled) }
     }
@@ -77,6 +83,8 @@ final class AppSettings {
         self.defaults = defaults
         language = defaults.string(forKey: Keys.language) ?? DictationLanguage.preferred()
         languageConfirmed = defaults.bool(forKey: Keys.languageConfirmed)
+        transcriptionEngine = defaults.string(forKey: Keys.transcriptionEngine)
+            .flatMap(TranscriptionEngine.init(rawValue:)) ?? .whisper
         enhancementEnabled = defaults.object(forKey: Keys.enhancementEnabled) as? Bool ?? true
         guideWhisperWithVocabulary = defaults.object(forKey: Keys.guideWhisperWithVocabulary) as? Bool ?? true
         shareFieldContext = defaults.object(forKey: Keys.shareFieldContext) as? Bool ?? true
@@ -88,6 +96,7 @@ final class AppSettings {
     private enum Keys {
         static let language = "language"
         static let languageConfirmed = "languageConfirmed"
+        static let transcriptionEngine = "transcriptionEngine"
         static let enhancementEnabled = "enhancementEnabled"
         static let guideWhisperWithVocabulary = "guideWhisperWithVocabulary"
         static let shareFieldContext = "shareFieldContext"

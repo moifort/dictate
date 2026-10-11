@@ -7,7 +7,7 @@ nonisolated enum SetupStep: Int, CaseIterable, Identifiable, Sendable {
     case inputMonitoring
     case accessibility
     case fnKey
-    case whisperModel
+    case transcriptionModel
     case claude
 
     var id: Int { rawValue }
@@ -24,7 +24,7 @@ nonisolated struct SetupChecklist: Equatable, Sendable {
     var inputMonitoring = false
     var accessibility = false
     var fnKeyFree = false
-    var whisperModel = false
+    var transcriptionModel = false
     /// The CLI was found, or the user chose to dictate without Claude.
     var claude = false
 
@@ -35,7 +35,7 @@ nonisolated struct SetupChecklist: Equatable, Sendable {
         case .inputMonitoring: inputMonitoring
         case .accessibility: accessibility
         case .fnKey: fnKeyFree
-        case .whisperModel: whisperModel
+        case .transcriptionModel: transcriptionModel
         case .claude: claude
         }
     }

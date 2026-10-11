@@ -6,7 +6,7 @@ import Observation
 final class AppModel {
     let settings: AppSettings
     let recorder = AudioRecorder()
-    let transcriber = WhisperKitTranscriber()
+    let transcriber: SwitchableTranscriber
     let controller: DictationController
     let indicator: RecordingIndicator
     let updater = Updater()
@@ -33,6 +33,7 @@ final class AppModel {
     init() {
         let settings = AppSettings()
         self.settings = settings
+        transcriber = SwitchableTranscriber(engine: settings.transcriptionEngine)
         let locator = locator
         enhancer = ClaudeCLIEnhancer(
             locate: { locator.locate(override: settings.cliPathOverride) },
@@ -83,19 +84,26 @@ final class AppModel {
             inputMonitoring: Permissions.inputMonitoring || hotkeyActive,
             accessibility: Permissions.accessibility,
             fnKeyFree: Permissions.fnKeyFree,
-            whisperModel: whisperReady,
+            transcriptionModel: transcriptionModelReady,
             claude: !settings.enhancementEnabled || claudeCLIPath != nil
         )
         if checklist != setup { setup = checklist }
     }
 
     /// Ready, or on disk and still being compiled: launch must not wait for that.
-    private var whisperReady: Bool {
+    private var transcriptionModelReady: Bool {
         switch transcriber.state {
         case .ready: true
         case .failed, .downloading: false
-        case .notLoaded, .loading: WhisperKitTranscriber.isModelDownloaded()
+        case .notLoaded, .loading: transcriber.isModelDownloaded
         }
+    }
+
+    /// Switches engines; a first switch to Parakeet downloads its model.
+    func transcriptionEngineChanged() {
+        transcriber.select(settings.transcriptionEngine)
+        refreshSetup()
+        pollSetupUntilComplete()
     }
 
     /// The onboarding showed the detected language and the user agreed.
@@ -104,7 +112,7 @@ final class AppModel {
         refreshSetup()
     }
 
-    /// Dictation without Claude inserts the raw Whisper transcript.
+    /// Dictation without Claude inserts the raw transcript.
     func continueWithoutClaude() {
         settings.enhancementEnabled = false
         refreshSetup()
@@ -198,7 +206,7 @@ final class AppModel {
         }
     }
 
-    func retryWhisper() {
+    func retryTranscriber() {
         Task { await transcriber.load() }
     }
 

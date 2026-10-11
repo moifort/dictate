@@ -4,22 +4,14 @@ import WhisperKit
 
 /// Local transcription with Whisper large-v3 turbo through WhisperKit.
 @Observable
-final class WhisperKitTranscriber: Transcriber {
-    enum State: Equatable {
-        case notLoaded
-        /// First launch only: fraction of the ~630 MB model downloaded.
-        case downloading(Double)
-        case loading
-        case ready
-        case failed(String)
-    }
-
+final class WhisperKitTranscriber: ModelTranscriber {
     nonisolated static let modelName = "openai_whisper-large-v3-v20240930_turbo_632MB"
 
-    private(set) var state: State = .notLoaded
+    private(set) var state: TranscriberState = .notLoaded
     @ObservationIgnored private let engine: WhisperEngine
 
     init(modelDirectory: URL = WhisperKitTranscriber.defaultModelDirectory) {
+        self.modelDirectory = modelDirectory
         engine = WhisperEngine(modelName: Self.modelName, downloadBase: modelDirectory)
     }
 
@@ -40,12 +32,11 @@ final class WhisperKitTranscriber: Transcriber {
         }
     }
 
-    var isBusy: Bool {
-        switch state {
-        case .downloading, .loading: true
-        default: false
-        }
-    }
+    @ObservationIgnored private let modelDirectory: URL
+
+    var isModelDownloaded: Bool { Self.isModelDownloaded(in: modelDirectory) }
+
+    private var isBusy: Bool { state.isBusy }
 
     /// Downloads the model on first launch (~630 MB), then loads it in memory.
     func load() async {
@@ -63,6 +54,14 @@ final class WhisperKitTranscriber: Transcriber {
         } catch {
             state = .failed(error.localizedDescription)
         }
+    }
+
+    /// Skipped while the model is downloading or loading: that load will
+    /// finish anyway, and the model is then freed at the next launch.
+    func unload() async {
+        guard state == .ready else { return }
+        await engine.unload()
+        state = .notLoaded
     }
 
     func transcribe(samples: [Float], vocabulary: [String], language: String) async throws -> String {
@@ -118,6 +117,10 @@ actor WhisperEngine {
             verbose: false, prewarm: true, load: true, download: false
         )
         return try await WhisperKit(config)
+    }
+
+    func unload() {
+        pipeline = nil
     }
 
     func transcribe(samples: [Float], vocabulary: [String], language: String) async throws -> String {

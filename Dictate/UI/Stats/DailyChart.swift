@@ -131,7 +131,7 @@ struct DailyWordsCard: View {
 }
 
 /// How long the text took to appear after `fn` was released, day by day:
-/// Whisper stacked under Claude, the day's median total above its column.
+/// Transcription stacked under Claude, the day's median total above its column.
 struct DailyLatencyCard: View {
     let days: [DictationStats.Day]
     /// Median over the last seven days.
@@ -140,7 +140,7 @@ struct DailyLatencyCard: View {
     var body: some View {
         WidgetCard(title: "Délai d'affichage") {
             HStack(spacing: 12) {
-                legend("Whisper", color: StatsPalette.whisper)
+                legend("Transcription", color: StatsPalette.whisper)
                 legend("Claude", color: StatsPalette.claude)
             }
             .font(.caption)
@@ -155,7 +155,7 @@ struct DailyLatencyCard: View {
                 Chart(Array(days.enumerated()), id: \.element.id) { index, day in
                     BarMark(
                         x: .value("Jour", DailyChart.column(index)),
-                        y: .value("Whisper", day.transcription),
+                        y: .value("Transcription", day.transcription),
                         width: .fixed(DailyChart.barWidth)
                     )
                     .foregroundStyle(StatsPalette.whisper)
