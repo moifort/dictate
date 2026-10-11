@@ -143,6 +143,34 @@ struct DictationControllerTests {
         #expect(controller.phase == .idle)
     }
 
+    @Test func insertedDictationIsRecordedWithItsTimings() async {
+        let (controller, _) = makeController()
+        var records: [DictationRecord] = []
+        controller.onRecord = { records.append($0) }
+        await dictate(controller)
+        #expect(records.count == 1)
+        #expect(records.first?.words == 3)
+        #expect(records.first?.audio == 1)
+        #expect(records.first?.enhancement != nil)
+    }
+
+    @Test func dictationWithoutClaudeIsRecordedWithoutEnhancement() async {
+        let (controller, _) = makeController(editableFocus: false, enhancementEnabled: false)
+        var records: [DictationRecord] = []
+        controller.onRecord = { records.append($0) }
+        await dictate(controller)
+        #expect(records.first?.words == 4)
+        #expect(records.first?.enhancement == nil)
+    }
+
+    @Test func discardedDictationIsNotRecorded() async {
+        let (controller, _) = makeController(transcript: .success("   "))
+        var records: [DictationRecord] = []
+        controller.onRecord = { records.append($0) }
+        await dictate(controller)
+        #expect(records.isEmpty)
+    }
+
     @Test func recorderFailureReportsFailure() {
         let (controller, fakes) = makeController()
         fakes.recorder.startError = FakeError()

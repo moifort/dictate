@@ -10,6 +10,7 @@ final class AppModel {
     let controller: DictationController
     let indicator: RecordingIndicator
     let updater = Updater()
+    let history = DictationHistory()
 
     private(set) var claudeCLIPath: URL?
     /// Version reported by `claude --version`: nil while probing or when the binary does not answer.
@@ -49,6 +50,7 @@ final class AppModel {
         )
         indicator = RecordingIndicator(controller: controller, recorder: recorder)
         controller.onOutcome = { [weak self] outcome in self?.handle(outcome) }
+        controller.onRecord = { [history] record in history.append(record) }
         fnMonitor.onGesture = { [weak self] gesture in
             guard let self else { return }
             Log.hotkey.info("gesture \(String(describing: gesture), privacy: .public) in phase \(String(describing: self.controller.phase), privacy: .public)")

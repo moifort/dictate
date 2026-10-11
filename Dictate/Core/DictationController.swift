@@ -44,6 +44,8 @@ final class DictationController {
 
     /// Called once per finished dictation, after `phase` returns to idle.
     @ObservationIgnored var onOutcome: ((DictationOutcome) -> Void)?
+    /// Called once per dictation that inserted text, with its timings.
+    @ObservationIgnored var onRecord: ((DictationRecord) -> Void)?
 
     private static let minimumSampleCount = AudioAnalysis.sampleRate * 3 / 10
 
@@ -105,12 +107,15 @@ final class DictationController {
         }
 
         let clock = ContinuousClock()
+        let audio = Double(samples.count) / Double(AudioAnalysis.sampleRate)
         let transcript: String
+        let transcription: Duration
         do {
             let start = clock.now
             transcript = try await transcriber.transcribe(samples: samples, vocabulary: whisperVocabulary(), language: language())
                 .trimmingCharacters(in: .whitespacesAndNewlines)
-            Log.dictation.info("transcribed \(Double(samples.count) / Double(AudioAnalysis.sampleRate), format: .fixed(precision: 1)) s of audio in \(Self.milliseconds(since: start, clock)) ms")
+            transcription = clock.now - start
+            Log.dictation.info("transcribed \(audio, format: .fixed(precision: 1)) s of audio in \(Self.milliseconds(transcription)) ms")
         } catch {
             return finish(.failed("Transcription impossible : \(error.localizedDescription)"))
         }
@@ -118,6 +123,7 @@ final class DictationController {
 
         var text = transcript
         var raw = false
+        var enhancement: Duration?
         if enhancementEnabled() {
             phase = .enhancing
             let start = clock.now
@@ -126,23 +132,39 @@ final class DictationController {
             } else {
                 raw = true
             }
-            Log.dictation.info("enhanced in \(Self.milliseconds(since: start, clock)) ms, raw: \(raw)")
+            let elapsed = clock.now - start
+            enhancement = elapsed
+            Log.dictation.info("enhanced in \(Self.milliseconds(elapsed)) ms, raw: \(raw)")
         }
 
         let start = clock.now
+        let outcome: DictationOutcome
         if focus.hasEditableFocus() {
             await inserter.paste(text)
-            Log.dictation.info("pasted in \(Self.milliseconds(since: start, clock)) ms")
-            finish(.pasted(raw: raw))
+            outcome = .pasted(raw: raw)
         } else {
             inserter.copyToPasteboard(text)
-            finish(.copied(raw: raw))
+            outcome = .copied(raw: raw)
         }
+        let insertion = clock.now - start
+        Log.dictation.info("inserted in \(Self.milliseconds(insertion)) ms")
+        onRecord?(DictationRecord(
+            date: .now,
+            words: DictationRecord.wordCount(of: text),
+            audio: audio,
+            transcription: Self.seconds(transcription),
+            enhancement: enhancement.map(Self.seconds),
+            insertion: Self.seconds(insertion)
+        ))
+        finish(outcome)
     }
 
-    private static func milliseconds(since start: ContinuousClock.Instant, _ clock: ContinuousClock) -> Int {
-        let elapsed = clock.now - start
-        return Int(elapsed.components.seconds * 1_000) + Int(elapsed.components.attoseconds / 1_000_000_000_000_000)
+    private static func milliseconds(_ elapsed: Duration) -> Int {
+        Int(elapsed.components.seconds * 1_000) + Int(elapsed.components.attoseconds / 1_000_000_000_000_000)
+    }
+
+    private static func seconds(_ elapsed: Duration) -> TimeInterval {
+        Double(elapsed.components.seconds) + Double(elapsed.components.attoseconds) / 1e18
     }
 
     private func enhanceWithTimeout(_ transcript: String) async -> String? {
