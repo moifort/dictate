@@ -40,6 +40,32 @@ struct ClaudeCLIEnhancerTests {
         #expect(content == PromptBuilder.userMessage(transcript: "fais un pouche", context: DictationContext(category: .code)))
     }
 
+    @Test func returnsOnTheAssistantTextWithoutWaitingForThePostTurnSummary() async throws {
+        let cli = try fakeCLI("""
+        cat > /dev/null
+        echo '{"type":"assistant","message":{"model":"claude-haiku-5-5","content":[{"type":"thinking","thinking":""}]}}'
+        echo '{"type":"assistant","message":{"model":"claude-haiku-5-5","content":[{"type":"text","text":"Fais un push."}]}}'
+        sleep 5
+        echo '{"type":"system","subtype":"post_turn_summary"}'
+        echo '{"type":"result","subtype":"success","is_error":false,"result":"Fais un push."}'
+        """)
+        let start = ContinuousClock.now
+        let result = try await makeEnhancer(cli).enhance(transcript: "fais un pouche", context: DictationContext())
+        #expect(result == "Fais un push.")
+        #expect(ContinuousClock.now - start < .seconds(2))
+    }
+
+    @Test func aMadeUpErrorReplyIsNotTakenForTheCleanup() async throws {
+        let cli = try fakeCLI("""
+        cat > /dev/null
+        echo '{"type":"assistant","error":"authentication_failed","message":{"model":"<synthetic>","content":[{"type":"text","text":"Please run /login"}]}}'
+        echo '{"type":"result","subtype":"success","is_error":true,"result":"Please run /login"}'
+        """)
+        await #expect(throws: ClaudeCLIError.self) {
+            try await makeEnhancer(cli).enhance(transcript: "x", context: DictationContext())
+        }
+    }
+
     @Test func errorResultThrows() async throws {
         let cli = try fakeCLI("""
         cat > /dev/null

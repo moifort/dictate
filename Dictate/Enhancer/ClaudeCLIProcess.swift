@@ -34,7 +34,10 @@ nonisolated final class ClaudeCLIProcess: @unchecked Sendable {
         process.arguments = arguments
         process.currentDirectoryURL = workingDirectory
         // Cleaning up a transcript needs no extended thinking; with thinking on,
-        // a cold Haiku request was measured at 4.6 s instead of 1.5 s.
+        // a cold Haiku request was measured at 4.6 s instead of 1.5 s. CLI
+        // 2.1.293 with Haiku 5.5 thinks anyway (~250 tokens, ~1 s): neither
+        // this, CLAUDE_CODE_DISABLE_THINKING, alwaysThinkingEnabled nor
+        // --effort low turned it off on 2026-10-11.
         var environment = ProcessInfo.processInfo.environment
         environment["MAX_THINKING_TOKENS"] = "0"
         process.environment = environment
@@ -72,20 +75,27 @@ nonisolated final class ClaudeCLIProcess: @unchecked Sendable {
                 outcome.resolve(.failure(error))
             }
         }
-        return try await withTaskCancellationHandler {
+        let text = try await withTaskCancellationHandler {
             try await outcome.value()
         } onCancel: {
             reader.cancel()
             terminate()
             outcome.resolve(.failure(CancellationError()))
         }
+        // The CLI would go on with its post-turn summary: nothing left to wait for.
+        reader.cancel()
+        terminate()
+        return text
     }
 
+    /// Returns on the assistant's text rather than on the `result` event: the
+    /// CLI writes a post-turn summary before `result`, measured at 2.5 to 5 s
+    /// on 2026-10-11 with CLI 2.1.293, longer than the cleanup itself.
     private static func readResult(from stdout: FileHandle, stderr: LockedBuffer) async throws -> String {
         for try await line in stdout.bytes.lines {
-            guard let event = try? JSONSerialization.jsonObject(with: Data(line.utf8)) as? [String: Any],
-                  event["type"] as? String == "result"
-            else { continue }
+            guard let event = try? JSONSerialization.jsonObject(with: Data(line.utf8)) as? [String: Any] else { continue }
+            if let text = assistantText(event) { return text }
+            guard event["type"] as? String == "result" else { continue }
             let text = event["result"] as? String ?? ""
             let subtype = event["subtype"] as? String ?? "unknown"
             if event["is_error"] as? Bool == true || subtype != "success" {
@@ -94,6 +104,19 @@ nonisolated final class ClaudeCLIProcess: @unchecked Sendable {
             return text
         }
         throw ClaudeCLIError.noResult(stderr.text)
+    }
+
+    /// The text of a model reply. Nil for thinking-only messages and for the
+    /// messages the CLI makes up itself on an API or login error, which carry
+    /// an `error` field: those are left for the `result` event to report.
+    static func assistantText(_ event: [String: Any]) -> String? {
+        guard event["type"] as? String == "assistant", event["error"] == nil,
+              let message = event["message"] as? [String: Any],
+              message["model"] as? String != "<synthetic>",
+              let content = message["content"] as? [[String: Any]]
+        else { return nil }
+        let texts = content.filter { $0["type"] as? String == "text" }.compactMap { $0["text"] as? String }
+        return texts.isEmpty ? nil : texts.joined()
     }
 }
 
