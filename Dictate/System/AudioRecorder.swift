@@ -16,6 +16,7 @@ final class AudioRecorder: AudioRecording {
     @ObservationIgnored private var voiceEngine: AVAudioEngine?
     @ObservationIgnored private var isWarmingVoiceEngine = false
     @ObservationIgnored private var inputMonitor: InputDeviceMonitor?
+    @ObservationIgnored private let avoidBluetoothInput: () -> Bool
 
     enum RecorderError: LocalizedError {
         case noInputDevice
@@ -23,7 +24,11 @@ final class AudioRecorder: AudioRecording {
         var errorDescription: String? { "Aucun micro disponible." }
     }
 
-    init() {
+    /// `avoidBluetoothInput`: record with the built-in mic while the default input is a
+    /// Bluetooth headset. Opening a headset mic switches it to its call profile, which
+    /// degrades everything it plays until the recording stops.
+    init(avoidBluetoothInput: @escaping () -> Bool = { false }) {
+        self.avoidBluetoothInput = avoidBluetoothInput
         inputMonitor = InputDeviceMonitor { [weak self] deviceChanged in
             self?.inputDeviceChanged(deviceChanged: deviceChanged)
         }
@@ -41,6 +46,11 @@ final class AudioRecorder: AudioRecording {
             engine = voiceEngine!
         } else {
             engine = AVAudioEngine()
+            // Voice processing stays on the default devices: only a plain engine can be redirected.
+            if avoidBluetoothInput(), let device = InputDeviceMonitor.builtInReplacementForBluetoothInput() {
+                Log.dictation.info("default input is Bluetooth: recording with the built-in microphone")
+                try Self.use(device, for: engine)
+            }
         }
         let input = engine.inputNode
         let format = input.outputFormat(forBus: 0)
@@ -105,6 +115,16 @@ final class AudioRecorder: AudioRecording {
             .init(enableAdvancedDucking: false, duckingLevel: .min)
         try engine.inputNode.setVoiceProcessingEnabled(true)
         return engine
+    }
+
+    private static func use(_ device: AudioDeviceID, for engine: AVAudioEngine) throws {
+        guard let unit = engine.inputNode.audioUnit else { return }
+        var device = device
+        let status = AudioUnitSetProperty(
+            unit, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0,
+            &device, UInt32(MemoryLayout<AudioDeviceID>.size)
+        )
+        guard status == noErr else { throw NSError(domain: NSOSStatusErrorDomain, code: Int(status)) }
     }
 
     /// Whether another process is capturing audio input. Asked per process: the
@@ -190,6 +210,53 @@ final class InputDeviceMonitor {
         guard AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &size, &device) == noErr,
               device != kAudioObjectUnknown else { return nil }
         return device
+    }
+
+    struct InputDevice: Equatable {
+        let id: AudioDeviceID
+        let transport: UInt32
+    }
+
+    /// The built-in mic to record with instead of a Bluetooth default input, or nil when
+    /// the default is not Bluetooth or the Mac has no built-in mic (desktop, closed lid).
+    nonisolated static func replacement(forDefault defaultInput: InputDevice?, among inputs: [InputDevice]) -> AudioDeviceID? {
+        let bluetooth = [kAudioDeviceTransportTypeBluetooth, kAudioDeviceTransportTypeBluetoothLE]
+        guard let defaultInput, bluetooth.contains(defaultInput.transport) else { return nil }
+        return inputs.first { $0.transport == kAudioDeviceTransportTypeBuiltIn }?.id
+    }
+
+    nonisolated static func builtInReplacementForBluetoothInput() -> AudioDeviceID? {
+        let inputs = allDevices().filter(hasInput).map { InputDevice(id: $0, transport: transportType(of: $0)) }
+        let defaultInput = defaultInputDevice().map { InputDevice(id: $0, transport: transportType(of: $0)) }
+        return replacement(forDefault: defaultInput, among: inputs)
+    }
+
+    nonisolated private static func allDevices() -> [AudioDeviceID] {
+        let system = AudioObjectID(kAudioObjectSystemObject)
+        var address = address(kAudioHardwarePropertyDevices)
+        var size = UInt32(0)
+        guard AudioObjectGetPropertyDataSize(system, &address, 0, nil, &size) == noErr else { return [] }
+        var devices = [AudioDeviceID](repeating: 0, count: Int(size) / MemoryLayout<AudioDeviceID>.size)
+        guard AudioObjectGetPropertyData(system, &address, 0, nil, &size, &devices) == noErr else { return [] }
+        return devices
+    }
+
+    nonisolated private static func hasInput(_ device: AudioDeviceID) -> Bool {
+        var address = AudioObjectPropertyAddress(
+            mSelector: kAudioDevicePropertyStreams,
+            mScope: kAudioObjectPropertyScopeInput,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        var size = UInt32(0)
+        return AudioObjectGetPropertyDataSize(device, &address, 0, nil, &size) == noErr && size > 0
+    }
+
+    nonisolated private static func transportType(of device: AudioDeviceID) -> UInt32 {
+        var transport = UInt32(0)
+        var size = UInt32(MemoryLayout<UInt32>.size)
+        var address = address(kAudioDevicePropertyTransportType)
+        AudioObjectGetPropertyData(device, &address, 0, nil, &size, &transport)
+        return transport
     }
 
     nonisolated static func address(_ selector: AudioObjectPropertySelector) -> AudioObjectPropertyAddress {

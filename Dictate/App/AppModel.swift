@@ -5,7 +5,7 @@ import Observation
 @Observable
 final class AppModel {
     let settings: AppSettings
-    let recorder = AudioRecorder()
+    let recorder: AudioRecorder
     let transcriber: SwitchableTranscriber
     let controller: DictationController
     let indicator: RecordingIndicator
@@ -33,6 +33,7 @@ final class AppModel {
     init() {
         let settings = AppSettings()
         self.settings = settings
+        recorder = AudioRecorder(avoidBluetoothInput: { settings.builtInMicWithBluetooth })
         let transcriber = SwitchableTranscriber(engine: settings.transcriptionEngine)
         self.transcriber = transcriber
         let locator = locator
