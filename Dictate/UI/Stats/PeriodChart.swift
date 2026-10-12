@@ -43,7 +43,11 @@ struct PeriodChart<Marks: ChartContent>: View {
         .chartXScale(domain: series.start...series.end)
         .chartXAxis {
             AxisMarks(values: axisDates) {
-                AxisValueLabel(format: series.period.axisFormat)
+                // A date label hangs to the right of its tick by default, as
+                // on a time axis; a label that names a column sits under its middle.
+                // A date label hangs to the right of its tick, as on a time
+                // axis; a label that names a column is centred between two ticks.
+                AxisValueLabel(format: series.period.axisFormat, centered: series.period.namesColumns)
                     .font(.caption2)
                     .foregroundStyle(Color.secondary)
             }
@@ -67,14 +71,15 @@ struct PeriodChart<Marks: ChartContent>: View {
         }
     }
 
-    /// Where a date goes under the columns. A week or a year names every
-    /// column, so the label sits under its middle; the day, the month and
-    /// the six months mark a scale, so the label sits at the tick.
+    /// Where the ticks go. A week or a year names every column, so the ticks
+    /// bound the columns, the end included, and the label is centred between
+    /// two of them; the day, the month and the six months mark a scale, so
+    /// the label sits at its tick.
     private var axisDates: [Date] {
         let starts = series.buckets.map(\.date)
         switch series.period {
         case .day: return stride(from: 0, to: starts.count, by: 6).map { starts[$0] }
-        case .week, .year: return series.buckets.map(\.midpoint)
+        case .week, .year: return starts + [series.end]
         case .month: return stride(from: 0, to: starts.count, by: 7).map { starts[$0] }
         case .sixMonths:
             let calendar = Calendar.current
@@ -113,6 +118,14 @@ private struct Lollipop: View {
 /// How the dates read under each period. The seven columns of a week are
 /// wide enough for "lun."; the twelve of a year only for an initial.
 private extension StatsPeriod {
+    /// True when every column gets its own label, under its middle.
+    var namesColumns: Bool {
+        switch self {
+        case .week, .year: true
+        case .day, .month, .sixMonths: false
+        }
+    }
+
     var axisFormat: Date.FormatStyle {
         switch self {
         case .day: .dateTime.hour()
