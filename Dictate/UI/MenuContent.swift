@@ -24,7 +24,6 @@ struct MenuContent: View {
         Button("Réglages…") { open { openSettings() } }
             .keyboardShortcut(",")
         Divider()
-        Button("Désinstaller Dictate…") { Uninstaller().confirmAndRun() }
         Button("Quitter Dictate") { NSApplication.shared.terminate(nil) }
             .keyboardShortcut("q")
     }

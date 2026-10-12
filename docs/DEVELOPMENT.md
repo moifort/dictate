@@ -32,8 +32,8 @@ has been downloaded by the app.
 ## Updates
 
 Dictate checks GitHub releases shortly after launch and every six hours. A
-newer release is installed automatically (Settings → "Installer les mises à
-jour automatiquement", on by default) or offered in the menu. The downloaded
+newer release is installed automatically (Settings → Général → "Installer les nouvelles versions
+automatiquement", on by default) or offered in the menu. The downloaded
 bundle is verified with `codesign` — same identifier, and same Team ID when the
 running copy is signed with a real certificate — before it replaces the
 installed one and the app relaunches. Copies run from a build folder never
@@ -86,7 +86,7 @@ The last page has a scratch field to try a dictation end to end.
 |---|---|
 | `fn` held / released | `FnKeyMonitor` → `FnKeyGesture` |
 | Microphone → 16 kHz mono | `AudioRecorder` |
-| Local transcription | `SwitchableTranscriber`, routing to the engine picked in Settings → Transcription: `WhisperKitTranscriber` (large-v3 turbo, default) or `ParakeetTranscriber` (Parakeet TDT Ultra through FluidAudio, faster, 25 European languages, no vocabulary prompt). Only the active engine's model stays in memory. |
+| Local transcription | `SwitchableTranscriber`, routing to the engine picked in Settings → Dictée: `WhisperKitTranscriber` (large-v3 turbo, default) or `ParakeetTranscriber` (Parakeet TDT Ultra through FluidAudio, faster, 25 European languages, no vocabulary prompt). Only the active engine's model stays in memory. |
 | Cleanup | `ClaudeCLIEnhancer`: one pre-warmed `claude -p --model haiku` process per dictation |
 | Insertion | `FocusInspector` + `TextInserter` (paste then restore the pasteboard, or pasteboard only when no field has focus) |
 | Orchestration | `DictationController` |

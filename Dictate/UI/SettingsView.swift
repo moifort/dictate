@@ -1,167 +1,159 @@
 import SwiftUI
 
+/// Classic macOS preferences: icon tabs in the toolbar, labels in the left
+/// column. From what every user touches to what most never will: the
+/// dictation itself, the Claude pass, then the app's housekeeping.
 struct SettingsView: View {
     @Bindable var model: AppModel
-    @State private var launchAtLogin = false
-    @Environment(\.openWindow) private var openWindow
+
+    var body: some View {
+        TabView {
+            Tab("Dictée", systemImage: "mic") {
+                DictationSettings(model: model)
+            }
+            Tab("Claude", systemImage: "sparkles") {
+                ClaudeSettings(model: model)
+            }
+            Tab("Général", systemImage: "gearshape") {
+                GeneralSettings(model: model)
+            }
+        }
+        .frame(width: 560)
+    }
+}
+
+/// Language, engine and lexicon: everything that shapes the raw transcription.
+private struct DictationSettings: View {
+    @Bindable var model: AppModel
 
     var body: some View {
         Form {
-            Section {
-                LanguagePicker(model: model)
-            } header: {
-                Text("Langue")
-            } footer: {
-                Text("Langue annoncée au moteur de transcription et à Claude. Les termes techniques anglais sont reconnus quelle que soit la langue.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+            LanguagePicker(model: model, label: "Langue :")
 
-            Section {
-                Picker("Moteur", selection: Bindable(model.settings).transcriptionEngine) {
-                    ForEach(TranscriptionEngine.allCases) { engine in
-                        Text(engine.displayName).tag(engine)
+            LabeledContent("Moteur :") {
+                VStack(alignment: .leading, spacing: 6) {
+                    Picker("Moteur", selection: Bindable(model.settings).transcriptionEngine) {
+                        ForEach(TranscriptionEngine.allCases) { engine in
+                            Text(engine.displayName).tag(engine)
+                        }
                     }
-                }
-                .pickerStyle(.segmented)
-                .onChange(of: model.settings.transcriptionEngine) { model.transcriptionEngineChanged() }
-                if !model.settings.transcriptionEngine.supports(language: model.settings.language) {
-                    Text("Parakeet ne connaît pas le \(DictationLanguage.name(of: model.settings.language)) : choisissez Whisper pour cette langue.")
-                        .font(.caption)
+                    .labelsHidden()
+                    .pickerStyle(.segmented)
+                    .onChange(of: model.settings.transcriptionEngine) { model.transcriptionEngineChanged() }
+                    Hint(engineHint)
+                    if !model.settings.transcriptionEngine.supports(language: model.settings.language) {
+                        Label(
+                            "Parakeet ne gère pas le \(DictationLanguage.name(of: model.settings.language)) : choisissez Whisper.",
+                            systemImage: "exclamationmark.triangle.fill"
+                        )
+                        .font(.callout)
                         .foregroundStyle(.orange)
-                }
-            } header: {
-                Text("Transcription")
-            } footer: {
-                Text(transcriptionFooter)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section("Amélioration") {
-                Toggle("Nettoyer le texte avec Claude (Haiku)", isOn: Bindable(model.settings).enhancementEnabled)
-                    .onChange(of: model.settings.enhancementEnabled) { model.settingsChanged() }
-                Toggle(isOn: Bindable(model.settings).shareFieldContext) {
-                    Text("Envoyer à Claude le texte qui précède le curseur")
-                    Text("Les 500 derniers caractères du champ, pour orthographier les noms comme vous et garder le ton. Jamais les mots de passe.")
-                }
-                .disabled(!model.settings.enhancementEnabled)
-                claudeCLIRow
-            }
-
-            Section {
-                TextEditor(text: Bindable(model.settings).vocabularyText)
-                    .font(.body.monospaced())
-                    .frame(minHeight: 160)
-                    .onChange(of: model.settings.vocabularyText) { model.settingsChanged() }
-                // Shown as on when Claude is off: Whisper then always gets the vocabulary.
-                // Parakeet has no prompt: shown as off.
-                Toggle("Guider aussi Whisper avec ce vocabulaire", isOn: Binding(
-                    get: {
-                        model.settings.transcriptionEngine.acceptsVocabulary
-                            && (model.settings.guideWhisperWithVocabulary || !model.settings.enhancementEnabled)
-                    },
-                    set: { model.settings.guideWhisperWithVocabulary = $0 }
-                ))
-                .disabled(!model.settings.enhancementEnabled || !model.settings.transcriptionEngine.acceptsVocabulary)
-            } header: {
-                Text("Vocabulaire")
-            } footer: {
-                Text("""
-                    Un terme par ligne, utilisé par Claude pour orthographier correctement votre jargon. \
-                    Le donner aussi à Whisper le rend plus précis mais ajoute environ 2 s par dictée ; \
-                    c'est toujours le cas quand Claude est désactivé.
-                    """)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-
-            Section("Mises à jour") {
-                Toggle("Installer les mises à jour automatiquement", isOn: Bindable(model.settings).autoUpdate)
-                LabeledContent("Version \(model.updater.currentVersion)") {
-                    HStack {
-                        if let release = model.updater.available {
-                            Button("Installer \(release.version)") { open { openWindow(id: "update") } }
-                        } else {
-                            Button("Rechercher") { Task { await model.updater.check() } }
-                                .disabled(model.updater.isBusy)
-                        }
-                        if model.updater.state == .checking {
-                            ProgressView().controlSize(.small)
-                        } else if let lastCheck = model.updater.lastCheck, model.updater.available == nil {
-                            Text("À jour, vérifié \(lastCheck.formatted(.relative(presentation: .named)))")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
                     }
                 }
             }
 
-            Section("Général") {
-                Toggle("Lancer Dictate à l'ouverture de session", isOn: $launchAtLogin)
-                    .onChange(of: launchAtLogin) {
-                        model.settings.launchAtLogin = launchAtLogin
-                        // Registration can be refused: show what macOS actually did.
-                        launchAtLogin = model.settings.launchAtLogin
+            Divider()
+
+            LabeledContent("Lexique :") {
+                VStack(alignment: .leading, spacing: 6) {
+                    TextEditor(text: Bindable(model.settings).vocabularyText)
+                        .font(.body.monospaced())
+                        .frame(height: 120)
+                        .overlay(RoundedRectangle(cornerRadius: 6).stroke(.separator))
+                        .onChange(of: model.settings.vocabularyText) { model.settingsChanged() }
+                    Hint("Un terme par ligne : noms, outils, sigles. Claude les écrit exactement ainsi, quel que soit le moteur.")
+                    if model.settings.transcriptionEngine.acceptsVocabulary {
+                        // Shown as on when Claude is off: Whisper then always gets the lexicon.
+                        Toggle("Le donner aussi à Whisper", isOn: Binding(
+                            get: { model.settings.guideWhisperWithVocabulary || !model.settings.enhancementEnabled },
+                            set: { model.settings.guideWhisperWithVocabulary = $0 }
+                        ))
+                        .disabled(!model.settings.enhancementEnabled)
+                        Hint(whisperLexiconHint)
                     }
+                }
             }
         }
-        .formStyle(.grouped)
-        .frame(width: 480)
-        .onAppear { launchAtLogin = model.settings.launchAtLogin }
+        .formStyle(.columns)
+        .padding(20)
     }
 
-    private var transcriptionFooter: String {
+    private var engineHint: String {
         switch model.settings.transcriptionEngine {
         case .whisper:
-            "Whisper large-v3 turbo : toutes les langues, guidé par votre vocabulaire. Environ 1,5 s par dictée sur un M1 Pro, 3,5 s avec le vocabulaire."
+            "Toutes les langues, environ 1,5 s par dictée."
         case .parakeet:
-            "Parakeet : plusieurs fois plus rapide, 25 langues européennes. Il ne lit pas le vocabulaire : Claude seul corrige votre jargon. Premier usage : téléchargement d'environ 610 Mo."
+            "Plusieurs fois plus rapide, 25 langues européennes. Ignore le lexique : seul Claude l'applique. 610 Mo à télécharger au premier usage."
         }
     }
 
-    /// Status, short path and actions of the `claude` CLI on a single row.
-    private var claudeCLIRow: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            LabeledContent {
-                HStack {
-                    Button("Tester") { Task { await model.testClaude() } }
-                        .disabled(model.claudeCLIPath == nil)
-                    Button("Choisir…", action: chooseClaudeCLI)
+    private var whisperLexiconHint: String {
+        if !model.settings.enhancementEnabled {
+            return "Toujours actif tant que Claude est désactivé : Whisper est alors seul à connaître votre jargon."
+        }
+        return "Plus précis sur le jargon, mais environ 2 s de plus par dictée."
+    }
+}
+
+/// The pass that turns the raw transcription into clean text.
+private struct ClaudeSettings: View {
+    @Bindable var model: AppModel
+
+    var body: some View {
+        Form {
+            LabeledContent("Relecture :") {
+                VStack(alignment: .leading, spacing: 6) {
+                    Toggle("Relire le texte avec Claude", isOn: Bindable(model.settings).enhancementEnabled)
+                        .onChange(of: model.settings.enhancementEnabled) { model.settingsChanged() }
+                    Hint("Ponctuation, hésitations retirées, lexique appliqué. Passe par votre compte Claude Code, avec le modèle Haiku.")
+                    Toggle("Lui montrer ce qui précède le curseur", isOn: Bindable(model.settings).shareFieldContext)
+                        .disabled(!model.settings.enhancementEnabled)
+                    Hint("Les 500 derniers caractères du champ, pour reprendre vos noms et votre ton. Jamais dans un champ de mot de passe.")
                 }
-            } label: {
-                HStack(spacing: 8) {
-                    claudeCLIStatusIcon
-                    VStack(alignment: .leading, spacing: 2) {
+            }
+
+            Divider()
+
+            LabeledContent("Programme claude :") {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 8) {
+                        claudeCLIStatusIcon
                         Text(claudeCLITitle)
-                        if let path = model.claudeCLIPath {
-                            Text(model.claudeCLIDisplayPath(path))
-                                .font(.caption.monospaced())
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                                .truncationMode(.middle)
-                                .help(path.path)
-                        }
+                        Spacer()
+                        Button("Tester") { Task { await model.testClaude() } }
+                            .disabled(model.claudeCLIPath == nil)
+                        Button("Choisir…", action: chooseClaudeCLI)
                     }
+                    if let path = model.claudeCLIPath {
+                        Text(model.claudeCLIDisplayPath(path))
+                            .font(.caption.monospaced())
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                            .help(path.path)
+                    }
+                    if overrideIgnored {
+                        Text("Le fichier choisi n'est pas exécutable : détection automatique utilisée.")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                    }
+                    if !model.settings.cliPathOverride.isEmpty {
+                        Button("Revenir à la détection automatique") {
+                            model.settings.cliPathOverride = ""
+                            model.settingsChanged()
+                        }
+                        .buttonStyle(.link)
+                        .font(.caption)
+                    }
+                    if let result = model.claudeTestResult {
+                        Text(result).font(.caption).foregroundStyle(.secondary)
+                    }
+                    Hint("Détecté dans l'application Claude ou dans votre installation de Claude Code.")
                 }
-            }
-            if overrideIgnored {
-                Text("Le fichier choisi n'est pas exécutable : détection automatique utilisée.")
-                    .font(.caption)
-                    .foregroundStyle(.orange)
-            }
-            if !model.settings.cliPathOverride.isEmpty {
-                Button("Revenir à la détection automatique") {
-                    model.settings.cliPathOverride = ""
-                    model.settingsChanged()
-                }
-                .buttonStyle(.link)
-                .font(.caption)
-            }
-            if let result = model.claudeTestResult {
-                Text(result).font(.caption).foregroundStyle(.secondary)
             }
         }
+        .formStyle(.columns)
+        .padding(20)
     }
 
     @ViewBuilder
@@ -176,9 +168,9 @@ struct SettingsView: View {
     }
 
     private var claudeCLITitle: String {
-        if model.claudeCLIPath == nil { return "CLI claude introuvable" }
-        if let version = model.claudeCLIVersion { return "CLI claude \(version)" }
-        return model.isProbingClaudeCLI ? "CLI claude" : "CLI claude : ne répond pas"
+        if model.claudeCLIPath == nil { return "Introuvable" }
+        if let version = model.claudeCLIVersion { return "Version \(version)" }
+        return model.isProbingClaudeCLI ? "Vérification…" : "Ne répond pas"
     }
 
     private var overrideIgnored: Bool {
@@ -202,10 +194,80 @@ struct SettingsView: View {
         model.settings.cliPathOverride = url.path
         model.settingsChanged()
     }
+}
 
-    /// An accessory app must be activated for its windows to come forward.
-    private func open(_ action: () -> Void) {
-        NSApp.activate()
-        action()
+/// Launch at login, updates and the way out.
+private struct GeneralSettings: View {
+    @Bindable var model: AppModel
+    @State private var launchAtLogin = false
+    @Environment(\.openWindow) private var openWindow
+
+    var body: some View {
+        Form {
+            LabeledContent("Démarrage :") {
+                Toggle("Ouvrir Dictate à l'ouverture de session", isOn: $launchAtLogin)
+                    .onChange(of: launchAtLogin) {
+                        model.settings.launchAtLogin = launchAtLogin
+                        // Registration can be refused: show what macOS actually did.
+                        launchAtLogin = model.settings.launchAtLogin
+                    }
+            }
+
+            Divider()
+
+            LabeledContent("Mises à jour :") {
+                VStack(alignment: .leading, spacing: 6) {
+                    Toggle("Installer les nouvelles versions automatiquement", isOn: Bindable(model.settings).autoUpdate)
+                    Hint("Vérifiées au lancement, puis toutes les six heures.")
+                }
+            }
+
+            LabeledContent("Version \(model.updater.currentVersion) :") {
+                HStack {
+                    if let release = model.updater.available {
+                        Button("Installer \(release.version)…") {
+                            NSApp.activate()
+                            openWindow(id: "update")
+                        }
+                    } else {
+                        Button("Rechercher") { Task { await model.updater.check() } }
+                            .disabled(model.updater.isBusy)
+                    }
+                    if model.updater.state == .checking {
+                        ProgressView().controlSize(.small)
+                    } else if let lastCheck = model.updater.lastCheck, model.updater.available == nil {
+                        Text("À jour, vérifié \(lastCheck.formatted(.relative(presentation: .named)))")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+
+            Divider()
+
+            LabeledContent("Désinstallation :") {
+                VStack(alignment: .leading, spacing: 6) {
+                    Button("Désinstaller Dictate…") { Uninstaller().confirmAndRun() }
+                    Hint("Place l'application, les modèles et les statistiques dans la Corbeille, efface les réglages et quitte.")
+                }
+            }
+        }
+        .formStyle(.columns)
+        .padding(20)
+        .onAppear { launchAtLogin = model.settings.launchAtLogin }
+    }
+}
+
+/// The small grey explanation under a control.
+private struct Hint: View {
+    let text: String
+
+    init(_ text: String) { self.text = text }
+
+    var body: some View {
+        Text(text)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }

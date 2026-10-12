@@ -3,9 +3,10 @@ import SwiftUI
 /// Picks the dictation language; shared by the onboarding and the settings.
 struct LanguagePicker: View {
     @Bindable var model: AppModel
+    var label = "Langue"
 
     var body: some View {
-        Picker("Langue", selection: Bindable(model.settings).language) {
+        Picker(label, selection: Bindable(model.settings).language) {
             ForEach(DictationLanguage.pickerCodes, id: \.self) { code in
                 Text(DictationLanguage.name(of: code).localizedCapitalized).tag(code)
             }
