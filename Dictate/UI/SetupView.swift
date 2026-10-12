@@ -584,6 +584,14 @@ private struct TryItPage: View {
                 .font(.callout)
                 .id(statusKey)
                 .transition(.blurReplace)
+
+            VStack(spacing: 4) {
+                LaunchAtLoginToggle("Ouvrir Dictate à l'ouverture de session", settings: model.settings)
+                Text("La touche de dictée répond dès que le Mac démarre.")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(.top, 6)
         }
         .animation(.snappy, value: statusKey)
         .animation(.snappy, value: model.setup.isComplete)

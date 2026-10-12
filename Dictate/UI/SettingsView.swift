@@ -206,19 +206,13 @@ private struct LexiconSettings: View {
 /// Launch at login, updates and the way out, on a single label.
 private struct GeneralSettings: View {
     @Bindable var model: AppModel
-    @State private var launchAtLogin = false
     @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         Form {
             LabeledContent("Application :") {
                 VStack(alignment: .leading, spacing: 8) {
-                    Toggle("Ouvrir à l'ouverture de session", isOn: $launchAtLogin)
-                        .onChange(of: launchAtLogin) {
-                            model.settings.launchAtLogin = launchAtLogin
-                            // Registration can be refused: show what macOS actually did.
-                            launchAtLogin = model.settings.launchAtLogin
-                        }
+                    LaunchAtLoginToggle(settings: model.settings)
                     Toggle("Installer les mises à jour automatiquement", isOn: Bindable(model.settings).autoUpdate)
                     HStack {
                         Text("Version \(model.updater.currentVersion)")
@@ -245,7 +239,6 @@ private struct GeneralSettings: View {
         }
         .formStyle(.columns)
         .padding(20)
-        .onAppear { launchAtLogin = model.settings.launchAtLogin }
     }
 }
 
