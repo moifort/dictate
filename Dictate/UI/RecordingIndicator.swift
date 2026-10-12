@@ -182,11 +182,8 @@ private struct IndicatorView: View {
         case .hidden:
             Color.clear.frame(width: 30)
         case .recording:
-            HStack(spacing: 10) {
-                PulsingDot()
-                LevelBars(level: CGFloat(recorder.level))
-            }
-            .id("recording")
+            LevelWaves(level: CGFloat(recorder.level))
+                .id("recording")
         case .processing:
             Spinner().id("processing")
         case .flash(.copied):
@@ -213,28 +210,6 @@ private struct BouncingSymbol: View {
     }
 }
 
-/// Red recording dot with a soft expanding ring.
-private struct PulsingDot: View {
-    @State private var pulsing = false
-
-    var body: some View {
-        Circle()
-            .fill(.red)
-            .frame(width: 7, height: 7)
-            .overlay {
-                Circle()
-                    .stroke(.red.opacity(0.7), lineWidth: 1.5)
-                    .scaleEffect(pulsing ? 2.4 : 1)
-                    .opacity(pulsing ? 0 : 1)
-            }
-            .onAppear {
-                withAnimation(.easeOut(duration: 1.2).repeatForever(autoreverses: false)) {
-                    pulsing = true
-                }
-            }
-    }
-}
-
 /// Rotating arc shown while Claude corrects the text.
 private struct Spinner: View {
     @State private var rotation: Angle = .zero
@@ -253,25 +228,93 @@ private struct Spinner: View {
     }
 }
 
-/// Thin white bars following the microphone level, each with its own slight
-/// sway so they never move as one block.
-private struct LevelBars: View {
+/// Three overlapping waves in the colours of the app icon, swelling with the
+/// microphone level: each one travels at its own pace over a soft glow, so
+/// they never move as one block.
+private struct LevelWaves: View {
     let level: CGFloat
-    private let weights: [CGFloat] = [0.5, 0.75, 0.9, 1, 0.9, 0.75, 0.5]
+
+    private struct Wave {
+        let colors: [Color]
+        /// Full periods across the width.
+        let frequency: Double
+        /// Radians per second; the sign sets the travel direction.
+        let speed: Double
+        let phase: Double
+        let weight: CGFloat
+    }
+
+    /// Drawn in order, so the magenta wave sits on top like in the icon.
+    private static let waves = [
+        Wave(
+            colors: [Color(red: 0.08, green: 0.82, blue: 0.8), Color(red: 0.55, green: 0.96, blue: 0.92)],
+            frequency: 2.0, speed: 6.6, phase: 2.6, weight: 0.6
+        ),
+        Wave(
+            colors: [Color(red: 0.1, green: 0.42, blue: 0.95), Color(red: 0.5, green: 0.7, blue: 1)],
+            frequency: 1.5, speed: -4.3, phase: 1.3, weight: 0.8
+        ),
+        Wave(
+            colors: [Color(red: 0.93, green: 0.09, blue: 0.78), Color(red: 1, green: 0.5, blue: 0.88)],
+            frequency: 1.0, speed: 5.5, phase: 0, weight: 1
+        ),
+    ]
 
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1 / 30)) { context in
+        TimelineView(.animation(minimumInterval: 1 / 60)) { context in
             let time = context.date.timeIntervalSinceReferenceDate
-            HStack(alignment: .center, spacing: 3) {
-                ForEach(weights.indices, id: \.self) { index in
-                    let sway = 0.8 + 0.2 * sin(time * 11 + Double(index) * 1.7)
-                    Capsule()
-                        .fill(.white)
-                        .frame(width: 2, height: 3 + 23 * min(1, level * weights[index] * sway))
+            ZStack {
+                ForEach(Self.waves.indices, id: \.self) { index in
+                    let wave = Self.waves[index]
+                    let amplitude = 1 + 11 * min(1, level * wave.weight)
+                    let gradient = LinearGradient(
+                        colors: [wave.colors[0], wave.colors[1], wave.colors[0]],
+                        startPoint: .leading, endPoint: .trailing
+                    )
+                    WaveShape(amplitude: amplitude, frequency: wave.frequency, phase: wave.phase + time * wave.speed, closed: true)
+                        .fill(gradient)
+                        .opacity(0.35)
+                        .blur(radius: 3)
+                    WaveShape(amplitude: amplitude, frequency: wave.frequency, phase: wave.phase + time * wave.speed, closed: false)
+                        .stroke(gradient, style: StrokeStyle(lineWidth: 1.2, lineCap: .round, lineJoin: .round))
                 }
             }
+            .animation(.interactiveSpring(response: 0.1, dampingFraction: 0.7), value: level)
         }
-        .frame(height: 26)
-        .animation(.interactiveSpring(response: 0.1, dampingFraction: 0.7), value: level)
+        .frame(width: 72, height: 26)
+    }
+}
+
+/// One sine wave across the frame, flat at both ends and widest in the middle
+/// like the icon. Only the amplitude animates: the phase jumps with each frame.
+nonisolated private struct WaveShape: Shape {
+    var amplitude: CGFloat
+    let frequency: Double
+    let phase: Double
+    /// Closes the wave back along the midline, for the glow under the stroke.
+    let closed: Bool
+
+    var animatableData: CGFloat {
+        get { amplitude }
+        set { amplitude = newValue }
+    }
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let midY = rect.midY
+        let steps = Int(rect.width)
+        for step in 0...steps {
+            let u = Double(step) / Double(steps)
+            let envelope = pow(4 * u * (1 - u), 1.5)
+            let y = midY - amplitude * envelope * sin(2 * .pi * frequency * u + phase)
+            let point = CGPoint(x: rect.minX + u * rect.width, y: y)
+            if step == 0 { path.move(to: point) } else { path.addLine(to: point) }
+        }
+        if closed {
+            path.addLine(to: CGPoint(x: rect.maxX, y: midY))
+            path.addLine(to: CGPoint(x: rect.minX, y: midY))
+            path.closeSubpath()
+        }
+        return path
     }
 }
