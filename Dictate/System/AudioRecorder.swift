@@ -10,6 +10,12 @@ final class AudioRecorder: AudioRecording {
 
     @ObservationIgnored private var engine = AVAudioEngine()
     @ObservationIgnored private var tap: TapProcessor?
+    @ObservationIgnored private var isRecording = false
+    /// Configured ahead of time while another app holds the mic: enabling voice
+    /// processing takes most of a second, which would cut the first words.
+    @ObservationIgnored private var voiceEngine: AVAudioEngine?
+    @ObservationIgnored private var isWarmingVoiceEngine = false
+    @ObservationIgnored private var inputMonitor: InputDeviceMonitor?
 
     enum RecorderError: LocalizedError {
         case noInputDevice
@@ -17,16 +23,24 @@ final class AudioRecorder: AudioRecording {
         var errorDescription: String? { "Aucun micro disponible." }
     }
 
+    init() {
+        inputMonitor = InputDeviceMonitor { [weak self] deviceChanged in
+            self?.inputDeviceChanged(deviceChanged: deviceChanged)
+        }
+        inputDeviceChanged(deviceChanged: false)
+    }
+
     func start() throws {
-        // Voice processing is only toggled on a stopped engine, so build a fresh one each time.
-        engine = AVAudioEngine()
         if Self.isInputInUseElsewhere() {
             // An app holding the mic with voice processing (Safari WebRTC, FaceTime…)
             // mutes it for everyone else; only a voice-processed stream still hears the user.
-            Log.dictation.info("microphone in use by another app: enabling voice processing")
-            engine.inputNode.voiceProcessingOtherAudioDuckingConfiguration =
-                .init(enableAdvancedDucking: false, duckingLevel: .min)
-            try engine.inputNode.setVoiceProcessingEnabled(true)
+            if voiceEngine == nil {
+                Log.dictation.info("voice-processing engine not ready: configuring it now")
+                voiceEngine = try Self.makeVoiceEngine()
+            }
+            engine = voiceEngine!
+        } else {
+            engine = AVAudioEngine()
         }
         let input = engine.inputNode
         let format = input.outputFormat(forBus: 0)
@@ -45,34 +59,145 @@ final class AudioRecorder: AudioRecording {
             tap = nil
             throw error
         }
+        isRecording = true
     }
 
     func stop() -> [Float] {
         engine.inputNode.removeTap(onBus: 0)
         engine.stop()
+        isRecording = false
         level = 0
-        defer { tap = nil }
+        defer {
+            tap = nil
+            inputDeviceChanged(deviceChanged: false)
+        }
         return tap?.drain() ?? []
     }
 
-    /// Whether another process is already capturing from the default input device.
+    private func inputDeviceChanged(deviceChanged: Bool) {
+        // A voice-processing engine stays bound to the device it was configured on.
+        if deviceChanged { voiceEngine = nil }
+        // Our own capture marks the device as running: decide again once it stops.
+        guard !isRecording else { return }
+        if Self.isInputInUseElsewhere() {
+            warmVoiceEngine()
+        } else if voiceEngine != nil {
+            Log.dictation.info("microphone released by the other app: dropping the voice-processing engine")
+            voiceEngine = nil
+        }
+    }
+
+    private func warmVoiceEngine() {
+        guard voiceEngine == nil, !isWarmingVoiceEngine else { return }
+        isWarmingVoiceEngine = true
+        Log.dictation.info("microphone in use by another app: preparing a voice-processing engine")
+        Task {
+            let engine = await Task.detached(priority: .userInitiated) { try? Self.makeVoiceEngine() }.value
+            isWarmingVoiceEngine = false
+            if voiceEngine == nil { voiceEngine = engine }
+            inputDeviceChanged(deviceChanged: false)
+        }
+    }
+
+    nonisolated private static func makeVoiceEngine() throws -> AVAudioEngine {
+        let engine = AVAudioEngine()
+        engine.inputNode.voiceProcessingOtherAudioDuckingConfiguration =
+            .init(enableAdvancedDucking: false, duckingLevel: .min)
+        try engine.inputNode.setVoiceProcessingEnabled(true)
+        return engine
+    }
+
+    /// Whether another process is capturing audio input. Asked per process: the
+    /// device-wide running flag counts our own capture, and lags for a moment after it stops.
     private static func isInputInUseElsewhere() -> Bool {
+        let system = AudioObjectID(kAudioObjectSystemObject)
+        var address = InputDeviceMonitor.address(kAudioHardwarePropertyProcessObjectList)
+        var size = UInt32(0)
+        guard AudioObjectGetPropertyDataSize(system, &address, 0, nil, &size) == noErr else { return false }
+        var processes = [AudioObjectID](repeating: 0, count: Int(size) / MemoryLayout<AudioObjectID>.size)
+        guard AudioObjectGetPropertyData(system, &address, 0, nil, &size, &processes) == noErr else { return false }
+
+        let ownPID = getpid()
+        return processes.contains { process in
+            var pid = pid_t(0)
+            var pidSize = UInt32(MemoryLayout<pid_t>.size)
+            var pidAddress = InputDeviceMonitor.address(kAudioProcessPropertyPID)
+            guard AudioObjectGetPropertyData(process, &pidAddress, 0, nil, &pidSize, &pid) == noErr, pid != ownPID else {
+                return false
+            }
+            var running = UInt32(0)
+            var runningSize = UInt32(MemoryLayout<UInt32>.size)
+            var runningAddress = InputDeviceMonitor.address(kAudioProcessPropertyIsRunningInput)
+            return AudioObjectGetPropertyData(process, &runningAddress, 0, nil, &runningSize, &running) == noErr && running != 0
+        }
+    }
+}
+
+/// Reports, on the main queue, when the default input device changes or another
+/// process starts or stops using it.
+final class InputDeviceMonitor {
+    private let onChange: (_ deviceChanged: Bool) -> Void
+    private var device: AudioDeviceID?
+    private var defaultDeviceListener: AudioObjectPropertyListenerBlock?
+    private var runningListener: AudioObjectPropertyListenerBlock?
+
+    init(onChange: @escaping (_ deviceChanged: Bool) -> Void) {
+        self.onChange = onChange
+        var address = Self.address(kAudioHardwarePropertyDefaultInputDevice)
+        let listener: AudioObjectPropertyListenerBlock = { [weak self] _, _ in
+            MainActor.assumeIsolated {
+                self?.watchDefaultDevice()
+                self?.onChange(true)
+            }
+        }
+        AudioObjectAddPropertyListenerBlock(AudioObjectID(kAudioObjectSystemObject), &address, .main, listener)
+        defaultDeviceListener = listener
+        watchDefaultDevice()
+    }
+
+    isolated deinit {
+        if let defaultDeviceListener {
+            var address = Self.address(kAudioHardwarePropertyDefaultInputDevice)
+            AudioObjectRemovePropertyListenerBlock(AudioObjectID(kAudioObjectSystemObject), &address, .main, defaultDeviceListener)
+        }
+        unwatchDevice()
+    }
+
+    private func watchDefaultDevice() {
+        unwatchDevice()
+        guard let device = Self.defaultInputDevice() else { return }
+        var address = Self.address(kAudioDevicePropertyDeviceIsRunningSomewhere)
+        let listener: AudioObjectPropertyListenerBlock = { [weak self] _, _ in
+            MainActor.assumeIsolated { self?.onChange(false) }
+        }
+        AudioObjectAddPropertyListenerBlock(device, &address, .main, listener)
+        self.device = device
+        runningListener = listener
+    }
+
+    private func unwatchDevice() {
+        guard let device, let runningListener else { return }
+        var address = Self.address(kAudioDevicePropertyDeviceIsRunningSomewhere)
+        AudioObjectRemovePropertyListenerBlock(device, &address, .main, runningListener)
+        self.device = nil
+        self.runningListener = nil
+    }
+
+    nonisolated static func defaultInputDevice() -> AudioDeviceID? {
         var device = AudioDeviceID(0)
         var size = UInt32(MemoryLayout<AudioDeviceID>.size)
-        var address = AudioObjectPropertyAddress(
-            mSelector: kAudioHardwarePropertyDefaultInputDevice,
+        var address = address(kAudioHardwarePropertyDefaultInputDevice)
+        guard AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &size, &device) == noErr,
+              device != kAudioObjectUnknown else { return nil }
+        return device
+    }
+
+    nonisolated static func address(_ selector: AudioObjectPropertySelector) -> AudioObjectPropertyAddress {
+        AudioObjectPropertyAddress(
+            mSelector: selector,
             mScope: kAudioObjectPropertyScopeGlobal,
             mElement: kAudioObjectPropertyElementMain
         )
-        guard AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &size, &device) == noErr else {
-            return false
-        }
-
-        var running = UInt32(0)
-        size = UInt32(MemoryLayout<UInt32>.size)
-        address.mSelector = kAudioDevicePropertyDeviceIsRunningSomewhere
-        guard AudioObjectGetPropertyData(device, &address, 0, nil, &size, &running) == noErr else { return false }
-        return running != 0
     }
 }
 
