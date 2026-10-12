@@ -9,6 +9,8 @@ final class RecordingIndicator {
         /// No field had focus: the text waits in the pasteboard.
         case copied
         case failed
+        /// `fn` pressed before the engine's model is in memory.
+        case loading(TranscriptionEngine)
     }
 
     @Observable
@@ -23,7 +25,8 @@ final class RecordingIndicator {
     private var hideTask: Task<Void, Never>?
     private var visibilityTask: Task<Void, Never>?
 
-    private static let size = CGSize(width: 140, height: 56)
+    /// Wide enough for the loading message; the panel is transparent around the pill.
+    private static let size = CGSize(width: 260, height: 56)
     /// Long enough for the fade-out in `IndicatorView` to finish.
     private static let hideDelay: Duration = .milliseconds(450)
 
@@ -41,13 +44,15 @@ final class RecordingIndicator {
         let flash: Flash? = switch outcome {
         case .copied: .copied
         case .failed: .failed
+        case .modelLoading(let engine): .loading(engine)
         case .pasted, .discarded: nil
         }
         flashTask?.cancel()
         state.flash = flash
         guard flash != nil else { return }
         flashTask = Task {
-            try? await Task.sleep(for: .seconds(1.6))
+            // A sentence takes longer to read than a symbol.
+            try? await Task.sleep(for: .seconds(flash == .copied || flash == .failed ? 1.6 : 2.5))
             guard !Task.isCancelled else { return }
             state.flash = nil
         }
@@ -192,6 +197,14 @@ private struct IndicatorView: View {
         case .flash(.failed):
             BouncingSymbol(name: "exclamationmark.triangle.fill", color: .orange)
                 .id("failed")
+        case .flash(.loading(let engine)):
+            HStack(spacing: 8) {
+                Spinner()
+                Text("Chargement de \(engine.displayName)…")
+                    .font(.callout)
+                    .lineLimit(1)
+            }
+            .id("loading")
         }
     }
 }

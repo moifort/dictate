@@ -14,7 +14,8 @@ struct DictationControllerTests {
         editableFocus: Bool = true,
         enhancementEnabled: Bool = true,
         shareFieldContext: Bool = true,
-        engine: TranscriptionEngine = .whisper
+        engine: TranscriptionEngine = .whisper,
+        loadingEngine: TranscriptionEngine? = nil
     ) -> (DictationController, Fakes) {
         let fakes = Fakes(
             recorder: FakeRecorder(samples: samples ?? speech),
@@ -34,6 +35,7 @@ struct DictationControllerTests {
             enhancementEnabled: { enhancementEnabled },
             shareFieldContext: { shareFieldContext },
             transcriptionEngine: { engine },
+            loadingEngine: { loadingEngine },
             enhancementTimeout: .milliseconds(200)
         )
         return (controller, fakes)
@@ -50,6 +52,16 @@ struct DictationControllerTests {
         controller.handle(.pressed)
         #expect(controller.phase == .recording)
         #expect(fakes.recorder.isRecording)
+    }
+
+    @Test func pressWhileModelLoadsReportsItWithoutRecording() {
+        let (controller, fakes) = makeController(loadingEngine: .whisper)
+        controller.handle(.pressed)
+        #expect(controller.phase == .idle)
+        #expect(!fakes.recorder.isRecording)
+        #expect(controller.lastOutcome == .modelLoading(.whisper))
+        controller.handle(.released)
+        #expect(controller.phase == .idle)
     }
 
     @Test func fullDictationPastesEnhancedTextWithCategory() async {

@@ -19,6 +19,8 @@ enum DictationOutcome: Equatable {
     case copied(raw: Bool)
     /// Nothing worth inserting (silence, empty transcript).
     case discarded
+    /// `fn` pressed while the engine's model is still downloading or loading.
+    case modelLoading(TranscriptionEngine)
     case failed(String)
 }
 
@@ -42,6 +44,8 @@ final class DictationController {
     @ObservationIgnored private let shareFieldContext: () -> Bool
     /// The engine behind `transcriber`, for the statistics.
     @ObservationIgnored private let transcriptionEngine: () -> TranscriptionEngine
+    /// The engine whose model is not in memory yet, nil once dictation can start.
+    @ObservationIgnored private let loadingEngine: () -> TranscriptionEngine?
     @ObservationIgnored private let enhancementTimeout: Duration
     @ObservationIgnored private var context = DictationContext()
     @ObservationIgnored private var processing: Task<Void, Never>?
@@ -66,6 +70,7 @@ final class DictationController {
         enhancementEnabled: @escaping () -> Bool,
         shareFieldContext: @escaping () -> Bool,
         transcriptionEngine: @escaping () -> TranscriptionEngine = { .whisper },
+        loadingEngine: @escaping () -> TranscriptionEngine? = { nil },
         enhancementTimeout: Duration = .seconds(8)
     ) {
         self.recorder = recorder
@@ -78,6 +83,7 @@ final class DictationController {
         self.enhancementEnabled = enhancementEnabled
         self.shareFieldContext = shareFieldContext
         self.transcriptionEngine = transcriptionEngine
+        self.loadingEngine = loadingEngine
         self.enhancementTimeout = enhancementTimeout
     }
 
@@ -85,6 +91,8 @@ final class DictationController {
         switch gesture {
         case .pressed:
             guard phase == .idle else { return }
+            // Recording now would only stall on transcription: say why instead.
+            if let engine = loadingEngine() { return finish(.modelLoading(engine)) }
             context = DictationContext(
                 category: AppCategory(bundleID: focus.frontmostBundleID()),
                 appName: focus.frontmostAppName()

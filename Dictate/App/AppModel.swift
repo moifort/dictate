@@ -50,7 +50,11 @@ final class AppModel {
             language: { settings.language },
             enhancementEnabled: { settings.enhancementEnabled },
             shareFieldContext: { settings.shareFieldContext },
-            transcriptionEngine: { [transcriber] in transcriber.engine }
+            transcriptionEngine: { [transcriber] in transcriber.engine },
+            loadingEngine: { [transcriber] in
+                // A failed load is retried by the dictation itself.
+                transcriber.state.isBusy || transcriber.state == .notLoaded ? transcriber.engine : nil
+            }
         )
         indicator = RecordingIndicator(controller: controller, recorder: recorder)
         controller.onOutcome = { [weak self] outcome in self?.handle(outcome) }
