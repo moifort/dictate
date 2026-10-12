@@ -45,7 +45,9 @@ final class ParakeetTranscriber: ModelTranscriber {
                 }
             }
             state = .ready
+            ErrorReporter.breadcrumb("parakeet model ready", category: "transcriber")
         } catch {
+            ErrorReporter.capture(error, "parakeet model failed to load", category: "transcriber")
             state = .failed(error.localizedDescription)
         }
     }

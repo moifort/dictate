@@ -117,6 +117,7 @@ final class RecordingIndicator {
         )
         guard let screen = index.map({ screens[$0] }) ?? NSScreen.main else {
             Log.indicator.error("no screen to present on")
+            ErrorReporter.capture(message: "no screen to present the indicator on", category: "indicator")
             return
         }
         let visible = screen.visibleFrame

@@ -56,6 +56,7 @@ struct Uninstaller {
         NSWorkspace.shared.recycle(existing) { _, error in
             if let error {
                 Log.app.error("uninstall left files behind: \(error.localizedDescription, privacy: .public)")
+                ErrorReporter.capture(error, "uninstall left files behind", category: "uninstaller")
             }
             MainActor.assumeIsolated { NSApp.terminate(nil) }
         }

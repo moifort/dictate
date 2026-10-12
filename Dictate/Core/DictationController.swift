@@ -101,6 +101,7 @@ final class DictationController {
                 try recorder.start()
                 phase = .recording
             } catch {
+                ErrorReporter.capture(error, "microphone could not start", category: "recorder")
                 finish(.failed("Micro indisponible : \(error.localizedDescription)"))
             }
 
@@ -145,6 +146,7 @@ final class DictationController {
             transcription = clock.now - start
             Log.dictation.info("transcribed \(audio, format: .fixed(precision: 1)) s of audio in \(Self.milliseconds(transcription)) ms")
         } catch {
+            ErrorReporter.capture(error, "transcription with \(engine.rawValue) failed", category: "transcriber")
             return finish(.failed("Transcription impossible : \(error.localizedDescription)"))
         }
         guard !transcript.isEmpty else { return finish(.discarded) }
@@ -205,7 +207,17 @@ final class DictationController {
             work.cancel()
         }
         defer { timer.cancel() }
-        return try? await work.value.trimmingCharacters(in: .whitespacesAndNewlines)
+        do {
+            return try await work.value.trimmingCharacters(in: .whitespacesAndNewlines)
+        } catch is CancellationError {
+            Log.dictation.error("enhancement timed out")
+            ErrorReporter.capture(message: "enhancement timed out after \(enhancementTimeout)", category: "enhancer", level: .warning)
+            return nil
+        } catch {
+            Log.dictation.error("enhancement failed: \(error.localizedDescription, privacy: .public)")
+            ErrorReporter.capture(error, "enhancement failed, raw transcript inserted", category: "enhancer")
+            return nil
+        }
     }
 
     private func finish(_ outcome: DictationOutcome) {

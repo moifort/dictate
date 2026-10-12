@@ -49,7 +49,15 @@ final class ClaudeCLIEnhancer: Enhancer {
     /// Makes sure a process is ready for the next dictation.
     func prewarm() {
         guard warm?.isRunning != true else { return }
-        warm = try? spawn()
+        do {
+            warm = try spawn()
+        } catch ClaudeCLIError.notFound {
+            // Expected on a Mac without Claude Code: the setup says so.
+            warm = nil
+        } catch {
+            ErrorReporter.capture(error, "claude process could not be started ahead of time", category: "enhancer")
+            warm = nil
+        }
         scheduleRecycle()
     }
 

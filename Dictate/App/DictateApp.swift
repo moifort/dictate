@@ -49,7 +49,14 @@ struct DictateApp: App {
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    let model = AppModel()
+    let model: AppModel
+
+    override init() {
+        // Before the model: its setup already touches the microphone and the models.
+        ErrorReporter.start()
+        model = AppModel()
+        super.init()
+    }
 
     static var isRunningTests: Bool {
         ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil

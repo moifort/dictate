@@ -81,6 +81,18 @@ final class AppModel {
         startHotkey()
         pollSetupUntilComplete()
         updater.startPeriodicChecks { [settings] in settings.autoUpdate }
+        reportSettings()
+    }
+
+    /// The settings an error report needs to be understood.
+    private func reportSettings() {
+        ErrorReporter.setTags([
+            "engine": settings.transcriptionEngine.rawValue,
+            "push_to_talk": settings.pushToTalkKey.rawValue,
+            "language": settings.language,
+            "enhancement": settings.enhancementEnabled ? "on" : "off",
+            "claude_cli": claudeCLIPath == nil ? "missing" : "found",
+        ])
     }
 
     func refreshSetup() {
@@ -111,6 +123,7 @@ final class AppModel {
         transcriber.select(settings.transcriptionEngine)
         refreshSetup()
         pollSetupUntilComplete()
+        reportSettings()
     }
 
     /// Takes effect on the next press: no need to restart the event tap.
@@ -119,6 +132,7 @@ final class AppModel {
         Log.hotkey.info("push-to-talk key: \(self.settings.pushToTalkKey.rawValue, privacy: .public)")
         refreshSetup()
         pollSetupUntilComplete()
+        reportSettings()
     }
 
     /// The onboarding showed the detected language and the user agreed.
@@ -198,6 +212,7 @@ final class AppModel {
         refreshClaudeCLI()
         refreshSetup()
         pollSetupUntilComplete()
+        reportSettings()
         resetEnhancerTask?.cancel()
         resetEnhancerTask = Task {
             try? await Task.sleep(for: .seconds(2))
@@ -217,6 +232,7 @@ final class AppModel {
             let elapsed = (ContinuousClock.now - start).formatted(.units(allowed: [.seconds, .milliseconds], width: .narrow))
             claudeTestResult = "« \(result) » en \(elapsed)"
         } catch {
+            ErrorReporter.capture(error, "claude test from the settings failed", category: "enhancer")
             claudeTestResult = error.localizedDescription
         }
     }
@@ -232,6 +248,7 @@ final class AppModel {
 
     private func handle(_ outcome: DictationOutcome) {
         Log.dictation.info("outcome \(String(describing: outcome), privacy: .public)")
+        ErrorReporter.breadcrumb("outcome \(outcome)", category: "dictation")
         switch outcome {
         case .failed(let message):
             lastError = message

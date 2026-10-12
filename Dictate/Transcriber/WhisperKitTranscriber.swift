@@ -52,7 +52,9 @@ final class WhisperKitTranscriber: ModelTranscriber {
                 }
             }
             state = .ready
+            ErrorReporter.breadcrumb("whisper model ready", category: "transcriber")
         } catch {
+            ErrorReporter.capture(error, "whisper model failed to load", category: "transcriber")
             state = .failed(error.localizedDescription)
         }
     }
@@ -104,6 +106,7 @@ actor WhisperEngine {
             } catch {
                 // An interrupted download leaves partial folders behind: let the hub complete them.
                 Logging.debug("Local model failed to load, downloading again: \(error)")
+                ErrorReporter.capture(error, "local whisper model failed to load, downloading again", category: "transcriber", level: .warning)
             }
         }
         let folder = try await WhisperKit.download(variant: modelName, downloadBase: downloadBase) {

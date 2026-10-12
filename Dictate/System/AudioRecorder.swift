@@ -93,7 +93,15 @@ final class AudioRecorder: AudioRecording {
         isWarmingVoiceEngine = true
         Log.dictation.info("microphone in use by another app: preparing a voice-processing engine")
         Task {
-            let engine = await Task.detached(priority: .userInitiated) { try? Self.makeVoiceEngine() }.value
+            let engine = await Task.detached(priority: .userInitiated) { () -> AVAudioEngine? in
+                do {
+                    return try Self.makeVoiceEngine()
+                } catch {
+                    Log.dictation.error("voice-processing engine failed: \(error.localizedDescription, privacy: .public)")
+                    ErrorReporter.capture(error, "voice-processing engine could not be prepared", category: "recorder")
+                    return nil
+                }
+            }.value
             isWarmingVoiceEngine = false
             if voiceEngine == nil { voiceEngine = engine }
             inputDeviceChanged(deviceChanged: false)
@@ -124,6 +132,7 @@ final class AudioRecorder: AudioRecording {
             Log.dictation.info("default microphone is wireless: capturing from \(device.name, privacy: .public) instead")
         } else {
             Log.dictation.error("could not capture from \(device.name, privacy: .public): \(status)")
+            ErrorReporter.capture(message: "could not bind the input device, status \(status)", category: "recorder")
         }
     }
 

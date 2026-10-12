@@ -78,7 +78,11 @@ nonisolated struct UpdateInstaller: Sendable {
         do {
             try fileManager.moveItem(at: replacement, to: current)
         } catch {
-            try? fileManager.moveItem(at: backup, to: current)
+            do {
+                try fileManager.moveItem(at: backup, to: current)
+            } catch let restore {
+                ErrorReporter.capture(restore, "previous bundle could not be restored after a failed update", category: "updater", level: .fatal)
+            }
             throw error
         }
         try? fileManager.removeItem(at: backup)

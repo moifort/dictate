@@ -99,7 +99,12 @@ final class Updater {
     }
 
     static func relaunchAndQuit(_ bundle: URL) {
-        try? UpdateInstaller().relaunch(bundle)
+        do {
+            try UpdateInstaller().relaunch(bundle)
+        } catch {
+            Log.app.error("relaunch failed: \(error.localizedDescription, privacy: .public)")
+            ErrorReporter.capture(error, "updated app could not be relaunched", category: "updater")
+        }
         NSApp.terminate(nil)
     }
 
@@ -136,6 +141,7 @@ final class Updater {
             Log.app.info("update check: \(self.releases.count) newer release(s)")
         } catch {
             Log.app.error("update check failed: \(error.localizedDescription, privacy: .public)")
+            ErrorReporter.capture(error, "update check failed", category: "updater", level: .warning)
             releases = []
             state = .idle
         }
@@ -171,6 +177,7 @@ final class Updater {
                 finish(current)
             } catch {
                 Log.app.error("update failed: \(error.localizedDescription, privacy: .public)")
+                ErrorReporter.capture(error, "update to \(release.version) failed", category: "updater")
                 state = .failed(error.localizedDescription)
             }
         }

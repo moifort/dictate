@@ -80,7 +80,11 @@ final class AppSettings {
     var launchAtLogin: Bool {
         get { SMAppService.mainApp.status == .enabled }
         set {
-            try? newValue ? SMAppService.mainApp.register() : SMAppService.mainApp.unregister()
+            do {
+                try newValue ? SMAppService.mainApp.register() : SMAppService.mainApp.unregister()
+            } catch {
+                ErrorReporter.capture(error, "launch at login could not be \(newValue ? "enabled" : "disabled")", category: "settings")
+            }
         }
     }
 

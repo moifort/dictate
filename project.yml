@@ -22,6 +22,9 @@ packages:
   FluidAudio:
     url: https://github.com/FluidInference/FluidAudio
     from: 0.17.7
+  Sentry:
+    url: https://github.com/getsentry/sentry-cocoa
+    from: 9.30.1
 targets:
   Dictate:
     type: application
@@ -31,6 +34,7 @@ targets:
     dependencies:
       - package: WhisperKit
       - package: FluidAudio
+      - package: Sentry
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.thibautmottet.dictate

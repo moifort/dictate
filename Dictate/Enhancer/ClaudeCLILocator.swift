@@ -50,7 +50,12 @@ nonisolated struct ClaudeCLILocator: Sendable {
             process.arguments = ["--version"]
             process.standardOutput = output
             process.standardError = FileHandle.nullDevice
-            guard (try? process.run()) != nil else { return nil }
+            do {
+                try process.run()
+            } catch {
+                ErrorReporter.capture(error, "claude --version could not be run", category: "enhancer", level: .warning)
+                return nil
+            }
             let data = output.fileHandleForReading.readDataToEndOfFile()
             process.waitUntilExit()
             guard process.terminationStatus == 0 else { return nil }

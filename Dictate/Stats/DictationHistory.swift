@@ -37,6 +37,7 @@ final class DictationHistory {
             }
         } catch {
             Log.app.error("could not save dictation statistics: \(error.localizedDescription, privacy: .public)")
+            ErrorReporter.capture(error, "dictation statistics could not be saved", category: "stats")
         }
     }
 
