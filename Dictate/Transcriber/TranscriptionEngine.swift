@@ -25,6 +25,22 @@ nonisolated enum TranscriptionEngine: String, CaseIterable, Codable, Identifiabl
         }
     }
 
+    /// The checkpoint behind each engine, as its authors name it.
+    var weightsName: String {
+        switch self {
+        case .whisper: "Whisper large-v3 turbo"
+        case .parakeet: "Parakeet TDT 0.6B v3 Ultra"
+        }
+    }
+
+    /// Number of parameters in the checkpoint, in millions.
+    var parameterCount: Int {
+        switch self {
+        case .whisper: 809
+        case .parakeet: 600
+        }
+    }
+
     /// Only Whisper biases its decoding with the vocabulary.
     var acceptsVocabulary: Bool { self == .whisper }
 
@@ -64,6 +80,8 @@ enum TranscriberState: Equatable {
     var state: TranscriberState { get }
     /// True once every file is on disk, so loading needs no network.
     var isModelDownloaded: Bool { get }
+    /// Where the model's files live once downloaded.
+    var modelFolder: URL { get }
     /// Downloads the model on first use, then loads it in memory.
     func load() async
     /// Frees the model's memory; the next transcription loads it again.
@@ -91,6 +109,7 @@ final class SwitchableTranscriber: Transcriber {
     var active: any ModelTranscriber { transcriber(for: engine) }
     var state: TranscriberState { active.state }
     var isModelDownloaded: Bool { active.isModelDownloaded }
+    var modelFolder: URL { active.modelFolder }
 
     func load() async {
         await active.load()
@@ -118,5 +137,23 @@ final class SwitchableTranscriber: Transcriber {
         case .whisper: whisper
         case .parakeet: parakeet
         }
+    }
+}
+
+/// What a downloaded model takes on disk.
+nonisolated enum ModelStorage {
+    /// Bytes allocated by every file under `folder`, or nil if it does not exist.
+    /// Walks the whole tree: call it off the main actor.
+    static func diskUsage(of folder: URL) -> Int64? {
+        let keys: [URLResourceKey] = [.isRegularFileKey, .totalFileAllocatedSizeKey]
+        guard FileManager.default.fileExists(atPath: folder.path),
+              let files = FileManager.default.enumerator(at: folder, includingPropertiesForKeys: keys)
+        else { return nil }
+        var total: Int64 = 0
+        for case let file as URL in files {
+            guard let values = try? file.resourceValues(forKeys: Set(keys)), values.isRegularFile == true else { continue }
+            total += Int64(values.totalFileAllocatedSize ?? 0)
+        }
+        return total
     }
 }

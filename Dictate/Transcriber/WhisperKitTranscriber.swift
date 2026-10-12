@@ -35,6 +35,7 @@ final class WhisperKitTranscriber: ModelTranscriber {
     @ObservationIgnored private let modelDirectory: URL
 
     var isModelDownloaded: Bool { Self.isModelDownloaded(in: modelDirectory) }
+    var modelFolder: URL { Self.modelFolder(in: modelDirectory) }
 
     private var isBusy: Bool { state.isBusy }
 

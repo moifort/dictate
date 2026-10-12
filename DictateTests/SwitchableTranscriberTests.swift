@@ -69,6 +69,7 @@ struct SwitchableTranscriberTests {
 private final class FakeModelTranscriber: ModelTranscriber {
     var state: TranscriberState = .notLoaded
     var isModelDownloaded = true
+    var modelFolder = URL.temporaryDirectory
     private let result: String
     private(set) var callCount = 0
     private(set) var loadCount = 0

@@ -44,6 +44,7 @@ private struct DictationSettings: View {
                     .pickerStyle(.segmented)
                     .onChange(of: model.settings.transcriptionEngine) { model.transcriptionEngineChanged() }
                     Hint(engineHint)
+                    ModelWeights(model: model)
                     EngineStatus(model: model)
                     if !model.settings.transcriptionEngine.supports(language: model.settings.language) {
                         Label(
@@ -107,6 +108,31 @@ private struct EngineStatus: View {
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
+    }
+}
+
+/// Which checkpoint the engine runs and, once downloaded, what it takes on disk.
+private struct ModelWeights: View {
+    let model: AppModel
+    @State private var diskUsage: Int64?
+
+    private var engine: TranscriptionEngine { model.transcriber.engine }
+
+    var body: some View {
+        Hint(description)
+            // Measured again when the engine changes or its download completes.
+            .task(id: "\(engine.rawValue)-\(model.transcriber.state == .ready)") {
+                let folder = model.transcriber.modelFolder
+                diskUsage = model.transcriber.isModelDownloaded
+                    ? await Task.detached { ModelStorage.diskUsage(of: folder) }.value
+                    : nil
+            }
+    }
+
+    private var description: String {
+        let weights = "Poids : \(engine.weightsName), \(engine.parameterCount) M de paramètres"
+        guard let diskUsage else { return weights + "." }
+        return weights + ", \(diskUsage.formatted(.byteCount(style: .file))) sur le disque."
     }
 }
 

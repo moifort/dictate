@@ -11,7 +11,7 @@ final class ParakeetTranscriber: ModelTranscriber {
     nonisolated static let modelVersion = AsrModelVersion.ultra
 
     private(set) var state: TranscriberState = .notLoaded
-    @ObservationIgnored private let modelFolder: URL
+    @ObservationIgnored let modelFolder: URL
     @ObservationIgnored private let engine: ParakeetEngine
 
     init(modelDirectory: URL = WhisperKitTranscriber.defaultModelDirectory) {
