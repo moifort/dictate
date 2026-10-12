@@ -143,10 +143,16 @@ jobs:
             IDENTITY=-
             TIMESTAMP=
           fi
+          # Inside out: the app's signature seals its frameworks, and a
+          # framework left with its build-time ad-hoc signature fails notarization.
+          for FRAMEWORK in "$APP"/Contents/Frameworks/*.framework; do
+            [ -d "$FRAMEWORK" ] || continue
+            codesign --force --options runtime $TIMESTAMP --sign "$IDENTITY" "$FRAMEWORK"
+          done
           codesign --force --options runtime $TIMESTAMP \
             --entitlements Dictate/Resources/Dictate.entitlements \
             --sign "$IDENTITY" "$APP"
-          codesign --verify --strict --verbose=2 "$APP"
+          codesign --verify --strict --deep --verbose=2 "$APP"
 
       # The disk image is for people installing by hand: open it, drag the app
       # onto the Applications alias. The updater keeps downloading the zip.
