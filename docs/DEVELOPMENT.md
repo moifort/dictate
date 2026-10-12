@@ -72,6 +72,25 @@ ad-hoc signed and Gatekeeper asks for right-click → Open):
 | `DEVELOPER_ID_P12_PASSWORD` | Password of that `.p12` |
 | `ASC_KEY_ID`, `ASC_ISSUER_ID` | App Store Connect API key, used by `notarytool` |
 | `ASC_KEY_P8` | Content of that key's `.p8` file |
+| `SENTRY_AUTH_TOKEN` | Sentry token with `project:releases` and `project:write`, to upload the dSYMs |
+
+## Error reporting
+
+Release builds send caught errors and crashes to Sentry, project
+`dictate-macos` in the `polyforms` organization, through `ErrorReporter`
+([Dictate/App/ErrorReporter.swift](../Dictate/App/ErrorReporter.swift)).
+Every `catch` in the app goes through it, with a message saying what was being
+attempted and a `category` tag (`recorder`, `transcriber`, `enhancer`,
+`updater`, `stats`…). The dictation outcomes and model loads are breadcrumbs,
+and the settings that matter (engine, key, language, Claude on or off) are
+tags on every event.
+
+Nothing the user said or wrote is ever sent: no audio, no transcript, no
+field context. Debug builds and the test host never report anything, so a
+development session cannot pollute the project.
+
+Without the `SENTRY_AUTH_TOKEN` secret the release workflow skips the dSYM
+upload and crashes show addresses instead of function names.
 
 ## First launch
 

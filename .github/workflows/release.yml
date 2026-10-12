@@ -33,6 +33,9 @@ jobs:
       # Without a Developer ID certificate the app is still published, ad-hoc
       # signed and not notarized: Gatekeeper then asks for a right-click → Open.
       SIGNED: ${{ secrets.DEVELOPER_ID_P12 != '' }}
+      # Without a Sentry token the crashes still arrive, with bare addresses
+      # instead of function names.
+      SYMBOLICATED: ${{ secrets.SENTRY_AUTH_TOKEN != '' }}
       APP: build/Build/Products/Release/Dictate.app
     steps:
       - uses: actions/checkout@v7
@@ -90,6 +93,19 @@ jobs:
             ARCHS=arm64 \
             MARKETING_VERSION="$MARKETING" CURRENT_PROJECT_VERSION="$BUILD" \
             CODE_SIGNING_ALLOWED=NO
+
+      # Sentry matches the symbols to a crash by the binary's UUID: the dSYM of
+      # this very build, before anything is stripped or signed.
+      - name: Upload the debug symbols to Sentry
+        if: env.SYMBOLICATED == 'true'
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: polyforms
+          SENTRY_PROJECT: dictate-macos
+        run: |
+          set -euo pipefail
+          brew install getsentry/tools/sentry-cli
+          sentry-cli debug-files upload --include-sources build/Build/Products/Release
 
       - name: Import the Developer ID identity
         if: env.SIGNED == 'true'
