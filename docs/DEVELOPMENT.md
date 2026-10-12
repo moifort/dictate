@@ -54,6 +54,15 @@ update themselves.
   git push origin v0.2.0
   ```
 
+  The disk image is laid out by [scripts/build-dmg.sh](../scripts/build-dmg.sh):
+  a Finder window with the app, an arrow and the Applications alias over a
+  background painted by `scripts/dmg/render-background.swift`. To check it on
+  a local Release build:
+
+  ```bash
+  scripts/build-dmg.sh build/Build/Products/Release/Dictate.app Dictate.dmg && open Dictate.dmg
+  ```
+
 Repository secrets for a signed, notarized build (without them the release is
 ad-hoc signed and Gatekeeper asks for right-click → Open):
 

@@ -134,16 +134,13 @@ jobs:
 
       # The disk image is for people installing by hand: open it, drag the app
       # onto the Applications alias. The updater keeps downloading the zip.
+      # scripts/build-dmg.sh lays the window out through Finder, which the
+      # macOS runners can drive like any logged-in session.
       - name: Build the disk image
         run: |
           set -euo pipefail
           DMG="Dictate-$MARKETING.dmg"
-          STAGING="$RUNNER_TEMP/dmg"
-          mkdir -p "$STAGING"
-          ditto "$APP" "$STAGING/Dictate.app"
-          ln -s /Applications "$STAGING/Applications"
-          diskutil image create from --format ULFO --volumeName Dictate \
-            "$STAGING" "$DMG"
+          scripts/build-dmg.sh "$APP" "$DMG"
           if [ "$SIGNED" = "true" ]; then
             codesign --force --timestamp --sign "Developer ID Application" "$DMG"
           fi
