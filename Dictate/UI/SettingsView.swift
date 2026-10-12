@@ -136,91 +136,102 @@ private struct GeneralSettings: View {
     }
 }
 
-/// The models that could review a dictation. Only Claude is wired today;
-/// the others show where this is going.
+/// Who reviews a dictation. Only Claude is wired today; the others show
+/// where this is going, and "Aucun" keeps the raw transcription.
 private enum Reviewer: String, CaseIterable, Identifiable {
-    case claude, chatGPT, gemini, local
+    case none, claude, chatGPT, gemini
 
     var id: String { rawValue }
 
     var displayName: String {
         switch self {
-        case .claude: "Claude (Haiku)"
+        case .none: "Aucun"
+        case .claude: "Claude"
         case .chatGPT: "ChatGPT"
         case .gemini: "Gemini"
-        case .local: "Modèle local"
         }
     }
 
-    var isAvailable: Bool { self == .claude }
+    /// Stand-ins until each service ships a logo we may embed.
+    var symbol: String {
+        switch self {
+        case .none: "nosign"
+        case .claude: "sparkles"
+        case .chatGPT: "bubble.left.and.text.bubble.right"
+        case .gemini: "star.circle"
+        }
+    }
+
+    var isAvailable: Bool { self == .none || self == .claude }
 }
 
 /// The pass that turns the raw transcription into clean text.
 private struct ReviewSettings: View {
     @Bindable var model: AppModel
-    @State private var reviewer = Reviewer.claude
+
+    /// "Aucun" is the enhancement switch under another name.
+    private var reviewer: Binding<Reviewer> {
+        Binding(
+            get: { model.settings.enhancementEnabled ? .claude : .none },
+            set: {
+                model.settings.enhancementEnabled = $0 == .claude
+                model.settingsChanged()
+            }
+        )
+    }
 
     var body: some View {
         Form {
-            LabeledContent("Modèle :") {
-                VStack(alignment: .leading, spacing: 6) {
-                    Picker("Modèle", selection: $reviewer) {
-                        ForEach(Reviewer.allCases) { reviewer in
-                            Text(reviewer.displayName).tag(reviewer).disabled(!reviewer.isAvailable)
+            LabeledContent("Relecture par :") {
+                ReviewerPicker(selection: reviewer)
+            }
+
+            if model.settings.enhancementEnabled {
+                LabeledContent("Claude :") {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Hint("Modèle Haiku, via votre compte Claude Code. Ponctuation, hésitations retirées, lexique appliqué.")
+                        Toggle("Lire le texte avant le curseur", isOn: Bindable(model.settings).shareFieldContext)
+                            .padding(.top, 4)
+                        Hint("500 caractères, pour reprendre vos noms et votre ton. Jamais un mot de passe.")
+                    }
+                }
+
+                Divider()
+
+                LabeledContent("Binaire :") {
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(spacing: 8) {
+                            claudeCLIStatusIcon
+                            Text(claudeCLITitle)
+                            Spacer()
+                            Button("Tester") { Task { await model.testClaude() } }
+                                .disabled(model.claudeCLIPath == nil)
+                            Button("Choisir…", action: chooseClaudeCLI)
                         }
-                    }
-                    .labelsHidden()
-                    .fixedSize()
-                    Hint("Via votre compte Claude Code.")
-                }
-            }
-
-            LabeledContent("Relecture :") {
-                VStack(alignment: .leading, spacing: 6) {
-                    Toggle("Relire chaque dictée", isOn: Bindable(model.settings).enhancementEnabled)
-                        .onChange(of: model.settings.enhancementEnabled) { model.settingsChanged() }
-                    Hint("Ponctuation, hésitations retirées, lexique appliqué.")
-                    Toggle("Lire le texte avant le curseur", isOn: Bindable(model.settings).shareFieldContext)
-                        .disabled(!model.settings.enhancementEnabled)
-                    Hint("500 caractères, pour reprendre vos noms et votre ton. Jamais un mot de passe.")
-                }
-            }
-
-            Divider()
-
-            LabeledContent("Binaire :") {
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack(spacing: 8) {
-                        claudeCLIStatusIcon
-                        Text(claudeCLITitle)
-                        Spacer()
-                        Button("Tester") { Task { await model.testClaude() } }
-                            .disabled(model.claudeCLIPath == nil)
-                        Button("Choisir…", action: chooseClaudeCLI)
-                    }
-                    if let path = model.claudeCLIPath {
-                        Text(model.claudeCLIDisplayPath(path))
-                            .font(.caption.monospaced())
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                            .truncationMode(.middle)
-                            .help(path.path)
-                    }
-                    if overrideIgnored {
-                        Text("Fichier non exécutable : détection automatique utilisée.")
+                        if let path = model.claudeCLIPath {
+                            Text(model.claudeCLIDisplayPath(path))
+                                .font(.caption.monospaced())
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                                .truncationMode(.middle)
+                                .help(path.path)
+                        }
+                        if overrideIgnored {
+                            Text("Fichier non exécutable : détection automatique utilisée.")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                        }
+                        if !model.settings.cliPathOverride.isEmpty {
+                            Button("Détection automatique") {
+                                model.settings.cliPathOverride = ""
+                                model.settingsChanged()
+                            }
+                            .buttonStyle(.link)
                             .font(.caption)
-                            .foregroundStyle(.orange)
-                    }
-                    if !model.settings.cliPathOverride.isEmpty {
-                        Button("Détection automatique") {
-                            model.settings.cliPathOverride = ""
-                            model.settingsChanged()
                         }
-                        .buttonStyle(.link)
-                        .font(.caption)
-                    }
-                    if let result = model.claudeTestResult {
-                        Hint(result)
+                        if let result = model.claudeTestResult {
+                            Hint(result)
+                        }
                     }
                 }
             }
@@ -269,6 +280,38 @@ private struct ReviewSettings: View {
     }
 }
 
+/// A row of icon tiles, like the appearance picker in System Settings.
+private struct ReviewerPicker: View {
+    @Binding var selection: Reviewer
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ForEach(Reviewer.allCases) { reviewer in
+                Button {
+                    selection = reviewer
+                } label: {
+                    VStack(spacing: 6) {
+                        Image(systemName: reviewer.symbol)
+                            .font(.system(size: 22))
+                            .frame(width: 56, height: 40)
+                            .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(selection == reviewer ? Color.accentColor : .clear, lineWidth: 2)
+                            }
+                        Text(reviewer.displayName)
+                            .font(.caption)
+                    }
+                }
+                .buttonStyle(.plain)
+                .disabled(!reviewer.isAvailable)
+                .help(reviewer.isAvailable ? "" : "Bientôt")
+            }
+        }
+    }
+}
+
+/// The small grey explanation under a control.
 private struct Hint: View {
     let text: String
 
