@@ -2,7 +2,7 @@ import AppKit
 import Observation
 import SwiftUI
 
-/// Small pill at the bottom centre of the screen, visible only while `fn` is
+/// Small pill at the bottom centre of the active window's screen, visible only while `fn` is
 /// held and while the dictation is processed.
 final class RecordingIndicator {
     enum Flash: Equatable {
@@ -108,10 +108,14 @@ final class RecordingIndicator {
         }
     }
 
-    /// Follows the screen the user is working on, found from the mouse position.
+    /// Follows the screen the user is typing on: the one holding the focused
+    /// window, else the one under the mouse.
     private func presentOnActiveScreen() {
-        let mouse = NSEvent.mouseLocation
-        guard let screen = NSScreen.screens.first(where: { $0.frame.contains(mouse) }) ?? NSScreen.main else {
+        let screens = NSScreen.screens
+        let index = ActiveWindow.screenIndex(
+            for: ActiveWindow.frame(), mouse: NSEvent.mouseLocation, screens: screens.map(\.frame)
+        )
+        guard let screen = index.map({ screens[$0] }) ?? NSScreen.main else {
             Log.indicator.error("no screen to present on")
             return
         }
