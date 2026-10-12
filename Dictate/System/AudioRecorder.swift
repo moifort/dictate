@@ -1,4 +1,5 @@
 @preconcurrency import AVFoundation
+import CoreAudio
 import Observation
 
 /// Records the default microphone into memory as 16 kHz mono samples.
@@ -7,7 +8,7 @@ final class AudioRecorder: AudioRecording {
     /// Recent input level in 0...1, for the recording indicator.
     private(set) var level: Float = 0
 
-    @ObservationIgnored private let engine = AVAudioEngine()
+    @ObservationIgnored private var engine = AVAudioEngine()
     @ObservationIgnored private var tap: TapProcessor?
 
     enum RecorderError: LocalizedError {
@@ -17,6 +18,16 @@ final class AudioRecorder: AudioRecording {
     }
 
     func start() throws {
+        // Voice processing is only toggled on a stopped engine, so build a fresh one each time.
+        engine = AVAudioEngine()
+        if Self.isInputInUseElsewhere() {
+            // An app holding the mic with voice processing (Safari WebRTC, FaceTime…)
+            // mutes it for everyone else; only a voice-processed stream still hears the user.
+            Log.dictation.info("microphone in use by another app: enabling voice processing")
+            engine.inputNode.voiceProcessingOtherAudioDuckingConfiguration =
+                .init(enableAdvancedDucking: false, duckingLevel: .min)
+            try engine.inputNode.setVoiceProcessingEnabled(true)
+        }
         let input = engine.inputNode
         let format = input.outputFormat(forBus: 0)
         guard format.sampleRate > 0, format.channelCount > 0 else { throw RecorderError.noInputDevice }
@@ -42,6 +53,26 @@ final class AudioRecorder: AudioRecording {
         level = 0
         defer { tap = nil }
         return tap?.drain() ?? []
+    }
+
+    /// Whether another process is already capturing from the default input device.
+    private static func isInputInUseElsewhere() -> Bool {
+        var device = AudioDeviceID(0)
+        var size = UInt32(MemoryLayout<AudioDeviceID>.size)
+        var address = AudioObjectPropertyAddress(
+            mSelector: kAudioHardwarePropertyDefaultInputDevice,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        guard AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &size, &device) == noErr else {
+            return false
+        }
+
+        var running = UInt32(0)
+        size = UInt32(MemoryLayout<UInt32>.size)
+        address.mSelector = kAudioDevicePropertyDeviceIsRunningSomewhere
+        guard AudioObjectGetPropertyData(device, &address, 0, nil, &size, &running) == noErr else { return false }
+        return running != 0
     }
 }
 
@@ -103,6 +134,9 @@ nonisolated final class AudioResampler: @unchecked Sendable {
         guard let converter = AVAudioConverter(from: inputFormat, to: Self.outputFormat) else {
             throw ResamplerError.unsupportedFormat
         }
+        // Discrete multichannel input (voice processing) maps to no output channel
+        // by default, which yields silence: take the first channel explicitly.
+        if inputFormat.channelCount > 1 { converter.channelMap = [0] }
         self.converter = converter
     }
 
