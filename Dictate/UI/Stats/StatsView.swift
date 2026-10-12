@@ -43,6 +43,9 @@ struct StatsView: View {
                         .labelsHidden()
                         .padding(.horizontal, 16)
                         .padding(.vertical, 12)
+                        // Span the whole window so the material covers the
+                        // cards on both sides of the picker too.
+                        .frame(maxWidth: .infinity)
                         .background(.bar)
                     }
                 }
