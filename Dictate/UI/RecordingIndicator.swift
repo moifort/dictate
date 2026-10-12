@@ -79,6 +79,10 @@ final class RecordingIndicator {
         if shouldBeVisible {
             hideTask?.cancel()
             hideTask = nil
+            Log.indicator.info("""
+                show for \(String(describing: self.controller.phase)), flash \(String(describing: self.state.flash)), \
+                panel visible: \(self.panel.isVisible), on screen: \(self.panel.occlusionState.contains(.visible))
+                """)
             if !panel.isVisible { presentOnActiveScreen() }
         } else if hideTask == nil {
             hideTask = Task {
@@ -86,6 +90,7 @@ final class RecordingIndicator {
                 defer { hideTask = nil }
                 guard !Task.isCancelled, !shouldBeVisible else { return }
                 panel.orderOut(nil)
+                Log.indicator.info("hidden")
             }
         }
     }
@@ -93,11 +98,15 @@ final class RecordingIndicator {
     /// Follows the screen the user is working on, found from the mouse position.
     private func presentOnActiveScreen() {
         let mouse = NSEvent.mouseLocation
-        guard let screen = NSScreen.screens.first(where: { $0.frame.contains(mouse) }) ?? NSScreen.main else { return }
+        guard let screen = NSScreen.screens.first(where: { $0.frame.contains(mouse) }) ?? NSScreen.main else {
+            Log.indicator.error("no screen to present on")
+            return
+        }
         let visible = screen.visibleFrame
         let origin = CGPoint(x: visible.midX - Self.size.width / 2, y: visible.minY + 16)
         panel.setFrameOrigin(origin)
         panel.orderFrontRegardless()
+        Log.indicator.info("presented at \(origin.x), \(origin.y) on \(screen.localizedName)")
     }
 }
 
