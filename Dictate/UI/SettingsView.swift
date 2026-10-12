@@ -44,6 +44,7 @@ private struct DictationSettings: View {
                     .pickerStyle(.segmented)
                     .onChange(of: model.settings.transcriptionEngine) { model.transcriptionEngineChanged() }
                     Hint(engineHint)
+                    EngineStatus(model: model)
                     if !model.settings.transcriptionEngine.supports(language: model.settings.language) {
                         Label(
                             "Parakeet ne gère pas le \(DictationLanguage.name(of: model.settings.language)) : choisissez Whisper.",
@@ -65,6 +66,46 @@ private struct DictationSettings: View {
             "Toutes les langues, environ 1,5 s par dictée."
         case .parakeet:
             "Plusieurs fois plus rapide, 25 langues européennes. Ignore le lexique : seul Claude l'applique. 610 Mo à télécharger au premier usage."
+        }
+    }
+}
+
+/// Switching engines loads a model of several hundred MB: until it is in
+/// memory, dictation is unavailable, and the user must know why.
+private struct EngineStatus: View {
+    let model: AppModel
+
+    private var engine: String { model.transcriber.engine.displayName }
+
+    var body: some View {
+        Group {
+            switch model.transcriber.state {
+            case .notLoaded, .loading:
+                status("Chargement de \(engine)… Dictate est indisponible en attendant.")
+            case .downloading(let fraction):
+                status("Téléchargement de \(engine)… \(fraction.formatted(.percent.precision(.fractionLength(0)))). Dictate est indisponible en attendant.")
+            case .failed(let message):
+                HStack(spacing: 8) {
+                    Label("\(engine) indisponible : \(message)", systemImage: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+                    Button("Réessayer") { model.retryTranscriber() }
+                        .controlSize(.small)
+                }
+                .font(.callout)
+            case .ready:
+                EmptyView()
+            }
+        }
+        .animation(.snappy, value: model.transcriber.state)
+    }
+
+    private func status(_ text: String) -> some View {
+        HStack(spacing: 8) {
+            ProgressView().controlSize(.small)
+            Text(text)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }
