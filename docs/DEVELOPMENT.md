@@ -76,10 +76,11 @@ install opens on the welcome page, a resumed setup on the checklist.
 
 1. **Dictation language**, taken from macOS, confirmed with a button.
 2. **Microphone** permission.
-3. **Input Monitoring** permission, to watch the `fn` key.
+3. **Input Monitoring** permission, to watch the push-to-talk key.
 4. **Accessibility** permission, to detect the focused field and paste.
 5. **System Settings → Keyboard → "Press 🌐 key to": Do Nothing**, otherwise
-   macOS opens the emoji picker or its own dictation.
+   macOS opens the emoji picker or its own dictation. Not needed when the
+   push-to-talk key is `control` (Settings → Dictée → Touche).
 6. The transcription model (~630 MB) downloads into
    `~/Library/Application Support/Dictate/Models`, with its progress shown.
 7. The `claude` CLI, optional: dictation also works without Claude.
@@ -90,7 +91,7 @@ The last page has a scratch field to try a dictation end to end.
 
 | Step | Component |
 |---|---|
-| `fn` held / released | `FnKeyMonitor` → `FnKeyGesture` |
+| `fn` or `control` held / released | `FnKeyMonitor` → `FnKeyGesture` |
 | Microphone → 16 kHz mono | `AudioRecorder` |
 | Local transcription | `SwitchableTranscriber`, routing to the engine picked in Settings → Dictée: `ParakeetTranscriber` (Parakeet TDT Ultra through FluidAudio, default, 25 European languages, no vocabulary prompt) or `WhisperKitTranscriber` (large-v3 turbo, every language, takes the vocabulary as a prompt). Only the active engine's model stays in memory. |
 | Cleanup | `ClaudeCLIEnhancer`: one pre-warmed `claude -p --model haiku` process per dictation |

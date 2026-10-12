@@ -12,8 +12,8 @@ ready-to-send text.
 
 ## What it does
 
-- **Push-to-talk on `fn`.** Hold the key while you speak, release it when you
-  are done. No window to open, no button to click.
+- **Push-to-talk on `fn` or `control`.** Hold the key while you speak, release
+  it when you are done. No window to open, no button to click.
 - **Text lands at the cursor.** The sentence is typed into whatever field has
   focus. If none does, it waits in the clipboard, ready to paste.
 - **Clean text, not a raw transcript.** Hesitations ("euh", "um"), repetitions

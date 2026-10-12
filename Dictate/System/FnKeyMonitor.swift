@@ -1,14 +1,17 @@
 import AppKit
 import CoreGraphics
 
-/// Listens to the `fn` key system-wide and reports push-to-talk gestures.
+/// Listens to the push-to-talk key system-wide and reports gestures.
 ///
 /// Uses a listen-only event tap, so it needs the Input Monitoring permission.
-/// The system action of the 🌐 key must be set to "Do Nothing".
+/// With `fn`, the system action of the 🌐 key must be set to "Do Nothing".
 final class FnKeyMonitor {
-    nonisolated static let fnKeyCode: Int64 = 63
-
     var onGesture: ((FnKeyGestureOutput) -> Void)?
+
+    /// Switching keys mid-press drops the press rather than leaving it stuck.
+    var key: PushToTalkKey = .fn {
+        didSet { if key != oldValue { gesture = FnKeyGesture() } }
+    }
 
     private var gesture = FnKeyGesture()
     private var tap: CFMachPort?
@@ -51,6 +54,7 @@ final class FnKeyMonitor {
             if let tap { CGEvent.tapEnable(tap: tap, enable: true) }
         default:
             guard let keyEvent = Self.classify(
+                key: key,
                 type: type,
                 keyCode: keyCode,
                 flags: flags,
@@ -62,14 +66,22 @@ final class FnKeyMonitor {
         }
     }
 
-    /// Maps a raw keyboard event to a `fn` gesture event.
-    nonisolated static func classify(type: CGEventType, keyCode: Int64, flags: CGEventFlags, time: TimeInterval) -> FnKeyEvent? {
-        switch type {
-        case .flagsChanged where keyCode == fnKeyCode:
-            flags.contains(.maskSecondaryFn) ? .fnDown(at: time) : .fnUp(at: time)
+    /// Maps a raw keyboard event to a push-to-talk gesture event.
+    nonisolated static func classify(
+        key: PushToTalkKey = .fn,
+        type: CGEventType,
+        keyCode: Int64,
+        flags: CGEventFlags,
+        time: TimeInterval
+    ) -> FnKeyEvent? {
+        let otherModifiers = CGEventFlags([.maskShift, .maskControl, .maskAlternate, .maskCommand]).subtracting(key.flag)
+        return switch type {
+        case .flagsChanged where key.keyCodes.contains(keyCode):
+            // With both controls held, the flag stays set until the last one is released.
+            flags.contains(key.flag) ? .fnDown(at: time) : .fnUp(at: time)
         case .flagsChanged:
             // Only a modifier going down counts: releasing Shift mid-dictation is not a shortcut.
-            flags.isDisjoint(with: [.maskShift, .maskControl, .maskAlternate, .maskCommand]) ? nil : .otherKeyDown
+            flags.isDisjoint(with: otherModifiers) ? nil : .otherKeyDown
         case .keyDown:
             .otherKeyDown
         default:

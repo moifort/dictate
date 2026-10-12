@@ -35,7 +35,7 @@ struct MenuContent: View {
         case .notLoaded, .loading: "Chargement de \(engine)…"
         case .downloading(let fraction): "Téléchargement de \(engine)… \(fraction.formatted(.percent.precision(.fractionLength(0))))"
         case .failed(let message): "\(engine) indisponible : \(message)"
-        case .ready: model.hotkeyActive ? nil : "Touche fn inactive"
+        case .ready: model.hotkeyActive ? nil : "Touche \(model.settings.pushToTalkKey.displayName) inactive"
         }
     }
 

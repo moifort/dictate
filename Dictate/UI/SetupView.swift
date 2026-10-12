@@ -314,6 +314,11 @@ private struct StepActions: View {
             Actions {
                 Button("Ouvrir les réglages Clavier") { Permissions.openKeyboardSettings() }
                     .buttonStyle(.glassProminent)
+                Button("Dicter avec control") {
+                    model.settings.pushToTalkKey = .control
+                    model.pushToTalkKeyChanged()
+                }
+                .buttonStyle(.glass)
             }
 
         case .transcriptionModel:
@@ -358,7 +363,7 @@ private extension SetupStep {
         switch self {
         case .language: "Langue de dictée"
         case .microphone: "Micro"
-        case .inputMonitoring: "Surveillance de la touche fn"
+        case .inputMonitoring: "Surveillance de la touche de dictée"
         case .accessibility: "Insertion du texte"
         case .fnKey: "Libérer la touche 🌐"
         case .transcriptionModel: "Modèle de transcription"
@@ -371,13 +376,13 @@ private extension SetupStep {
         case .language:
             "La transcription est plus fiable quand elle sait à l'avance dans quelle langue vous parlez. Dictate a repris celle de macOS ; changez-la si vous dictez dans une autre. Les termes techniques anglais restent reconnus."
         case .microphone:
-            "Dictate n'écoute que pendant que vous maintenez fn. L'audio est transcrit sur ce Mac et n'en sort jamais."
+            "Dictate n'écoute que pendant que vous maintenez la touche de dictée. L'audio est transcrit sur ce Mac et n'en sort jamais."
         case .inputMonitoring:
-            "macOS appelle cette autorisation « Surveillance de l'entrée ». Elle sert à savoir quand fn est enfoncée ; aucune frappe n'est enregistrée."
+            "macOS appelle cette autorisation « Surveillance de l'entrée ». Elle sert à savoir quand la touche de dictée est enfoncée ; aucune frappe n'est enregistrée."
         case .accessibility:
             "Pour repérer le champ de texte actif et y coller votre dictée. Sans champ actif, le texte reste dans le presse-papiers."
         case .fnKey:
-            "Par défaut, macOS ouvre les emoji ou sa propre dictée quand on appuie sur 🌐 fn."
+            "Par défaut, macOS ouvre les emoji ou sa propre dictée quand on appuie sur 🌐 fn. Vous pouvez aussi dicter avec control, qui n'a rien à régler."
         case .transcriptionModel:
             "Un modèle de transcription tourne sur ce Mac, sans réseau. Il se télécharge une seule fois, environ 630 Mo."
         case .claude:
@@ -495,7 +500,7 @@ private struct WelcomePage: View {
     var body: some View {
         PageLayout(
             title: "Bienvenue dans Dictate",
-            explanation: "Maintenez fn, parlez, relâchez : le texte apparaît dans le champ actif, dans n'importe quelle app."
+            explanation: "Maintenez fn ou control, parlez, relâchez : le texte apparaît dans le champ actif, dans n'importe quelle app."
         ) {
             AppTile()
         } content: {
@@ -505,7 +510,7 @@ private struct WelcomePage: View {
                 FeatureRow(symbol: "sparkles", title: "Nettoyage par Claude",
                            detail: "Hésitations, ponctuation et jargon corrigés avec votre abonnement Claude.")
                 FeatureRow(symbol: "keyboard", title: "Une seule touche",
-                           detail: "fn suffit, même par-dessus une app en plein écran.")
+                           detail: "fn ou control suffit, même par-dessus une app en plein écran.")
             }
             .frame(maxWidth: 400)
         }
@@ -616,7 +621,8 @@ private struct TryItPage: View {
         case "success":
             Label("Ça marche.", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
         default:
-            Label("Maintenez fn pour dicter", systemImage: "globe").foregroundStyle(.secondary)
+            let key = model.settings.pushToTalkKey
+            Label("Maintenez \(key.displayName) pour dicter", systemImage: key.symbol).foregroundStyle(.secondary)
         }
     }
 }

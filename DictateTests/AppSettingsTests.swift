@@ -33,6 +33,14 @@ struct AppSettingsTests {
         #expect(!AppSettings(defaults: UserDefaults(suiteName: suite)!).shareFieldContext)
     }
 
+    @Test func pushToTalkKeyIsFnByDefaultAndPersists() {
+        let suite = "AppSettingsTests-\(UUID().uuidString)"
+        let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!)
+        #expect(settings.pushToTalkKey == .fn)
+        settings.pushToTalkKey = .control
+        #expect(AppSettings(defaults: UserDefaults(suiteName: suite)!).pushToTalkKey == .control)
+    }
+
     @Test func transcriptionEngineIsParakeetByDefaultAndPersists() {
         let suite = "AppSettingsTests-\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!

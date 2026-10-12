@@ -31,6 +31,21 @@ private struct DictationSettings: View {
 
     var body: some View {
         Form {
+            LabeledContent("Touche :") {
+                VStack(alignment: .leading, spacing: 6) {
+                    Picker("Touche", selection: Bindable(model.settings).pushToTalkKey) {
+                        ForEach(PushToTalkKey.allCases) { key in
+                            Text(key.displayName).tag(key)
+                        }
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.segmented)
+                    .fixedSize()
+                    .onChange(of: model.settings.pushToTalkKey) { model.pushToTalkKeyChanged() }
+                    Hint(keyHint)
+                }
+            }
+
             LanguagePicker(model: model, label: "Langue :")
 
             LabeledContent("Moteur :") {
@@ -59,6 +74,15 @@ private struct DictationSettings: View {
         }
         .formStyle(.columns)
         .padding(20)
+    }
+
+    private var keyHint: String {
+        switch model.settings.pushToTalkKey {
+        case .fn:
+            "Maintenez 🌐 fn pour dicter. macOS doit la laisser libre : Clavier → « Appuyer sur la touche 🌐 pour » → « Ne rien faire »."
+        case .control:
+            "Maintenez l'une des touches control pour dicter. Un raccourci comme control-C n'enregistre rien."
+        }
     }
 
     private var engineHint: String {

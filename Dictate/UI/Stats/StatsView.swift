@@ -15,7 +15,7 @@ struct StatsView: View {
                     ContentUnavailableView(
                         "Aucune dictée pour l'instant",
                         systemImage: "chart.bar",
-                        description: Text("Maintenez fn et parlez : vos statistiques apparaîtront ici.")
+                        description: Text("Maintenez la touche de dictée et parlez : vos statistiques apparaîtront ici.")
                     )
                 } else {
                     ScrollView {

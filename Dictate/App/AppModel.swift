@@ -64,6 +64,7 @@ final class AppModel {
             Log.hotkey.info("gesture \(String(describing: gesture), privacy: .public) in phase \(String(describing: self.controller.phase), privacy: .public)")
             self.controller.handle(gesture)
         }
+        fnMonitor.key = settings.pushToTalkKey
         claudeCLIPath = locator.locate(override: settings.cliPathOverride)
         refreshSetup()
     }
@@ -89,7 +90,7 @@ final class AppModel {
             microphone: Permissions.microphone,
             inputMonitoring: Permissions.inputMonitoring || hotkeyActive,
             accessibility: Permissions.accessibility,
-            fnKeyFree: Permissions.fnKeyFree,
+            fnKeyFree: !settings.pushToTalkKey.needsSystemKeyFreed || Permissions.fnKeyFree,
             transcriptionModel: transcriptionModelReady,
             claude: !settings.enhancementEnabled || claudeCLIPath != nil
         )
@@ -108,6 +109,14 @@ final class AppModel {
     /// Switches engines; a first switch to Parakeet downloads its model.
     func transcriptionEngineChanged() {
         transcriber.select(settings.transcriptionEngine)
+        refreshSetup()
+        pollSetupUntilComplete()
+    }
+
+    /// Takes effect on the next press: no need to restart the event tap.
+    func pushToTalkKeyChanged() {
+        fnMonitor.key = settings.pushToTalkKey
+        Log.hotkey.info("push-to-talk key: \(self.settings.pushToTalkKey.rawValue, privacy: .public)")
         refreshSetup()
         pollSetupUntilComplete()
     }

@@ -30,6 +30,11 @@ final class AppSettings {
         didSet { defaults.set(transcriptionEngine.rawValue, forKey: Keys.transcriptionEngine) }
     }
 
+    /// The modifier held to dictate.
+    var pushToTalkKey: PushToTalkKey {
+        didSet { defaults.set(pushToTalkKey.rawValue, forKey: Keys.pushToTalkKey) }
+    }
+
     var enhancementEnabled: Bool {
         didSet { defaults.set(enhancementEnabled, forKey: Keys.enhancementEnabled) }
     }
@@ -87,6 +92,7 @@ final class AppSettings {
         transcriptionEngine = defaults.string(forKey: Keys.transcriptionEngine)
             .flatMap(TranscriptionEngine.init(rawValue:))
             ?? (TranscriptionEngine.parakeet.supports(language: language) ? .parakeet : .whisper)
+        pushToTalkKey = defaults.string(forKey: Keys.pushToTalkKey).flatMap(PushToTalkKey.init(rawValue:)) ?? .fn
         enhancementEnabled = defaults.object(forKey: Keys.enhancementEnabled) as? Bool ?? true
         guideWhisperWithVocabulary = defaults.object(forKey: Keys.guideWhisperWithVocabulary) as? Bool ?? true
         shareFieldContext = defaults.object(forKey: Keys.shareFieldContext) as? Bool ?? true
@@ -99,6 +105,7 @@ final class AppSettings {
         static let language = "language"
         static let languageConfirmed = "languageConfirmed"
         static let transcriptionEngine = "transcriptionEngine"
+        static let pushToTalkKey = "pushToTalkKey"
         static let enhancementEnabled = "enhancementEnabled"
         static let guideWhisperWithVocabulary = "guideWhisperWithVocabulary"
         static let shareFieldContext = "shareFieldContext"

@@ -26,4 +26,29 @@ struct FnKeyMonitorTests {
     @Test func unrelatedEventsAreIgnored() {
         #expect(FnKeyMonitor.classify(type: .keyUp, keyCode: 0, flags: [], time: 0) == nil)
     }
+
+    @Test func eitherControlKeyIsThePushToTalkKey() {
+        for keyCode: Int64 in [59, 62] {
+            #expect(FnKeyMonitor.classify(key: .control, type: .flagsChanged, keyCode: keyCode, flags: .maskControl, time: 1) == .fnDown(at: 1))
+            #expect(FnKeyMonitor.classify(key: .control, type: .flagsChanged, keyCode: keyCode, flags: [], time: 2) == .fnUp(at: 2))
+        }
+    }
+
+    /// Releasing one control while the other is still held keeps the flag set.
+    @Test func controlStaysDownWhileTheOtherControlIsHeld() {
+        #expect(FnKeyMonitor.classify(key: .control, type: .flagsChanged, keyCode: 62, flags: .maskControl, time: 3) == .fnDown(at: 3))
+    }
+
+    @Test func withControlTheOtherModifiersStillInterrupt() {
+        #expect(FnKeyMonitor.classify(key: .control, type: .flagsChanged, keyCode: 55, flags: [.maskControl, .maskCommand], time: 0) == .otherKeyDown)
+        #expect(FnKeyMonitor.classify(key: .control, type: .keyDown, keyCode: 8, flags: .maskControl, time: 0) == .otherKeyDown)
+    }
+
+    @Test func withControlHeldAModifierReleaseIsIgnored() {
+        #expect(FnKeyMonitor.classify(key: .control, type: .flagsChanged, keyCode: 56, flags: .maskControl, time: 0) == nil)
+    }
+
+    @Test func withControlTheFnKeyIsNotThePushToTalkKey() {
+        #expect(FnKeyMonitor.classify(key: .control, type: .flagsChanged, keyCode: 63, flags: .maskSecondaryFn, time: 0) == nil)
+    }
 }
