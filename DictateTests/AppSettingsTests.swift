@@ -33,12 +33,20 @@ struct AppSettingsTests {
         #expect(!AppSettings(defaults: UserDefaults(suiteName: suite)!).shareFieldContext)
     }
 
-    @Test func transcriptionEngineIsWhisperByDefaultAndPersists() {
+    @Test func transcriptionEngineIsParakeetByDefaultAndPersists() {
         let suite = "AppSettingsTests-\(UUID().uuidString)"
-        let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!)
-        #expect(settings.transcriptionEngine == .whisper)
-        settings.transcriptionEngine = .parakeet
-        #expect(AppSettings(defaults: UserDefaults(suiteName: suite)!).transcriptionEngine == .parakeet)
+        let defaults = UserDefaults(suiteName: suite)!
+        defaults.set("fr", forKey: "language")
+        let settings = AppSettings(defaults: defaults)
+        #expect(settings.transcriptionEngine == .parakeet)
+        settings.transcriptionEngine = .whisper
+        #expect(AppSettings(defaults: UserDefaults(suiteName: suite)!).transcriptionEngine == .whisper)
+    }
+
+    @Test func transcriptionEngineFallsBackToWhisperForLanguagesParakeetLacks() {
+        let defaults = UserDefaults(suiteName: "AppSettingsTests-\(UUID().uuidString)")!
+        defaults.set("ja", forKey: "language")
+        #expect(AppSettings(defaults: defaults).transcriptionEngine == .whisper)
     }
 
     @Test func whisperGetsTheVocabularyByDefault() {

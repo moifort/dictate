@@ -1,28 +1,28 @@
 import SwiftUI
 
 /// Classic macOS preferences: icon tabs in the toolbar, labels in the left
-/// column. From what every user touches to what most never will: the
-/// dictation itself, the Claude pass, then the app's housekeeping.
+/// column. The app itself, then the two halves of a dictation: the
+/// transcription and the review pass.
 struct SettingsView: View {
     @Bindable var model: AppModel
 
     var body: some View {
         TabView {
+            Tab("Général", systemImage: "gearshape") {
+                GeneralSettings(model: model)
+            }
             Tab("Dictée", systemImage: "mic") {
                 DictationSettings(model: model)
             }
-            Tab("Claude", systemImage: "sparkles") {
-                ClaudeSettings(model: model)
-            }
-            Tab("Général", systemImage: "gearshape") {
-                GeneralSettings(model: model)
+            Tab("Relecture", systemImage: "sparkles") {
+                ReviewSettings(model: model)
             }
         }
         .frame(width: 560)
     }
 }
 
-/// Language, engine and lexicon: everything that shapes the raw transcription.
+/// Language, then engine and lexicon together: everything that shapes the raw transcription.
 private struct DictationSettings: View {
     @Bindable var model: AppModel
 
@@ -49,19 +49,14 @@ private struct DictationSettings: View {
                         .font(.callout)
                         .foregroundStyle(.orange)
                     }
-                }
-            }
 
-            Divider()
-
-            LabeledContent("Lexique :") {
-                VStack(alignment: .leading, spacing: 6) {
                     TextEditor(text: Bindable(model.settings).vocabularyText)
                         .font(.body.monospaced())
                         .frame(height: 120)
                         .overlay(RoundedRectangle(cornerRadius: 6).stroke(.separator))
+                        .padding(.top, 8)
                         .onChange(of: model.settings.vocabularyText) { model.settingsChanged() }
-                    Hint("Un terme par ligne : noms, outils, sigles. Claude les écrit exactement ainsi, quel que soit le moteur.")
+                    Hint("Lexique, un terme par ligne : noms, outils, sigles. Claude les écrit exactement ainsi, quel que soit le moteur.")
                     if model.settings.transcriptionEngine.acceptsVocabulary {
                         // Shown as on when Claude is off: Whisper then always gets the lexicon.
                         Toggle("Le donner aussi à Whisper", isOn: Binding(
@@ -95,26 +90,105 @@ private struct DictationSettings: View {
     }
 }
 
-/// The pass that turns the raw transcription into clean text.
-private struct ClaudeSettings: View {
+/// Launch at login, updates and the way out, on a single label.
+private struct GeneralSettings: View {
     @Bindable var model: AppModel
+    @State private var launchAtLogin = false
+    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         Form {
+            LabeledContent("Application :") {
+                VStack(alignment: .leading, spacing: 8) {
+                    Toggle("Ouvrir à l'ouverture de session", isOn: $launchAtLogin)
+                        .onChange(of: launchAtLogin) {
+                            model.settings.launchAtLogin = launchAtLogin
+                            // Registration can be refused: show what macOS actually did.
+                            launchAtLogin = model.settings.launchAtLogin
+                        }
+                    Toggle("Installer les mises à jour automatiquement", isOn: Bindable(model.settings).autoUpdate)
+                    HStack {
+                        Text("Version \(model.updater.currentVersion)")
+                        if let release = model.updater.available {
+                            Button("Installer \(release.version)…") {
+                                NSApp.activate()
+                                openWindow(id: "update")
+                            }
+                        } else {
+                            Button("Rechercher") { Task { await model.updater.check() } }
+                                .disabled(model.updater.isBusy)
+                        }
+                        if model.updater.state == .checking {
+                            ProgressView().controlSize(.small)
+                        } else if let lastCheck = model.updater.lastCheck, model.updater.available == nil {
+                            Hint("À jour, vérifié \(lastCheck.formatted(.relative(presentation: .named)))")
+                        }
+                    }
+                    Button("Désinstaller Dictate…") { Uninstaller().confirmAndRun() }
+                        .padding(.top, 8)
+                    Hint("Met l'application, les modèles et les statistiques à la Corbeille, efface les réglages.")
+                }
+            }
+        }
+        .formStyle(.columns)
+        .padding(20)
+        .onAppear { launchAtLogin = model.settings.launchAtLogin }
+    }
+}
+
+/// The models that could review a dictation. Only Claude is wired today;
+/// the others show where this is going.
+private enum Reviewer: String, CaseIterable, Identifiable {
+    case claude, chatGPT, gemini, local
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .claude: "Claude (Haiku)"
+        case .chatGPT: "ChatGPT"
+        case .gemini: "Gemini"
+        case .local: "Modèle local"
+        }
+    }
+
+    var isAvailable: Bool { self == .claude }
+}
+
+/// The pass that turns the raw transcription into clean text.
+private struct ReviewSettings: View {
+    @Bindable var model: AppModel
+    @State private var reviewer = Reviewer.claude
+
+    var body: some View {
+        Form {
+            LabeledContent("Modèle :") {
+                VStack(alignment: .leading, spacing: 6) {
+                    Picker("Modèle", selection: $reviewer) {
+                        ForEach(Reviewer.allCases) { reviewer in
+                            Text(reviewer.displayName).tag(reviewer).disabled(!reviewer.isAvailable)
+                        }
+                    }
+                    .labelsHidden()
+                    .fixedSize()
+                    Hint("Via votre compte Claude Code.")
+                }
+            }
+
             LabeledContent("Relecture :") {
                 VStack(alignment: .leading, spacing: 6) {
-                    Toggle("Relire le texte avec Claude", isOn: Bindable(model.settings).enhancementEnabled)
+                    Toggle("Relire chaque dictée", isOn: Bindable(model.settings).enhancementEnabled)
                         .onChange(of: model.settings.enhancementEnabled) { model.settingsChanged() }
-                    Hint("Ponctuation, hésitations retirées, lexique appliqué. Passe par votre compte Claude Code, avec le modèle Haiku.")
-                    Toggle("Lui montrer ce qui précède le curseur", isOn: Bindable(model.settings).shareFieldContext)
+                    Hint("Ponctuation, hésitations retirées, lexique appliqué.")
+                    Toggle("Lire le texte avant le curseur", isOn: Bindable(model.settings).shareFieldContext)
                         .disabled(!model.settings.enhancementEnabled)
-                    Hint("Les 500 derniers caractères du champ, pour reprendre vos noms et votre ton. Jamais dans un champ de mot de passe.")
+                    Hint("500 caractères, pour reprendre vos noms et votre ton. Jamais un mot de passe.")
                 }
             }
 
             Divider()
 
-            LabeledContent("Programme claude :") {
+            LabeledContent("Binaire :") {
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 8) {
                         claudeCLIStatusIcon
@@ -133,12 +207,12 @@ private struct ClaudeSettings: View {
                             .help(path.path)
                     }
                     if overrideIgnored {
-                        Text("Le fichier choisi n'est pas exécutable : détection automatique utilisée.")
+                        Text("Fichier non exécutable : détection automatique utilisée.")
                             .font(.caption)
                             .foregroundStyle(.orange)
                     }
                     if !model.settings.cliPathOverride.isEmpty {
-                        Button("Revenir à la détection automatique") {
+                        Button("Détection automatique") {
                             model.settings.cliPathOverride = ""
                             model.settingsChanged()
                         }
@@ -146,9 +220,8 @@ private struct ClaudeSettings: View {
                         .font(.caption)
                     }
                     if let result = model.claudeTestResult {
-                        Text(result).font(.caption).foregroundStyle(.secondary)
+                        Hint(result)
                     }
-                    Hint("Détecté dans l'application Claude ou dans votre installation de Claude Code.")
                 }
             }
         }
@@ -168,9 +241,9 @@ private struct ClaudeSettings: View {
     }
 
     private var claudeCLITitle: String {
-        if model.claudeCLIPath == nil { return "Introuvable" }
-        if let version = model.claudeCLIVersion { return "Version \(version)" }
-        return model.isProbingClaudeCLI ? "Vérification…" : "Ne répond pas"
+        if model.claudeCLIPath == nil { return "claude introuvable" }
+        if let version = model.claudeCLIVersion { return "claude \(version)" }
+        return model.isProbingClaudeCLI ? "claude" : "claude ne répond pas"
     }
 
     private var overrideIgnored: Bool {
@@ -196,69 +269,6 @@ private struct ClaudeSettings: View {
     }
 }
 
-/// Launch at login, updates and the way out.
-private struct GeneralSettings: View {
-    @Bindable var model: AppModel
-    @State private var launchAtLogin = false
-    @Environment(\.openWindow) private var openWindow
-
-    var body: some View {
-        Form {
-            LabeledContent("Démarrage :") {
-                Toggle("Ouvrir Dictate à l'ouverture de session", isOn: $launchAtLogin)
-                    .onChange(of: launchAtLogin) {
-                        model.settings.launchAtLogin = launchAtLogin
-                        // Registration can be refused: show what macOS actually did.
-                        launchAtLogin = model.settings.launchAtLogin
-                    }
-            }
-
-            Divider()
-
-            LabeledContent("Mises à jour :") {
-                VStack(alignment: .leading, spacing: 6) {
-                    Toggle("Installer les nouvelles versions automatiquement", isOn: Bindable(model.settings).autoUpdate)
-                    Hint("Vérifiées au lancement, puis toutes les six heures.")
-                }
-            }
-
-            LabeledContent("Version \(model.updater.currentVersion) :") {
-                HStack {
-                    if let release = model.updater.available {
-                        Button("Installer \(release.version)…") {
-                            NSApp.activate()
-                            openWindow(id: "update")
-                        }
-                    } else {
-                        Button("Rechercher") { Task { await model.updater.check() } }
-                            .disabled(model.updater.isBusy)
-                    }
-                    if model.updater.state == .checking {
-                        ProgressView().controlSize(.small)
-                    } else if let lastCheck = model.updater.lastCheck, model.updater.available == nil {
-                        Text("À jour, vérifié \(lastCheck.formatted(.relative(presentation: .named)))")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-
-            Divider()
-
-            LabeledContent("Désinstallation :") {
-                VStack(alignment: .leading, spacing: 6) {
-                    Button("Désinstaller Dictate…") { Uninstaller().confirmAndRun() }
-                    Hint("Place l'application, les modèles et les statistiques dans la Corbeille, efface les réglages et quitte.")
-                }
-            }
-        }
-        .formStyle(.columns)
-        .padding(20)
-        .onAppear { launchAtLogin = model.settings.launchAtLogin }
-    }
-}
-
-/// The small grey explanation under a control.
 private struct Hint: View {
     let text: String
 

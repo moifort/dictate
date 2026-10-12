@@ -24,8 +24,8 @@ final class AppSettings {
         didSet { defaults.set(languageConfirmed, forKey: Keys.languageConfirmed) }
     }
 
-    /// The model that turns speech into text. Whisper by default: it covers
-    /// every language and takes the vocabulary as a prompt.
+    /// The model that turns speech into text. Parakeet by default for its
+    /// speed; Whisper when the language is one of those Parakeet lacks.
     var transcriptionEngine: TranscriptionEngine {
         didSet { defaults.set(transcriptionEngine.rawValue, forKey: Keys.transcriptionEngine) }
     }
@@ -81,10 +81,12 @@ final class AppSettings {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        language = defaults.string(forKey: Keys.language) ?? DictationLanguage.preferred()
+        let language = defaults.string(forKey: Keys.language) ?? DictationLanguage.preferred()
+        self.language = language
         languageConfirmed = defaults.bool(forKey: Keys.languageConfirmed)
         transcriptionEngine = defaults.string(forKey: Keys.transcriptionEngine)
-            .flatMap(TranscriptionEngine.init(rawValue:)) ?? .whisper
+            .flatMap(TranscriptionEngine.init(rawValue:))
+            ?? (TranscriptionEngine.parakeet.supports(language: language) ? .parakeet : .whisper)
         enhancementEnabled = defaults.object(forKey: Keys.enhancementEnabled) as? Bool ?? true
         guideWhisperWithVocabulary = defaults.object(forKey: Keys.guideWhisperWithVocabulary) as? Bool ?? true
         shareFieldContext = defaults.object(forKey: Keys.shareFieldContext) as? Bool ?? true
