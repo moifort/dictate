@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// Classic macOS preferences: icon tabs in the toolbar, labels in the left
-/// column. The app itself, then the two halves of a dictation: the
-/// transcription and the review pass.
+/// column. The app itself, then the stages of a dictation: transcription,
+/// the words it must get right, the review pass.
 struct SettingsView: View {
     @Bindable var model: AppModel
 
@@ -14,6 +14,9 @@ struct SettingsView: View {
             Tab("Dictée", systemImage: "mic") {
                 DictationSettings(model: model)
             }
+            Tab("Lexique", systemImage: "character.book.closed") {
+                LexiconSettings(model: model)
+            }
             Tab("Relecture", systemImage: "sparkles") {
                 ReviewSettings(model: model)
             }
@@ -22,7 +25,7 @@ struct SettingsView: View {
     }
 }
 
-/// Language, then engine and lexicon together: everything that shapes the raw transcription.
+/// Language and engine: what turns speech into raw text.
 private struct DictationSettings: View {
     @Bindable var model: AppModel
 
@@ -49,23 +52,6 @@ private struct DictationSettings: View {
                         .font(.callout)
                         .foregroundStyle(.orange)
                     }
-
-                    TextEditor(text: Bindable(model.settings).vocabularyText)
-                        .font(.body.monospaced())
-                        .frame(height: 120)
-                        .overlay(RoundedRectangle(cornerRadius: 6).stroke(.separator))
-                        .padding(.top, 8)
-                        .onChange(of: model.settings.vocabularyText) { model.settingsChanged() }
-                    Hint("Lexique, un terme par ligne : noms, outils, sigles. Claude les écrit exactement ainsi, quel que soit le moteur.")
-                    if model.settings.transcriptionEngine.acceptsVocabulary {
-                        // Shown as on when Claude is off: Whisper then always gets the lexicon.
-                        Toggle("Le donner aussi à Whisper", isOn: Binding(
-                            get: { model.settings.guideWhisperWithVocabulary || !model.settings.enhancementEnabled },
-                            set: { model.settings.guideWhisperWithVocabulary = $0 }
-                        ))
-                        .disabled(!model.settings.enhancementEnabled)
-                        Hint(whisperLexiconHint)
-                    }
                 }
             }
         }
@@ -81,10 +67,46 @@ private struct DictationSettings: View {
             "Plusieurs fois plus rapide, 25 langues européennes. Ignore le lexique : seul Claude l'applique. 610 Mo à télécharger au premier usage."
         }
     }
+}
 
-    private var whisperLexiconHint: String {
+/// The terms every dictation must spell right.
+private struct LexiconSettings: View {
+    @Bindable var model: AppModel
+
+    var body: some View {
+        Form {
+            LabeledContent("Termes :") {
+                VStack(alignment: .leading, spacing: 6) {
+                    TextEditor(text: Bindable(model.settings).vocabularyText)
+                        .font(.body.monospaced())
+                        .frame(height: 220)
+                        .overlay(RoundedRectangle(cornerRadius: 6).stroke(.separator))
+                        .onChange(of: model.settings.vocabularyText) { model.settingsChanged() }
+                    Hint("Un par ligne : noms, outils, sigles. Claude les écrit exactement ainsi, quel que soit le moteur.")
+                }
+            }
+
+            if model.settings.transcriptionEngine.acceptsVocabulary {
+                LabeledContent("Whisper :") {
+                    VStack(alignment: .leading, spacing: 6) {
+                        // Shown as on when Claude is off: Whisper then always gets the lexicon.
+                        Toggle("Guider aussi Whisper avec ces termes", isOn: Binding(
+                            get: { model.settings.guideWhisperWithVocabulary || !model.settings.enhancementEnabled },
+                            set: { model.settings.guideWhisperWithVocabulary = $0 }
+                        ))
+                        .disabled(!model.settings.enhancementEnabled)
+                        Hint(whisperHint)
+                    }
+                }
+            }
+        }
+        .formStyle(.columns)
+        .padding(20)
+    }
+
+    private var whisperHint: String {
         if !model.settings.enhancementEnabled {
-            return "Toujours actif tant que Claude est désactivé : Whisper est alors seul à connaître votre jargon."
+            return "Toujours actif sans relecture : Whisper est alors seul à connaître votre jargon."
         }
         return "Plus précis sur le jargon, mais environ 2 s de plus par dictée."
     }
