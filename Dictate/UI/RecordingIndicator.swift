@@ -21,6 +21,7 @@ final class RecordingIndicator {
     private let panel: IndicatorPanel
     private var flashTask: Task<Void, Never>?
     private var hideTask: Task<Void, Never>?
+    private var visibilityTask: Task<Void, Never>?
 
     private static let size = CGSize(width: 140, height: 56)
     /// Long enough for the fade-out in `IndicatorView` to finish.
@@ -56,19 +57,19 @@ final class RecordingIndicator {
         controller.phase != .idle || state.flash != nil
     }
 
+    /// A single long-lived subscription: a `withObservationTracking` chain that
+    /// re-registers itself after each change can drop a link and leave the pill
+    /// hidden for the rest of the session.
     private func observeVisibility() {
-        withObservationTracking {
-            _ = controller.phase
-            _ = state.flash
-        } onChange: { [weak self] in
-            Task { @MainActor in
+        let changes = Observations { [controller, state] in (controller.phase, state.flash) }
+        visibilityTask = Task { [weak self] in
+            for await (phase, _) in changes {
                 guard let self else { return }
-                if self.controller.phase == .recording {
-                    self.flashTask?.cancel()
-                    self.state.flash = nil
+                if phase == .recording, state.flash != nil {
+                    flashTask?.cancel()
+                    state.flash = nil
                 }
-                self.updateVisibility()
-                self.observeVisibility()
+                updateVisibility()
             }
         }
     }
@@ -83,7 +84,14 @@ final class RecordingIndicator {
                 show for \(String(describing: self.controller.phase)), flash \(String(describing: self.state.flash)), \
                 panel visible: \(self.panel.isVisible), on screen: \(self.panel.occlusionState.contains(.visible))
                 """)
-            if !panel.isVisible { presentOnActiveScreen() }
+            if panel.isVisible {
+                // AppKit may keep reporting the panel as visible after the window
+                // server dropped it (suspected after a long session with sleeps):
+                // bring it back on every show, without moving it mid-dictation.
+                panel.orderFrontRegardless()
+            } else {
+                presentOnActiveScreen()
+            }
         } else if hideTask == nil {
             hideTask = Task {
                 try? await Task.sleep(for: Self.hideDelay)
