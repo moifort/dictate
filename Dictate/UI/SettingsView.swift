@@ -292,7 +292,9 @@ private struct ReviewSettings: View {
                 ReviewerPicker(selection: reviewer)
             }
 
-            if model.settings.enhancementEnabled {
+            // Greyed out rather than removed under "Aucun", so that the window
+            // keeps its height: it is sized to its content.
+            Group {
                 LabeledContent("Claude :") {
                     VStack(alignment: .leading, spacing: 6) {
                         Hint("Modèle Haiku, via votre compte Claude Code. Ponctuation, hésitations retirées, lexique appliqué.")
@@ -341,6 +343,7 @@ private struct ReviewSettings: View {
                     }
                 }
             }
+            .disabled(!model.settings.enhancementEnabled)
         }
         .formStyle(.columns)
         .padding(20)
