@@ -182,6 +182,40 @@ struct UpdaterFlowTests {
         try? FileManager.default.removeItem(at: root)
     }
 
+    @Test func keepsTheReleaseWhileDownloadingAndAfterAFailure() async throws {
+        let feed = """
+        [{"tag_name": "v9.9.9", "draft": false, "prerelease": false, "body": "Big one",
+          "assets": [{"name": "Dictate-9.9.9.zip", "browser_download_url": "https://x/9.9.9.zip"}]}]
+        """
+        let updater = Updater(
+            currentVersion: "0.1.0",
+            bundleURL: FileManager.default.temporaryDirectory.appending(path: "Dictate.app"),
+            expectation: .init(bundleIdentifier: "test.fake", teamIdentifier: nil),
+            fetch: { _ in Data(feed.utf8) },
+            download: { _, progress in
+                progress(0.5)
+                try await Task.sleep(for: .milliseconds(300))
+                throw URLError(.networkConnectionLost)
+            },
+            finish: { _ in }
+        )
+        await updater.check()
+        #expect(updater.available?.version == "9.9.9")
+
+        updater.install()
+        try await Task.sleep(for: .milliseconds(100))
+        #expect(updater.state == .downloading(0.5), "\(updater.state)")
+        #expect(updater.available?.version == "9.9.9")
+        #expect(updater.releases.map(\.notes) == ["Big one"])
+
+        for _ in 0..<50 {
+            if case .failed = updater.state { break }
+            try await Task.sleep(for: .milliseconds(100))
+        }
+        guard case .failed = updater.state else { Issue.record("\(updater.state)"); return }
+        #expect(updater.available?.version == "9.9.9")
+    }
+
     @Test func thisBuildExpectsItsOwnIdentifierAndTeam() {
         let expectation = Updater.expectation()
         // Debug builds carry a `.dev` suffix, so compare with the running bundle.

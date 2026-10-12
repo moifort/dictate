@@ -49,8 +49,7 @@ struct UpdateView: View {
     }
 
     private var notes: AttributedString {
-        let releases: [Release] = if case .available(let list) = updater.state { list.reversed() } else { [] }
-        let markdown = releases.map { "**\($0.version)**\n\n\($0.notes.isEmpty ? "Pas de notes." : $0.notes)" }
+        let markdown = updater.releases.reversed().map { "**\($0.version)**\n\n\($0.notes.isEmpty ? "Pas de notes." : $0.notes)" }
             .joined(separator: "\n\n")
         return (try? AttributedString(markdown: markdown, options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)))
             ?? AttributedString(markdown)

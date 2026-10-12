@@ -52,8 +52,8 @@ final class Updater {
     enum State: Equatable {
         case idle
         case checking
-        /// Newer releases, oldest first; the last one is installed.
-        case available([Release])
+        /// `releases` holds newer versions; the last one is installed.
+        case available
         case downloading(Double)
         case installing
         case failed(String)
@@ -63,6 +63,9 @@ final class Updater {
     static let checkInterval: Duration = .seconds(6 * 3600)
 
     private(set) var state: State = .idle
+    /// Releases newer than the running one, oldest first. Survives downloading and failures so the
+    /// window keeps showing what is being installed and lets the user retry.
+    private(set) var releases: [Release] = []
     private(set) var lastCheck: Date?
     let currentVersion: String
 
@@ -100,10 +103,7 @@ final class Updater {
         NSApp.terminate(nil)
     }
 
-    var available: Release? {
-        if case .available(let releases) = state { return releases.last }
-        return nil
-    }
+    var available: Release? { releases.last }
 
     var isBusy: Bool {
         switch state {
@@ -131,11 +131,12 @@ final class Updater {
         defer { lastCheck = .now }
         do {
             let url = URL(string: "https://api.github.com/repos/\(Self.repository)/releases")!
-            let releases = try Release.newer(than: currentVersion, in: try await fetch(url))
-            state = releases.isEmpty ? .idle : .available(releases)
-            Log.app.info("update check: \(releases.count) newer release(s)")
+            self.releases = try Release.newer(than: currentVersion, in: try await fetch(url))
+            state = self.releases.isEmpty ? .idle : .available
+            Log.app.info("update check: \(self.releases.count) newer release(s)")
         } catch {
             Log.app.error("update check failed: \(error.localizedDescription, privacy: .public)")
+            releases = []
             state = .idle
         }
     }
