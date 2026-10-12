@@ -78,13 +78,25 @@ struct LatencyCard: View {
                 }
             }
             .pickerStyle(.segmented)
+            .controlSize(.small)
             .labelsHidden()
             .fixedSize()
         } content: {
-            MetricHeadline(
-                caption: "Médiane", value: series.latency.map(StatsFormat.seconds) ?? "—", unit: "s",
-                range: StatsFormat.range(series)
-            )
+            // The legend shares the headline's row: a row of its own would
+            // make this card taller than its neighbours.
+            HStack(alignment: .bottom) {
+                MetricHeadline(
+                    caption: "Médiane", value: series.latency.map(StatsFormat.seconds) ?? "—", unit: "s",
+                    range: StatsFormat.range(series)
+                )
+                Spacer()
+                HStack(spacing: 12) {
+                    legend(engine.displayName, color: StatsPalette.latency)
+                    legend("Claude", color: StatsPalette.claude)
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
             PeriodChart(
                 series: series,
                 peak: series.buckets.map { $0.transcription + $0.enhancement }.max() ?? 0,
@@ -104,12 +116,6 @@ struct LatencyCard: View {
                 .foregroundStyle(StatsPalette.claude)
                 .opacity(dimmed ? 0.4 : 1)
             }
-            HStack(spacing: 12) {
-                legend(engine.displayName, color: StatsPalette.latency)
-                legend("Claude", color: StatsPalette.claude)
-            }
-            .font(.caption)
-            .foregroundStyle(.secondary)
         }
     }
 

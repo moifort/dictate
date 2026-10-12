@@ -11,6 +11,7 @@ struct StatsCard<Content: View, Accessory: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
+            // One height whatever the accessory, so cards side by side line up.
             HStack {
                 Label(title, systemImage: symbol)
                     .font(.headline)
@@ -18,6 +19,7 @@ struct StatsCard<Content: View, Accessory: View>: View {
                 Spacer()
                 accessory
             }
+            .frame(height: 22)
             content
         }
         .padding(16)

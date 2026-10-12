@@ -43,7 +43,7 @@ struct PeriodChart<Marks: ChartContent>: View {
         .chartXScale(domain: series.start...series.end)
         .chartXAxis {
             AxisMarks(values: axisDates) {
-                AxisValueLabel(format: series.period.axisFormat, centered: series.period.axisCentered)
+                AxisValueLabel(format: series.period.axisFormat)
                     .font(.caption2)
                     .foregroundStyle(Color.secondary)
             }
@@ -67,14 +67,14 @@ struct PeriodChart<Marks: ChartContent>: View {
         }
     }
 
-    /// Where a date goes under the columns: one per column for a week or a
-    /// year, every six hours of the day, every week of the month, and the
-    /// first of each month over six months.
+    /// Where a date goes under the columns. A week or a year names every
+    /// column, so the label sits under its middle; the day, the month and
+    /// the six months mark a scale, so the label sits at the tick.
     private var axisDates: [Date] {
         let starts = series.buckets.map(\.date)
         switch series.period {
         case .day: return stride(from: 0, to: starts.count, by: 6).map { starts[$0] }
-        case .week, .year: return starts
+        case .week, .year: return series.buckets.map(\.midpoint)
         case .month: return stride(from: 0, to: starts.count, by: 7).map { starts[$0] }
         case .sixMonths:
             let calendar = Calendar.current
@@ -110,23 +110,16 @@ private struct Lollipop: View {
     }
 }
 
-/// How the dates read under each period.
+/// How the dates read under each period. The seven columns of a week are
+/// wide enough for "lun."; the twelve of a year only for an initial.
 private extension StatsPeriod {
     var axisFormat: Date.FormatStyle {
         switch self {
         case .day: .dateTime.hour()
-        case .week: .dateTime.weekday(.narrow)
+        case .week: .dateTime.weekday(.abbreviated)
         case .month: .dateTime.day()
         case .sixMonths: .dateTime.month(.abbreviated)
         case .year: .dateTime.month(.narrow)
-        }
-    }
-
-    /// Under the column when one label names one column.
-    var axisCentered: Bool {
-        switch self {
-        case .week, .year: true
-        case .day, .month, .sixMonths: false
         }
     }
 }
