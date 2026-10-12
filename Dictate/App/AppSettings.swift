@@ -47,12 +47,6 @@ final class AppSettings {
         didSet { defaults.set(shareFieldContext, forKey: Keys.shareFieldContext) }
     }
 
-    /// Record with the Mac's mic while a Bluetooth headset is the default input,
-    /// so the headset keeps its full audio quality during the dictation.
-    var builtInMicWithBluetooth: Bool {
-        didSet { defaults.set(builtInMicWithBluetooth, forKey: Keys.builtInMicWithBluetooth) }
-    }
-
     /// Install new releases as soon as they are found, without asking.
     var autoUpdate: Bool {
         didSet { defaults.set(autoUpdate, forKey: Keys.autoUpdate) }
@@ -96,7 +90,6 @@ final class AppSettings {
         enhancementEnabled = defaults.object(forKey: Keys.enhancementEnabled) as? Bool ?? true
         guideWhisperWithVocabulary = defaults.object(forKey: Keys.guideWhisperWithVocabulary) as? Bool ?? true
         shareFieldContext = defaults.object(forKey: Keys.shareFieldContext) as? Bool ?? true
-        builtInMicWithBluetooth = defaults.object(forKey: Keys.builtInMicWithBluetooth) as? Bool ?? true
         autoUpdate = defaults.object(forKey: Keys.autoUpdate) as? Bool ?? true
         cliPathOverride = defaults.string(forKey: Keys.cliPathOverride) ?? ""
         vocabularyText = defaults.string(forKey: Keys.vocabulary) ?? Self.defaultVocabulary.joined(separator: "\n")
@@ -109,7 +102,6 @@ final class AppSettings {
         static let enhancementEnabled = "enhancementEnabled"
         static let guideWhisperWithVocabulary = "guideWhisperWithVocabulary"
         static let shareFieldContext = "shareFieldContext"
-        static let builtInMicWithBluetooth = "builtInMicWithBluetooth"
         static let autoUpdate = "autoUpdate"
         static let cliPathOverride = "cliPathOverride"
         static let vocabulary = "vocabulary"

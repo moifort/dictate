@@ -192,13 +192,6 @@ private struct GeneralSettings: View {
                     Hint("Met l'application, les modèles et les statistiques à la Corbeille, efface les réglages.")
                 }
             }
-            LabeledContent("Micro :") {
-                VStack(alignment: .leading, spacing: 4) {
-                    Toggle("Micro du Mac avec un casque Bluetooth", isOn: Bindable(model.settings).builtInMicWithBluetooth)
-                    Hint("Utiliser le micro du casque dégrade son son pendant toute la dictée.")
-                }
-            }
-            .padding(.top, 12)
         }
         .formStyle(.columns)
         .padding(20)

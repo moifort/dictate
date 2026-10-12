@@ -33,14 +33,6 @@ struct AppSettingsTests {
         #expect(!AppSettings(defaults: UserDefaults(suiteName: suite)!).shareFieldContext)
     }
 
-    @Test func builtInMicWithBluetoothIsOnByDefaultAndPersists() {
-        let suite = "AppSettingsTests-\(UUID().uuidString)"
-        let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!)
-        #expect(settings.builtInMicWithBluetooth)
-        settings.builtInMicWithBluetooth = false
-        #expect(!AppSettings(defaults: UserDefaults(suiteName: suite)!).builtInMicWithBluetooth)
-    }
-
     @Test func transcriptionEngineIsParakeetByDefaultAndPersists() {
         let suite = "AppSettingsTests-\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
