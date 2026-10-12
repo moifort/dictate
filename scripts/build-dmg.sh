@@ -51,12 +51,21 @@ cp "$APP/Contents/Resources/AppIcon.icns" "$STAGING/.VolumeIcon.icns"
 
 echo "Creating a read-write image"
 mkdir -p "$MOUNT_POINT"
-hdiutil create -quiet -srcfolder "$STAGING" -volname "$VOLUME" \
+hdiutil create -srcfolder "$STAGING" -volname "$VOLUME" \
   -fs HFS+ -format UDRW "$RW_IMAGE"
-hdiutil attach -quiet -readwrite -noverify -noautoopen \
+hdiutil attach -readwrite -noverify -noautoopen \
   -mountpoint "$MOUNT_POINT" "$RW_IMAGE"
-SetFile -a C "$MOUNT_POINT"
-SetFile -a V "$MOUNT_POINT/.VolumeIcon.icns" "$MOUNT_POINT/.background"
+# Flag the volume as carrying a custom icon. NSWorkspace does what the
+# deprecated SetFile used to, without depending on Xcode's extra tools.
+osascript -l JavaScript - "$MOUNT_POINT" "$STAGING/.VolumeIcon.icns" <<'JXA'
+function run(argv) {
+  ObjC.import("AppKit");
+  const icon = $.NSImage.alloc.initWithContentsOfFile(argv[1]);
+  if (!$.NSWorkspace.sharedWorkspace.setIconForFileOptions(icon, argv[0], 0)) {
+    throw new Error("could not set the volume icon");
+  }
+}
+JXA
 
 echo "Laying out the Finder window"
 # Finder only writes a .DS_Store for a window it has opened, hence the
@@ -98,10 +107,10 @@ APPLESCRIPT
 sync
 sleep 2
 rm -rf "$MOUNT_POINT/.fseventsd" "$MOUNT_POINT/.Trashes"
-hdiutil detach -quiet "$MOUNT_POINT"
+hdiutil detach "$MOUNT_POINT"
 
 echo "Compressing to $DMG"
 rm -f "$DMG"
-hdiutil convert -quiet -format ULFO -o "$DMG" "$RW_IMAGE"
-hdiutil verify -quiet "$DMG"
+hdiutil convert -format ULFO -o "$DMG" "$RW_IMAGE"
+hdiutil verify "$DMG"
 echo "Built $DMG ($(du -h "$DMG" | cut -f1))"
