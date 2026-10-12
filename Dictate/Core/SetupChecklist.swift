@@ -47,5 +47,9 @@ nonisolated struct SetupChecklist: Equatable, Sendable {
 
     var isComplete: Bool { pending.isEmpty }
 
+    /// The user went through at least the first page: only the onboarding
+    /// confirms the language, whereas macOS may already have granted the rest.
+    var hasStarted: Bool { language }
+
     var completedCount: Int { SetupStep.allCases.count - pending.count }
 }

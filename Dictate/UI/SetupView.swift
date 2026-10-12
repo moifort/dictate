@@ -7,40 +7,48 @@ import SwiftUI
 struct SetupView: View {
     @Bindable var model: AppModel
     @Environment(\.dismissWindow) private var dismissWindow
-    /// nil until the user navigates: a fresh install opens on the welcome
-    /// page, a resumed setup on the first missing step.
-    @State private var visited: Page?
-    @State private var movingForward = true
+    /// Decided once when the window opens; the permission poll never moves it.
+    @State private var page: Page
+    @State private var direction = SlideDirection()
 
-    enum Page: Hashable {
+    nonisolated enum Page: Hashable, Sendable {
         case welcome
         case step(SetupStep)
         case tryIt
     }
 
     private static let pages: [Page] = [.welcome] + SetupStep.allCases.map(Page.step) + [.tryIt]
+    private static let size = CGSize(width: 600, height: 640)
 
-    private var page: Page {
-        if let visited { return visited }
-        if model.setup.completedCount == 0 { return .welcome }
-        return model.setup.current.map(Page.step) ?? .tryIt
+    init(model: AppModel) {
+        self.model = model
+        _page = State(initialValue: Self.firstPage(for: model.setup))
+    }
+
+    /// A fresh install opens on the welcome page, a resumed setup on the first
+    /// missing step, whatever macOS had already granted.
+    nonisolated static func firstPage(for checklist: SetupChecklist) -> Page {
+        guard checklist.hasStarted else { return .welcome }
+        return checklist.current.map(Page.step) ?? .tryIt
     }
 
     private var index: Int { Self.pages.firstIndex(of: page) ?? 0 }
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            ZStack {
-                content
-                    .id(page)
-                    .transition(.asymmetric(
-                        insertion: .move(edge: movingForward ? .trailing : .leading).combined(with: .opacity),
-                        removal: .move(edge: movingForward ? .leading : .trailing).combined(with: .opacity)
-                    ))
+            VStack(spacing: 0) {
+                ZStack {
+                    content
+                        .id(page)
+                        .transition(PageSlide(direction: direction, width: Self.size.width))
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipped()
+
+                bottomBar
+                    .padding(.horizontal, 48)
+                    .padding(.bottom, 32)
             }
-            .animation(.snappy(duration: 0.45), value: page)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .clipped()
 
             if index > 0 {
                 Button { go(to: index - 1) } label: {
@@ -54,34 +62,78 @@ struct SetupView: View {
                 .transition(.opacity)
             }
         }
-        .frame(width: 600, height: 640)
-        .animation(.snappy, value: index)
+        .frame(width: Self.size.width, height: Self.size.height)
+        // One animation for the slide, the chevron and the bottom bar.
+        .animation(.snappy(duration: 0.45), value: page)
     }
 
     @ViewBuilder
     private var content: some View {
         switch page {
         case .welcome:
-            WelcomePage(onContinue: { go(to: 1) })
+            WelcomePage()
         case .step(let step):
-            StepPage(model: model, step: step, onContinue: { advance(after: step) }) {
-                actions(for: step)
-            }
+            StepPage(model: model, step: step) { actions(for: step) }
         case .tryIt:
-            TryItPage(model: model) { dismissWindow(id: "setup") }
+            TryItPage(model: model)
         }
     }
 
-    private func go(to target: Int) {
-        guard Self.pages.indices.contains(target) else { return }
-        movingForward = target > index
-        visited = Self.pages[target]
+    // MARK: Bottom bar
+
+    /// Stays in place while the pages slide, like the Continue button of a
+    /// setup assistant; only its wording follows the page.
+    private var bottomBar: some View {
+        BottomBar(
+            primary: primaryTitle,
+            primaryEnabled: primaryEnabled,
+            prominent: page != .tryIt || model.setup.isComplete,
+            onPrimary: primaryAction,
+            secondary: secondaryTitle,
+            onSecondary: secondaryAction,
+            pageIndex: index,
+            pageCount: Self.pages.count
+        )
     }
 
-    /// Continue on the language page is the confirmation itself.
-    private func advance(after step: SetupStep) {
-        if step == .language { model.confirmLanguage() }
-        go(to: index + 1)
+    private var primaryTitle: String {
+        switch page {
+        case .welcome, .step: "Continuer"
+        case .tryIt: model.setup.isComplete ? "Commencer" : "Plus tard"
+        }
+    }
+
+    private var primaryEnabled: Bool {
+        guard case .step(let step) = page else { return true }
+        return model.setup.isDone(step) || step == .language
+    }
+
+    private var secondaryTitle: String? {
+        guard case .step(let step) = page, !model.setup.isDone(step) else { return nil }
+        return step.skipTitle
+    }
+
+    private func primaryAction() {
+        switch page {
+        case .welcome:
+            go(to: 1)
+        case .step(let step):
+            // Continue on the language page is the confirmation itself.
+            if step == .language { model.confirmLanguage() }
+            go(to: index + 1)
+        case .tryIt:
+            dismissWindow(id: "setup")
+        }
+    }
+
+    private func secondaryAction() {
+        if page == .step(.claude) { model.continueWithoutClaude() }
+    }
+
+    private func go(to target: Int) {
+        guard Self.pages.indices.contains(target), target != index else { return }
+        direction.forward = target > index
+        page = Self.pages[target]
     }
 
     // MARK: Step actions
@@ -168,6 +220,29 @@ struct SetupView: View {
     }
 }
 
+// MARK: - Slide
+
+/// Where the next page change goes. Shared by reference: SwiftUI evaluates
+/// the outgoing page with the modifiers it had before the change, so a
+/// direction captured as a value would be the one of the previous navigation
+/// and both pages would head for the same edge.
+private final class SlideDirection {
+    var forward = true
+}
+
+/// Pages come in from the trailing edge and leave by the leading one when
+/// going forward, the reverse when going back.
+private struct PageSlide: Transition {
+    let direction: SlideDirection
+    let width: CGFloat
+
+    func body(content: Content, phase: TransitionPhase) -> some View {
+        content
+            .offset(x: phase.value * (direction.forward ? -width : width))
+            .opacity(phase.isIdentity ? 1 : 0)
+    }
+}
+
 // MARK: - Step copy
 
 private extension SetupStep {
@@ -225,15 +300,13 @@ private extension SetupStep {
 
 // MARK: - Shared layout
 
-/// The column every page uses: symbol, title, explanation, content, then the
-/// bottom bar with the primary button, an optional secondary link and the
-/// page dots.
-private struct PageLayout<Hero: View, Content: View, Footer: View>: View {
+/// The column every page uses: symbol, title, explanation, content. The
+/// bottom bar is not part of it, so that it stays put while pages slide.
+private struct PageLayout<Hero: View, Content: View>: View {
     let title: String
     let explanation: String
     @ViewBuilder let hero: Hero
     @ViewBuilder let content: Content
-    @ViewBuilder let footer: Footer
 
     var body: some View {
         VStack(spacing: 0) {
@@ -244,12 +317,14 @@ private struct PageLayout<Hero: View, Content: View, Footer: View>: View {
             Text(title)
                 .font(.system(size: 30, weight: .bold))
                 .multilineTextAlignment(.center)
+                .contentTransition(.opacity)
                 .padding(.top, 22)
 
             Text(explanation)
                 .font(.title3)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+                .contentTransition(.opacity)
                 .frame(maxWidth: 430)
                 .padding(.top, 12)
                 .fixedSize(horizontal: false, vertical: true)
@@ -260,11 +335,8 @@ private struct PageLayout<Hero: View, Content: View, Footer: View>: View {
             .padding(.top, 32)
 
             Spacer(minLength: 24)
-
-            footer
         }
         .padding(.horizontal, 48)
-        .padding(.bottom, 32)
     }
 }
 
@@ -284,6 +356,7 @@ private struct BottomBar: View {
             Button(action: onPrimary) {
                 Text(primary)
                     .font(.body.weight(.semibold))
+                    .contentTransition(.opacity)
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(prominent ? AnyPrimitiveButtonStyle(.glassProminent) : AnyPrimitiveButtonStyle(.glass))
@@ -330,13 +403,9 @@ private struct AnyPrimitiveButtonStyle: PrimitiveButtonStyle {
     }
 }
 
-private let pageCount = SetupStep.allCases.count + 2
-
 // MARK: - Pages
 
 private struct WelcomePage: View {
-    let onContinue: () -> Void
-
     var body: some View {
         PageLayout(
             title: "Bienvenue dans Dictate",
@@ -353,8 +422,6 @@ private struct WelcomePage: View {
                            detail: "fn suffit, même par-dessus une app en plein écran.")
             }
             .frame(maxWidth: 400)
-        } footer: {
-            BottomBar(primary: "Continuer", onPrimary: onContinue, pageIndex: 0, pageCount: pageCount)
         }
     }
 }
@@ -401,7 +468,6 @@ private struct FeatureRow: View {
 private struct StepPage<Content: View>: View {
     let model: AppModel
     let step: SetupStep
-    let onContinue: () -> Void
     @ViewBuilder let content: Content
 
     private var done: Bool { model.setup.isDone(step) }
@@ -418,16 +484,6 @@ private struct StepPage<Content: View>: View {
                 content
                     .transition(.opacity.combined(with: .offset(y: 8)))
             }
-        } footer: {
-            BottomBar(
-                primary: "Continuer",
-                primaryEnabled: done || step == .language,
-                onPrimary: onContinue,
-                secondary: done ? nil : step.skipTitle,
-                onSecondary: { if step == .claude { model.continueWithoutClaude() } },
-                pageIndex: step.rawValue + 1,
-                pageCount: pageCount
-            )
         }
         .animation(.spring(duration: 0.45, bounce: 0.2), value: done)
     }
@@ -436,7 +492,6 @@ private struct StepPage<Content: View>: View {
 /// Last page: a scratch field to check the whole chain end to end.
 private struct TryItPage: View {
     let model: AppModel
-    let onFinish: () -> Void
     @State private var text = ""
     @FocusState private var focused: Bool
 
@@ -462,14 +517,6 @@ private struct TryItPage: View {
                 .font(.callout)
                 .id(statusKey)
                 .transition(.blurReplace)
-        } footer: {
-            BottomBar(
-                primary: model.setup.isComplete ? "Commencer" : "Plus tard",
-                prominent: model.setup.isComplete,
-                onPrimary: onFinish,
-                pageIndex: pageCount - 1,
-                pageCount: pageCount
-            )
         }
         .animation(.snappy, value: statusKey)
         .animation(.snappy, value: model.setup.isComplete)
@@ -567,6 +614,7 @@ private struct TranscriptionModelProgress: View {
                 }
                 .frame(width: 320)
                 .id("downloading")
+                .transition(.blurReplace)
             case .loading, .notLoaded:
                 HStack(spacing: 10) {
                     ProgressView().controlSize(.small)
@@ -574,6 +622,7 @@ private struct TranscriptionModelProgress: View {
                         .foregroundStyle(.secondary)
                 }
                 .id("loading")
+                .transition(.blurReplace)
             case .failed(let message):
                 VStack(spacing: 12) {
                     Label(message, systemImage: "exclamationmark.triangle")
@@ -583,11 +632,11 @@ private struct TranscriptionModelProgress: View {
                         .controlSize(.large)
                 }
                 .id("failed")
+                .transition(.blurReplace)
             case .ready:
                 EmptyView()
             }
         }
-        .transition(.blurReplace)
         .animation(.snappy, value: model.transcriber.state)
     }
 }

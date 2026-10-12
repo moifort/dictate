@@ -67,16 +67,21 @@ ad-hoc signed and Gatekeeper asks for right-click → Open):
 ## First launch
 
 An onboarding window opens at every launch until everything below is ready.
-It shows one step at a time and moves on by itself as each one is granted:
+It looks like a macOS setup assistant: one page per step, "Continuer" at the
+bottom and a back chevron. A fresh install opens on a welcome page; a resumed
+setup opens on the first missing step. "Continuer" only enables once the step
+is granted, polled every second since macOS does not notify permission
+changes.
 
-1. **Microphone** permission.
-2. **Input Monitoring** permission, to watch the `fn` key.
-3. **Accessibility** permission, to detect the focused field and paste.
-4. **System Settings → Keyboard → "Press 🌐 key to": Do Nothing**, otherwise
+1. **Dictation language**, taken from macOS and confirmed by "Continuer".
+2. **Microphone** permission.
+3. **Input Monitoring** permission, to watch the `fn` key.
+4. **Accessibility** permission, to detect the focused field and paste.
+5. **System Settings → Keyboard → "Press 🌐 key to": Do Nothing**, otherwise
    macOS opens the emoji picker or its own dictation.
-5. The transcription model (~630 MB) downloads into
+6. The transcription model (~630 MB) downloads into
    `~/Library/Application Support/Dictate/Models`, with its progress shown.
-6. The `claude` CLI, optional: dictation also works without Claude.
+7. The `claude` CLI, optional: dictation also works without Claude.
 
 The last page has a scratch field to try a dictation end to end.
 

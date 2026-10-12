@@ -29,6 +29,17 @@ struct SetupChecklistTests {
         #expect(ready.current == nil)
     }
 
+    /// The language page is the first one and only the onboarding confirms it,
+    /// so it tells a fresh install from a resumed setup whatever macOS already granted.
+    @Test func startsOnceTheLanguageIsConfirmed() {
+        var checklist = SetupChecklist()
+        checklist.fnKeyFree = true
+        checklist.microphone = true
+        #expect(!checklist.hasStarted)
+        checklist.language = true
+        #expect(checklist.hasStarted)
+    }
+
     @Test func onlyClaudeIsOptional() {
         #expect(SetupStep.allCases.filter(\.isOptional) == [.claude])
     }
