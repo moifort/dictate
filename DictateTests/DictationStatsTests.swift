@@ -52,41 +52,6 @@ struct DictationStatsTests {
         #expect(raw.latency == 2.5)
     }
 
-    // MARK: - Days
-
-    @Test func daysCoverTheLastMonthOldestFirstEmptyDaysIncluded() {
-        let stats = stats([record(daysAgo: 0), record(daysAgo: 2)])
-        #expect(stats.days.count == DictationStats.dayCount)
-        #expect(stats.days.last?.date == calendar.startOfDay(for: now))
-        #expect(stats.days.map(\.dictations).suffix(3) == [1, 0, 1])
-    }
-
-    @Test func dayAddsWordsAndTakesMedianTimings() {
-        let stats = stats([
-            record(daysAgo: 0, hour: 9, words: 5, transcription: 1, enhancement: 1),
-            record(daysAgo: 0, hour: 10, words: 7, transcription: 2, enhancement: 1),
-            // A Claude timeout must not drag the whole day.
-            record(daysAgo: 0, hour: 11, words: 8, transcription: 3, enhancement: 8),
-        ])
-        let today = stats.today
-        #expect(today.words == 20)
-        #expect(today.dictations == 3)
-        #expect(today.transcription == 2)
-        #expect(today.enhancement == 1)
-        #expect(today.latency == 3)
-    }
-
-    @Test func recordsOlderThanTheWindowAreLeftOut() {
-        let stats = stats([record(daysAgo: 60), record(daysAgo: 0)])
-        #expect(stats.days.reduce(0) { $0 + $1.dictations } == 1)
-    }
-
-    @Test func dictationWithoutClaudeCountsNoEnhancement() {
-        let stats = stats([record(daysAgo: 0, enhancement: nil)])
-        #expect(stats.today.enhancement == 0)
-        #expect(stats.today.latency == 2)
-    }
-
     // MARK: - Trends
 
     @Test func wordsTrendComparesActiveDaysOfTheLastWeekToTheFourBefore() {
@@ -120,6 +85,7 @@ struct DictationStatsTests {
 
     @Test func smallChangesReadAsSteady() {
         let stats = stats([record(daysAgo: 0, words: 102), record(daysAgo: 9, words: 100)])
+        #expect(stats.wordsPerDay.change == 0.02)
         #expect(stats.wordsPerDay.direction == .steady)
     }
 
@@ -127,6 +93,7 @@ struct DictationStatsTests {
         let stats = stats([record(daysAgo: 0)])
         #expect(stats.wordsPerDay.recent == 10)
         #expect(stats.wordsPerDay.baseline == nil)
+        #expect(stats.wordsPerDay.change == nil)
         #expect(stats.wordsPerDay.direction == nil)
     }
 

@@ -98,7 +98,7 @@ The last page has a scratch field to try a dictation end to end.
 | Insertion | `FocusInspector` + `TextInserter` (paste then restore the pasteboard, or pasteboard only when no field has focus) |
 | Orchestration | `DictationController` |
 | Bottom-centre pill | `RecordingIndicator` |
-| Statistics (menu → Statistiques…) | `DictationHistory` → `DictationStats` → `StatsView` |
+| Statistics (menu → Statistiques…) | `DictationHistory` → `DictationSeries` (one column per hour, day, week or month of the picked period) and `DictationStats` (the week against the four before) → `StatsView`, laid out like a Health app measure |
 
 Every inserted dictation appends one JSON line — date, word count, audio
 length, transcription, Claude and insertion times, never the text — to
