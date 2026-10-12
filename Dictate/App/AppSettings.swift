@@ -92,7 +92,7 @@ final class AppSettings {
         transcriptionEngine = defaults.string(forKey: Keys.transcriptionEngine)
             .flatMap(TranscriptionEngine.init(rawValue:))
             ?? (TranscriptionEngine.parakeet.supports(language: language) ? .parakeet : .whisper)
-        pushToTalkKey = defaults.string(forKey: Keys.pushToTalkKey).flatMap(PushToTalkKey.init(rawValue:)) ?? .fn
+        pushToTalkKey = defaults.string(forKey: Keys.pushToTalkKey).flatMap(PushToTalkKey.init(rawValue:)) ?? .control
         enhancementEnabled = defaults.object(forKey: Keys.enhancementEnabled) as? Bool ?? true
         guideWhisperWithVocabulary = defaults.object(forKey: Keys.guideWhisperWithVocabulary) as? Bool ?? true
         shareFieldContext = defaults.object(forKey: Keys.shareFieldContext) as? Bool ?? true

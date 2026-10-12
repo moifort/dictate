@@ -1,6 +1,6 @@
 # Dictate
 
-**Hold `fn`, speak, release: your words appear wherever you are typing.**
+**Hold `control`, speak, release: your words appear wherever you are typing.**
 
 Dictate is push-to-talk dictation for the Mac. It works in any app — mail,
 notes, chat, code editor, terminal — and turns what you say into clean,
@@ -12,8 +12,8 @@ ready-to-send text.
 
 ## What it does
 
-- **Push-to-talk on `fn` or `control`.** Hold the key while you speak, release
-  it when you are done. No window to open, no button to click.
+- **Push-to-talk on `control`** (or `fn`, in Settings). Hold the key while you
+  speak, release it when you are done. No window to open, no button to click.
 - **Text lands at the cursor.** The sentence is typed into whatever field has
   focus. If none does, it waits in the clipboard, ready to paste.
 - **Clean text, not a raw transcript.** Hesitations ("euh", "um"), repetitions

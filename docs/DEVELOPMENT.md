@@ -79,8 +79,8 @@ install opens on the welcome page, a resumed setup on the checklist.
 3. **Input Monitoring** permission, to watch the push-to-talk key.
 4. **Accessibility** permission, to detect the focused field and paste.
 5. **System Settings → Keyboard → "Press 🌐 key to": Do Nothing**, otherwise
-   macOS opens the emoji picker or its own dictation. Not needed when the
-   push-to-talk key is `control` (Settings → Dictée → Touche).
+   macOS opens the emoji picker or its own dictation. Only needed when the
+   push-to-talk key is `fn` (Settings → Dictée → Touche); `control` is the default.
 6. The transcription model (~630 MB) downloads into
    `~/Library/Application Support/Dictate/Models`, with its progress shown.
 7. The `claude` CLI, optional: dictation also works without Claude.

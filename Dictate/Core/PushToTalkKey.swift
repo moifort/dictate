@@ -2,10 +2,10 @@ import CoreGraphics
 
 /// The modifier held to dictate.
 nonisolated enum PushToTalkKey: String, CaseIterable, Identifiable, Sendable {
-    /// 🌐 fn: the default, but macOS must be told to leave it alone.
-    case fn
-    /// Either control key: works out of the box, on any keyboard.
+    /// Either control key: the default, works out of the box on any keyboard.
     case control
+    /// 🌐 fn: macOS must be told to leave it alone.
+    case fn
 
     var id: String { rawValue }
 

@@ -500,7 +500,7 @@ private struct WelcomePage: View {
     var body: some View {
         PageLayout(
             title: "Bienvenue dans Dictate",
-            explanation: "Maintenez fn ou control, parlez, relâchez : le texte apparaît dans le champ actif, dans n'importe quelle app."
+            explanation: "Maintenez control, parlez, relâchez : le texte apparaît dans le champ actif, dans n'importe quelle app."
         ) {
             AppTile()
         } content: {
@@ -510,7 +510,7 @@ private struct WelcomePage: View {
                 FeatureRow(symbol: "sparkles", title: "Nettoyage par Claude",
                            detail: "Hésitations, ponctuation et jargon corrigés avec votre abonnement Claude.")
                 FeatureRow(symbol: "keyboard", title: "Une seule touche",
-                           detail: "fn ou control suffit, même par-dessus une app en plein écran.")
+                           detail: "control suffit, même par-dessus une app en plein écran. fn au choix dans les Réglages.")
             }
             .frame(maxWidth: 400)
         }
