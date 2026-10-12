@@ -9,11 +9,11 @@ struct SetupViewTests {
         #expect(SetupView.firstPage(for: checklist) == .welcome)
     }
 
-    @Test func resumedSetupOpensOnTheFirstMissingStep() {
+    @Test func resumedSetupOpensOnTheChecklist() {
         var checklist = SetupChecklist()
         checklist.language = true
         checklist.microphone = true
-        #expect(SetupView.firstPage(for: checklist) == .step(.inputMonitoring))
+        #expect(SetupView.firstPage(for: checklist) == .checklist)
     }
 
     @Test func completeSetupOpensOnTheTryItPage() {

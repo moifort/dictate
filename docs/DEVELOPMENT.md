@@ -67,13 +67,14 @@ ad-hoc signed and Gatekeeper asks for right-click → Open):
 ## First launch
 
 An onboarding window opens at every launch until everything below is ready.
-It looks like a macOS setup assistant: one page per step, "Continuer" at the
-bottom and a back chevron. A fresh install opens on a welcome page; a resumed
-setup opens on the first missing step. "Continuer" only enables once the step
-is granted, polled every second since macOS does not notify permission
-changes.
+It looks like a macOS setup assistant: a welcome page, then one checklist
+page with every step. The step being worked on is unfolded with its
+explanation and buttons; a step ticks as soon as macOS grants it, polled
+every second since macOS does not notify permission changes, and the next
+missing one unfolds. "Continuer" enables once the list is complete. A fresh
+install opens on the welcome page, a resumed setup on the checklist.
 
-1. **Dictation language**, taken from macOS and confirmed by "Continuer".
+1. **Dictation language**, taken from macOS, confirmed with a button.
 2. **Microphone** permission.
 3. **Input Monitoring** permission, to watch the `fn` key.
 4. **Accessibility** permission, to detect the focused field and paste.
