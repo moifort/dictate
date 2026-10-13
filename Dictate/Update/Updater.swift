@@ -140,10 +140,30 @@ final class Updater {
             state = self.releases.isEmpty ? .idle : .available
             Log.app.info("update check: \(self.releases.count) newer release(s)")
         } catch {
-            Log.app.error("update check failed: \(error.localizedDescription, privacy: .public)")
-            ErrorReporter.capture(error, "update check failed", category: "updater", level: .warning)
+            if Self.isOffline(error) {
+                // No network is the ordinary way a background check fails: the
+                // next one runs a few hours later, nobody needs to hear about it.
+                Log.app.info("update check skipped, offline: \(error.localizedDescription, privacy: .public)")
+            } else {
+                Log.app.error("update check failed: \(error.localizedDescription, privacy: .public)")
+                ErrorReporter.capture(error, "update check failed", category: "updater", level: .warning)
+            }
             releases = []
             state = .idle
+        }
+    }
+
+    /// Whether `error` says the Mac cannot reach GitHub right now, as opposed to GitHub
+    /// answering something unexpected. Matched on the `URLError` code, which Foundation
+    /// also hands over bridged as an `NSError` in the `NSURLErrorDomain`.
+    nonisolated static func isOffline(_ error: Error) -> Bool {
+        guard let code = (error as? URLError)?.code else { return false }
+        switch code {
+        case .notConnectedToInternet, .networkConnectionLost, .cannotFindHost, .cannotConnectToHost,
+             .dnsLookupFailed, .timedOut, .internationalRoamingOff, .dataNotAllowed:
+            return true
+        default:
+            return false
         }
     }
 

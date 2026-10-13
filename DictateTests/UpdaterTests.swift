@@ -234,3 +234,41 @@ struct UpdaterFlowTests {
         #expect(process.terminationStatus == 0, "\(tool) \(arguments)")
     }
 }
+
+/// A Mac with no network is the usual way a background check fails: that is
+/// not an error worth a Sentry event, only a check to run again later.
+struct UpdaterOfflineTests {
+    @Test func noNetworkIsOffline() {
+        #expect(Updater.isOffline(URLError(.notConnectedToInternet)))
+        #expect(Updater.isOffline(URLError(.networkConnectionLost)))
+        #expect(Updater.isOffline(URLError(.cannotFindHost)))
+        #expect(Updater.isOffline(URLError(.dnsLookupFailed)))
+        #expect(Updater.isOffline(URLError(.timedOut)))
+    }
+
+    /// Foundation hands URLSession failures over as `NSError`, the form Sentry saw.
+    @Test func bridgedNSErrorIsOffline() {
+        let error = NSError(domain: NSURLErrorDomain, code: NSURLErrorNotConnectedToInternet)
+        #expect(Updater.isOffline(error))
+    }
+
+    @Test func otherFailuresAreNotOffline() {
+        #expect(!Updater.isOffline(URLError(.badServerResponse)))
+        #expect(!Updater.isOffline(NSError(domain: "test", code: 1)))
+    }
+
+    @Test func offlineCheckEndsIdleWithNothingToInstall() async {
+        let updater = Updater(
+            currentVersion: "0.1.0",
+            bundleURL: FileManager.default.temporaryDirectory.appending(path: "Dictate.app"),
+            expectation: .init(bundleIdentifier: "test.fake", teamIdentifier: nil),
+            fetch: { _ in throw URLError(.notConnectedToInternet) },
+            download: { url, _ in url },
+            finish: { _ in }
+        )
+        await updater.check()
+        #expect(updater.state == .idle)
+        #expect(updater.releases.isEmpty)
+        #expect(updater.lastCheck != nil)
+    }
+}
