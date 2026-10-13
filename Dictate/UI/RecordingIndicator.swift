@@ -20,7 +20,10 @@ final class RecordingIndicator {
 
     private let controller: DictationController
     private let state = State()
-    private let panel: IndicatorPanel
+    /// Created on the first presentation and replaced on every later one, see
+    /// `presentOnActiveScreen`.
+    private var panel: IndicatorPanel?
+    private let content: NSHostingView<IndicatorView>
     private var flashTask: Task<Void, Never>?
     private var hideTask: Task<Void, Never>?
     private var visibilityTask: Task<Void, Never>?
@@ -32,8 +35,7 @@ final class RecordingIndicator {
 
     init(controller: DictationController, recorder: AudioRecorder) {
         self.controller = controller
-        panel = IndicatorPanel(size: Self.size)
-        panel.contentView = NSHostingView(
+        content = NSHostingView(
             rootView: IndicatorView(controller: controller, recorder: recorder, state: state)
         )
         observeVisibility()
@@ -87,9 +89,10 @@ final class RecordingIndicator {
             hideTask = nil
             Log.indicator.info("""
                 show for \(String(describing: self.controller.phase)), flash \(String(describing: self.state.flash)), \
-                panel visible: \(self.panel.isVisible), on screen: \(self.panel.occlusionState.contains(.visible))
+                panel visible: \(self.panel?.isVisible ?? false), \
+                on screen: \(self.panel?.occlusionState.contains(.visible) ?? false)
                 """)
-            if panel.isVisible {
+            if let panel, panel.isVisible {
                 // AppKit may keep reporting the panel as visible after the window
                 // server dropped it (suspected after a long session with sleeps):
                 // bring it back on every show, without moving it mid-dictation.
@@ -102,7 +105,7 @@ final class RecordingIndicator {
                 try? await Task.sleep(for: Self.hideDelay)
                 defer { hideTask = nil }
                 guard !Task.isCancelled, !shouldBeVisible else { return }
-                panel.orderOut(nil)
+                panel?.orderOut(nil)
                 Log.indicator.info("hidden")
             }
         }
@@ -122,9 +125,24 @@ final class RecordingIndicator {
         }
         let visible = screen.visibleFrame
         let origin = CGPoint(x: visible.midX - Self.size.width / 2, y: visible.minY + 16)
+        let panel = replacePanel()
         panel.setFrameOrigin(origin)
         panel.orderFrontRegardless()
         Log.indicator.info("presented at \(origin.x), \(origin.y) on \(screen.localizedName)")
+    }
+
+    /// A fresh window for every presentation. When an app leaves full screen
+    /// while the panel is hidden, the window server moves the panel to the
+    /// desktop space for good: it no longer joins the other spaces, so the pill
+    /// shows on the desktop but not over full-screen apps. Setting the collection
+    /// behaviour again does not bring it back; only a new window does.
+    private func replacePanel() -> IndicatorPanel {
+        let old = panel
+        let new = IndicatorPanel(size: Self.size)
+        new.contentView = content
+        panel = new
+        old?.close()
+        return new
     }
 }
 
@@ -144,6 +162,8 @@ private final class IndicatorPanel: NSPanel {
         backgroundColor = .clear
         hasShadow = false
         hidesOnDeactivate = false
+        // Closed and dropped by `RecordingIndicator`, not freed by AppKit.
+        isReleasedWhenClosed = false
     }
 
     override var canBecomeKey: Bool { false }
