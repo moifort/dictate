@@ -44,7 +44,7 @@ Improvements to transcript quality and latency, in the recommended order.
   real time). The vocabulary would then fix mangled terms from the audio
   instead of relying on Haiku guessing them. Risk: the CTC model is likely
   English-centric — validate on the evaluation corpus with French dictations.
-- [ ] **Self-building vocabulary** — re-read the field a few seconds after
+- [x] **Self-building vocabulary** — re-read the field a few seconds after
   insertion and diff it with what was pasted; when the user fixed a term,
   suggest adding it to the vocabulary. Simpler variant: suggest the proper
   nouns that keep appearing in the preceding text.
