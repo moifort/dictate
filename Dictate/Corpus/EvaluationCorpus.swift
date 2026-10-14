@@ -46,7 +46,8 @@ final class EvaluationCorpus {
             transcript: sample.transcript,
             inserted: sample.inserted,
             enhanced: sample.enhanced,
-            reference: reference
+            reference: reference,
+            vocabularyBoosted: sample.vocabularyBoosted
         )
         do {
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)

@@ -24,6 +24,9 @@ nonisolated struct CorpusEntry: Codable, Equatable, Identifiable, Sendable {
     /// The inserted text as the user left it; nil when the field could not
     /// be read again or no longer held it.
     let reference: String?
+    /// Whether the transcript was rescored against the vocabulary. Nil in
+    /// entries kept before boosting existed, which were not.
+    var vocabularyBoosted: Bool? = nil
 }
 
 /// What the controller knows about a dictation it pasted, for the corpus.
@@ -37,6 +40,8 @@ struct DictationSample {
     let transcript: String
     let inserted: String
     let enhanced: Bool
+    /// Whether `transcript` was rescored against the vocabulary.
+    var vocabularyBoosted = false
     /// The field before the paste and a few seconds after; nil when it could
     /// not be read before the paste.
     let followUp: Task<InsertionFollowUp?, Never>?

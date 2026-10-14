@@ -18,16 +18,25 @@ nonisolated struct CorpusEvaluation: Equatable, Sendable {
         var enhancedDictations = 0
     }
 
+    /// What produced the transcripts of a line.
+    struct Setup: Hashable, Sendable {
+        var engine: TranscriptionEngine
+        /// The transcript was rescored against the vocabulary.
+        var vocabularyBoosted = false
+    }
+
     /// Every entry, references or not.
     var total = 0
-    /// One line per engine that has entries with a reference.
-    var engines: [TranscriptionEngine: Line] = [:]
+    /// One line per setup that has entries with a reference, so the rates
+    /// with and without vocabulary boosting can be compared.
+    var lines: [Setup: Line] = [:]
 
     init(entries: [CorpusEntry], normalization: WordErrorRate.Normalization = .standard) {
         total = entries.count
         for entry in entries {
             guard let reference = entry.reference else { continue }
-            var line = engines[entry.engine] ?? Line()
+            let setup = Setup(engine: entry.engine, vocabularyBoosted: entry.vocabularyBoosted ?? false)
+            var line = lines[setup] ?? Line()
             line.dictations += 1
             line.transcript = line.transcript + WordErrorRate.count(
                 reference: reference, hypothesis: entry.transcript, normalization: normalization
@@ -38,22 +47,25 @@ nonisolated struct CorpusEvaluation: Equatable, Sendable {
                     reference: reference, hypothesis: entry.inserted, normalization: normalization
                 )
             }
-            engines[entry.engine] = line
+            lines[setup] = line
         }
     }
 
     /// Plain-text summary, for the log and the alert.
     var summary: String {
-        let withReference = engines.values.reduce(0) { $0 + $1.dictations }
-        var lines = ["\(total) dictées, \(withReference) avec une référence."]
+        let withReference = lines.values.reduce(0) { $0 + $1.dictations }
+        var summary = ["\(total) dictées, \(withReference) avec une référence."]
         for engine in TranscriptionEngine.allCases {
-            guard let line = engines[engine] else { continue }
-            lines.append("\(engine.displayName) seul : WER \(Self.format(line.transcript)) sur \(line.dictations) dictées")
-            if line.enhancedDictations > 0 {
-                lines.append("\(engine.displayName) + Claude : WER \(Self.format(line.enhanced)) sur \(line.enhancedDictations) dictées")
+            for boosted in [false, true] {
+                guard let line = lines[Setup(engine: engine, vocabularyBoosted: boosted)] else { continue }
+                let name = engine.displayName + (boosted ? " avec lexique renforcé" : "")
+                summary.append("\(name) seul : WER \(Self.format(line.transcript)) sur \(line.dictations) dictées")
+                if line.enhancedDictations > 0 {
+                    summary.append("\(name) + Claude : WER \(Self.format(line.enhanced)) sur \(line.enhancedDictations) dictées")
+                }
             }
         }
-        return lines.joined(separator: "\n")
+        return summary.joined(separator: "\n")
     }
 
     private static func format(_ count: WordErrorRate.Count) -> String {

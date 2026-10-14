@@ -27,7 +27,8 @@ xcodebuild -project Dictate.xcodeproj -scheme Dictate -derivedDataPath build -de
 ```
 
 The Parakeet integration tests only run once the model
-has been downloaded by the app.
+has been downloaded by the app; the vocabulary boosting ones also need the
+CTC model, downloaded when the setting is turned on.
 
 ## Updates
 
@@ -122,6 +123,7 @@ The last page has a scratch field to try a dictation end to end.
 | `fn` or `control` held / released | `FnKeyMonitor` → `FnKeyGesture` |
 | Microphone → 16 kHz mono | `AudioRecorder` |
 | Local transcription | `SwitchableTranscriber`, routing to `ParakeetTranscriber` (Parakeet TDT Ultra through FluidAudio, 25 European languages, no vocabulary prompt), the only engine. Only the active engine's model stays in memory. |
+| Vocabulary boosting (experimental, off by default) | `VocabularyBooster`: FluidAudio's CTC keyword spotting with Parakeet CTC 110M (~100 MB, in `Models/parakeet-ctc-110m-coreml`) rescores Parakeet's transcript against the vocabulary before Claude. Never waits for the model, falls back to the plain transcript on any failure. |
 | Cleanup | `ClaudeCLIEnhancer`: one pre-warmed `claude -p --model haiku` process per dictation |
 | Insertion | `FocusInspector` + `TextInserter` (paste then restore the pasteboard, or pasteboard only when no field has focus) |
 | Orchestration | `DictationController` |
@@ -143,7 +145,9 @@ reads back from the same field 5 s after the paste (or when the next
 dictation starts), cut down to the pasted segment by `InsertedSegment`, so it
 includes the user's fixes. Menu → « Évaluer le corpus » shows the pooled word
 error rate (`WordErrorRate`, `CorpusEvaluation`) of each engine alone and with
-Claude. An unfixed mistake counts as correct, so both rates are lower bounds.
+Claude, split by whether vocabulary boosting rescored the transcript
+(`vocabularyBoosted`, absent from older entries). An unfixed mistake counts as
+correct, so both rates are lower bounds.
 Nothing leaves the Mac; the settings can delete the corpus.
 
 ### Vocabulary suggestions
@@ -161,3 +165,16 @@ logs carry counts only. The menu and the Lexique tab offer Add / Ignore.
 
 If Claude fails or takes longer than 8 s, the raw transcript is
 inserted and the pill shows an orange dot.
+
+### Vocabulary boosting
+
+Settings → Lexique → « Renforcer le vocabulaire dans la transcription »
+downloads Parakeet CTC 110M on first use, then rescores each transcript
+against the vocabulary (`CtcVocabularyEngine`, mirroring FluidAudio's
+`VocabularyBoostingSession` but reading the tokenizer from `ModelStorage`).
+A replaced word gets confidence 1, so Claude does not see it as doubtful and
+"fix" it back; a word the rescorer drops next to a multi-word term ("with
+Argo CD" → "Argo CD") is kept. The log gives the added time per dictation:
+about 200 ms for a few seconds of audio on an M1 Pro. The CTC model was
+trained mostly on English: compare the corpus' WER with and without it
+before turning it on by default.

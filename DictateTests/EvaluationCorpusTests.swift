@@ -7,7 +7,9 @@ struct EvaluationCorpusTests {
     private let folder = FileManager.default.temporaryDirectory
         .appending(path: "EvaluationCorpusTests-\(UUID().uuidString)", directoryHint: .isDirectory)
 
-    private func sample(inserted: String = "Fais un push.", followUp: Task<InsertionFollowUp?, Never>? = nil) -> DictationSample {
+    private func sample(
+        inserted: String = "Fais un push.", vocabularyBoosted: Bool = false, followUp: Task<InsertionFollowUp?, Never>? = nil
+    ) -> DictationSample {
         DictationSample(
             date: Date(timeIntervalSince1970: 1_800_000_000),
             samples: [0, 0.5, -0.5, 1],
@@ -18,6 +20,7 @@ struct EvaluationCorpusTests {
             transcript: "euh fais un pouche",
             inserted: inserted,
             enhanced: true,
+            vocabularyBoosted: vocabularyBoosted,
             followUp: followUp
         )
     }
@@ -46,6 +49,14 @@ struct EvaluationCorpusTests {
         #expect(samples.count == 4)
         #expect(abs(samples[1] - 0.5) < 0.001)
         #expect(reloaded.entries.last?.reference == nil)
+    }
+
+    @Test func boostingIsKeptWithTheEntry() {
+        let corpus = EvaluationCorpus(folder: folder)
+        corpus.add(sample(vocabularyBoosted: true), reference: nil)
+        corpus.add(sample(), reference: nil)
+        let reloaded = EvaluationCorpus(folder: folder)
+        #expect(reloaded.entries.map(\.vocabularyBoosted) == [true, false])
     }
 
     @Test func deleteAllRemovesEverything() {
@@ -101,13 +112,16 @@ struct WAVFileTests {
 }
 
 struct CorpusEvaluationTests {
+    private let parakeet = CorpusEvaluation.Setup(engine: .parakeet)
+
     private func entry(
-        engine: TranscriptionEngine = .parakeet, transcript: String, inserted: String, enhanced: Bool = true, reference: String?
+        engine: TranscriptionEngine = .parakeet, transcript: String, inserted: String, enhanced: Bool = true,
+        reference: String?, vocabularyBoosted: Bool? = nil
     ) -> CorpusEntry {
         CorpusEntry(
             id: UUID(), date: .now, audioFile: "a.wav", audio: 1, engine: engine, language: "fr",
             bundleID: nil, category: "other", transcript: transcript, inserted: inserted, enhanced: enhanced,
-            reference: reference
+            reference: reference, vocabularyBoosted: vocabularyBoosted
         )
     }
 
@@ -120,28 +134,72 @@ struct CorpusEvaluationTests {
             entry(transcript: "ignoré", inserted: "Ignoré", reference: nil),
         ])
         #expect(evaluation.total == 3)
-        let parakeet = evaluation.engines[.parakeet]
-        #expect(parakeet?.dictations == 2)
-        #expect(parakeet?.transcript == WordErrorRate.Count(errors: 4, referenceWords: 6))
-        #expect(parakeet?.enhanced == WordErrorRate.Count(errors: 3, referenceWords: 6))
-        #expect(parakeet?.enhancedDictations == 2)
+        let result = evaluation.lines[parakeet]
+        #expect(result?.dictations == 2)
+        #expect(result?.transcript == WordErrorRate.Count(errors: 4, referenceWords: 6))
+        #expect(result?.enhanced == WordErrorRate.Count(errors: 3, referenceWords: 6))
+        #expect(result?.enhancedDictations == 2)
     }
 
     @Test func rawInsertionsDoNotCountForClaude() {
         let evaluation = CorpusEvaluation(entries: [
             entry(transcript: "fais un push", inserted: "fais un push", enhanced: false, reference: "fais un push"),
         ])
-        #expect(evaluation.engines[.parakeet]?.enhancedDictations == 0)
-        #expect(evaluation.engines[.parakeet]?.enhanced.referenceWords == 0)
+        #expect(evaluation.lines[parakeet]?.enhancedDictations == 0)
+        #expect(evaluation.lines[parakeet]?.enhanced.referenceWords == 0)
     }
 
     @Test func summaryNamesTheEngine() {
         let evaluation = CorpusEvaluation(entries: [
             entry(engine: .parakeet, transcript: "a", inserted: "a", reference: "a"),
         ])
-        #expect(evaluation.engines[.parakeet]?.transcript.rate == 0)
+        #expect(evaluation.lines[parakeet]?.transcript.rate == 0)
         #expect(evaluation.summary.contains("Parakeet seul"))
         #expect(evaluation.summary.contains("Parakeet + Claude"))
+        #expect(!evaluation.summary.contains("lexique"))
+    }
+
+    @Test func splitsTheDictationsByVocabularyBoosting() {
+        let evaluation = CorpusEvaluation(entries: [
+            entry(transcript: "fais un pouche", inserted: "Fais un push.", reference: "fais un push"),
+            entry(transcript: "fais un pouche", inserted: "Fais un push.", reference: "fais un push", vocabularyBoosted: false),
+            entry(transcript: "fais un push", inserted: "Fais un push.", reference: "fais un push", vocabularyBoosted: true),
+        ])
+        #expect(evaluation.lines[parakeet]?.dictations == 2)
+        #expect(evaluation.lines[parakeet]?.transcript == WordErrorRate.Count(errors: 2, referenceWords: 6))
+        let boosted = evaluation.lines[CorpusEvaluation.Setup(engine: .parakeet, vocabularyBoosted: true)]
+        #expect(boosted?.dictations == 1)
+        #expect(boosted?.transcript.rate == 0)
+        #expect(evaluation.summary.contains("Parakeet seul"))
+        #expect(evaluation.summary.contains("Parakeet avec lexique renforcé seul"))
+        #expect(evaluation.summary.contains("Parakeet avec lexique renforcé + Claude"))
+    }
+}
+
+struct CorpusEntryDecodingTests {
+    private let decoder: JSONDecoder = {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        return decoder
+    }()
+
+    private func line(boosting: String) -> Data {
+        Data("""
+            {"audio":1.5,"audioFile":"a.wav","bundleID":null,"category":"code","date":"2026-10-14T10:00:00Z",\
+            "enhanced":true,"engine":"parakeet","id":"6F9619FF-8B86-D011-B42D-00C04FC964FF","inserted":"Fais un push.",\
+            "language":"fr","reference":"Fais un push.","transcript":"fais un pouche"\(boosting)}
+            """.utf8)
+    }
+
+    @Test func entriesKeptBeforeBoostingStillDecode() throws {
+        let entry = try decoder.decode(CorpusEntry.self, from: line(boosting: ""))
+        #expect(entry.vocabularyBoosted == nil)
+        #expect(entry.transcript == "fais un pouche")
+    }
+
+    @Test func boostingIsReadBack() throws {
+        let entry = try decoder.decode(CorpusEntry.self, from: line(boosting: #","vocabularyBoosted":true"#))
+        #expect(entry.vocabularyBoosted == true)
     }
 }
 

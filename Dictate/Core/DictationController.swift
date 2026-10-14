@@ -221,7 +221,7 @@ final class DictationController {
                     date: .now, samples: samples, engine: engine, language: language(),
                     bundleID: bundleID, category: context.category,
                     transcript: transcript.text, inserted: text, enhanced: enhancement != nil && !raw,
-                    followUp: followUp
+                    vocabularyBoosted: transcript.vocabularyBoosted, followUp: followUp
                 ))
             }
         } else {
