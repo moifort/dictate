@@ -7,7 +7,7 @@ Improvements to transcript quality and latency, in the recommended order.
 - [ ] **Keep recording after `fn` is released** — the recorder stops the
   instant `fn` goes up (`DictationController`, `.released`), which often clips
   the last syllable. Keep capturing 200-300 ms before stopping.
-- [ ] **Read the preceding text while Parakeet transcribes** — today the
+- [x] **Read the preceding text while Parakeet transcribes** — today the
   accessibility read runs on release, before transcription starts, and can
   take up to the 0.5 s messaging timeout in Electron apps. Run it concurrently
   with the transcription.
