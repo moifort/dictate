@@ -18,11 +18,12 @@ struct DictationControllerTests {
         enhancementEnabled: Bool = true,
         shareFieldContext: Bool = true,
         engine: TranscriptionEngine = .parakeet,
-        loadingEngine: TranscriptionEngine? = nil
+        loadingEngine: TranscriptionEngine? = nil,
+        tail: ((Fakes) async -> Void)? = nil
     ) -> (DictationController, Fakes) {
         let events = EventLog()
         let fakes = Fakes(
-            recorder: FakeRecorder(samples: samples ?? speech),
+            recorder: FakeRecorder(samples: samples ?? speech, events: events),
             transcriber: FakeTranscriber(result: transcript, words: words, delay: transcriberDelay, events: events),
             enhancer: FakeEnhancer(result: enhanced, delay: enhancerDelay),
             focus: FakeFocus(editable: editableFocus, bundleID: "com.apple.Terminal", delay: precedingTextDelay, events: events),
@@ -40,7 +41,12 @@ struct DictationControllerTests {
             shareFieldContext: { shareFieldContext },
             transcriptionEngine: { engine },
             loadingEngine: { loadingEngine },
-            enhancementTimeout: .milliseconds(200)
+            enhancementTimeout: .milliseconds(200),
+            sleep: { duration in
+                fakes.events.append("tail of \(duration) started")
+                await tail?(fakes)
+                fakes.events.append("tail ended")
+            }
         )
         return (controller, fakes)
     }
@@ -436,6 +442,75 @@ struct DictationControllerTests {
         }
     }
 
+    // MARK: Release tail
+
+    @Test func recordingGoesOnForTheTailAfterRelease() async {
+        let (controller, fakes) = makeController()
+        await dictate(controller)
+        let events = fakes.events.entries
+        #expect(events.contains("tail of \(DictationController.defaultReleaseTail) started"))
+        #expect(events.firstIndex(of: "tail ended")! < events.firstIndex(of: "recording stopped")!)
+    }
+
+    @Test func samplesCapturedDuringTheTailAreTranscribed() async {
+        let tailSpeech = [Float](repeating: 0.3, count: 4_000)
+        let (controller, fakes) = makeController(tail: { fakes in fakes.recorder.samples += tailSpeech })
+        await dictate(controller)
+        #expect(fakes.transcriber.receivedSamples == speech + tailSpeech)
+    }
+
+    @Test func phaseLeavesRecordingAsSoonAsTheKeyIsReleased() async {
+        let (controller, fakes) = makeController(tail: { _ in try? await Task.sleep(for: .milliseconds(50)) })
+        controller.handle(.pressed)
+        controller.handle(.released)
+        #expect(controller.phase == .transcribing)
+        // Still capturing the tail.
+        #expect(fakes.recorder.isRecording)
+        await controller.waitUntilIdle()
+        #expect(!fakes.recorder.isRecording)
+        #expect(controller.lastOutcome == .pasted(raw: false))
+    }
+
+    @Test func fieldContextReadStartsBeforeTheTailEnds() async {
+        let (controller, fakes) = makeController(tail: { _ in try? await Task.sleep(for: .milliseconds(50)) })
+        await dictate(controller)
+        let events = fakes.events.entries
+        #expect(events.firstIndex(of: "read started")! < events.firstIndex(of: "tail ended")!)
+    }
+
+    @Test func pressDuringTheTailIsIgnoredAndTheDictationCompletes() async {
+        let (controller, fakes) = makeController(tail: { _ in try? await Task.sleep(for: .milliseconds(50)) })
+        controller.handle(.pressed)
+        controller.handle(.released)
+        controller.handle(.pressed)
+        #expect(controller.phase == .transcribing)
+        controller.handle(.cancelled)
+        controller.handle(.released)
+        #expect(controller.phase == .transcribing)
+        await controller.waitUntilIdle()
+        #expect(fakes.recorder.startCount == 1)
+        #expect(fakes.transcriber.callCount == 1)
+        #expect(fakes.inserter.pasted == ["Fais un push."])
+    }
+
+    @Test func tooShortARecordingIsDiscardedEvenWithTheTail() async {
+        let short = [Float](repeating: 0.2, count: 1_000)
+        let (controller, fakes) = makeController(samples: short, tail: { fakes in fakes.recorder.samples += short })
+        await dictate(controller)
+        #expect(fakes.transcriber.callCount == 0)
+        #expect(controller.lastOutcome == .discarded)
+    }
+
+    @Test func silentTailDoesNotMakeSilenceWorthTranscribing() async {
+        let silence = [Float](repeating: 0, count: 16_000)
+        let (controller, fakes) = makeController(
+            samples: silence, tail: { fakes in fakes.recorder.samples += [Float](repeating: 0, count: 4_000) }
+        )
+        await dictate(controller)
+        #expect(fakes.transcriber.callCount == 0)
+        #expect(controller.lastOutcome == .discarded)
+    }
+
     @Test func recorderFailureReportsFailure() {
         let (controller, fakes) = makeController()
         fakes.recorder.startError = FakeError()
@@ -471,12 +546,17 @@ private final class EventLog {
 
 @MainActor
 private final class FakeRecorder: AudioRecording {
-    let samples: [Float]
+    /// Everything captured so far; a tail appends to it to mimic speech after the release.
+    var samples: [Float]
+    let events: EventLog
     var isRecording = false
     var startCount = 0
     var startError: Error?
 
-    init(samples: [Float]) { self.samples = samples }
+    init(samples: [Float], events: EventLog) {
+        self.samples = samples
+        self.events = events
+    }
 
     func start() throws {
         if let startError { throw startError }
@@ -486,6 +566,7 @@ private final class FakeRecorder: AudioRecording {
 
     func stop() -> [Float] {
         isRecording = false
+        events.append("recording stopped")
         return samples
     }
 }
@@ -498,6 +579,7 @@ private final class FakeTranscriber: Transcriber {
     let events: EventLog
     var callCount = 0
     var receivedLanguage = ""
+    var receivedSamples: [Float] = []
 
     init(result: Result<String, Error>, words: [Transcription.Word], delay: Duration, events: EventLog) {
         self.result = result
@@ -516,7 +598,8 @@ private final class FakeTranscriber: Transcriber {
     }
 
     func transcription(samples: [Float], language: String) async throws -> Transcription {
-        Transcription(text: try await transcribe(samples: samples, language: language), words: words)
+        receivedSamples = samples
+        return Transcription(text: try await transcribe(samples: samples, language: language), words: words)
     }
 }
 

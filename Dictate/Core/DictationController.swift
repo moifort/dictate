@@ -45,6 +45,10 @@ final class DictationController {
     /// The engine whose model is not in memory yet, nil once dictation can start.
     @ObservationIgnored private let loadingEngine: () -> TranscriptionEngine?
     @ObservationIgnored private let enhancementTimeout: Duration
+    /// How long the microphone keeps capturing once the key is released.
+    @ObservationIgnored private let releaseTail: Duration
+    /// Waits out `releaseTail`; injected so tests control when the tail ends.
+    @ObservationIgnored private let sleep: (Duration) async -> Void
     @ObservationIgnored private var context = DictationContext()
     @ObservationIgnored private var bundleID: String?
     @ObservationIgnored private var processing: Task<Void, Never>?
@@ -70,6 +74,10 @@ final class DictationController {
     private static let minimumSampleCount = AudioAnalysis.sampleRate * 3 / 10
     /// Enough for the names and tone of the current message, small enough to stay fast.
     private static let precedingTextLength = 500
+    /// People let go of the key while still finishing the last syllable, and the
+    /// tap hands audio over in buffers of ~85 ms at 48 kHz: a quarter of a second
+    /// keeps that syllable without the user waiting noticeably longer for the text.
+    static let defaultReleaseTail: Duration = .milliseconds(250)
 
     init(
         recorder: AudioRecording,
@@ -82,7 +90,9 @@ final class DictationController {
         shareFieldContext: @escaping () -> Bool,
         transcriptionEngine: @escaping () -> TranscriptionEngine = { .parakeet },
         loadingEngine: @escaping () -> TranscriptionEngine? = { nil },
-        enhancementTimeout: Duration = .seconds(8)
+        enhancementTimeout: Duration = .seconds(8),
+        releaseTail: Duration = defaultReleaseTail,
+        sleep: @escaping (Duration) async -> Void = { try? await Task.sleep(for: $0) }
     ) {
         self.recorder = recorder
         self.transcriber = transcriber
@@ -95,6 +105,8 @@ final class DictationController {
         self.transcriptionEngine = transcriptionEngine
         self.loadingEngine = loadingEngine
         self.enhancementTimeout = enhancementTimeout
+        self.releaseTail = releaseTail
+        self.sleep = sleep
     }
 
     func handle(_ gesture: FnKeyGestureOutput) {
@@ -125,17 +137,26 @@ final class DictationController {
 
         case .released:
             guard phase == .recording else { return }
-            let samples = recorder.stop()
             // Read on release rather than press: Electron apps only build their
             // accessibility tree once asked, which happens on press. The read
-            // can take the whole AX messaging timeout, so it runs while the
-            // audio is transcribed rather than before.
+            // can take the whole AX messaging timeout, so it runs during the
+            // release tail and while the audio is transcribed rather than before.
             var fieldContext: Task<FieldContext, Never>?
             if enhancementEnabled(), shareFieldContext() {
                 fieldContext = Task { [focus] in await focus.fieldContext(maxLength: Self.precedingTextLength) }
             }
+            // The pill switches now: the tail is not felt as more recording.
+            // A press during the tail is ignored, as during any processing,
+            // so the audio of one dictation never bleeds into the next. The
+            // gesture already ended, so no cancel can reach this dictation;
+            // quitting mid-tail just drops it, as quitting mid-recording does.
             phase = .transcribing
-            processing = Task { await process(samples, fieldContext: fieldContext) }
+            processing = Task {
+                await sleep(releaseTail)
+                Log.dictation.info("kept recording \(Self.milliseconds(self.releaseTail)) ms after release")
+                let samples = recorder.stop()
+                await process(samples, fieldContext: fieldContext)
+            }
         }
     }
 
