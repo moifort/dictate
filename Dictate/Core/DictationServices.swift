@@ -20,10 +20,11 @@ protocol AudioRecording: AnyObject {
 protocol FocusInspecting: AnyObject {
     func frontmostBundleID() -> String?
     func frontmostAppName() -> String?
-    /// Up to `maxLength` characters before the cursor in the focused field.
-    /// Nil for password fields and when the app does not expose its text.
+    /// The focused field's surroundings: up to `maxLength` characters on each
+    /// side of the cursor, its label, the window title and the page host.
+    /// Text is nil for password fields and when the app does not expose it.
     /// Async so the controller can run it alongside the transcription.
-    func precedingText(maxLength: Int) async -> String?
+    func fieldContext(maxLength: Int) async -> FieldContext
     /// Whether the focused UI element accepts text input.
     func hasEditableFocus() -> Bool
 }

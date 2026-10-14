@@ -22,65 +22,34 @@ final class FocusInspector: FocusInspecting {
     }
 
     func hasEditableFocus() -> Bool {
-        guard let focused = focusedElement() else { return false }
+        let ax = AXReader()
+        guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier,
+              let focused = ax.focusedElement(pid: pid) else { return false }
 
-        if let role = Self.copyString(focused, kAXRoleAttribute), Self.textRoles.contains(role) {
+        if let role = ax.copyString(focused, kAXRoleAttribute), Self.textRoles.contains(role) {
             return true
         }
         // Rich editors and web `contenteditable` expose a selection and a settable value.
         var settable: DarwinBoolean = false
-        let hasSelection = Self.copyValue(focused, kAXSelectedTextRangeAttribute) != nil
+        let hasSelection = ax.copyValue(focused, kAXSelectedTextRangeAttribute) != nil
         AXUIElementIsAttributeSettable(focused, kAXValueAttribute as CFString, &settable)
         return hasSelection && settable.boolValue
     }
 
-    func precedingText(maxLength: Int) async -> String? {
-        guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier else { return nil }
-        return await Self.precedingText(pid: pid, maxLength: maxLength)
+    func fieldContext(maxLength: Int) async -> FieldContext {
+        guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier else { return FieldContext() }
+        return await Self.fieldContext(pid: pid, maxLength: maxLength)
     }
+
+    private nonisolated static let readBudget = Duration.seconds(1)
 
     /// Off the main actor: an Electron app can hold each call for the whole
     /// messaging timeout, and the transcription runs meanwhile.
     @concurrent
-    private nonisolated static func precedingText(pid: pid_t, maxLength: Int) async -> String? {
-        guard let focused = focusedElement(pid: pid), !isSecure(focused) else { return nil }
-        guard let rangeValue = copyValue(focused, kAXSelectedTextRangeAttribute),
-              CFGetTypeID(rangeValue) == AXValueGetTypeID() else { return nil }
-        var selection = CFRange()
-        guard AXValueGetValue(rangeValue as! AXValue, .cfRange, &selection), selection.location > 0 else { return nil }
-
-        let start = max(0, selection.location - maxLength)
-        var range = CFRange(location: start, length: selection.location - start)
-        // Asking for the range only avoids copying a whole document (Xcode, Notes).
-        if let rangeArgument = AXValueCreate(.cfRange, &range) {
-            var value: CFTypeRef?
-            if AXUIElementCopyParameterizedAttributeValue(
-                focused, kAXStringForRangeParameterizedAttribute as CFString, rangeArgument, &value
-            ) == .success, let text = value as? String {
-                return text
-            }
-        }
-        // AX ranges count UTF-16 units, like NSString.
-        guard let value = copyString(focused, kAXValueAttribute) as NSString?,
-              range.location + range.length <= value.length else { return nil }
-        return value.substring(with: NSRange(location: range.location, length: range.length))
-    }
-
-    private func focusedElement() -> AXUIElement? {
-        guard let app = NSWorkspace.shared.frontmostApplication else { return nil }
-        return Self.focusedElement(pid: app.processIdentifier)
-    }
-
-    private nonisolated static func focusedElement(pid: pid_t) -> AXUIElement? {
-        let appElement = AXUIElementCreateApplication(pid)
-        // A busy app would otherwise block the dictation for the default 6 s.
-        AXUIElementSetMessagingTimeout(appElement, 0.5)
-        return copyElement(appElement, kAXFocusedUIElementAttribute)
-    }
-
-    private nonisolated static func isSecure(_ element: AXUIElement) -> Bool {
-        let secure = kAXSecureTextFieldSubrole as String
-        return copyString(element, kAXSubroleAttribute) == secure || copyString(element, kAXRoleAttribute) == secure
+    private nonisolated static func fieldContext(pid: pid_t, maxLength: Int) async -> FieldContext {
+        // A busy app would otherwise block the dictation for the default 6 s per
+        // call; the budget caps the whole read, whatever the number of calls.
+        AXReader(deadline: .now + readBudget).fieldContext(pid: pid, maxLength: maxLength)
     }
 
     private func enableManualAccessibility(for pid: pid_t) {
@@ -90,19 +59,163 @@ final class FocusInspector: FocusInspecting {
         AXUIElementSetMessagingTimeout(element, 0.5)
         AXUIElementSetAttributeValue(element, "AXManualAccessibility" as CFString, kCFBooleanTrue)
     }
+}
 
-    private nonisolated static func copyValue(_ element: AXUIElement, _ attribute: String) -> CFTypeRef? {
+/// Accessibility reads, optionally capped by a deadline. Not shared between
+/// threads: each read builds its own.
+private nonisolated final class AXReader {
+    static let messagingTimeout: Float = 0.5
+    /// Web pages nest deeply; past this, the focused element is not in a page.
+    private static let maxWebAreaDepth = 60
+
+    private var deadline: ContinuousClock.Instant?
+
+    init(deadline: ContinuousClock.Instant? = nil) {
+        self.deadline = deadline
+    }
+
+    func fieldContext(pid: pid_t, maxLength: Int) -> FieldContext {
+        let appElement = AXUIElementCreateApplication(pid)
+        AXUIElementSetMessagingTimeout(appElement, Self.messagingTimeout)
+        let window = copyElement(appElement, kAXFocusedWindowAttribute)
+        let focused = copyElement(appElement, kAXFocusedUIElementAttribute)
+
+        var field = FieldContext()
+        field.windowTitle = window.flatMap { nonEmpty(copyString($0, kAXTitleAttribute)) }
+        if let focused, !isSecure(focused) {
+            if let selection = selectedRange(focused) {
+                field.precedingText = precedingText(focused, selection: selection, maxLength: maxLength)
+                field.followingText = followingText(focused, selection: selection, maxLength: maxLength)
+            }
+            field.fieldLabel = label(of: focused)
+        }
+        field.webHost = webHost(focused: focused, window: window)
+        return field
+    }
+
+    func focusedElement(pid: pid_t) -> AXUIElement? {
+        let appElement = AXUIElementCreateApplication(pid)
+        AXUIElementSetMessagingTimeout(appElement, Self.messagingTimeout)
+        return copyElement(appElement, kAXFocusedUIElementAttribute)
+    }
+
+
+    private func selectedRange(_ element: AXUIElement) -> CFRange? {
+        guard let value = copyValue(element, kAXSelectedTextRangeAttribute),
+              CFGetTypeID(value) == AXValueGetTypeID() else { return nil }
+        var range = CFRange()
+        return AXValueGetValue(value as! AXValue, .cfRange, &range) ? range : nil
+    }
+
+    private func precedingText(_ element: AXUIElement, selection: CFRange, maxLength: Int) -> String? {
+        guard selection.location > 0 else { return nil }
+        let start = max(0, selection.location - maxLength)
+        return string(element, in: CFRange(location: start, length: selection.location - start))
+    }
+
+    /// The text after the selection, which the dictation will replace.
+    private func followingText(_ element: AXUIElement, selection: CFRange, maxLength: Int) -> String? {
+        let start = selection.location + max(0, selection.length)
+        if let total = copyValue(element, kAXNumberOfCharactersAttribute) as? Int {
+            guard start < total else { return nil }
+            return string(element, in: CFRange(location: start, length: min(maxLength, total - start)))
+        }
+        // Without a length, only the whole value tells where the text ends.
+        guard let value = copyString(element, kAXValueAttribute) as NSString?, start < value.length else { return nil }
+        return value.substring(with: NSRange(location: start, length: min(maxLength, value.length - start)))
+    }
+
+    private func string(_ element: AXUIElement, in range: CFRange) -> String? {
+        var range = range
+        // Asking for the range only avoids copying a whole document (Xcode, Notes).
+        if let rangeArgument = AXValueCreate(.cfRange, &range), isWithinBudget() {
+            var value: CFTypeRef?
+            let result = AXUIElementCopyParameterizedAttributeValue(
+                element, kAXStringForRangeParameterizedAttribute as CFString, rangeArgument, &value
+            )
+            noteTimeout(result)
+            if result == .success, let text = value as? String {
+                return text
+            }
+        }
+        // AX ranges count UTF-16 units, like NSString.
+        guard let value = copyString(element, kAXValueAttribute) as NSString?,
+              range.location + range.length <= value.length else { return nil }
+        return value.substring(with: NSRange(location: range.location, length: range.length))
+    }
+
+    /// What the field is for: its placeholder, its accessibility label, or the label next to it.
+    private func label(of element: AXUIElement) -> String? {
+        for attribute in [kAXPlaceholderValueAttribute, kAXDescriptionAttribute, kAXTitleAttribute] {
+            if let label = nonEmpty(copyString(element, attribute)) { return label }
+        }
+        guard let titleElement = copyElement(element, kAXTitleUIElementAttribute) else { return nil }
+        return nonEmpty(copyString(titleElement, kAXValueAttribute)) ?? nonEmpty(copyString(titleElement, kAXTitleAttribute))
+    }
+
+    /// The host of the page in a browser (or an Electron app). Safari exposes the
+    /// page as the window's document; Chromium and Firefox only on the web area
+    /// holding the focus, whose outermost one is the tab (inner ones are iframes).
+    private func webHost(focused: AXUIElement?, window: AXUIElement?) -> String? {
+        if let window, let url = url(copyValue(window, kAXDocumentAttribute)), let host = FieldContext.webHost(of: url) {
+            return host
+        }
+        var pageURL: URL?
+        var element = focused
+        for _ in 0..<Self.maxWebAreaDepth {
+            guard let current = element else { break }
+            let role = copyString(current, kAXRoleAttribute)
+            if role == kAXWindowRole || role == kAXApplicationRole { break }
+            if role == "AXWebArea", let url = url(copyValue(current, kAXURLAttribute)) {
+                pageURL = url
+            }
+            element = copyElement(current, kAXParentAttribute)
+        }
+        return pageURL.flatMap(FieldContext.webHost(of:))
+    }
+
+    private func url(_ value: CFTypeRef?) -> URL? {
+        if let url = value as? URL { return url }
+        if let string = value as? String { return URL(string: string) }
+        return nil
+    }
+
+    private func nonEmpty(_ string: String?) -> String? {
+        guard let trimmed = string?.trimmingCharacters(in: .whitespacesAndNewlines), !trimmed.isEmpty else { return nil }
+        return trimmed
+    }
+
+    private func isSecure(_ element: AXUIElement) -> Bool {
+        let secure = kAXSecureTextFieldSubrole as String
+        return copyString(element, kAXSubroleAttribute) == secure || copyString(element, kAXRoleAttribute) == secure
+    }
+
+    private func isWithinBudget() -> Bool {
+        deadline.map { ContinuousClock.now < $0 } ?? true
+    }
+
+    /// An app that let one call time out is busy: skip the remaining reads.
+    private func noteTimeout(_ result: AXError) {
+        if result == .cannotComplete, deadline != nil { deadline = .now }
+    }
+
+    func copyValue(_ element: AXUIElement, _ attribute: String) -> CFTypeRef? {
+        guard isWithinBudget() else { return nil }
         var value: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(element, attribute as CFString, &value) == .success else { return nil }
-        return value
+        let result = AXUIElementCopyAttributeValue(element, attribute as CFString, &value)
+        noteTimeout(result)
+        return result == .success ? value : nil
     }
 
-    private nonisolated static func copyElement(_ element: AXUIElement, _ attribute: String) -> AXUIElement? {
+    private func copyElement(_ element: AXUIElement, _ attribute: String) -> AXUIElement? {
         guard let value = copyValue(element, attribute), CFGetTypeID(value) == AXUIElementGetTypeID() else { return nil }
-        return (value as! AXUIElement)
+        let child = value as! AXUIElement
+        // The timeout is per element, not inherited from the app element.
+        AXUIElementSetMessagingTimeout(child, Self.messagingTimeout)
+        return child
     }
 
-    private nonisolated static func copyString(_ element: AXUIElement, _ attribute: String) -> String? {
+    func copyString(_ element: AXUIElement, _ attribute: String) -> String? {
         copyValue(element, attribute) as? String
     }
 }

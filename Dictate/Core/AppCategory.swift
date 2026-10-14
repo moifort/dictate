@@ -23,6 +23,50 @@ nonisolated enum AppCategory: String, CaseIterable, Sendable {
         }
     }
 
+    /// The category of a web app from its host, e.g. "mail.google.com" → mail;
+    /// nil for sites with no clear tone. "www." and subdomains of a listed
+    /// domain match it ("acme.slack.com" → chat).
+    init?(webHost: String) {
+        var host = webHost.lowercased()
+        if host.hasSuffix(".") { host.removeLast() }
+        if host.hasPrefix("www.") { host.removeFirst(4) }
+        for (domain, category) in Self.webDomains where host == domain || host.hasSuffix("." + domain) {
+            self = category
+            return
+        }
+        return nil
+    }
+
+    private static let webDomains: [(String, AppCategory)] = [
+        ("mail.google.com", .mail),
+        ("outlook.live.com", .mail),
+        ("outlook.office.com", .mail),
+        ("outlook.office365.com", .mail),
+        ("mail.proton.me", .mail),
+        ("app.fastmail.com", .mail),
+        ("mail.yahoo.com", .mail),
+        ("app.hey.com", .mail),
+        ("mail.superhuman.com", .mail),
+
+        ("slack.com", .chat),
+        ("discord.com", .chat),
+        ("web.whatsapp.com", .chat),
+        ("web.telegram.org", .chat),
+        ("teams.microsoft.com", .chat),
+        ("teams.live.com", .chat),
+        ("chat.google.com", .chat),
+        ("messenger.com", .chat),
+
+        ("github.com", .code),
+        ("github.dev", .code),
+        ("gitlab.com", .code),
+        ("bitbucket.org", .code),
+        ("codeberg.org", .code),
+        ("vscode.dev", .code),
+        ("stackoverflow.com", .code),
+        ("claude.ai", .code),
+    ]
+
     private static let codeBundleIDs: Set<String> = [
         "com.apple.Terminal",
         "com.googlecode.iterm2",

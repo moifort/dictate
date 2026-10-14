@@ -113,12 +113,12 @@ final class DictationController {
             // accessibility tree once asked, which happens on press. The read
             // can take the whole AX messaging timeout, so it runs while the
             // audio is transcribed rather than before.
-            var precedingText: Task<String?, Never>?
+            var fieldContext: Task<FieldContext, Never>?
             if enhancementEnabled(), shareFieldContext() {
-                precedingText = Task { [focus] in await focus.precedingText(maxLength: Self.precedingTextLength) }
+                fieldContext = Task { [focus] in await focus.fieldContext(maxLength: Self.precedingTextLength) }
             }
             phase = .transcribing
-            processing = Task { await process(samples, precedingText: precedingText) }
+            processing = Task { await process(samples, fieldContext: fieldContext) }
         }
     }
 
@@ -127,7 +127,7 @@ final class DictationController {
         await processing?.value
     }
 
-    private func process(_ samples: [Float], precedingText: Task<String?, Never>?) async {
+    private func process(_ samples: [Float], fieldContext: Task<FieldContext, Never>?) async {
         guard samples.count >= Self.minimumSampleCount, !AudioAnalysis.isSilent(samples) else {
             return finish(.discarded)
         }
@@ -149,9 +149,15 @@ final class DictationController {
         }
         guard !transcript.isEmpty else { return finish(.discarded) }
 
-        if let precedingText {
-            context.precedingText = await precedingText.value
-            Log.dictation.info("preceding text: \(self.context.precedingText?.count ?? 0) characters")
+        if let fieldContext {
+            context.include(await fieldContext.value)
+            // Sizes only: the text, title and host are the user's.
+            Log.dictation.info("""
+                field context: \(self.context.precedingText?.count ?? 0) characters before, \
+                \(self.context.followingText?.count ?? 0) after, label \(self.context.fieldLabel != nil), \
+                title \(self.context.windowTitle != nil), web \(self.context.webHost != nil), \
+                category \(self.context.category.rawValue, privacy: .public)
+                """)
         }
 
         var text = transcript

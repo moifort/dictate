@@ -112,17 +112,38 @@ struct DictationControllerTests {
         #expect(fakes.enhancer.received.first?.context.precedingText == "Salut Guillaume,")
     }
 
+    @Test func fieldContextReachesTheEnhancer() async {
+        let (controller, fakes) = makeController()
+        fakes.focus.field = FieldContext(
+            followingText: " demain", fieldLabel: "Message #general", windowTitle: "general", webHost: nil
+        )
+        await dictate(controller)
+        let context = fakes.enhancer.received.first?.context
+        #expect(context?.followingText == " demain")
+        #expect(context?.fieldLabel == "Message #general")
+        #expect(context?.windowTitle == "general")
+    }
+
+    @Test func browserTabHostSetsTheCategory() async {
+        let (controller, fakes) = makeController()
+        fakes.focus.bundleID = "com.apple.Safari"
+        fakes.focus.field.webHost = "mail.google.com"
+        await dictate(controller)
+        #expect(fakes.enhancer.received.first?.context.category == .mail)
+        #expect(fakes.enhancer.received.first?.context.webHost == "mail.google.com")
+    }
+
     @Test func precedingTextIsNotReadWhenSharingIsOff() async {
         let (controller, fakes) = makeController(shareFieldContext: false)
         await dictate(controller)
-        #expect(fakes.focus.precedingTextReads == 0)
+        #expect(fakes.focus.fieldContextReads == 0)
         #expect(fakes.enhancer.received.first?.context.precedingText == nil)
     }
 
     @Test func precedingTextIsNotReadWithoutClaude() async {
         let (controller, fakes) = makeController(enhancementEnabled: false)
         await dictate(controller)
-        #expect(fakes.focus.precedingTextReads == 0)
+        #expect(fakes.focus.fieldContextReads == 0)
     }
 
     @Test func enhancerErrorFallsBackToRawTranscript() async {
@@ -336,11 +357,11 @@ private final class FakeEnhancer: Enhancer {
 @MainActor
 private final class FakeFocus: FocusInspecting {
     let editable: Bool
-    let bundleID: String?
+    var bundleID: String?
     let delay: Duration
     let events: EventLog
-    var precedingText: String? = "Salut Guillaume,"
-    private(set) var precedingTextReads = 0
+    var field = FieldContext(precedingText: "Salut Guillaume,")
+    private(set) var fieldContextReads = 0
 
     init(editable: Bool, bundleID: String?, delay: Duration, events: EventLog) {
         self.editable = editable
@@ -353,12 +374,12 @@ private final class FakeFocus: FocusInspecting {
     func frontmostAppName() -> String? { "Terminal" }
     func hasEditableFocus() -> Bool { editable }
 
-    func precedingText(maxLength: Int) async -> String? {
-        precedingTextReads += 1
+    func fieldContext(maxLength: Int) async -> FieldContext {
+        fieldContextReads += 1
         events.append("read started")
         try? await Task.sleep(for: delay)
         events.append("read ended")
-        return precedingText.map { String($0.suffix(maxLength)) }
+        return field
     }
 }
 

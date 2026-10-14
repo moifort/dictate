@@ -253,9 +253,9 @@ private struct ReviewSettings: View {
                 LabeledContent("Claude :") {
                     VStack(alignment: .leading, spacing: 6) {
                         Hint("Modèle Haiku, via votre compte Claude Code. Ponctuation, hésitations retirées, lexique appliqué.")
-                        Toggle("Lire le texte avant le curseur", isOn: Bindable(model.settings).shareFieldContext)
+                        Toggle("Lire le texte autour du curseur", isOn: Bindable(model.settings).shareFieldContext)
                             .padding(.top, 4)
-                        Hint("500 caractères, pour reprendre vos noms et votre ton. Jamais un mot de passe.")
+                        Hint("Texte du champ, titre de la fenêtre et domaine du site, pour reprendre vos noms et votre ton. Jamais un mot de passe.")
                     }
                 }
 
