@@ -4,8 +4,8 @@ import Observation
 import Synchronization
 
 /// Local transcription with Parakeet TDT Ultra through FluidAudio, on the
-/// Neural Engine. Much faster than Whisper, but it takes no vocabulary
-/// prompt: the jargon is left to Claude.
+/// Neural Engine. It takes no vocabulary prompt: the jargon is left to
+/// Claude.
 @Observable
 final class ParakeetTranscriber: ModelTranscriber {
     nonisolated static let modelVersion = AsrModelVersion.ultra
@@ -14,7 +14,7 @@ final class ParakeetTranscriber: ModelTranscriber {
     @ObservationIgnored let modelFolder: URL
     @ObservationIgnored private let engine: ParakeetEngine
 
-    init(modelDirectory: URL = WhisperKitTranscriber.defaultModelDirectory) {
+    init(modelDirectory: URL = ModelStorage.defaultDirectory) {
         modelFolder = Self.modelFolder(in: modelDirectory)
         engine = ParakeetEngine(folder: modelFolder)
     }
@@ -25,7 +25,7 @@ final class ParakeetTranscriber: ModelTranscriber {
         base.appending(path: "parakeet-ultra", directoryHint: .isDirectory)
     }
 
-    nonisolated static func isModelDownloaded(in base: URL = WhisperKitTranscriber.defaultModelDirectory) -> Bool {
+    nonisolated static func isModelDownloaded(in base: URL = ModelStorage.defaultDirectory) -> Bool {
         AsrModels.modelsExist(at: modelFolder(in: base), version: modelVersion)
     }
 
@@ -60,8 +60,7 @@ final class ParakeetTranscriber: ModelTranscriber {
         state = .notLoaded
     }
 
-    /// `vocabulary` is ignored: Parakeet has no prompt to bias its decoding.
-    func transcribe(samples: [Float], vocabulary: [String], language: String) async throws -> String {
+    func transcribe(samples: [Float], language: String) async throws -> String {
         if state != .ready { await load() }
         return try await engine.transcribe(samples: samples, language: language)
     }

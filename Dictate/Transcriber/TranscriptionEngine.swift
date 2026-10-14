@@ -1,18 +1,15 @@
 import Foundation
 import Observation
 
-/// The speech-to-text model run on this Mac, in the order the settings offer them.
+/// The speech-to-text model run on this Mac.
 nonisolated enum TranscriptionEngine: String, CaseIterable, Codable, Identifiable, Sendable {
-    /// Parakeet TDT Ultra: the default, several times faster, 25 European languages, no vocabulary.
+    /// Parakeet TDT Ultra: 25 European languages, no vocabulary.
     case parakeet
-    /// Whisper large-v3 turbo: every language, takes the vocabulary as a prompt.
-    case whisper
 
     var id: String { rawValue }
 
     var displayName: String {
         switch self {
-        case .whisper: "Whisper"
         case .parakeet: "Parakeet"
         }
     }
@@ -20,7 +17,6 @@ nonisolated enum TranscriptionEngine: String, CaseIterable, Codable, Identifiabl
     /// Approximate size of the one-time model download, in MB.
     var downloadSize: Int {
         switch self {
-        case .whisper: 630
         case .parakeet: 610
         }
     }
@@ -28,7 +24,6 @@ nonisolated enum TranscriptionEngine: String, CaseIterable, Codable, Identifiabl
     /// The checkpoint behind each engine, as its authors name it.
     var weightsName: String {
         switch self {
-        case .whisper: "Whisper large-v3 turbo"
         case .parakeet: "Parakeet TDT 0.6B v3 Ultra"
         }
     }
@@ -36,26 +31,9 @@ nonisolated enum TranscriptionEngine: String, CaseIterable, Codable, Identifiabl
     /// Number of parameters in the checkpoint, in millions.
     var parameterCount: Int {
         switch self {
-        case .whisper: 809
         case .parakeet: 600
         }
     }
-
-    /// Only Whisper biases its decoding with the vocabulary.
-    var acceptsVocabulary: Bool { self == .whisper }
-
-    func supports(language code: String) -> Bool {
-        switch self {
-        case .whisper: DictationLanguage.supportedCodes.contains(code)
-        case .parakeet: Self.parakeetLanguages.contains(code)
-        }
-    }
-
-    /// The 25 European languages Parakeet TDT v3 and its Ultra post-training cover.
-    static let parakeetLanguages: Set<String> = [
-        "bg", "cs", "da", "de", "el", "en", "es", "et", "fi", "fr", "hr", "hu", "it",
-        "lt", "lv", "mt", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sv", "uk",
-    ]
 }
 
 /// Where a transcription model stands, for every engine.
@@ -89,20 +67,14 @@ enum TranscriberState: Equatable {
 }
 
 /// Routes dictations to the engine picked in the settings and keeps only that
-/// engine's model in memory: both together would hold well over 1 GB.
+/// engine's model in memory: two models together would hold well over 1 GB.
 @Observable
 final class SwitchableTranscriber: Transcriber {
     private(set) var engine: TranscriptionEngine
-    @ObservationIgnored private let whisper: any ModelTranscriber
     @ObservationIgnored private let parakeet: any ModelTranscriber
 
-    init(
-        engine: TranscriptionEngine,
-        whisper: any ModelTranscriber = WhisperKitTranscriber(),
-        parakeet: any ModelTranscriber = ParakeetTranscriber()
-    ) {
+    init(engine: TranscriptionEngine, parakeet: any ModelTranscriber = ParakeetTranscriber()) {
         self.engine = engine
-        self.whisper = whisper
         self.parakeet = parakeet
     }
 
@@ -116,7 +88,7 @@ final class SwitchableTranscriber: Transcriber {
     }
 
     /// Unloads the previous engine and loads the new one in parallel: a
-    /// first-time Parakeet download must not wait for Whisper to be freed.
+    /// first-time download must not wait for the previous model to be freed.
     func select(_ engine: TranscriptionEngine) {
         guard engine != self.engine else { return }
         let previous = active
@@ -126,22 +98,35 @@ final class SwitchableTranscriber: Transcriber {
         Task { await next.load() }
     }
 
-    func transcribe(samples: [Float], vocabulary: [String], language: String) async throws -> String {
-        try await active.transcribe(
-            samples: samples, vocabulary: engine.acceptsVocabulary ? vocabulary : [], language: language
-        )
+    func transcribe(samples: [Float], language: String) async throws -> String {
+        try await active.transcribe(samples: samples, language: language)
     }
 
     private func transcriber(for engine: TranscriptionEngine) -> any ModelTranscriber {
         switch engine {
-        case .whisper: whisper
         case .parakeet: parakeet
         }
     }
 }
 
-/// What a downloaded model takes on disk.
+/// Where the models are downloaded, and what they take on disk.
 nonisolated enum ModelStorage {
+    static var defaultDirectory: URL {
+        URL.applicationSupportDirectory.appending(path: "Dictate/Models", directoryHint: .isDirectory)
+    }
+
+    /// Whisper was offered until it was removed: its model, about 630 MB,
+    /// stays behind on the Macs that downloaded it.
+    static func removeWhisperModel(in base: URL = defaultDirectory) {
+        let folder = base.appending(path: "models/argmaxinc", directoryHint: .isDirectory)
+        guard FileManager.default.fileExists(atPath: folder.path) else { return }
+        do {
+            try FileManager.default.removeItem(at: folder)
+        } catch {
+            ErrorReporter.capture(error, "whisper model could not be removed", category: "transcriber", level: .warning)
+        }
+    }
+
     /// Bytes allocated by every file under `folder`, or nil if it does not exist.
     /// Walks the whole tree: call it off the main actor.
     static func diskUsage(of folder: URL) -> Int64? {

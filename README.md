@@ -22,11 +22,12 @@ ready-to-send text.
 - **Adapts to where you are.** The tone of the cleanup follows the app: a bit
   more polished in a mail, direct in a chat, raw and technical in a code editor
   or a terminal.
-- **Private by design.** Speech is transcribed on your Mac with Parakeet, or
-  Whisper for languages Parakeet lacks; the audio never leaves it. Only the text is sent to Claude for the cleanup, through
+- **Private by design.** Speech is transcribed on your Mac with Parakeet; the
+  audio never leaves it. Only the text is sent to Claude for the cleanup, through
   your own Claude subscription, and you can turn that off entirely. Crashes
   and errors are reported to Sentry without any of your text.
-- **Your language, your words.** Pick the dictation language and add your own
+- **Your language, your words.** Pick the dictation language among 25
+  European languages and add your own
   vocabulary — names, jargon, product terms — so they come out spelled right.
 - **Discreet.** A small pill at the bottom of the screen shows that Dictate is
   listening, then working, and disappears.

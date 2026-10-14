@@ -14,7 +14,7 @@ struct DictationControllerTests {
         editableFocus: Bool = true,
         enhancementEnabled: Bool = true,
         shareFieldContext: Bool = true,
-        engine: TranscriptionEngine = .whisper,
+        engine: TranscriptionEngine = .parakeet,
         loadingEngine: TranscriptionEngine? = nil
     ) -> (DictationController, Fakes) {
         let fakes = Fakes(
@@ -30,7 +30,6 @@ struct DictationControllerTests {
             enhancer: fakes.enhancer,
             focus: fakes.focus,
             inserter: fakes.inserter,
-            whisperVocabulary: { ["push"] },
             language: { "fr" },
             enhancementEnabled: { enhancementEnabled },
             shareFieldContext: { shareFieldContext },
@@ -55,11 +54,11 @@ struct DictationControllerTests {
     }
 
     @Test func pressWhileModelLoadsReportsItWithoutRecording() {
-        let (controller, fakes) = makeController(loadingEngine: .whisper)
+        let (controller, fakes) = makeController(loadingEngine: .parakeet)
         controller.handle(.pressed)
         #expect(controller.phase == .idle)
         #expect(!fakes.recorder.isRecording)
-        #expect(controller.lastOutcome == .modelLoading(.whisper))
+        #expect(controller.lastOutcome == .modelLoading(.parakeet))
         controller.handle(.released)
         #expect(controller.phase == .idle)
     }
@@ -70,7 +69,6 @@ struct DictationControllerTests {
         #expect(fakes.inserter.pasted == ["Fais un push."])
         #expect(fakes.enhancer.received.first?.context.category == .code)
         #expect(fakes.enhancer.received.first?.context.appName == "Terminal")
-        #expect(fakes.transcriber.receivedVocabulary == ["push"])
         #expect(fakes.transcriber.receivedLanguage == "fr")
         #expect(controller.lastOutcome == .pasted(raw: false))
         #expect(controller.phase == .idle)
@@ -264,14 +262,12 @@ private final class FakeRecorder: AudioRecording {
 private final class FakeTranscriber: Transcriber {
     let result: Result<String, Error>
     var callCount = 0
-    var receivedVocabulary: [String] = []
     var receivedLanguage = ""
 
     init(result: Result<String, Error>) { self.result = result }
 
-    func transcribe(samples: [Float], vocabulary: [String], language: String) async throws -> String {
+    func transcribe(samples: [Float], language: String) async throws -> String {
         callCount += 1
-        receivedVocabulary = vocabulary
         receivedLanguage = language
         return try result.get()
     }

@@ -25,7 +25,7 @@ struct ParakeetTranscriberTests {
         #expect(transcriber.state == .ready)
 
         let start = ContinuousClock.now
-        let text = try await transcriber.transcribe(samples: samples, vocabulary: [], language: "fr")
+        let text = try await transcriber.transcribe(samples: samples, language: "fr")
         print("Parakeet: \(ContinuousClock.now - start) for \(samples.count / AudioAnalysis.sampleRate) s of audio: \(text)")
         let lowered = text.lowercased()
         #expect(lowered.contains("branche"), "got: \(text)")
@@ -38,7 +38,7 @@ struct ParakeetTranscriberTests {
         await transcriber.load()
         await transcriber.unload()
         #expect(transcriber.state == .notLoaded)
-        let text = try await transcriber.transcribe(samples: try synthesize("Bonjour à tous"), vocabulary: [], language: "fr")
+        let text = try await transcriber.transcribe(samples: try synthesize("Bonjour à tous"), language: "fr")
         #expect(transcriber.state == .ready)
         #expect(text.lowercased().contains("bonjour"), "got: \(text)")
     }

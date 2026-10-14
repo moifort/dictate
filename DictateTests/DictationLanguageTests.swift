@@ -3,7 +3,7 @@ import Testing
 @testable import Dictate
 
 struct DictationLanguageTests {
-    @Test func followsTheOSLanguageWhenWhisperSupportsIt() {
+    @Test func followsTheOSLanguageWhenSupported() {
         #expect(DictationLanguage.preferred(for: Locale(identifier: "fr_FR")) == "fr")
         #expect(DictationLanguage.preferred(for: Locale(identifier: "en_US")) == "en")
         #expect(DictationLanguage.preferred(for: Locale(identifier: "pt_BR")) == "pt")

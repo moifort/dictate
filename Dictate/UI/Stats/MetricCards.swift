@@ -57,31 +57,19 @@ struct DictationsCard: View {
     }
 }
 
-/// How long the text took to appear after `fn` was released, for one
-/// transcription engine at a time: their speeds differ too much for a shared
-/// median to mean anything. The engine's time is stacked under Claude's.
+/// How long the text took to appear after `fn` was released, with the
+/// current engine only: Whisper's dictations were several times slower and
+/// would drown its median. The engine's time is stacked under Claude's.
 struct LatencyCard: View {
     let records: [DictationRecord]
     let period: StatsPeriod
     let now: Date
-    /// Nil until the user picks one: the engine of the latest dictation.
-    @State private var picked: TranscriptionEngine?
 
-    private var engine: TranscriptionEngine { picked ?? records.last?.engine ?? .parakeet }
+    private let engine = TranscriptionEngine.parakeet
 
     var body: some View {
         let series = DictationSeries(records: records.filter { $0.engine == engine }, period: period, now: now)
         StatsCard(title: "Délai d'affichage", symbol: "timer", color: StatsPalette.latency) {
-            Picker("Moteur", selection: Binding(get: { engine }, set: { picked = $0 })) {
-                ForEach(TranscriptionEngine.allCases) { engine in
-                    Text(engine.displayName).tag(engine)
-                }
-            }
-            .pickerStyle(.segmented)
-            .controlSize(.small)
-            .labelsHidden()
-            .fixedSize()
-        } content: {
             // The legend shares the headline's row: a row of its own would
             // make this card taller than its neighbours.
             HStack(alignment: .bottom) {

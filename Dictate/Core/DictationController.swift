@@ -4,7 +4,7 @@ import Observation
 enum DictationPhase: Equatable {
     case idle
     case recording
-    /// Whisper is turning the audio into text.
+    /// The engine is turning the audio into text.
     case transcribing
     /// Claude is cleaning up the transcript.
     case enhancing
@@ -35,8 +35,6 @@ final class DictationController {
     @ObservationIgnored private let enhancer: Enhancer
     @ObservationIgnored private let focus: FocusInspecting
     @ObservationIgnored private let inserter: TextInserting
-    /// Vocabulary handed to Whisper; empty when Claude alone handles the jargon.
-    @ObservationIgnored private let whisperVocabulary: () -> [String]
     /// ISO 639-1 code of the language being dictated.
     @ObservationIgnored private let language: () -> String
     @ObservationIgnored private let enhancementEnabled: () -> Bool
@@ -65,11 +63,10 @@ final class DictationController {
         enhancer: Enhancer,
         focus: FocusInspecting,
         inserter: TextInserting,
-        whisperVocabulary: @escaping () -> [String],
         language: @escaping () -> String,
         enhancementEnabled: @escaping () -> Bool,
         shareFieldContext: @escaping () -> Bool,
-        transcriptionEngine: @escaping () -> TranscriptionEngine = { .whisper },
+        transcriptionEngine: @escaping () -> TranscriptionEngine = { .parakeet },
         loadingEngine: @escaping () -> TranscriptionEngine? = { nil },
         enhancementTimeout: Duration = .seconds(8)
     ) {
@@ -78,7 +75,6 @@ final class DictationController {
         self.enhancer = enhancer
         self.focus = focus
         self.inserter = inserter
-        self.whisperVocabulary = whisperVocabulary
         self.language = language
         self.enhancementEnabled = enhancementEnabled
         self.shareFieldContext = shareFieldContext
@@ -141,7 +137,7 @@ final class DictationController {
         let engine = transcriptionEngine()
         do {
             let start = clock.now
-            transcript = try await transcriber.transcribe(samples: samples, vocabulary: whisperVocabulary(), language: language())
+            transcript = try await transcriber.transcribe(samples: samples, language: language())
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             transcription = clock.now - start
             Log.dictation.info("transcribed \(audio, format: .fixed(precision: 1)) s of audio in \(Self.milliseconds(transcription)) ms")

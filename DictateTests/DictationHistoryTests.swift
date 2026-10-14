@@ -39,13 +39,17 @@ struct DictationHistoryTests {
         #expect(DictationHistory(file: file).records == [record])
     }
 
-    @Test func linesWrittenBeforeTheEngineWasRecordedComeFromWhisper() throws {
+    @Test func whisperDictationsAreKeptWithoutAnEngine() throws {
         try FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
-        let line = #"{"date":"2026-10-11T17:39:57Z","words":4,"audio":1.5,"transcription":2.1,"enhancement":1.2,"insertion":0.03}"#
-        try Data((line + "\n").utf8).write(to: file)
+        let lines = [
+            // Written before the engine was recorded: all came from Whisper.
+            #"{"date":"2026-10-11T17:39:57Z","words":4,"audio":1.5,"transcription":2.1,"enhancement":1.2,"insertion":0.03}"#,
+            #"{"date":"2026-10-12T09:00:00Z","words":6,"audio":2,"engine":"whisper","transcription":1.4,"enhancement":1,"insertion":0.02}"#,
+        ]
+        try Data((lines.joined(separator: "\n") + "\n").utf8).write(to: file)
         let records = DictationHistory(file: file).records
-        #expect(records.count == 1)
-        #expect(records.first?.engine == .whisper)
+        #expect(records.map(\.words) == [4, 6])
+        #expect(records.allSatisfy { $0.engine == nil })
         #expect(records.first?.transcription == 2.1)
     }
 

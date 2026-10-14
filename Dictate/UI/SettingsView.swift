@@ -50,25 +50,10 @@ private struct DictationSettings: View {
 
             LabeledContent("Moteur :") {
                 VStack(alignment: .leading, spacing: 6) {
-                    Picker("Moteur", selection: Bindable(model.settings).transcriptionEngine) {
-                        ForEach(TranscriptionEngine.allCases) { engine in
-                            Text(engine.displayName).tag(engine)
-                        }
-                    }
-                    .labelsHidden()
-                    .pickerStyle(.segmented)
-                    .onChange(of: model.settings.transcriptionEngine) { model.transcriptionEngineChanged() }
-                    Hint(engineHint)
+                    Text(model.transcriber.engine.displayName)
+                    Hint("25 langues européennes, sur cette machine. Ignore le lexique : seul Claude l'applique. 610 Mo à télécharger au premier usage.")
                     ModelWeights(model: model)
                     EngineStatus(model: model)
-                    if !model.settings.transcriptionEngine.supports(language: model.settings.language) {
-                        Label(
-                            "Parakeet ne gère pas le \(DictationLanguage.name(of: model.settings.language)) : choisissez Whisper.",
-                            systemImage: "exclamationmark.triangle.fill"
-                        )
-                        .font(.callout)
-                        .foregroundStyle(.orange)
-                    }
                 }
             }
         }
@@ -82,15 +67,6 @@ private struct DictationSettings: View {
             "Maintenez 🌐 fn pour dicter. macOS doit la laisser libre : Clavier → « Appuyer sur la touche 🌐 pour » → « Ne rien faire »."
         case .control:
             "Maintenez l'une des touches control pour dicter. Un raccourci comme control-C n'enregistre rien."
-        }
-    }
-
-    private var engineHint: String {
-        switch model.settings.transcriptionEngine {
-        case .whisper:
-            "Toutes les langues, environ 1,5 s par dictée."
-        case .parakeet:
-            "Plusieurs fois plus rapide, 25 langues européennes. Ignore le lexique : seul Claude l'applique. 610 Mo à télécharger au premier usage."
         }
     }
 }
@@ -173,33 +149,12 @@ private struct LexiconSettings: View {
                         .frame(height: 220)
                         .overlay(RoundedRectangle(cornerRadius: 6).stroke(.separator))
                         .onChange(of: model.settings.vocabularyText) { model.settingsChanged() }
-                    Hint("Un par ligne : noms, outils, sigles. Claude les écrit exactement ainsi, quel que soit le moteur.")
-                }
-            }
-
-            if model.settings.transcriptionEngine.acceptsVocabulary {
-                LabeledContent("Whisper :") {
-                    VStack(alignment: .leading, spacing: 6) {
-                        // Shown as on when Claude is off: Whisper then always gets the lexicon.
-                        Toggle("Guider aussi Whisper avec ces termes", isOn: Binding(
-                            get: { model.settings.guideWhisperWithVocabulary || !model.settings.enhancementEnabled },
-                            set: { model.settings.guideWhisperWithVocabulary = $0 }
-                        ))
-                        .disabled(!model.settings.enhancementEnabled)
-                        Hint(whisperHint)
-                    }
+                    Hint("Un par ligne : noms, outils, sigles. Claude les écrit exactement ainsi.")
                 }
             }
         }
         .formStyle(.columns)
         .padding(20)
-    }
-
-    private var whisperHint: String {
-        if !model.settings.enhancementEnabled {
-            return "Toujours actif sans relecture : Whisper est alors seul à connaître votre jargon."
-        }
-        return "Plus précis sur le jargon, mais environ 2 s de plus par dictée."
     }
 }
 

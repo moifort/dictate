@@ -16,9 +16,6 @@ settings:
     MARKETING_VERSION: "0.1.0"
     CURRENT_PROJECT_VERSION: "1"
 packages:
-  WhisperKit:
-    url: https://github.com/argmaxinc/WhisperKit
-    from: 1.1.1
   FluidAudio:
     url: https://github.com/FluidInference/FluidAudio
     from: 0.17.7
@@ -32,7 +29,6 @@ targets:
     sources:
       - Dictate
     dependencies:
-      - package: WhisperKit
       - package: FluidAudio
       - package: Sentry
     settings:

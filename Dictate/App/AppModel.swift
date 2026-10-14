@@ -46,7 +46,6 @@ final class AppModel {
             enhancer: enhancer,
             focus: FocusInspector(),
             inserter: TextInserter(),
-            whisperVocabulary: { settings.whisperVocabulary },
             language: { settings.language },
             enhancementEnabled: { settings.enhancementEnabled },
             shareFieldContext: { settings.shareFieldContext },
@@ -78,6 +77,7 @@ final class AppModel {
         probeClaudeCLI()
         enhancer.prewarm()
         Task { await transcriber.load() }
+        Task.detached(priority: .background) { ModelStorage.removeWhisperModel() }
         startHotkey()
         pollSetupUntilComplete()
         updater.startPeriodicChecks { [settings] in settings.autoUpdate }
@@ -116,14 +116,6 @@ final class AppModel {
         case .failed, .downloading: false
         case .notLoaded, .loading: transcriber.isModelDownloaded
         }
-    }
-
-    /// Switches engines; a first switch to Parakeet downloads its model.
-    func transcriptionEngineChanged() {
-        transcriber.select(settings.transcriptionEngine)
-        refreshSetup()
-        pollSetupUntilComplete()
-        reportSettings()
     }
 
     /// Takes effect on the next press: no need to restart the event tap.

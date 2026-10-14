@@ -21,4 +21,18 @@ struct ModelStorageTests {
         let missing = URL.temporaryDirectory.appending(path: UUID().uuidString, directoryHint: .isDirectory)
         #expect(ModelStorage.diskUsage(of: missing) == nil)
     }
+
+    @Test func removingWhisperKeepsParakeet() throws {
+        let base = URL.temporaryDirectory.appending(path: UUID().uuidString, directoryHint: .isDirectory)
+        defer { try? FileManager.default.removeItem(at: base) }
+        let whisper = base.appending(path: "models/argmaxinc/whisperkit-coreml", directoryHint: .isDirectory)
+        let parakeet = ParakeetTranscriber.modelFolder(in: base)
+        try FileManager.default.createDirectory(at: whisper, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: parakeet, withIntermediateDirectories: true)
+
+        ModelStorage.removeWhisperModel(in: base)
+
+        #expect(!FileManager.default.fileExists(atPath: base.appending(path: "models/argmaxinc").path))
+        #expect(FileManager.default.fileExists(atPath: parakeet.path))
+    }
 }

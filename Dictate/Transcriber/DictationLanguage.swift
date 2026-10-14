@@ -1,18 +1,20 @@
 import Foundation
-import WhisperKit
 
-/// The language Whisper is told to expect, as an ISO 639-1 code ("fr").
+/// The language being dictated, as an ISO 639-1 code ("fr").
 ///
-/// Forcing it skips Whisper's language detection and keeps a dictation from
-/// drifting into another language on a hesitation or an English term.
+/// Parakeet uses it to drop tokens from another alphabet, and Claude to know
+/// which language it is cleaning up.
 nonisolated enum DictationLanguage {
-    /// Every code Whisper large-v3 understands.
-    static let supportedCodes: Set<String> = Constants.languageCodes
+    /// The 25 European languages Parakeet TDT v3 and its Ultra post-training cover.
+    static let supportedCodes: Set<String> = [
+        "bg", "cs", "da", "de", "el", "en", "es", "et", "fi", "fr", "hr", "hu", "it",
+        "lt", "lv", "mt", "nl", "pl", "pt", "ro", "ru", "sk", "sl", "sv", "uk",
+    ]
 
-    /// What Whisper falls back to when the OS language is not one of its own.
+    /// What the app falls back to when the OS language is not supported.
     static let fallback = "en"
 
-    /// The OS language, when Whisper supports it.
+    /// The OS language, when it is supported.
     static func preferred(for locale: Locale = .current) -> String {
         guard let code = locale.language.languageCode?.identifier.lowercased(), supportedCodes.contains(code) else {
             return fallback

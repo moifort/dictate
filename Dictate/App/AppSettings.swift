@@ -13,7 +13,7 @@ final class AppSettings {
 
     @ObservationIgnored private let defaults: UserDefaults
 
-    /// ISO 639-1 code of the dictated language, for Whisper and the Claude
+    /// ISO 639-1 code of the dictated language, for Parakeet and the Claude
     /// prompt. Starts as the OS language.
     var language: String {
         didSet { defaults.set(language, forKey: Keys.language) }
@@ -24,8 +24,7 @@ final class AppSettings {
         didSet { defaults.set(languageConfirmed, forKey: Keys.languageConfirmed) }
     }
 
-    /// The model that turns speech into text. Parakeet by default for its
-    /// speed; Whisper when the language is one of those Parakeet lacks.
+    /// The model that turns speech into text.
     var transcriptionEngine: TranscriptionEngine {
         didSet { defaults.set(transcriptionEngine.rawValue, forKey: Keys.transcriptionEngine) }
     }
@@ -37,13 +36,6 @@ final class AppSettings {
 
     var enhancementEnabled: Bool {
         didSet { defaults.set(enhancementEnabled, forKey: Keys.enhancementEnabled) }
-    }
-
-    /// Also give the vocabulary to Whisper as a decoding prompt. More accurate
-    /// on jargon, but each prompt token costs a decoder pass: about 2 s per
-    /// dictation with the default list on an M1 Pro.
-    var guideWhisperWithVocabulary: Bool {
-        didSet { defaults.set(guideWhisperWithVocabulary, forKey: Keys.guideWhisperWithVocabulary) }
     }
 
     /// Send the text before the cursor to Claude, so names and tone match
@@ -72,11 +64,6 @@ final class AppSettings {
             .filter { !$0.isEmpty }
     }
 
-    /// Without Claude, Whisper is the only chance to spell the jargon right.
-    var whisperVocabulary: [String] {
-        guideWhisperWithVocabulary || !enhancementEnabled ? vocabulary : []
-    }
-
     var launchAtLogin: Bool {
         get { SMAppService.mainApp.status == .enabled }
         set {
@@ -90,15 +77,17 @@ final class AppSettings {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        let language = defaults.string(forKey: Keys.language) ?? DictationLanguage.preferred()
-        self.language = language
-        languageConfirmed = defaults.bool(forKey: Keys.languageConfirmed)
+        // A language only Whisper understood falls back to the OS language,
+        // and must be confirmed again in the onboarding.
+        let saved = defaults.string(forKey: Keys.language)
+        let supported = saved.map(DictationLanguage.supportedCodes.contains) ?? true
+        language = supported ? saved ?? DictationLanguage.preferred() : DictationLanguage.preferred()
+        languageConfirmed = supported && defaults.bool(forKey: Keys.languageConfirmed)
+        // "whisper", saved before it was removed, no longer decodes.
         transcriptionEngine = defaults.string(forKey: Keys.transcriptionEngine)
-            .flatMap(TranscriptionEngine.init(rawValue:))
-            ?? (TranscriptionEngine.parakeet.supports(language: language) ? .parakeet : .whisper)
+            .flatMap(TranscriptionEngine.init(rawValue:)) ?? .parakeet
         pushToTalkKey = defaults.string(forKey: Keys.pushToTalkKey).flatMap(PushToTalkKey.init(rawValue:)) ?? .control
         enhancementEnabled = defaults.object(forKey: Keys.enhancementEnabled) as? Bool ?? true
-        guideWhisperWithVocabulary = defaults.object(forKey: Keys.guideWhisperWithVocabulary) as? Bool ?? true
         shareFieldContext = defaults.object(forKey: Keys.shareFieldContext) as? Bool ?? true
         autoUpdate = defaults.object(forKey: Keys.autoUpdate) as? Bool ?? true
         cliPathOverride = defaults.string(forKey: Keys.cliPathOverride) ?? ""
@@ -111,7 +100,6 @@ final class AppSettings {
         static let transcriptionEngine = "transcriptionEngine"
         static let pushToTalkKey = "pushToTalkKey"
         static let enhancementEnabled = "enhancementEnabled"
-        static let guideWhisperWithVocabulary = "guideWhisperWithVocabulary"
         static let shareFieldContext = "shareFieldContext"
         static let autoUpdate = "autoUpdate"
         static let cliPathOverride = "cliPathOverride"

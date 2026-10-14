@@ -8,10 +8,8 @@ protocol AudioRecording: AnyObject {
 }
 
 @MainActor protocol Transcriber: AnyObject, Sendable {
-    /// `vocabulary` biases decoding towards the listed spellings, at a cost
-    /// of one decoder pass per prompt token; pass `[]` for the fastest result.
-    /// `language` is the ISO 639-1 code Whisper is told to expect.
-    func transcribe(samples: [Float], vocabulary: [String], language: String) async throws -> String
+    /// `language` is the ISO 639-1 code of the dictated language.
+    func transcribe(samples: [Float], language: String) async throws -> String
 }
 
 @MainActor protocol Enhancer: AnyObject, Sendable {

@@ -26,7 +26,7 @@ Tests:
 xcodebuild -project Dictate.xcodeproj -scheme Dictate -derivedDataPath build -destination 'platform=macOS' test
 ```
 
-The Whisper and Parakeet integration tests only run once the matching model
+The Parakeet integration tests only run once the model
 has been downloaded by the app.
 
 ## Updates
@@ -121,7 +121,7 @@ The last page has a scratch field to try a dictation end to end.
 |---|---|
 | `fn` or `control` held / released | `FnKeyMonitor` → `FnKeyGesture` |
 | Microphone → 16 kHz mono | `AudioRecorder` |
-| Local transcription | `SwitchableTranscriber`, routing to the engine picked in Settings → Dictée: `ParakeetTranscriber` (Parakeet TDT Ultra through FluidAudio, default, 25 European languages, no vocabulary prompt) or `WhisperKitTranscriber` (large-v3 turbo, every language, takes the vocabulary as a prompt). Only the active engine's model stays in memory. |
+| Local transcription | `SwitchableTranscriber`, routing to `ParakeetTranscriber` (Parakeet TDT Ultra through FluidAudio, 25 European languages, no vocabulary prompt), the only engine. Only the active engine's model stays in memory. |
 | Cleanup | `ClaudeCLIEnhancer`: one pre-warmed `claude -p --model haiku` process per dictation |
 | Insertion | `FocusInspector` + `TextInserter` (paste then restore the pasteboard, or pasteboard only when no field has focus) |
 | Orchestration | `DictationController` |

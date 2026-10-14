@@ -41,37 +41,22 @@ struct AppSettingsTests {
         #expect(AppSettings(defaults: UserDefaults(suiteName: suite)!).pushToTalkKey == .fn)
     }
 
-    @Test func transcriptionEngineIsParakeetByDefaultAndPersists() {
-        let suite = "AppSettingsTests-\(UUID().uuidString)"
-        let defaults = UserDefaults(suiteName: suite)!
-        defaults.set("fr", forKey: "language")
-        let settings = AppSettings(defaults: defaults)
-        #expect(settings.transcriptionEngine == .parakeet)
-        settings.transcriptionEngine = .whisper
-        #expect(AppSettings(defaults: UserDefaults(suiteName: suite)!).transcriptionEngine == .whisper)
+    @Test func transcriptionEngineIsParakeetByDefault() {
+        #expect(makeSettings().transcriptionEngine == .parakeet)
     }
 
-    @Test func transcriptionEngineFallsBackToWhisperForLanguagesParakeetLacks() {
+    @Test func aSavedWhisperEngineFallsBackToParakeet() {
+        let defaults = UserDefaults(suiteName: "AppSettingsTests-\(UUID().uuidString)")!
+        defaults.set("whisper", forKey: "transcriptionEngine")
+        #expect(AppSettings(defaults: defaults).transcriptionEngine == .parakeet)
+    }
+
+    @Test func aLanguageOnlyWhisperUnderstoodIsAskedAgain() {
         let defaults = UserDefaults(suiteName: "AppSettingsTests-\(UUID().uuidString)")!
         defaults.set("ja", forKey: "language")
-        #expect(AppSettings(defaults: defaults).transcriptionEngine == .whisper)
-    }
-
-    @Test func whisperGetsTheVocabularyByDefault() {
-        let settings = makeSettings()
-        #expect(settings.guideWhisperWithVocabulary)
-        #expect(settings.whisperVocabulary == settings.vocabulary)
-    }
-
-    @Test func whisperGetsNoVocabularyWhenClaudeAloneHandlesTheJargon() {
-        let settings = makeSettings()
-        settings.guideWhisperWithVocabulary = false
-        #expect(settings.whisperVocabulary.isEmpty)
-    }
-
-    @Test func whisperGetsTheVocabularyWithoutClaude() {
-        let settings = makeSettings()
-        settings.enhancementEnabled = false
-        #expect(settings.whisperVocabulary == settings.vocabulary)
+        defaults.set(true, forKey: "languageConfirmed")
+        let settings = AppSettings(defaults: defaults)
+        #expect(settings.language == DictationLanguage.preferred())
+        #expect(!settings.languageConfirmed)
     }
 }

@@ -1,7 +1,7 @@
 name: Tests
 
 # The unit suite on every commit to main and on pull requests. No microphone,
-# no Whisper model, no Claude: the controller runs on fakes and the Whisper
+# no Parakeet model, no Claude: the controller runs on fakes and the Parakeet
 # integration test skips itself when the model is not on disk.
 on:
   push:
