@@ -27,15 +27,15 @@ Improvements to transcript quality and latency, in the recommended order.
   per token (`TokenTiming.confidence`), currently unused. Mark the doubtful
   words in the user message (e.g. `<?>Kubernetis</?>`) so Haiku knows where to
   correct, and where to leave the text alone.
-- [ ] **Richer accessibility context**
-  - [ ] Browsers: read the active tab's URL to categorize web apps
+- [x] **Richer accessibility context**
+  - [x] Browsers: read the active tab's URL to categorize web apps
     (`mail.google.com` → mail, `app.slack.com` → chat, `github.com` → code).
     Browsers all fall into `other` today.
-  - [ ] Window title: email subject, Slack channel, PR title — names Haiku
+  - [x] Window title: email subject, Slack channel, PR title — names Haiku
     can spell from.
-  - [ ] Field label (placeholder, description): "Subject",
+  - [x] Field label (placeholder, description): "Subject",
     "Message #general", "Commit message".
-  - [ ] Text after the cursor: when dictating mid-sentence, no final period
+  - [x] Text after the cursor: when dictating mid-sentence, no final period
     and no leading capital.
 - [ ] **Vocabulary boosting in Parakeet** — FluidAudio 0.17.7 ships CTC keyword
   spotting + rescoring (`VocabularyBoostingSession`, see
