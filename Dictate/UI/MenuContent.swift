@@ -53,8 +53,14 @@ struct MenuContent: View {
         case .notLoaded, .loading: "Chargement de \(engine)…"
         case .downloading(let fraction): "Téléchargement de \(engine)… \(fraction.formatted(.percent.precision(.fractionLength(0))))"
         case .failed(let message): "\(engine) indisponible : \(message)"
-        case .ready: model.hotkeyActive ? nil : "Touche \(model.settings.pushToTalkKey.displayName) inactive"
+        case .ready: model.hotkeyActive ? boosterStatusLine : "Touche \(model.settings.pushToTalkKey.displayName) inactive"
         }
+    }
+
+    /// Only its download: the rest is in the settings, and dictation never waits for it.
+    private var boosterStatusLine: String? {
+        guard case .downloading(let fraction) = model.booster.state else { return nil }
+        return "Téléchargement du modèle de vocabulaire… \(fraction.formatted(.percent.precision(.fractionLength(0))))"
     }
 
     /// An accessory app must be activated for its windows to come forward.

@@ -82,6 +82,19 @@ final class AppSettings {
             .filter { !$0.isEmpty }
     }
 
+    /// Search the audio for the vocabulary and fix the transcript before
+    /// Claude, with a second model. Experimental, off by default: its effect
+    /// on French is still to be measured.
+    var boostVocabulary: Bool {
+        didSet { defaults.set(boostVocabulary, forKey: Keys.boostVocabulary) }
+    }
+
+    /// The terms Parakeet's transcript is rescored against: none unless
+    /// boosting is on and the vocabulary has terms.
+    var boostedVocabulary: [String] {
+        boostVocabulary ? vocabulary : []
+    }
+
     var launchAtLogin: Bool {
         get { SMAppService.mainApp.status == .enabled }
         set {
@@ -112,6 +125,7 @@ final class AppSettings {
         suggestVocabulary = defaults.bool(forKey: Keys.suggestVocabulary)
         cliPathOverride = defaults.string(forKey: Keys.cliPathOverride) ?? ""
         vocabularyText = defaults.string(forKey: Keys.vocabulary) ?? Self.defaultVocabulary.joined(separator: "\n")
+        boostVocabulary = defaults.bool(forKey: Keys.boostVocabulary)
     }
 
     private enum Keys {
@@ -126,5 +140,6 @@ final class AppSettings {
         static let suggestVocabulary = "suggestVocabulary"
         static let cliPathOverride = "cliPathOverride"
         static let vocabulary = "vocabulary"
+        static let boostVocabulary = "boostVocabulary"
     }
 }

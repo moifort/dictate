@@ -5,7 +5,7 @@ import Synchronization
 
 /// Local transcription with Parakeet TDT Ultra through FluidAudio, on the
 /// Neural Engine. It takes no vocabulary prompt: the jargon is left to
-/// Claude.
+/// Claude, unless the experimental vocabulary boosting rescores its output.
 @Observable
 final class ParakeetTranscriber: ModelTranscriber {
     nonisolated static let modelVersion = AsrModelVersion.ultra
@@ -13,10 +13,19 @@ final class ParakeetTranscriber: ModelTranscriber {
     private(set) var state: TranscriberState = .notLoaded
     @ObservationIgnored let modelFolder: URL
     @ObservationIgnored private let engine: ParakeetEngine
+    @ObservationIgnored private let booster: VocabularyBooster?
+    /// The terms to search the audio for; empty when boosting is off.
+    @ObservationIgnored private let boostedVocabulary: () -> [String]
 
-    init(modelDirectory: URL = ModelStorage.defaultDirectory) {
+    init(
+        modelDirectory: URL = ModelStorage.defaultDirectory,
+        booster: VocabularyBooster? = nil,
+        boostedVocabulary: @escaping () -> [String] = { [] }
+    ) {
         modelFolder = Self.modelFolder(in: modelDirectory)
         engine = ParakeetEngine(folder: modelFolder)
+        self.booster = booster
+        self.boostedVocabulary = boostedVocabulary
     }
 
     /// FluidAudio's cache folder for this model: it resolves the files from
@@ -66,7 +75,10 @@ final class ParakeetTranscriber: ModelTranscriber {
 
     func transcription(samples: [Float], language: String) async throws -> Transcription {
         if state != .ready { await load() }
-        return try await engine.transcribe(samples: samples, language: language)
+        let (transcription, tokenTimings) = try await engine.transcribe(samples: samples, language: language)
+        let vocabulary = boostedVocabulary()
+        guard let booster, !vocabulary.isEmpty else { return transcription }
+        return await booster.boost(transcription, tokenTimings: tokenTimings, samples: samples, vocabulary: vocabulary)
     }
 }
 
@@ -111,15 +123,17 @@ actor ParakeetEngine {
         manager = nil
     }
 
-    func transcribe(samples: [Float], language: String) async throws -> Transcription {
+    /// The token timings come along for the vocabulary rescoring.
+    func transcribe(samples: [Float], language: String) async throws -> (Transcription, [TokenTiming]) {
         try await load()
-        guard let manager else { return Transcription(text: "") }
+        guard let manager else { return (Transcription(text: ""), []) }
         // A fresh decoder state per dictation: they are independent utterances.
         var decoderState = TdtDecoderState.make(decoderLayers: await manager.decoderLayerCount)
         // The language only filters out tokens from another alphabet.
         let result = try await manager.transcribe(samples, decoderState: &decoderState, language: Language(rawValue: language))
-        let tokens = (result.tokenTimings ?? []).map { (piece: $0.token, confidence: $0.confidence) }
-        return Transcription(text: result.text, words: Transcription.words(fromTokens: tokens))
+        let timings = result.tokenTimings ?? []
+        let tokens = timings.map { (piece: $0.token, confidence: $0.confidence) }
+        return (Transcription(text: result.text, words: Transcription.words(fromTokens: tokens)), timings)
     }
 }
 

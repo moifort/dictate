@@ -14,10 +14,14 @@ nonisolated struct Transcription: Equatable, Sendable {
     var text: String
     /// In transcript order; empty when the engine reports no confidence.
     var words: [Word]
+    /// The custom vocabulary was searched for in the audio and the transcript
+    /// rescored against it, whether or not a word changed.
+    var vocabularyBoosted: Bool
 
-    init(text: String, words: [Word] = []) {
+    init(text: String, words: [Word] = [], vocabularyBoosted: Bool = false) {
         self.text = text
         self.words = words
+        self.vocabularyBoosted = vocabularyBoosted
     }
 
     /// The least certain word, nil when the engine reports no confidence.

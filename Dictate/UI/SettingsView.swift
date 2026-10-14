@@ -51,7 +51,7 @@ private struct DictationSettings: View {
             LabeledContent("Moteur :") {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(model.transcriber.engine.displayName)
-                    Hint("25 langues européennes, sur cette machine. Ignore le lexique : seul Claude l'applique. 610 Mo à télécharger au premier usage.")
+                    Hint("25 langues européennes, sur cette machine. Le lexique est appliqué par Claude, et par Parakeet si vous renforcez le vocabulaire (onglet Lexique). 610 Mo à télécharger au premier usage.")
                     ModelWeights(model: model)
                     EngineStatus(model: model)
                 }
@@ -128,6 +128,48 @@ private struct EngineStatus: View {
     }
 }
 
+/// The boosting model downloads like the engine's, but dictation never waits
+/// for it: until it is ready, transcripts go through as Parakeet heard them.
+private struct BoosterStatus: View {
+    let model: AppModel
+
+    var body: some View {
+        Group {
+            switch model.booster.state {
+            case .loading:
+                status("Chargement du modèle de vocabulaire…")
+            case .downloading(let fraction):
+                status("Téléchargement du modèle de vocabulaire… \(fraction.formatted(.percent.precision(.fractionLength(0)))).")
+            case .failed(let message):
+                HStack(spacing: 8) {
+                    Label("Modèle de vocabulaire indisponible : \(message)", systemImage: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+                    Button("Réessayer") { model.retryBooster() }
+                        .controlSize(.small)
+                }
+                .font(.callout)
+            case .notLoaded:
+                if model.settings.vocabulary.isEmpty {
+                    Hint("Sans effet tant que le lexique est vide.")
+                }
+            case .ready:
+                EmptyView()
+            }
+        }
+        .animation(.snappy, value: model.booster.state)
+    }
+
+    private func status(_ text: String) -> some View {
+        HStack(spacing: 8) {
+            ProgressView().controlSize(.small)
+            Text(text)
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
+
 /// Which checkpoint the engine runs and, once downloaded, what it takes on disk.
 private struct ModelWeights: View {
     let model: AppModel
@@ -165,8 +207,29 @@ private struct LexiconSettings: View {
                         .font(.body.monospaced())
                         .frame(height: 220)
                         .overlay(RoundedRectangle(cornerRadius: 6).stroke(.separator))
-                        .onChange(of: model.settings.vocabularyText) { model.settingsChanged() }
+                        .onChange(of: model.settings.vocabularyText) {
+                            model.settingsChanged()
+                            model.vocabularyBoostingChanged()
+                        }
                     Hint("Un par ligne : noms, outils, sigles. Claude les écrit exactement ainsi.")
+                }
+            }
+
+            LabeledContent("Transcription :") {
+                VStack(alignment: .leading, spacing: 6) {
+                    Toggle(
+                        "Renforcer le vocabulaire dans la transcription (expérimental)",
+                        isOn: Bindable(model.settings).boostVocabulary
+                    )
+                    .onChange(of: model.settings.boostVocabulary) { model.vocabularyBoostingChanged() }
+                    Hint("""
+                        Un second modèle cherche ces termes dans l'audio et corrige la transcription avant Claude. \
+                        Entraîné surtout sur l'anglais : son effet en français reste à mesurer. \
+                        Environ 100 Mo à télécharger.
+                        """)
+                    if model.settings.boostVocabulary {
+                        BoosterStatus(model: model)
+                    }
                 }
             }
 

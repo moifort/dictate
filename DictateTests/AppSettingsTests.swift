@@ -51,6 +51,25 @@ struct AppSettingsTests {
         #expect(settings.vocabularyText == "Claude")
     }
 
+    @Test func vocabularyBoostingIsOffByDefaultAndPersists() {
+        let suite = "AppSettingsTests-\(UUID().uuidString)"
+        let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!)
+        #expect(!settings.boostVocabulary)
+        #expect(settings.boostedVocabulary.isEmpty)
+        settings.boostVocabulary = true
+        #expect(AppSettings(defaults: UserDefaults(suiteName: suite)!).boostVocabulary)
+    }
+
+    @Test func boostedVocabularyIsTheVocabularyOnlyWhenBoostingIsOn() {
+        let settings = makeSettings()
+        settings.vocabularyText = "Kubernetes\n  \nClaude Code "
+        #expect(settings.boostedVocabulary.isEmpty)
+        settings.boostVocabulary = true
+        #expect(settings.boostedVocabulary == ["Kubernetes", "Claude Code"])
+        settings.vocabularyText = ""
+        #expect(settings.boostedVocabulary.isEmpty)
+    }
+
     @Test func fieldContextIsSharedByDefaultAndPersists() {
         let suite = "AppSettingsTests-\(UUID().uuidString)"
         let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!)

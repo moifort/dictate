@@ -7,6 +7,8 @@ final class AppModel {
     let settings: AppSettings
     let recorder = AudioRecorder()
     let transcriber: SwitchableTranscriber
+    /// The experimental vocabulary rescoring of Parakeet's transcript.
+    let booster: VocabularyBooster
     let controller: DictationController
     let indicator: RecordingIndicator
     let updater = Updater()
@@ -35,7 +37,10 @@ final class AppModel {
     init() {
         let settings = AppSettings()
         self.settings = settings
-        let transcriber = SwitchableTranscriber(engine: settings.transcriptionEngine)
+        let booster = VocabularyBooster()
+        self.booster = booster
+        let parakeet = ParakeetTranscriber(booster: booster, boostedVocabulary: { settings.boostedVocabulary })
+        let transcriber = SwitchableTranscriber(engine: settings.transcriptionEngine, parakeet: parakeet)
         self.transcriber = transcriber
         let locator = locator
         let focus = FocusInspector()
@@ -96,6 +101,7 @@ final class AppModel {
         probeClaudeCLI()
         enhancer.prewarm()
         Task { await transcriber.load() }
+        vocabularyBoostingChanged()
         Task.detached(priority: .background) { ModelStorage.removeWhisperModel() }
         startHotkey()
         pollSetupUntilComplete()
@@ -110,6 +116,7 @@ final class AppModel {
             "push_to_talk": settings.pushToTalkKey.rawValue,
             "language": settings.language,
             "enhancement": settings.enhancementEnabled ? "on" : "off",
+            "vocabulary_boosting": settings.boostedVocabulary.isEmpty ? "off" : "on",
             "claude_cli": claudeCLIPath == nil ? "missing" : "found",
         ])
     }
@@ -230,6 +237,21 @@ final class AppModel {
             guard !Task.isCancelled else { return }
             enhancer.reset()
         }
+    }
+
+    /// Loads the boosting model, downloading it the first time, as soon as
+    /// it is wanted, and frees it once it is not: about 130 MB in memory.
+    func vocabularyBoostingChanged() {
+        reportSettings()
+        if settings.boostedVocabulary.isEmpty {
+            Task { await booster.unload() }
+        } else {
+            Task { await booster.load() }
+        }
+    }
+
+    func retryBooster() {
+        Task { await booster.load() }
     }
 
     func testClaude() async {
