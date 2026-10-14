@@ -134,20 +134,21 @@ final class DictationController {
 
         let clock = ContinuousClock()
         let audio = Double(samples.count) / Double(AudioAnalysis.sampleRate)
-        let transcript: String
+        var transcript: Transcription
         let transcription: Duration
         let engine = transcriptionEngine()
         do {
             let start = clock.now
-            transcript = try await transcriber.transcribe(samples: samples, language: language())
-                .trimmingCharacters(in: .whitespacesAndNewlines)
+            transcript = try await transcriber.transcription(samples: samples, language: language())
+            transcript.text = transcript.text.trimmingCharacters(in: .whitespacesAndNewlines)
             transcription = clock.now - start
-            Log.dictation.info("transcribed \(audio, format: .fixed(precision: 1)) s of audio in \(Self.milliseconds(transcription)) ms")
+            let doubtful = transcript.words.count { $0.confidence < DoubtfulWords.threshold }
+            Log.dictation.info("transcribed \(audio, format: .fixed(precision: 1)) s of audio in \(Self.milliseconds(transcription)) ms, \(doubtful) doubtful words")
         } catch {
             ErrorReporter.capture(error, "transcription with \(engine.rawValue) failed", category: "transcriber")
             return finish(.failed("Transcription impossible : \(error.localizedDescription)"))
         }
-        guard !transcript.isEmpty else { return finish(.discarded) }
+        guard !transcript.text.isEmpty else { return finish(.discarded) }
 
         if let fieldContext {
             context.include(await fieldContext.value)
@@ -160,7 +161,7 @@ final class DictationController {
                 """)
         }
 
-        var text = transcript
+        var text = transcript.text
         var raw = false
         var enhancement: Duration?
         if enhancementEnabled() {
@@ -207,9 +208,9 @@ final class DictationController {
         Double(elapsed.components.seconds) + Double(elapsed.components.attoseconds) / 1e18
     }
 
-    private func enhanceWithTimeout(_ transcript: String) async -> String? {
+    private func enhanceWithTimeout(_ transcript: Transcription) async -> String? {
         let work = Task { [enhancer, context] in
-            try await enhancer.enhance(transcript: transcript, context: context)
+            try await enhancer.enhance(transcript, context: context)
         }
         let timer = Task { [enhancementTimeout] in
             try await Task.sleep(for: enhancementTimeout)

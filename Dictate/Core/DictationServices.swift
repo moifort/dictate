@@ -10,11 +10,26 @@ protocol AudioRecording: AnyObject {
 @MainActor protocol Transcriber: AnyObject, Sendable {
     /// `language` is the ISO 639-1 code of the dictated language.
     func transcribe(samples: [Float], language: String) async throws -> String
+    /// The same text, with the confidence of each word when the engine reports it.
+    func transcription(samples: [Float], language: String) async throws -> Transcription
+}
+
+extension Transcriber {
+    /// For engines without per-word confidence.
+    func transcription(samples: [Float], language: String) async throws -> Transcription {
+        Transcription(text: try await transcribe(samples: samples, language: language))
+    }
 }
 
 @MainActor protocol Enhancer: AnyObject, Sendable {
     /// Must honour task cancellation: the controller cancels on timeout.
-    func enhance(transcript: String, context: DictationContext) async throws -> String
+    func enhance(_ transcription: Transcription, context: DictationContext) async throws -> String
+}
+
+extension Enhancer {
+    func enhance(transcript: String, context: DictationContext) async throws -> String {
+        try await enhance(Transcription(text: transcript), context: context)
+    }
 }
 
 protocol FocusInspecting: AnyObject {

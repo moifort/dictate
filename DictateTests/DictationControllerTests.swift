@@ -9,6 +9,7 @@ struct DictationControllerTests {
     private func makeController(
         samples: [Float]? = nil,
         transcript: Result<String, Error> = .success("euh fais un pouche"),
+        words: [Transcription.Word] = [],
         enhanced: Result<String, Error> = .success("Fais un push."),
         enhancerDelay: Duration = .zero,
         transcriberDelay: Duration = .zero,
@@ -22,7 +23,7 @@ struct DictationControllerTests {
         let events = EventLog()
         let fakes = Fakes(
             recorder: FakeRecorder(samples: samples ?? speech),
-            transcriber: FakeTranscriber(result: transcript, delay: transcriberDelay, events: events),
+            transcriber: FakeTranscriber(result: transcript, words: words, delay: transcriberDelay, events: events),
             enhancer: FakeEnhancer(result: enhanced, delay: enhancerDelay),
             focus: FakeFocus(editable: editableFocus, bundleID: "com.apple.Terminal", delay: precedingTextDelay, events: events),
             inserter: FakeInserter(),
@@ -158,6 +159,32 @@ struct DictationControllerTests {
         await dictate(controller)
         #expect(fakes.inserter.pasted == ["euh fais un pouche"])
         #expect(controller.lastOutcome == .pasted(raw: true))
+    }
+
+    @Test func wordConfidencesReachTheEnhancer() async {
+        let words = [
+            Transcription.Word(text: "fais", confidence: 0.98),
+            Transcription.Word(text: "un", confidence: 0.97),
+            Transcription.Word(text: "pouche", confidence: 0.2),
+        ]
+        let (controller, fakes) = makeController(transcript: .success(" fais un pouche "), words: words)
+        await dictate(controller)
+        #expect(fakes.enhancer.received.first?.transcription == Transcription(text: "fais un pouche", words: words))
+    }
+
+    @Test(arguments: [true, false])
+    func rawTranscriptNeverCarriesMarkers(enhancementEnabled: Bool) async {
+        let words = [
+            Transcription.Word(text: "fais", confidence: 0.98),
+            Transcription.Word(text: "un", confidence: 0.97),
+            Transcription.Word(text: "pouche", confidence: 0.2),
+        ]
+        let (controller, fakes) = makeController(
+            transcript: .success("fais un pouche"), words: words,
+            enhanced: .failure(FakeError()), enhancementEnabled: enhancementEnabled
+        )
+        await dictate(controller)
+        #expect(fakes.inserter.pasted == ["fais un pouche"])
     }
 
     @Test func disabledEnhancementSkipsEnhancer() async {
@@ -315,13 +342,15 @@ private final class FakeRecorder: AudioRecording {
 @MainActor
 private final class FakeTranscriber: Transcriber {
     let result: Result<String, Error>
+    let words: [Transcription.Word]
     let delay: Duration
     let events: EventLog
     var callCount = 0
     var receivedLanguage = ""
 
-    init(result: Result<String, Error>, delay: Duration, events: EventLog) {
+    init(result: Result<String, Error>, words: [Transcription.Word], delay: Duration, events: EventLog) {
         self.result = result
+        self.words = words
         self.delay = delay
         self.events = events
     }
@@ -334,21 +363,25 @@ private final class FakeTranscriber: Transcriber {
         events.append("transcription ended")
         return try result.get()
     }
+
+    func transcription(samples: [Float], language: String) async throws -> Transcription {
+        Transcription(text: try await transcribe(samples: samples, language: language), words: words)
+    }
 }
 
 @MainActor
 private final class FakeEnhancer: Enhancer {
     let result: Result<String, Error>
     let delay: Duration
-    var received: [(transcript: String, context: DictationContext)] = []
+    var received: [(transcription: Transcription, context: DictationContext)] = []
 
     init(result: Result<String, Error>, delay: Duration) {
         self.result = result
         self.delay = delay
     }
 
-    func enhance(transcript: String, context: DictationContext) async throws -> String {
-        received.append((transcript, context))
+    func enhance(_ transcription: Transcription, context: DictationContext) async throws -> String {
+        received.append((transcription, context))
         try await Task.sleep(for: delay)
         return try result.get()
     }

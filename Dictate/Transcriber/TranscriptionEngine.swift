@@ -102,6 +102,10 @@ final class SwitchableTranscriber: Transcriber {
         try await active.transcribe(samples: samples, language: language)
     }
 
+    func transcription(samples: [Float], language: String) async throws -> Transcription {
+        try await active.transcription(samples: samples, language: language)
+    }
+
     private func transcriber(for engine: TranscriptionEngine) -> any ModelTranscriber {
         switch engine {
         case .parakeet: parakeet

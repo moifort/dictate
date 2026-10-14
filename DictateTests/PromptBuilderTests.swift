@@ -46,6 +46,30 @@ struct PromptBuilderTests {
         #expect(message.components(separatedBy: "<dictation>").count == 2)
     }
 
+    @Test func systemPromptExplainsDoubtfulWordMarkers() {
+        let prompt = PromptBuilder.systemPrompt(vocabulary: ["rebase"], language: "fr")
+        #expect(prompt.contains("<?>…</?>"))
+        #expect(prompt.contains("N'écris jamais <?> ni </?>"))
+    }
+
+    @Test func userMessageMarksDoubtfulWords() {
+        let words = [
+            Transcription.Word(text: "déploie", confidence: 0.98),
+            Transcription.Word(text: "sur", confidence: 0.97),
+            Transcription.Word(text: "Kubernetis.", confidence: 0.31),
+        ]
+        let transcription = Transcription(text: "déploie sur Kubernetis.", words: words)
+        let message = PromptBuilder.userMessage(transcription: transcription, context: DictationContext(category: .code))
+        #expect(message.contains("<dictation>\ndéploie sur <?>Kubernetis</?>.\n</dictation>"))
+        #expect(message.contains("<context>code</context>"))
+    }
+
+    @Test func userMessageWithoutConfidencesIsThePlainOne() {
+        let context = DictationContext(category: .chat)
+        #expect(PromptBuilder.userMessage(transcription: Transcription(text: "ça marche"), context: context)
+            == PromptBuilder.userMessage(transcript: "ça marche", context: context))
+    }
+
     @Test func systemPromptExplainsPrecedingText() {
         #expect(PromptBuilder.systemPrompt(vocabulary: [], language: "fr").contains("<preceding_text>"))
     }

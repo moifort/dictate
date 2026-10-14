@@ -61,6 +61,10 @@ final class ParakeetTranscriber: ModelTranscriber {
     }
 
     func transcribe(samples: [Float], language: String) async throws -> String {
+        try await transcription(samples: samples, language: language).text
+    }
+
+    func transcription(samples: [Float], language: String) async throws -> Transcription {
         if state != .ready { await load() }
         return try await engine.transcribe(samples: samples, language: language)
     }
@@ -107,14 +111,15 @@ actor ParakeetEngine {
         manager = nil
     }
 
-    func transcribe(samples: [Float], language: String) async throws -> String {
+    func transcribe(samples: [Float], language: String) async throws -> Transcription {
         try await load()
-        guard let manager else { return "" }
+        guard let manager else { return Transcription(text: "") }
         // A fresh decoder state per dictation: they are independent utterances.
         var decoderState = TdtDecoderState.make(decoderLayers: await manager.decoderLayerCount)
         // The language only filters out tokens from another alphabet.
         let result = try await manager.transcribe(samples, decoderState: &decoderState, language: Language(rawValue: language))
-        return result.text
+        let tokens = (result.tokenTimings ?? []).map { (piece: $0.token, confidence: $0.confidence) }
+        return Transcription(text: result.text, words: Transcription.words(fromTokens: tokens))
     }
 }
 

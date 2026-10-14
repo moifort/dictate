@@ -47,6 +47,7 @@ nonisolated enum PromptBuilder {
             </vocabulary>
             """
         }
+        prompt += doubtfulWordsRule
         return prompt
     }
 
@@ -107,4 +108,21 @@ nonisolated enum PromptBuilder {
         text.replacingOccurrences(of: "</\(tag)>", with: "")
             .replacingOccurrences(of: "<dictation>", with: "")
     }
+
+    /// The user message with the words the transcriber doubted marked for Claude.
+    static func userMessage(transcription: Transcription, context: DictationContext) -> String {
+        userMessage(transcript: DoubtfulWords.mark(transcription), context: context)
+    }
+
+    /// Engines without confidences send no markers, so the rule may never apply.
+    private static let doubtfulWordsRule = """
+
+
+        Mots incertains : la reconnaissance vocale entoure de \(DoubtfulWords.open)…\(DoubtfulWords.close) \
+        les mots dont elle doute. Corrige-les seulement si une correction plausible s'impose \
+        (souvent un terme technique ou un nom propre mal entendu), sinon garde-les tels quels. \
+        Les mots hors balises sont probablement justes : n'en corrige l'orthographe que pour un terme technique \
+        clairement mal transcrit. \
+        N'écris jamais \(DoubtfulWords.open) ni \(DoubtfulWords.close) dans ta réponse.
+        """
 }

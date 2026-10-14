@@ -40,6 +40,27 @@ struct ClaudeCLIEnhancerTests {
         #expect(content == PromptBuilder.userMessage(transcript: "fais un pouche", context: DictationContext(category: .code)))
     }
 
+    @Test func sendsDoubtfulWordsMarkedAndStripsMarkersFromTheReply() async throws {
+        let stdinCopy = directory.appending(path: "stdin.txt")
+        let cli = try fakeCLI("""
+        cat > "\(stdinCopy.path)"
+        echo '{"type":"result","subtype":"success","is_error":false,"result":"Déploie sur <?>Kubernetes</?>."}'
+        """)
+        let words = [
+            Transcription.Word(text: "déploie", confidence: 0.9),
+            Transcription.Word(text: "sur", confidence: 0.9),
+            Transcription.Word(text: "Kubernetis", confidence: 0.2),
+        ]
+        let result = try await makeEnhancer(cli).enhance(
+            Transcription(text: "déploie sur Kubernetis", words: words), context: DictationContext()
+        )
+        #expect(result == "Déploie sur Kubernetes.")
+        let sent = try Data(contentsOf: stdinCopy)
+        let json = try #require(try JSONSerialization.jsonObject(with: sent) as? [String: Any])
+        let content = try #require((json["message"] as? [String: Any])?["content"] as? String)
+        #expect(content.contains("<?>Kubernetis</?>"))
+    }
+
     @Test func returnsOnTheAssistantTextWithoutWaitingForThePostTurnSummary() async throws {
         let cli = try fakeCLI("""
         cat > /dev/null

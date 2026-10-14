@@ -33,6 +33,15 @@ struct ParakeetTranscriberTests {
     }
 
     @Test(.enabled(if: modelAvailable), .timeLimit(.minutes(5)))
+    func reportsAConfidenceForEveryWordOfTheText() async throws {
+        let samples = try synthesize("Je vais déployer sur Kubernetes, puis faire un rebase.")
+        let transcription = try await ParakeetTranscriber().transcription(samples: samples, language: "fr")
+        print("Parakeet confidences: " + transcription.words.map { "\($0.text) \($0.confidence)" }.joined(separator: ", "))
+        #expect(transcription.words.map(\.text) == transcription.text.split(separator: " ").map(String.init))
+        #expect(transcription.words.allSatisfy { (0...1).contains($0.confidence) })
+    }
+
+    @Test(.enabled(if: modelAvailable), .timeLimit(.minutes(5)))
     func unloadFreesTheModelAndTheNextDictationReloadsIt() async throws {
         let transcriber = ParakeetTranscriber()
         await transcriber.load()

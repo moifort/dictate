@@ -74,7 +74,7 @@ final class ClaudeCLIEnhancer: Enhancer {
         warm = nil
     }
 
-    func enhance(transcript: String, context: DictationContext) async throws -> String {
+    func enhance(_ transcription: Transcription, context: DictationContext) async throws -> String {
         let process: ClaudeCLIProcess
         if let warm, warm.isRunning {
             process = warm
@@ -83,7 +83,9 @@ final class ClaudeCLIEnhancer: Enhancer {
         }
         warm = nil
         defer { prewarm() }
-        return try await process.send(PromptBuilder.userMessage(transcript: transcript, context: context))
+        let reply = try await process.send(PromptBuilder.userMessage(transcription: transcription, context: context))
+        // The prompt forbids them, but a marker left in would end up in the user's text.
+        return DoubtfulWords.strip(reply)
     }
 
     private func spawn() throws -> ClaudeCLIProcess {
