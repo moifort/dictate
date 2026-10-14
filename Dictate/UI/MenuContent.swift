@@ -21,6 +21,10 @@ struct MenuContent: View {
         }
         Divider()
         Button("Statistiques…") { open { openWindow(id: "stats") } }
+        if model.settings.keepEvaluationCorpus {
+            Button("Évaluer le corpus (\(model.corpus.entries.count) dictées)…") { model.evaluateCorpus() }
+                .disabled(model.corpus.entries.isEmpty)
+        }
         Button("Réglages…") { open { openSettings() } }
             .keyboardShortcut(",")
         Divider()

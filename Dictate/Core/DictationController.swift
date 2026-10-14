@@ -46,12 +46,19 @@ final class DictationController {
     @ObservationIgnored private let loadingEngine: () -> TranscriptionEngine?
     @ObservationIgnored private let enhancementTimeout: Duration
     @ObservationIgnored private var context = DictationContext()
+    @ObservationIgnored private var bundleID: String?
     @ObservationIgnored private var processing: Task<Void, Never>?
 
     /// Called once per finished dictation, after `phase` returns to idle.
     @ObservationIgnored var onOutcome: ((DictationOutcome) -> Void)?
     /// Called once per dictation that inserted text, with its timings.
     @ObservationIgnored var onRecord: ((DictationRecord) -> Void)?
+    /// Whether to hand each pasted dictation, audio included, to `onSample`.
+    @ObservationIgnored var keepSamples: () -> Bool = { false }
+    /// Called once per pasted dictation while `keepSamples` is true, for the evaluation corpus.
+    @ObservationIgnored var onSample: ((DictationSample) -> Void)?
+    /// Catches the field before each kept paste, to read it again later.
+    @ObservationIgnored var insertionObserver: PostInsertionObserver?
 
     private static let minimumSampleCount = AudioAnalysis.sampleRate * 3 / 10
     /// Enough for the names and tone of the current message, small enough to stay fast.
@@ -89,8 +96,11 @@ final class DictationController {
             guard phase == .idle else { return }
             // Recording now would only stall on transcription: say why instead.
             if let engine = loadingEngine() { return finish(.modelLoading(engine)) }
+            // The previous dictation's field is read now, before this one lands in it.
+            insertionObserver?.settle()
+            bundleID = focus.frontmostBundleID()
             context = DictationContext(
-                category: AppCategory(bundleID: focus.frontmostBundleID()),
+                category: AppCategory(bundleID: bundleID),
                 appName: focus.frontmostAppName()
             )
             do {
@@ -180,8 +190,19 @@ final class DictationController {
         let start = clock.now
         let outcome: DictationOutcome
         if focus.hasEditableFocus() {
+            let keep = keepSamples() && onSample != nil
+            // Read before the paste: Cmd+V lands some time after it is posted.
+            let watch = keep ? insertionObserver?.watchFocusedField() : nil
             await inserter.paste(text)
             outcome = .pasted(raw: raw)
+            if keep {
+                onSample?(DictationSample(
+                    date: .now, samples: samples, engine: engine, language: language(),
+                    bundleID: bundleID, category: context.category,
+                    transcript: transcript.text, inserted: text, enhanced: enhancement != nil && !raw,
+                    watch: watch
+                ))
+            }
         } else {
             inserter.copyToPasteboard(text)
             outcome = .copied(raw: raw)

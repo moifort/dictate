@@ -49,6 +49,12 @@ final class AppSettings {
         didSet { defaults.set(autoUpdate, forKey: Keys.autoUpdate) }
     }
 
+    /// Keep each dictation's audio, texts and the field's content a few
+    /// seconds later on this Mac, to measure the word error rate. Off by default.
+    var keepEvaluationCorpus: Bool {
+        didSet { defaults.set(keepEvaluationCorpus, forKey: Keys.keepEvaluationCorpus) }
+    }
+
     var cliPathOverride: String {
         didSet { defaults.set(cliPathOverride, forKey: Keys.cliPathOverride) }
     }
@@ -90,6 +96,7 @@ final class AppSettings {
         enhancementEnabled = defaults.object(forKey: Keys.enhancementEnabled) as? Bool ?? true
         shareFieldContext = defaults.object(forKey: Keys.shareFieldContext) as? Bool ?? true
         autoUpdate = defaults.object(forKey: Keys.autoUpdate) as? Bool ?? true
+        keepEvaluationCorpus = defaults.bool(forKey: Keys.keepEvaluationCorpus)
         cliPathOverride = defaults.string(forKey: Keys.cliPathOverride) ?? ""
         vocabularyText = defaults.string(forKey: Keys.vocabulary) ?? Self.defaultVocabulary.joined(separator: "\n")
     }
@@ -102,6 +109,7 @@ final class AppSettings {
         static let enhancementEnabled = "enhancementEnabled"
         static let shareFieldContext = "shareFieldContext"
         static let autoUpdate = "autoUpdate"
+        static let keepEvaluationCorpus = "keepEvaluationCorpus"
         static let cliPathOverride = "cliPathOverride"
         static let vocabulary = "vocabulary"
     }

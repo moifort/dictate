@@ -285,6 +285,55 @@ struct DictationControllerTests {
         #expect(records.isEmpty)
     }
 
+    @Test func samplesAreOnlyHandedOverWhenAsked() async {
+        let (controller, _) = makeController()
+        var samples: [DictationSample] = []
+        controller.onSample = { samples.append($0) }
+        await dictate(controller)
+        #expect(samples.isEmpty)
+    }
+
+    @Test func keptSampleCarriesTheAudioBothTextsAndTheFieldBeforeThePaste() async {
+        let (controller, _) = makeController()
+        let reader = FakeFieldReader(text: "Salut, ")
+        controller.insertionObserver = PostInsertionObserver(reader: reader)
+        controller.keepSamples = { true }
+        var samples: [DictationSample] = []
+        controller.onSample = { samples.append($0) }
+        await dictate(controller)
+        let sample = samples.first
+        #expect(samples.count == 1)
+        #expect(sample?.samples == speech)
+        #expect(sample?.transcript == "euh fais un pouche")
+        #expect(sample?.inserted == "Fais un push.")
+        #expect(sample?.enhanced == true)
+        #expect(sample?.engine == .parakeet)
+        #expect(sample?.language == "fr")
+        #expect(sample?.bundleID == "com.apple.Terminal")
+        #expect(sample?.category == .code)
+        #expect(sample?.watch?.before.text == "Salut, ")
+    }
+
+    @Test func rawInsertionIsKeptAsNotEnhanced() async {
+        let (controller, _) = makeController(enhanced: .failure(FakeError()))
+        controller.keepSamples = { true }
+        var samples: [DictationSample] = []
+        controller.onSample = { samples.append($0) }
+        await dictate(controller)
+        #expect(samples.first?.enhanced == false)
+        #expect(samples.first?.inserted == "euh fais un pouche")
+        #expect(samples.first?.watch == nil)
+    }
+
+    @Test func copiedDictationIsNotKept() async {
+        let (controller, _) = makeController(editableFocus: false)
+        controller.keepSamples = { true }
+        var samples: [DictationSample] = []
+        controller.onSample = { samples.append($0) }
+        await dictate(controller)
+        #expect(samples.isEmpty)
+    }
+
     @Test func recorderFailureReportsFailure() {
         let (controller, fakes) = makeController()
         fakes.recorder.startError = FakeError()
@@ -413,6 +462,19 @@ private final class FakeFocus: FocusInspecting {
         try? await Task.sleep(for: delay)
         events.append("read ended")
         return field
+    }
+}
+
+@MainActor
+private final class FakeFieldReader: FieldReading, ReadableField {
+    var text: String
+
+    init(text: String) { self.text = text }
+
+    func focusedField() -> (any ReadableField)? { self }
+
+    func snapshot() -> FieldSnapshot? {
+        FieldSnapshot(text: text, selection: NSRange(location: (text as NSString).length, length: 0))
     }
 }
 

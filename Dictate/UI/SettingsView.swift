@@ -56,6 +56,23 @@ private struct DictationSettings: View {
                     EngineStatus(model: model)
                 }
             }
+
+            LabeledContent("Évaluation :") {
+                VStack(alignment: .leading, spacing: 6) {
+                    Toggle("Garder les dictées pour mesurer la précision", isOn: Bindable(model.settings).keepEvaluationCorpus)
+                    Hint("""
+                        Conserve sur ce Mac l'audio, la transcription, le texte inséré et le contenu du champ \
+                        \(PostInsertionObserver.defaultDelay.components.seconds) s plus tard, vos corrections comprises. \
+                        Rien n'est envoyé.
+                        """)
+                    if !model.corpus.entries.isEmpty {
+                        HStack {
+                            Text("\(model.corpus.entries.count) dictées gardées")
+                            Button("Supprimer…") { model.confirmAndDeleteCorpus() }
+                        }
+                    }
+                }
+            }
         }
         .formStyle(.columns)
         .padding(20)

@@ -25,6 +25,14 @@ struct AppSettingsTests {
         #expect(reloaded.languageConfirmed)
     }
 
+    @Test func evaluationCorpusIsOffByDefaultAndPersists() {
+        let suite = "AppSettingsTests-\(UUID().uuidString)"
+        let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!)
+        #expect(!settings.keepEvaluationCorpus)
+        settings.keepEvaluationCorpus = true
+        #expect(AppSettings(defaults: UserDefaults(suiteName: suite)!).keepEvaluationCorpus)
+    }
+
     @Test func fieldContextIsSharedByDefaultAndPersists() {
         let suite = "AppSettingsTests-\(UUID().uuidString)"
         let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!)

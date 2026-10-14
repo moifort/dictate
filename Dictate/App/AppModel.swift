@@ -11,6 +11,7 @@ final class AppModel {
     let indicator: RecordingIndicator
     let updater = Updater()
     let history = DictationHistory()
+    let corpus = EvaluationCorpus()
 
     private(set) var claudeCLIPath: URL?
     /// Version reported by `claude --version`: nil while probing or when the binary does not answer.
@@ -36,6 +37,7 @@ final class AppModel {
         let transcriber = SwitchableTranscriber(engine: settings.transcriptionEngine)
         self.transcriber = transcriber
         let locator = locator
+        let focus = FocusInspector()
         enhancer = ClaudeCLIEnhancer(
             locate: { locator.locate(override: settings.cliPathOverride) },
             systemPrompt: { PromptBuilder.systemPrompt(vocabulary: settings.vocabulary, language: settings.language) }
@@ -44,7 +46,7 @@ final class AppModel {
             recorder: recorder,
             transcriber: transcriber,
             enhancer: enhancer,
-            focus: FocusInspector(),
+            focus: focus,
             inserter: TextInserter(),
             language: { settings.language },
             enhancementEnabled: { settings.enhancementEnabled },
@@ -58,6 +60,12 @@ final class AppModel {
         indicator = RecordingIndicator(controller: controller, recorder: recorder)
         controller.onOutcome = { [weak self] outcome in self?.handle(outcome) }
         controller.onRecord = { [history] record in history.append(record) }
+        let observer = PostInsertionObserver(reader: focus)
+        controller.insertionObserver = observer
+        controller.keepSamples = { settings.keepEvaluationCorpus }
+        controller.onSample = { [corpus] sample in
+            Task { await corpus.record(sample, observer: observer) }
+        }
         fnMonitor.onGesture = { [weak self] gesture in
             guard let self else { return }
             Log.hotkey.info("gesture \(String(describing: gesture), privacy: .public) in phase \(String(describing: self.controller.phase), privacy: .public)")
@@ -227,6 +235,39 @@ final class AppModel {
             ErrorReporter.capture(error, "claude test from the settings failed", category: "enhancer")
             claudeTestResult = error.localizedDescription
         }
+    }
+
+    /// Developer tool: word error rates over the corpus, logged and shown.
+    func evaluateCorpus() {
+        let evaluation = CorpusEvaluation(entries: corpus.entries)
+        Log.app.info("corpus evaluation:\n\(evaluation.summary, privacy: .public)")
+        NSApp.activate()
+        let alert = NSAlert()
+        alert.messageText = "Taux d'erreur sur le corpus"
+        alert.informativeText = evaluation.summary + """
+
+
+            Référence : le texte laissé dans le champ \(PostInsertionObserver.defaultDelay.components.seconds) s \
+            après l'insertion. Une erreur non corrigée compte comme juste : ces taux sont des minimums.
+            """
+        alert.addButton(withTitle: "OK")
+        alert.addButton(withTitle: "Afficher dans le Finder")
+        if alert.runModal() == .alertSecondButtonReturn {
+            NSWorkspace.shared.activateFileViewerSelecting([corpus.folder])
+        }
+    }
+
+    /// Asks first: the recordings cannot be brought back.
+    func confirmAndDeleteCorpus() {
+        NSApp.activate()
+        let alert = NSAlert()
+        alert.alertStyle = .warning
+        alert.messageText = "Supprimer le corpus d'évaluation ?"
+        alert.informativeText = "Les \(corpus.entries.count) enregistrements et leurs textes seront effacés de ce Mac."
+        alert.addButton(withTitle: "Supprimer").hasDestructiveAction = true
+        alert.addButton(withTitle: "Annuler")
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        corpus.deleteAll()
     }
 
     func retryTranscriber() {

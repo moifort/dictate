@@ -133,5 +133,18 @@ length, transcription, Claude and insertion times, never the text — to
 `~/Library/Application Support/Dictate/Statistics/<bundle id>.jsonl`, so
 Debug builds keep their own history.
 
+### Evaluation corpus
+
+Settings → Dictée → Évaluation (off by default) keeps each pasted dictation
+in `~/Library/Application Support/Dictate/Corpus/<bundle id>/`: a 16 kHz
+mono WAV, and a line of `entries.jsonl` with the engine's transcript, the
+inserted text and a reference. The reference is what `PostInsertionObserver`
+reads back from the same field 5 s after the paste (or when the next
+dictation starts), cut down to the pasted segment by `InsertedSegment`, so it
+includes the user's fixes. Menu → « Évaluer le corpus » shows the pooled word
+error rate (`WordErrorRate`, `CorpusEvaluation`) of each engine alone and with
+Claude. An unfixed mistake counts as correct, so both rates are lower bounds.
+Nothing leaves the Mac; the settings can delete the corpus.
+
 If Claude fails or takes longer than 8 s, the raw transcript is
 inserted and the pill shows an orange dot.
