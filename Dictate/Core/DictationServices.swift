@@ -22,7 +22,8 @@ protocol FocusInspecting: AnyObject {
     func frontmostAppName() -> String?
     /// Up to `maxLength` characters before the cursor in the focused field.
     /// Nil for password fields and when the app does not expose its text.
-    func precedingText(maxLength: Int) -> String?
+    /// Async so the controller can run it alongside the transcription.
+    func precedingText(maxLength: Int) async -> String?
     /// Whether the focused UI element accepts text input.
     func hasEditableFocus() -> Bool
 }

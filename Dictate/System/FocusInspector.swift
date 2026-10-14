@@ -24,18 +24,26 @@ final class FocusInspector: FocusInspecting {
     func hasEditableFocus() -> Bool {
         guard let focused = focusedElement() else { return false }
 
-        if let role = copyString(focused, kAXRoleAttribute), Self.textRoles.contains(role) {
+        if let role = Self.copyString(focused, kAXRoleAttribute), Self.textRoles.contains(role) {
             return true
         }
         // Rich editors and web `contenteditable` expose a selection and a settable value.
         var settable: DarwinBoolean = false
-        let hasSelection = copyValue(focused, kAXSelectedTextRangeAttribute) != nil
+        let hasSelection = Self.copyValue(focused, kAXSelectedTextRangeAttribute) != nil
         AXUIElementIsAttributeSettable(focused, kAXValueAttribute as CFString, &settable)
         return hasSelection && settable.boolValue
     }
 
-    func precedingText(maxLength: Int) -> String? {
-        guard let focused = focusedElement(), !isSecure(focused) else { return nil }
+    func precedingText(maxLength: Int) async -> String? {
+        guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier else { return nil }
+        return await Self.precedingText(pid: pid, maxLength: maxLength)
+    }
+
+    /// Off the main actor: an Electron app can hold each call for the whole
+    /// messaging timeout, and the transcription runs meanwhile.
+    @concurrent
+    private nonisolated static func precedingText(pid: pid_t, maxLength: Int) async -> String? {
+        guard let focused = focusedElement(pid: pid), !isSecure(focused) else { return nil }
         guard let rangeValue = copyValue(focused, kAXSelectedTextRangeAttribute),
               CFGetTypeID(rangeValue) == AXValueGetTypeID() else { return nil }
         var selection = CFRange()
@@ -60,13 +68,17 @@ final class FocusInspector: FocusInspecting {
 
     private func focusedElement() -> AXUIElement? {
         guard let app = NSWorkspace.shared.frontmostApplication else { return nil }
-        let appElement = AXUIElementCreateApplication(app.processIdentifier)
+        return Self.focusedElement(pid: app.processIdentifier)
+    }
+
+    private nonisolated static func focusedElement(pid: pid_t) -> AXUIElement? {
+        let appElement = AXUIElementCreateApplication(pid)
         // A busy app would otherwise block the dictation for the default 6 s.
         AXUIElementSetMessagingTimeout(appElement, 0.5)
         return copyElement(appElement, kAXFocusedUIElementAttribute)
     }
 
-    private func isSecure(_ element: AXUIElement) -> Bool {
+    private nonisolated static func isSecure(_ element: AXUIElement) -> Bool {
         let secure = kAXSecureTextFieldSubrole as String
         return copyString(element, kAXSubroleAttribute) == secure || copyString(element, kAXRoleAttribute) == secure
     }
@@ -79,18 +91,18 @@ final class FocusInspector: FocusInspecting {
         AXUIElementSetAttributeValue(element, "AXManualAccessibility" as CFString, kCFBooleanTrue)
     }
 
-    private func copyValue(_ element: AXUIElement, _ attribute: String) -> CFTypeRef? {
+    private nonisolated static func copyValue(_ element: AXUIElement, _ attribute: String) -> CFTypeRef? {
         var value: CFTypeRef?
         guard AXUIElementCopyAttributeValue(element, attribute as CFString, &value) == .success else { return nil }
         return value
     }
 
-    private func copyElement(_ element: AXUIElement, _ attribute: String) -> AXUIElement? {
+    private nonisolated static func copyElement(_ element: AXUIElement, _ attribute: String) -> AXUIElement? {
         guard let value = copyValue(element, attribute), CFGetTypeID(value) == AXUIElementGetTypeID() else { return nil }
         return (value as! AXUIElement)
     }
 
-    private func copyString(_ element: AXUIElement, _ attribute: String) -> String? {
+    private nonisolated static func copyString(_ element: AXUIElement, _ attribute: String) -> String? {
         copyValue(element, attribute) as? String
     }
 }

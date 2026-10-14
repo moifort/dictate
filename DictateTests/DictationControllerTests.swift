@@ -11,18 +11,22 @@ struct DictationControllerTests {
         transcript: Result<String, Error> = .success("euh fais un pouche"),
         enhanced: Result<String, Error> = .success("Fais un push."),
         enhancerDelay: Duration = .zero,
+        transcriberDelay: Duration = .zero,
+        precedingTextDelay: Duration = .zero,
         editableFocus: Bool = true,
         enhancementEnabled: Bool = true,
         shareFieldContext: Bool = true,
         engine: TranscriptionEngine = .parakeet,
         loadingEngine: TranscriptionEngine? = nil
     ) -> (DictationController, Fakes) {
+        let events = EventLog()
         let fakes = Fakes(
             recorder: FakeRecorder(samples: samples ?? speech),
-            transcriber: FakeTranscriber(result: transcript),
+            transcriber: FakeTranscriber(result: transcript, delay: transcriberDelay, events: events),
             enhancer: FakeEnhancer(result: enhanced, delay: enhancerDelay),
-            focus: FakeFocus(editable: editableFocus, bundleID: "com.apple.Terminal"),
-            inserter: FakeInserter()
+            focus: FakeFocus(editable: editableFocus, bundleID: "com.apple.Terminal", delay: precedingTextDelay, events: events),
+            inserter: FakeInserter(),
+            events: events
         )
         let controller = DictationController(
             recorder: fakes.recorder,
@@ -85,6 +89,26 @@ struct DictationControllerTests {
     @Test func precedingTextReachesTheEnhancer() async {
         let (controller, fakes) = makeController()
         await dictate(controller)
+        #expect(fakes.enhancer.received.first?.context.precedingText == "Salut Guillaume,")
+    }
+
+    @Test func precedingTextIsReadWhileTheAudioIsTranscribed() async {
+        let (controller, fakes) = makeController(
+            transcriberDelay: .milliseconds(100),
+            precedingTextDelay: .milliseconds(100)
+        )
+        await dictate(controller)
+        let events = fakes.events.entries
+        // Each started before the other ended: they overlapped.
+        #expect(events.firstIndex(of: "read started")! < events.firstIndex(of: "transcription ended")!)
+        #expect(events.firstIndex(of: "transcription started")! < events.firstIndex(of: "read ended")!)
+        #expect(fakes.enhancer.received.first?.context.precedingText == "Salut Guillaume,")
+    }
+
+    @Test func slowPrecedingTextReadIsAwaitedBeforeClaude() async {
+        let (controller, fakes) = makeController(precedingTextDelay: .milliseconds(100))
+        await dictate(controller)
+        #expect(fakes.events.entries.suffix(2) == ["transcription ended", "read ended"])
         #expect(fakes.enhancer.received.first?.context.precedingText == "Salut Guillaume,")
     }
 
@@ -235,6 +259,15 @@ private struct Fakes {
     let enhancer: FakeEnhancer
     let focus: FakeFocus
     let inserter: FakeInserter
+    let events: EventLog
+}
+
+/// Start and end of the transcription and of the preceding-text read, in order.
+@MainActor
+private final class EventLog {
+    private(set) var entries: [String] = []
+
+    func append(_ entry: String) { entries.append(entry) }
 }
 
 @MainActor
@@ -261,14 +294,23 @@ private final class FakeRecorder: AudioRecording {
 @MainActor
 private final class FakeTranscriber: Transcriber {
     let result: Result<String, Error>
+    let delay: Duration
+    let events: EventLog
     var callCount = 0
     var receivedLanguage = ""
 
-    init(result: Result<String, Error>) { self.result = result }
+    init(result: Result<String, Error>, delay: Duration, events: EventLog) {
+        self.result = result
+        self.delay = delay
+        self.events = events
+    }
 
     func transcribe(samples: [Float], language: String) async throws -> String {
         callCount += 1
         receivedLanguage = language
+        events.append("transcription started")
+        try await Task.sleep(for: delay)
+        events.append("transcription ended")
         return try result.get()
     }
 }
@@ -295,20 +337,27 @@ private final class FakeEnhancer: Enhancer {
 private final class FakeFocus: FocusInspecting {
     let editable: Bool
     let bundleID: String?
+    let delay: Duration
+    let events: EventLog
     var precedingText: String? = "Salut Guillaume,"
     private(set) var precedingTextReads = 0
 
-    init(editable: Bool, bundleID: String?) {
+    init(editable: Bool, bundleID: String?, delay: Duration, events: EventLog) {
         self.editable = editable
         self.bundleID = bundleID
+        self.delay = delay
+        self.events = events
     }
 
     func frontmostBundleID() -> String? { bundleID }
     func frontmostAppName() -> String? { "Terminal" }
     func hasEditableFocus() -> Bool { editable }
 
-    func precedingText(maxLength: Int) -> String? {
+    func precedingText(maxLength: Int) async -> String? {
         precedingTextReads += 1
+        events.append("read started")
+        try? await Task.sleep(for: delay)
+        events.append("read ended")
         return precedingText.map { String($0.suffix(maxLength)) }
     }
 }

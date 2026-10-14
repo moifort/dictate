@@ -110,13 +110,15 @@ final class DictationController {
             guard phase == .recording else { return }
             let samples = recorder.stop()
             // Read on release rather than press: Electron apps only build their
-            // accessibility tree once asked, which happens on press.
+            // accessibility tree once asked, which happens on press. The read
+            // can take the whole AX messaging timeout, so it runs while the
+            // audio is transcribed rather than before.
+            var precedingText: Task<String?, Never>?
             if enhancementEnabled(), shareFieldContext() {
-                context.precedingText = focus.precedingText(maxLength: Self.precedingTextLength)
-                Log.dictation.info("preceding text: \(self.context.precedingText?.count ?? 0) characters")
+                precedingText = Task { [focus] in await focus.precedingText(maxLength: Self.precedingTextLength) }
             }
             phase = .transcribing
-            processing = Task { await process(samples) }
+            processing = Task { await process(samples, precedingText: precedingText) }
         }
     }
 
@@ -125,7 +127,7 @@ final class DictationController {
         await processing?.value
     }
 
-    private func process(_ samples: [Float]) async {
+    private func process(_ samples: [Float], precedingText: Task<String?, Never>?) async {
         guard samples.count >= Self.minimumSampleCount, !AudioAnalysis.isSilent(samples) else {
             return finish(.discarded)
         }
@@ -146,6 +148,11 @@ final class DictationController {
             return finish(.failed("Transcription impossible : \(error.localizedDescription)"))
         }
         guard !transcript.isEmpty else { return finish(.discarded) }
+
+        if let precedingText {
+            context.precedingText = await precedingText.value
+            Log.dictation.info("preceding text: \(self.context.precedingText?.count ?? 0) characters")
+        }
 
         var text = transcript
         var raw = false
