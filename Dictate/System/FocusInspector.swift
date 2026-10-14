@@ -2,7 +2,7 @@ import AppKit
 import ApplicationServices
 
 /// Uses the Accessibility API to find out whether a text field has focus.
-final class FocusInspector: FocusInspecting {
+final class FocusInspector: FocusInspecting, FieldReading {
     private static let textRoles: Set<String> = [
         kAXTextFieldRole, kAXTextAreaRole, kAXComboBoxRole, "AXSearchField",
     ]
@@ -50,6 +50,13 @@ final class FocusInspector: FocusInspecting {
         // A busy app would otherwise block the dictation for the default 6 s per
         // call; the budget caps the whole read, whatever the number of calls.
         AXReader(deadline: .now + readBudget).fieldContext(pid: pid, maxLength: maxLength)
+    }
+
+    func focusedField() -> (any ReadableField)? {
+        let ax = AXReader()
+        guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier,
+              let focused = ax.focusedElement(pid: pid), !ax.isSecure(focused) else { return nil }
+        return AccessibilityField(element: focused)
     }
 
     private func enableManualAccessibility(for pid: pid_t) {
@@ -185,7 +192,7 @@ private nonisolated final class AXReader {
         return trimmed
     }
 
-    private func isSecure(_ element: AXUIElement) -> Bool {
+    func isSecure(_ element: AXUIElement) -> Bool {
         let secure = kAXSecureTextFieldSubrole as String
         return copyString(element, kAXSubroleAttribute) == secure || copyString(element, kAXRoleAttribute) == secure
     }
@@ -217,5 +224,32 @@ private nonisolated final class AXReader {
 
     func copyString(_ element: AXUIElement, _ attribute: String) -> String? {
         copyValue(element, attribute) as? String
+    }
+}
+
+/// A text field held by its accessibility element, so that it can be read
+/// again after the user moved to another field or app.
+private final class AccessibilityField: ReadableField {
+    /// Beyond this, the field is a document rather than a message: not worth copying.
+    private static let maxLength = 200_000
+
+    private let element: AXUIElement
+
+    init(element: AXUIElement) {
+        self.element = element
+    }
+
+    func snapshot() -> FieldSnapshot? {
+        let ax = AXReader()
+        guard !ax.isSecure(element),
+              let text = ax.copyString(element, kAXValueAttribute) else { return nil }
+        let length = (text as NSString).length
+        guard length <= Self.maxLength else { return nil }
+        // Without a selection, assume the caret sits at the end, where a paste usually lands.
+        var selection = CFRange(location: length, length: 0)
+        if let value = ax.copyValue(element, kAXSelectedTextRangeAttribute), CFGetTypeID(value) == AXValueGetTypeID() {
+            AXValueGetValue(value as! AXValue, .cfRange, &selection)
+        }
+        return FieldSnapshot(text: text, selection: NSRange(location: selection.location, length: selection.length))
     }
 }
