@@ -23,7 +23,7 @@ Improvements to transcript quality and latency, in the recommended order.
 
 ## Transcript quality
 
-- [ ] **Flag low-confidence words for Haiku** — FluidAudio returns a confidence
+- [x] **Flag low-confidence words for Haiku** — FluidAudio returns a confidence
   per token (`TokenTiming.confidence`), currently unused. Mark the doubtful
   words in the user message (e.g. `<?>Kubernetis</?>`) so Haiku knows where to
   correct, and where to leave the text alone.
