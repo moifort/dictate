@@ -116,9 +116,10 @@ nonisolated enum ModelStorage {
     }
 
     /// Whisper was offered until it was removed: its model, about 630 MB,
-    /// stays behind on the Macs that downloaded it.
+    /// stays behind on the Macs that downloaded it. `models` is WhisperKit's
+    /// download cache, model and tokenizer; Parakeet lives next to it.
     static func removeWhisperModel(in base: URL = defaultDirectory) {
-        let folder = base.appending(path: "models/argmaxinc", directoryHint: .isDirectory)
+        let folder = base.appending(path: "models", directoryHint: .isDirectory)
         guard FileManager.default.fileExists(atPath: folder.path) else { return }
         do {
             try FileManager.default.removeItem(at: folder)
