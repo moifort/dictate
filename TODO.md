@@ -37,7 +37,7 @@ Improvements to transcript quality and latency, in the recommended order.
     "Message #general", "Commit message".
   - [x] Text after the cursor: when dictating mid-sentence, no final period
     and no leading capital.
-- [ ] **Vocabulary boosting in Parakeet** — FluidAudio 0.17.7 ships CTC keyword
+- [x] **Vocabulary boosting in Parakeet** — FluidAudio 0.17.7 ships CTC keyword
   spotting + rescoring (`VocabularyBoostingSession`, see
   `Documentation/ASR/CustomVocabulary.md`). It works with any TDT model,
   Ultra included, through a separate Parakeet CTC 110M model (~100 MB, ~70×
