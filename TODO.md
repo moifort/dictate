@@ -14,7 +14,7 @@ Improvements to transcript quality and latency, in the recommended order.
 
 ## Measure before tuning
 
-- [ ] **Evaluation corpus from real dictations** — opt-in setting that keeps
+- [x] **Evaluation corpus from real dictations** — opt-in setting that keeps
   each dictation's audio locally, plus the field's text a few seconds after
   insertion (i.e. with the user's own fixes) as the reference. With 50-100
   real dictations, compute the word error rate of Parakeet alone and of
