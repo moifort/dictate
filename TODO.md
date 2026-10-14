@@ -4,7 +4,7 @@ Improvements to transcript quality and latency, in the recommended order.
 
 ## Quick wins
 
-- [ ] **Keep recording after `fn` is released** — the recorder stops the
+- [x] **Keep recording after `fn` is released** — the recorder stops the
   instant `fn` goes up (`DictationController`, `.released`), which often clips
   the last syllable. Keep capturing 200-300 ms before stopping.
 - [x] **Read the preceding text while Parakeet transcribes** — today the
