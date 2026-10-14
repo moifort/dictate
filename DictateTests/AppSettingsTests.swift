@@ -33,6 +33,24 @@ struct AppSettingsTests {
         #expect(AppSettings(defaults: UserDefaults(suiteName: suite)!).keepEvaluationCorpus)
     }
 
+    @Test func vocabularySuggestionsAreOffByDefaultAndPersist() {
+        let suite = "AppSettingsTests-\(UUID().uuidString)"
+        let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!)
+        #expect(!settings.suggestVocabulary)
+        settings.suggestVocabulary = true
+        #expect(AppSettings(defaults: UserDefaults(suiteName: suite)!).suggestVocabulary)
+    }
+
+    @Test func aTermIsAddedOnItsOwnLine() {
+        let settings = makeSettings()
+        settings.vocabularyText = "GitHub\nSwift\n"
+        settings.addToVocabulary("Claude")
+        #expect(settings.vocabulary == ["GitHub", "Swift", "Claude"])
+        settings.vocabularyText = ""
+        settings.addToVocabulary("Claude")
+        #expect(settings.vocabularyText == "Claude")
+    }
+
     @Test func fieldContextIsSharedByDefaultAndPersists() {
         let suite = "AppSettingsTests-\(UUID().uuidString)"
         let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!)

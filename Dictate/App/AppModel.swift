@@ -12,6 +12,7 @@ final class AppModel {
     let updater = Updater()
     let history = DictationHistory()
     let corpus = EvaluationCorpus()
+    let vocabularySuggestions = VocabularySuggestions()
 
     private(set) var claudeCLIPath: URL?
     /// Version reported by `claude --version`: nil while probing or when the binary does not answer.
@@ -64,6 +65,17 @@ final class AppModel {
         controller.keepSamples = { settings.keepEvaluationCorpus }
         controller.onSample = { [corpus] sample in
             Task { await corpus.record(sample) }
+        }
+        let suggestions = vocabularySuggestions
+        controller.followInsertions = { settings.suggestVocabulary }
+        controller.onFollowUp = { followUp in
+            // The setting may have been turned off during the wait.
+            guard settings.suggestVocabulary else { return }
+            suggestions.consider(followUp, vocabulary: settings.vocabulary)
+        }
+        controller.onFieldContext = { context in
+            guard settings.suggestVocabulary, let text = context.precedingText else { return }
+            suggestions.consider(precedingText: text, vocabulary: settings.vocabulary)
         }
         fnMonitor.onGesture = { [weak self] gesture in
             guard let self else { return }
@@ -267,6 +279,21 @@ final class AppModel {
         alert.addButton(withTitle: "Annuler")
         guard alert.runModal() == .alertFirstButtonReturn else { return }
         corpus.deleteAll()
+    }
+
+    /// The suggestions not answered yet, minus the terms typed into the vocabulary meanwhile.
+    var pendingVocabularySuggestions: [VocabularySuggestion] {
+        vocabularySuggestions.pending(excluding: settings.vocabulary)
+    }
+
+    func acceptVocabularySuggestion(_ suggestion: VocabularySuggestion) {
+        settings.addToVocabulary(suggestion.term)
+        vocabularySuggestions.remove(suggestion)
+        settingsChanged()
+    }
+
+    func ignoreVocabularySuggestion(_ suggestion: VocabularySuggestion) {
+        vocabularySuggestions.ignore(suggestion)
     }
 
     func retryTranscriber() {

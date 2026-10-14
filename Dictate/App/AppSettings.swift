@@ -55,6 +55,12 @@ final class AppSettings {
         didSet { defaults.set(keepEvaluationCorpus, forKey: Keys.keepEvaluationCorpus) }
     }
 
+    /// Re-read the field after each dictation and count the names already
+    /// written, to propose vocabulary terms. Everything stays on this Mac. Off by default.
+    var suggestVocabulary: Bool {
+        didSet { defaults.set(suggestVocabulary, forKey: Keys.suggestVocabulary) }
+    }
+
     var cliPathOverride: String {
         didSet { defaults.set(cliPathOverride, forKey: Keys.cliPathOverride) }
     }
@@ -62,6 +68,12 @@ final class AppSettings {
     /// One term per line.
     var vocabularyText: String {
         didSet { defaults.set(vocabularyText, forKey: Keys.vocabulary) }
+    }
+
+    /// Appends a term on its own line.
+    func addToVocabulary(_ term: String) {
+        let text = vocabularyText.trimmingCharacters(in: .whitespacesAndNewlines)
+        vocabularyText = text.isEmpty ? term : text + "\n" + term
     }
 
     var vocabulary: [String] {
@@ -97,6 +109,7 @@ final class AppSettings {
         shareFieldContext = defaults.object(forKey: Keys.shareFieldContext) as? Bool ?? true
         autoUpdate = defaults.object(forKey: Keys.autoUpdate) as? Bool ?? true
         keepEvaluationCorpus = defaults.bool(forKey: Keys.keepEvaluationCorpus)
+        suggestVocabulary = defaults.bool(forKey: Keys.suggestVocabulary)
         cliPathOverride = defaults.string(forKey: Keys.cliPathOverride) ?? ""
         vocabularyText = defaults.string(forKey: Keys.vocabulary) ?? Self.defaultVocabulary.joined(separator: "\n")
     }
@@ -110,6 +123,7 @@ final class AppSettings {
         static let shareFieldContext = "shareFieldContext"
         static let autoUpdate = "autoUpdate"
         static let keepEvaluationCorpus = "keepEvaluationCorpus"
+        static let suggestVocabulary = "suggestVocabulary"
         static let cliPathOverride = "cliPathOverride"
         static let vocabulary = "vocabulary"
     }

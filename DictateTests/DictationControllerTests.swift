@@ -368,6 +368,23 @@ struct DictationControllerTests {
         #expect(reader.snapshots == 2)
     }
 
+    @Test func aTermFixedAfterThePasteBecomesASuggestion() async throws {
+        let (controller, _) = makeController(enhanced: .success("On en parle avec cloud."))
+        let reader = FakeFieldReader(text: "Salut, ")
+        let file = FileManager.default.temporaryDirectory
+            .appending(path: "ControllerSuggestions-\(UUID().uuidString).json")
+        let suggestions = VocabularySuggestions(file: file)
+        controller.insertionObserver = PostInsertionObserver(reader: reader, delay: .milliseconds(30))
+        controller.followInsertions = { true }
+        controller.onFollowUp = { suggestions.consider($0, vocabulary: []) }
+        controller.onFieldContext = { suggestions.consider(precedingText: $0.precedingText ?? "", vocabulary: []) }
+        await dictate(controller)
+        reader.text = "Salut, On en parle avec Claude."
+        try await eventually { !suggestions.state.pending.isEmpty }
+        #expect(suggestions.state.pending.map(\.term) == ["Claude"])
+        #expect(suggestions.state.sightings["guillaume"]?.count == 1)
+    }
+
     @Test func insertionsAreNotFollowedUnlessAsked() async throws {
         let (controller, _) = makeController()
         let reader = FakeFieldReader(text: "Salut, ")

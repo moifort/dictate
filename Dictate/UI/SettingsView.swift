@@ -169,9 +169,52 @@ private struct LexiconSettings: View {
                     Hint("Un par ligne : noms, outils, sigles. Claude les écrit exactement ainsi.")
                 }
             }
+
+            LabeledContent("Suggestions :") {
+                VStack(alignment: .leading, spacing: 6) {
+                    Toggle("Suggérer des mots pour le vocabulaire", isOn: Bindable(model.settings).suggestVocabulary)
+                    Hint("""
+                        Relit le champ \(PostInsertionObserver.defaultDelay.components.seconds) s après chaque dictée \
+                        pour repérer les noms que vous corrigez, et compte ceux qui reviennent dans le texte déjà écrit \
+                        (avec « Lire le texte autour du curseur »). Tout reste sur ce Mac.
+                        """)
+                    VocabularySuggestionList(model: model)
+                }
+            }
         }
         .formStyle(.columns)
         .padding(20)
+    }
+}
+
+/// The terms waiting for an answer, each with what brought it up.
+private struct VocabularySuggestionList: View {
+    let model: AppModel
+
+    var body: some View {
+        let suggestions = model.pendingVocabularySuggestions
+        if !suggestions.isEmpty {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 6) {
+                    ForEach(suggestions) { suggestion in
+                        HStack(spacing: 8) {
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(suggestion.term)
+                                Text(suggestion.reasonDescription)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            Button("Ajouter") { model.acceptVocabularySuggestion(suggestion) }
+                            Button("Ignorer") { model.ignoreVocabularySuggestion(suggestion) }
+                        }
+                    }
+                }
+                .padding(.trailing, 8)
+            }
+            .frame(height: min(CGFloat(suggestions.count) * 40, 160))
+            .padding(.top, 4)
+        }
     }
 }
 

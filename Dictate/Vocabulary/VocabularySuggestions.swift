@@ -15,6 +15,14 @@ nonisolated struct VocabularySuggestion: Codable, Equatable, Identifiable, Senda
     let date: Date
 
     var id: String { VocabularySuggestionState.key(of: term) }
+
+    /// Why the term comes up, for the settings and the menu.
+    var reasonDescription: String {
+        switch reason {
+        case .corrected(let wrong): "Corrigé depuis « \(wrong) »"
+        case .recurring(let count): "Déjà écrit dans \(count) dictées"
+        }
+    }
 }
 
 /// What the suggestions remember: the terms waiting for an answer, those the

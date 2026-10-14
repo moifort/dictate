@@ -21,6 +21,20 @@ struct MenuContent: View {
         }
         Divider()
         Button("Statistiques…") { open { openWindow(id: "stats") } }
+        if model.settings.suggestVocabulary {
+            let suggestions = model.pendingVocabularySuggestions
+            if !suggestions.isEmpty {
+                Menu("Suggestions de vocabulaire (\(suggestions.count))") {
+                    ForEach(suggestions) { suggestion in
+                        Menu(suggestion.term) {
+                            Text(suggestion.reasonDescription)
+                            Button("Ajouter au lexique") { model.acceptVocabularySuggestion(suggestion) }
+                            Button("Ignorer") { model.ignoreVocabularySuggestion(suggestion) }
+                        }
+                    }
+                }
+            }
+        }
         if model.settings.keepEvaluationCorpus {
             Button("Évaluer le corpus (\(model.corpus.entries.count) dictées)…") { model.evaluateCorpus() }
                 .disabled(model.corpus.entries.isEmpty)

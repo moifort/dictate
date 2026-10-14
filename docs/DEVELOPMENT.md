@@ -146,5 +146,18 @@ error rate (`WordErrorRate`, `CorpusEvaluation`) of each engine alone and with
 Claude. An unfixed mistake counts as correct, so both rates are lower bounds.
 Nothing leaves the Mac; the settings can delete the corpus.
 
+### Vocabulary suggestions
+
+Settings → Lexique → « Suggérer des mots pour le vocabulaire » (off by
+default) reuses the same follow-up: the controller reads the field once for
+both the corpus and the suggestions. `CorrectedTerms` aligns the pasted text
+with the user's version word by word (case, accents and punctuation ignored)
+and keeps short replacements that look like terms and still resemble what
+was heard. `RecurringTerms` also counts the names and technical words of the
+text before the cursor (only read when « Lire le texte autour du curseur » is
+on); one seen in 5 dictations is suggested. Pending, ignored and counted
+terms live in `~/Library/Application Support/Dictate/Vocabulary/<bundle id>/suggestions.json`;
+logs carry counts only. The menu and the Lexique tab offer Add / Ignore.
+
 If Claude fails or takes longer than 8 s, the raw transcript is
 inserted and the pill shows an orange dot.
