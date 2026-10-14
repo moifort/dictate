@@ -60,11 +60,10 @@ final class AppModel {
         indicator = RecordingIndicator(controller: controller, recorder: recorder)
         controller.onOutcome = { [weak self] outcome in self?.handle(outcome) }
         controller.onRecord = { [history] record in history.append(record) }
-        let observer = PostInsertionObserver(reader: focus)
-        controller.insertionObserver = observer
+        controller.insertionObserver = PostInsertionObserver(reader: focus)
         controller.keepSamples = { settings.keepEvaluationCorpus }
         controller.onSample = { [corpus] sample in
-            Task { await corpus.record(sample, observer: observer) }
+            Task { await corpus.record(sample) }
         }
         fnMonitor.onGesture = { [weak self] gesture in
             guard let self else { return }

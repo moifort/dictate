@@ -57,8 +57,15 @@ final class DictationController {
     @ObservationIgnored var keepSamples: () -> Bool = { false }
     /// Called once per pasted dictation while `keepSamples` is true, for the evaluation corpus.
     @ObservationIgnored var onSample: ((DictationSample) -> Void)?
-    /// Catches the field before each kept paste, to read it again later.
+    /// Whether to hand each pasted dictation's field, read again a few seconds later, to `onFollowUp`.
+    @ObservationIgnored var followInsertions: () -> Bool = { false }
+    /// Called once per pasted dictation while `followInsertions` is true, once the field was read again.
+    @ObservationIgnored var onFollowUp: ((InsertionFollowUp) -> Void)?
+    /// Catches the field before each followed or kept paste, to read it again later.
+    /// One read serves both `onSample` and `onFollowUp`.
     @ObservationIgnored var insertionObserver: PostInsertionObserver?
+    /// Called once per dictation whose field context was read, before Claude sees it.
+    @ObservationIgnored var onFieldContext: ((DictationContext) -> Void)?
 
     private static let minimumSampleCount = AudioAnalysis.sampleRate * 3 / 10
     /// Enough for the names and tone of the current message, small enough to stay fast.
@@ -169,6 +176,7 @@ final class DictationController {
                 title \(self.context.windowTitle != nil), web \(self.context.webHost != nil), \
                 category \(self.context.category.rawValue, privacy: .public)
                 """)
+            onFieldContext?(context)
         }
 
         var text = transcript.text
@@ -191,16 +199,29 @@ final class DictationController {
         let outcome: DictationOutcome
         if focus.hasEditableFocus() {
             let keep = keepSamples() && onSample != nil
+            let follow = followInsertions() && onFollowUp != nil
+            let observer = keep || follow ? insertionObserver : nil
             // Read before the paste: Cmd+V lands some time after it is posted.
-            let watch = keep ? insertionObserver?.watchFocusedField() : nil
+            let watch = observer?.watchFocusedField()
             await inserter.paste(text)
             outcome = .pasted(raw: raw)
+            // A single read later on, shared by every consumer.
+            let followUp: Task<InsertionFollowUp?, Never>? = if let observer, let watch {
+                Task { await observer.followUp(watch, inserted: text) }
+            } else {
+                nil
+            }
+            if follow, let followUp, let onFollowUp {
+                Task {
+                    if let result = await followUp.value { onFollowUp(result) }
+                }
+            }
             if keep {
                 onSample?(DictationSample(
                     date: .now, samples: samples, engine: engine, language: language(),
                     bundleID: bundleID, category: context.category,
                     transcript: transcript.text, inserted: text, enhanced: enhancement != nil && !raw,
-                    watch: watch
+                    followUp: followUp
                 ))
             }
         } else {

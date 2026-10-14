@@ -27,11 +27,8 @@ final class EvaluationCorpus {
     }
 
     /// Waits for the user's fixes, then keeps the dictation.
-    func record(_ sample: DictationSample, observer: PostInsertionObserver) async {
-        var reference: String?
-        if let watch = sample.watch {
-            reference = await observer.followUp(watch, inserted: sample.inserted)?.corrected
-        }
+    func record(_ sample: DictationSample) async {
+        let reference = await sample.followUp?.value?.corrected
         add(sample, reference: reference)
     }
 

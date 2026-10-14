@@ -296,12 +296,13 @@ struct DictationControllerTests {
     @Test func keptSampleCarriesTheAudioBothTextsAndTheFieldBeforeThePaste() async {
         let (controller, _) = makeController()
         let reader = FakeFieldReader(text: "Salut, ")
-        controller.insertionObserver = PostInsertionObserver(reader: reader)
+        controller.insertionObserver = PostInsertionObserver(reader: reader, delay: .milliseconds(10))
         controller.keepSamples = { true }
         var samples: [DictationSample] = []
         controller.onSample = { samples.append($0) }
         await dictate(controller)
         let sample = samples.first
+        let before = await sample?.followUp?.value?.before.text
         #expect(samples.count == 1)
         #expect(sample?.samples == speech)
         #expect(sample?.transcript == "euh fais un pouche")
@@ -311,7 +312,7 @@ struct DictationControllerTests {
         #expect(sample?.language == "fr")
         #expect(sample?.bundleID == "com.apple.Terminal")
         #expect(sample?.category == .code)
-        #expect(sample?.watch?.before.text == "Salut, ")
+        #expect(before == "Salut, ")
     }
 
     @Test func rawInsertionIsKeptAsNotEnhanced() async {
@@ -322,7 +323,7 @@ struct DictationControllerTests {
         await dictate(controller)
         #expect(samples.first?.enhanced == false)
         #expect(samples.first?.inserted == "euh fais un pouche")
-        #expect(samples.first?.watch == nil)
+        #expect(samples.first?.followUp == nil)
     }
 
     @Test func copiedDictationIsNotKept() async {
@@ -332,6 +333,90 @@ struct DictationControllerTests {
         controller.onSample = { samples.append($0) }
         await dictate(controller)
         #expect(samples.isEmpty)
+    }
+
+    @Test func followedInsertionHandsTheUsersFixesOver() async throws {
+        let (controller, _) = makeController()
+        let reader = FakeFieldReader(text: "Salut, ")
+        controller.insertionObserver = PostInsertionObserver(reader: reader, delay: .milliseconds(50))
+        controller.followInsertions = { true }
+        var followUps: [InsertionFollowUp] = []
+        controller.onFollowUp = { followUps.append($0) }
+        await dictate(controller)
+        reader.text = "Salut, Fais un push sur Main."
+        try await eventually { !followUps.isEmpty }
+        #expect(followUps.first?.inserted == "Fais un push.")
+        #expect(followUps.first?.corrected == "Fais un push sur Main.")
+    }
+
+    @Test func aFieldIsReadOnceForBothTheCorpusAndTheFollowUp() async throws {
+        let (controller, _) = makeController()
+        let reader = FakeFieldReader(text: "Salut, ")
+        controller.insertionObserver = PostInsertionObserver(reader: reader, delay: .milliseconds(10))
+        controller.keepSamples = { true }
+        controller.followInsertions = { true }
+        var samples: [DictationSample] = []
+        var followUps: [InsertionFollowUp] = []
+        controller.onSample = { samples.append($0) }
+        controller.onFollowUp = { followUps.append($0) }
+        await dictate(controller)
+        try await eventually { !followUps.isEmpty }
+        let sampled = await samples.first?.followUp?.value
+        #expect(sampled == followUps.first)
+        #expect(reader.focusedFieldCalls == 1)
+        // Once before the paste, once after the delay.
+        #expect(reader.snapshots == 2)
+    }
+
+    @Test func insertionsAreNotFollowedUnlessAsked() async throws {
+        let (controller, _) = makeController()
+        let reader = FakeFieldReader(text: "Salut, ")
+        controller.insertionObserver = PostInsertionObserver(reader: reader, delay: .milliseconds(10))
+        var followUps: [InsertionFollowUp] = []
+        controller.onFollowUp = { followUps.append($0) }
+        await dictate(controller)
+        try await Task.sleep(for: .milliseconds(50))
+        #expect(followUps.isEmpty)
+        #expect(reader.focusedFieldCalls == 0)
+    }
+
+    @Test func copiedDictationIsNotFollowed() async throws {
+        let (controller, _) = makeController(editableFocus: false)
+        let reader = FakeFieldReader(text: "Salut, ")
+        controller.insertionObserver = PostInsertionObserver(reader: reader, delay: .milliseconds(10))
+        controller.followInsertions = { true }
+        controller.onFollowUp = { _ in Issue.record("no follow-up expected") }
+        await dictate(controller)
+        try await Task.sleep(for: .milliseconds(50))
+        #expect(reader.focusedFieldCalls == 0)
+    }
+
+    @Test func fieldContextIsHandedOver() async {
+        let (controller, _) = makeController()
+        var contexts: [DictationContext] = []
+        controller.onFieldContext = { contexts.append($0) }
+        await dictate(controller)
+        #expect(contexts.map(\.precedingText) == ["Salut Guillaume,"])
+    }
+
+    @Test func unreadFieldContextIsNotHandedOver() async {
+        let (controller, _) = makeController(shareFieldContext: false)
+        var contexts: [DictationContext] = []
+        controller.onFieldContext = { contexts.append($0) }
+        await dictate(controller)
+        #expect(contexts.isEmpty)
+    }
+
+    /// Polls `condition` until it holds, failing after a second.
+    private func eventually(_ condition: () -> Bool) async throws {
+        let deadline = ContinuousClock.now + .seconds(1)
+        while !condition() {
+            guard ContinuousClock.now < deadline else {
+                Issue.record("condition never held")
+                return
+            }
+            try await Task.sleep(for: .milliseconds(5))
+        }
     }
 
     @Test func recorderFailureReportsFailure() {
@@ -468,13 +553,19 @@ private final class FakeFocus: FocusInspecting {
 @MainActor
 private final class FakeFieldReader: FieldReading, ReadableField {
     var text: String
+    private(set) var focusedFieldCalls = 0
+    private(set) var snapshots = 0
 
     init(text: String) { self.text = text }
 
-    func focusedField() -> (any ReadableField)? { self }
+    func focusedField() -> (any ReadableField)? {
+        focusedFieldCalls += 1
+        return self
+    }
 
     func snapshot() -> FieldSnapshot? {
-        FieldSnapshot(text: text, selection: NSRange(location: (text as NSString).length, length: 0))
+        snapshots += 1
+        return FieldSnapshot(text: text, selection: NSRange(location: (text as NSString).length, length: 0))
     }
 }
 

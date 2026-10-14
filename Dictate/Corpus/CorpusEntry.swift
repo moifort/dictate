@@ -37,6 +37,7 @@ struct DictationSample {
     let transcript: String
     let inserted: String
     let enhanced: Bool
-    /// The field as it was right before the paste; nil when it could not be read.
-    let watch: InsertionWatch?
+    /// The field before the paste and a few seconds after; nil when it could
+    /// not be read before the paste.
+    let followUp: Task<InsertionFollowUp?, Never>?
 }

@@ -7,7 +7,7 @@ struct EvaluationCorpusTests {
     private let folder = FileManager.default.temporaryDirectory
         .appending(path: "EvaluationCorpusTests-\(UUID().uuidString)", directoryHint: .isDirectory)
 
-    private func sample(inserted: String = "Fais un push.", watch: InsertionWatch? = nil) -> DictationSample {
+    private func sample(inserted: String = "Fais un push.", followUp: Task<InsertionFollowUp?, Never>? = nil) -> DictationSample {
         DictationSample(
             date: Date(timeIntervalSince1970: 1_800_000_000),
             samples: [0, 0.5, -0.5, 1],
@@ -18,7 +18,7 @@ struct EvaluationCorpusTests {
             transcript: "euh fais un pouche",
             inserted: inserted,
             enhanced: true,
-            watch: watch
+            followUp: followUp
         )
     }
 
@@ -60,17 +60,17 @@ struct EvaluationCorpusTests {
     @Test func recordWaitsForTheUsersFixes() async {
         let field = CorpusFakeField(text: "Salut, ")
         let observer = PostInsertionObserver(reader: CorpusFakeReader(field: field), delay: .milliseconds(10))
-        let watch = observer.watchFocusedField()
+        let watch = observer.watchFocusedField()!
         field.text = "Salut, Fais un push sur main."
+        let followUp = Task { await observer.followUp(watch, inserted: "Fais un push.") }
         let corpus = EvaluationCorpus(folder: folder)
-        await corpus.record(sample(inserted: "Fais un push.", watch: watch), observer: observer)
+        await corpus.record(sample(inserted: "Fais un push.", followUp: followUp))
         #expect(corpus.entries.first?.reference == "Fais un push sur main.")
     }
 
     @Test func recordWithoutAReadableFieldKeepsTheDictationWithoutReference() async {
-        let observer = PostInsertionObserver(reader: CorpusFakeReader(field: nil), delay: .milliseconds(10))
         let corpus = EvaluationCorpus(folder: folder)
-        await corpus.record(sample(watch: nil), observer: observer)
+        await corpus.record(sample(followUp: nil))
         #expect(corpus.entries.count == 1)
         #expect(corpus.entries.first?.reference == nil)
     }
