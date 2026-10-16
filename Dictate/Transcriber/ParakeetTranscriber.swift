@@ -131,9 +131,25 @@ actor ParakeetEngine {
         var decoderState = TdtDecoderState.make(decoderLayers: await manager.decoderLayerCount)
         // The language only filters out tokens from another alphabet.
         let result = try await manager.transcribe(samples, decoderState: &decoderState, language: Language(rawValue: language))
-        let timings = result.tokenTimings ?? []
+        let (text, timings) = Self.resolvingUnknownTokens(text: result.text, timings: result.tokenTimings ?? [])
         let tokens = timings.map { (piece: $0.token, confidence: $0.confidence) }
-        return (Transcription(text: result.text, words: Transcription.words(fromTokens: tokens)), timings)
+        return (Transcription(text: text, words: Transcription.words(fromTokens: tokens)), timings)
+    }
+
+    /// Parakeet writes `<unk>` for the quotation marks its vocabulary lacks.
+    /// The timings carry the guillemets too, so the vocabulary rescoring
+    /// rebuilds the same words.
+    private static func resolvingUnknownTokens(text: String, timings: [TokenTiming]) -> (String, [TokenTiming]) {
+        let pieces = timings.map(\.token)
+        guard UnknownTokens.containsUnknown(pieces) else { return (UnknownTokens.stripped(text), timings) }
+        let resolved = UnknownTokens.resolved(pieces)
+        let resolvedTimings = zip(timings, resolved).map { timing, piece in
+            TokenTiming(
+                token: piece, tokenId: timing.tokenId, startTime: timing.startTime, endTime: timing.endTime,
+                confidence: timing.confidence
+            )
+        }
+        return (UnknownTokens.text(fromPieces: resolved), resolvedTimings)
     }
 }
 
