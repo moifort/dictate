@@ -5,8 +5,8 @@ import Observation
 /// Records the default microphone into memory as 16 kHz mono samples.
 @Observable
 final class AudioRecorder: AudioRecording {
-    /// Recent input level in 0...1, for the recording indicator.
-    private(set) var level: Float = 0
+    /// Recent input level and its spread across frequency bands, for the recording indicator.
+    private(set) var spectrum = VoiceSpectrum.silent
 
     @ObservationIgnored private var engine = AVAudioEngine()
     @ObservationIgnored private var tap: TapProcessor?
@@ -47,11 +47,13 @@ final class AudioRecorder: AudioRecording {
         let format = input.outputFormat(forBus: 0)
         guard format.sampleRate > 0, format.channelCount > 0 else { throw RecorderError.noInputDevice }
 
-        let processor = try TapProcessor(inputFormat: format) { [weak self] level in
-            Task { @MainActor in self?.level = level }
+        let processor = try TapProcessor(inputFormat: format) { [weak self] spectrum in
+            Task { @MainActor in self?.spectrum = spectrum }
         }
         tap = processor
-        input.installTap(onBus: 0, bufferSize: 4_096, format: format, block: processor.makeBlock())
+        // About 21 ms at 48 kHz, so the waves follow syllables; the hardware may
+        // still deliver larger buffers, which the analyzer handles.
+        input.installTap(onBus: 0, bufferSize: 1_024, format: format, block: processor.makeBlock())
         engine.prepare()
         do {
             try engine.start()
@@ -67,7 +69,7 @@ final class AudioRecorder: AudioRecording {
         engine.inputNode.removeTap(onBus: 0)
         engine.stop()
         isRecording = false
-        level = 0
+        spectrum = .silent
         defer {
             tap = nil
             inputDeviceChanged(deviceChanged: false)
@@ -233,14 +235,14 @@ final class InputDeviceMonitor {
 /// Runs on the audio thread: resamples each buffer and accumulates samples.
 nonisolated final class TapProcessor: @unchecked Sendable {
     private let resampler: AudioResampler
-    private let onLevel: @Sendable (Float) -> Void
+    private let onSpectrum: @Sendable (VoiceSpectrum) -> Void
+    private let analyzer = SpectrumAnalyzer()
     private let lock = NSLock()
     private var samples: [Float] = []
-    private var smoothedLevel: Float = 0
 
-    init(inputFormat: AVAudioFormat, onLevel: @escaping @Sendable (Float) -> Void) throws {
+    init(inputFormat: AVAudioFormat, onSpectrum: @escaping @Sendable (VoiceSpectrum) -> Void) throws {
         resampler = try AudioResampler(inputFormat: inputFormat)
-        self.onLevel = onLevel
+        self.onSpectrum = onSpectrum
     }
 
     func makeBlock() -> AVAudioNodeTapBlock {
@@ -253,13 +255,7 @@ nonisolated final class TapProcessor: @unchecked Sendable {
         lock.lock()
         samples.append(contentsOf: chunk)
         lock.unlock()
-
-        var sum: Float = 0
-        for sample in chunk { sum += sample * sample }
-        let level = AudioAnalysis.meterLevel(rms: (sum / Float(chunk.count)).squareRoot())
-        // Rises instantly, falls over a few buffers: the meter breathes instead of flickering.
-        smoothedLevel = max(level, smoothedLevel * 0.8)
-        onLevel(smoothedLevel)
+        onSpectrum(analyzer.process(chunk))
     }
 
     func drain() -> [Float] {

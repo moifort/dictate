@@ -212,7 +212,7 @@ private struct IndicatorView: View {
         case .hidden:
             Color.clear.frame(width: 30)
         case .recording:
-            LevelWaves(level: CGFloat(recorder.level))
+            LevelWaves(spectrum: recorder.spectrum)
                 .id("recording")
         case .processing:
             Spinner().id("processing")
@@ -266,11 +266,12 @@ private struct Spinner: View {
     }
 }
 
-/// Three overlapping waves in the colours of the app icon, swelling with the
-/// microphone level: each one travels at its own pace over a soft glow, so
-/// they never move as one block.
+/// Three overlapping waves in the colours of the app icon, one per frequency
+/// band: magenta for the lows, blue for the mids, cyan for the highs. Each sits
+/// a little off centre, lows to the left and highs to the right, and the whole
+/// group leans towards whichever end the voice favours.
 private struct LevelWaves: View {
-    let level: CGFloat
+    let spectrum: VoiceSpectrum
 
     private struct Wave {
         let colors: [Color]
@@ -279,24 +280,29 @@ private struct LevelWaves: View {
         /// Radians per second; the sign sets the travel direction.
         let speed: Double
         let phase: Double
-        let weight: CGFloat
+        /// Where the wave peaks at rest, as a fraction of the width.
+        let center: Double
+        let band: KeyPath<VoiceSpectrum, Float>
     }
 
     /// Drawn in order, so the magenta wave sits on top like in the icon.
     private static let waves = [
         Wave(
             colors: [Color(red: 0.08, green: 0.82, blue: 0.8), Color(red: 0.55, green: 0.96, blue: 0.92)],
-            frequency: 2.0, speed: 6.6, phase: 2.6, weight: 0.6
+            frequency: 2.0, speed: 6.6, phase: 2.6, center: 0.6, band: \.high
         ),
         Wave(
             colors: [Color(red: 0.1, green: 0.42, blue: 0.95), Color(red: 0.5, green: 0.7, blue: 1)],
-            frequency: 1.5, speed: -4.3, phase: 1.3, weight: 0.8
+            frequency: 1.5, speed: -4.3, phase: 1.3, center: 0.5, band: \.mid
         ),
         Wave(
             colors: [Color(red: 0.93, green: 0.09, blue: 0.78), Color(red: 1, green: 0.5, blue: 0.88)],
-            frequency: 1.0, speed: 5.5, phase: 0, weight: 1
+            frequency: 1.0, speed: 5.5, phase: 0, center: 0.4, band: \.low
         ),
     ]
+
+    /// How far the tilt moves the peaks, as a fraction of the width.
+    private static let lean = 0.15
 
     var body: some View {
         TimelineView(.animation(minimumInterval: 1 / 60)) { context in
@@ -304,46 +310,55 @@ private struct LevelWaves: View {
             ZStack {
                 ForEach(Self.waves.indices, id: \.self) { index in
                     let wave = Self.waves[index]
-                    let amplitude = 1 + 11 * min(1, level * wave.weight)
+                    let amplitude = 1 + 11 * min(1, CGFloat(spectrum[keyPath: wave.band]))
+                    let center = min(0.75, max(0.25, wave.center + Self.lean * Double(spectrum.tilt)))
                     let gradient = LinearGradient(
                         colors: [wave.colors[0], wave.colors[1], wave.colors[0]],
                         startPoint: .leading, endPoint: .trailing
                     )
-                    WaveShape(amplitude: amplitude, frequency: wave.frequency, phase: wave.phase + time * wave.speed, closed: true)
+                    let phase = wave.phase + time * wave.speed
+                    WaveShape(amplitude: amplitude, center: center, frequency: wave.frequency, phase: phase, closed: true)
                         .fill(gradient)
                         .opacity(0.35)
                         .blur(radius: 3)
-                    WaveShape(amplitude: amplitude, frequency: wave.frequency, phase: wave.phase + time * wave.speed, closed: false)
+                    WaveShape(amplitude: amplitude, center: center, frequency: wave.frequency, phase: phase, closed: false)
                         .stroke(gradient, style: StrokeStyle(lineWidth: 1.2, lineCap: .round, lineJoin: .round))
                 }
             }
-            .animation(.interactiveSpring(response: 0.1, dampingFraction: 0.7), value: level)
+            .animation(.interactiveSpring(response: 0.1, dampingFraction: 0.7), value: spectrum)
         }
         .frame(width: 72, height: 26)
     }
 }
 
-/// One sine wave across the frame, flat at both ends and widest in the middle
-/// like the icon. Only the amplitude animates: the phase jumps with each frame.
+/// One sine wave across the frame, flat at both ends and widest at `center`
+/// (the middle, like the icon, when the voice is balanced). The amplitude and
+/// the centre animate; the phase jumps with each frame.
 nonisolated private struct WaveShape: Shape {
     var amplitude: CGFloat
+    /// Where the envelope peaks, as a fraction of the width.
+    var center: Double
     let frequency: Double
     let phase: Double
     /// Closes the wave back along the midline, for the glow under the stroke.
     let closed: Bool
 
-    var animatableData: CGFloat {
-        get { amplitude }
-        set { amplitude = newValue }
+    var animatableData: AnimatablePair<CGFloat, Double> {
+        get { AnimatablePair(amplitude, center) }
+        set { (amplitude, center) = (newValue.first, newValue.second) }
     }
 
     func path(in rect: CGRect) -> Path {
         var path = Path()
         let midY = rect.midY
         let steps = Int(rect.width)
+        // Warps the width so the envelope's peak lands on `center` while both
+        // ends stay pinned to the edges.
+        let warp = log(0.5) / log(center)
         for step in 0...steps {
             let u = Double(step) / Double(steps)
-            let envelope = pow(4 * u * (1 - u), 1.5)
+            let v = pow(u, warp)
+            let envelope = pow(4 * v * (1 - v), 1.5)
             let y = midY - amplitude * envelope * sin(2 * .pi * frequency * u + phase)
             let point = CGPoint(x: rect.minX + u * rect.width, y: y)
             if step == 0 { path.move(to: point) } else { path.addLine(to: point) }
