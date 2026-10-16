@@ -4,6 +4,12 @@ options:
   deploymentTarget:
     macOS: "27.0"
   createIntermediateGroups: true
+  # The project is generated, so the pinned package versions live at the
+  # root and are copied in. After updating a package in Xcode, copy the
+  # project's Package.resolved back to the root.
+  postGenCommand: >-
+    mkdir -p Dictate.xcodeproj/project.xcworkspace/xcshareddata/swiftpm &&
+    cp Package.resolved Dictate.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 settings:
   base:
     SWIFT_VERSION: "6.0"
