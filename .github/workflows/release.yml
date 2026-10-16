@@ -10,6 +10,9 @@ name: Release
 # updater). A manual run stops before publishing and leaves both as run
 # artifacts.
 #
+# The tests and the build run side by side; the release is only published
+# once both pass.
+#
 # Dictate cannot ship on the Mac App Store: its event tap, Accessibility access
 # and the `claude` subprocess are all incompatible with the sandbox.
 on:
@@ -25,8 +28,52 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  release:
-    name: 📦 Test, build, sign & publish
+  test:
+    name: 🎙️ Unit tests
+    runs-on: xcode-27
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Select Xcode 27
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest
+
+      - name: Generate the Xcode project
+        run: |
+          set -euo pipefail
+          brew install xcodegen
+          xcodegen generate
+
+      - name: Restore the Debug build
+        id: derived-data
+        uses: ./.github/actions/derived-data
+        with:
+          configuration: Debug
+
+      - name: Run the unit tests
+        run: |
+          set -euo pipefail
+          xcodebuild test \
+            -project Dictate.xcodeproj -scheme Dictate \
+            -destination 'platform=macOS' \
+            -derivedDataPath build \
+            -onlyUsePackageVersionsFromResolvedFile \
+            CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=
+
+      - name: Save the Debug build
+        if: steps.derived-data.outputs.hit != 'true' && github.ref == 'refs/heads/main'
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            build
+            !build/Logs
+            !build/Index.noindex
+          key: ${{ steps.derived-data.outputs.key }}
+
+  build:
+    name: 📦 Build, sign & notarize
     runs-on: xcode-27
     timeout-minutes: 60
     env:
@@ -40,7 +87,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0   # the build number and the tag annotation depend on it
+          fetch-depth: 0   # the build number depends on it
 
       - name: Select Xcode 27
         uses: maxim-lobanov/setup-xcode@v1
@@ -66,33 +113,28 @@ jobs:
           brew install xcodegen
           xcodegen generate
 
-      - name: Restore Swift packages
-        uses: actions/cache@v6
+      - name: Restore the Release build
+        id: derived-data
+        uses: ./.github/actions/derived-data
         with:
-          path: build/SourcePackages
-          key: spm-${{ runner.os }}-${{ hashFiles('project.yml') }}
-
-      - name: Run the unit tests
-        run: |
-          set -euo pipefail
-          xcodebuild test \
-            -project Dictate.xcodeproj -scheme Dictate \
-            -destination 'platform=macOS' \
-            -derivedDataPath build \
-            CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=
+          configuration: Release
 
       # Signed by hand after the build rather than by Xcode: no provisioning
       # profile, no team lookup, and the same command for both signing modes.
       - name: Build the app
-        run: |
-          set -euo pipefail
-          xcodebuild build \
-            -project Dictate.xcodeproj -scheme Dictate -configuration Release \
-            -destination 'generic/platform=macOS' \
-            -derivedDataPath build \
-            ARCHS=arm64 \
-            MARKETING_VERSION="$MARKETING" CURRENT_PROJECT_VERSION="$BUILD" \
-            CODE_SIGNING_ALLOWED=NO
+        run: scripts/ci-build-release.sh
+
+      # A manual run on main seeds the cache too; a tag's cache would be
+      # visible to no other run.
+      - name: Save the Release build
+        if: steps.derived-data.outputs.hit != 'true' && github.ref == 'refs/heads/main'
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            build
+            !build/Logs
+            !build/Index.noindex
+          key: ${{ steps.derived-data.outputs.key }}
 
       # Sentry matches the symbols to a crash by the binary's UUID: the dSYM of
       # this very build, before anything is stripped or signed.
@@ -204,12 +246,42 @@ jobs:
           ditto -c -k --keepParent "$APP" "$ZIP"
           echo "ZIP=$ZIP" >> "$GITHUB_ENV"
 
+      # The publish job picks the packages up from here.
+      - name: Archive the packages as a run artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: Dictate
+          path: |
+            Dictate-*.dmg
+            Dictate-*.zip
+          if-no-files-found: ignore
+          retention-days: 14
+
+  publish:
+    name: 🚀 Publish the release
+    needs: [test, build]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SIGNED: ${{ secrets.DEVELOPER_ID_P12 != '' }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # the tag annotation holds the notes
+
+      - name: Download the packages
+        uses: actions/download-artifact@v8
+        with:
+          name: Dictate
+
       - name: Publish the GitHub release
-        if: startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          MARKETING="${GITHUB_REF_NAME#v}"
           # The notes live with the tag rather than in a CHANGELOG.
           git tag -l --format='%(contents:body)' "$GITHUB_REF_NAME" > notes.txt
           if [ ! -s notes.txt ]; then
@@ -224,15 +296,4 @@ jobs:
           else
             gh release create "$GITHUB_REF_NAME" --title "Dictate $MARKETING" --notes-file notes.txt
           fi
-          gh release upload "$GITHUB_REF_NAME" "$DMG" "$ZIP" --clobber
-
-      - name: Archive the packages as a run artifact
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: Dictate
-          path: |
-            Dictate-*.dmg
-            Dictate-*.zip
-          if-no-files-found: ignore
-          retention-days: 14
+          gh release upload "$GITHUB_REF_NAME" "Dictate-$MARKETING.dmg" "Dictate-$MARKETING.zip" --clobber

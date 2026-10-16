@@ -1,0 +1,45 @@
+name: Restore DerivedData
+description: >-
+  Restores the build folder of one configuration, compiled packages included,
+  so FluidAudio and Sentry are not compiled again. The checkout is newer than
+  the cache, so the app's own sources are always rebuilt.
+
+  Save it with actions/cache/save and exactly the same `path` list, from main
+  only: a tag or pull request run cannot share its cache with the next one.
+
+inputs:
+  configuration:
+    description: Debug or Release
+    required: true
+  lookup-only:
+    description: Only tell whether the cache exists, without downloading it
+    default: 'false'
+
+outputs:
+  key:
+    description: The cache key for this configuration, Xcode and package versions
+    value: ${{ steps.key.outputs.key }}
+  hit:
+    description: The exact key was found
+    value: ${{ steps.restore.outputs.cache-hit }}
+
+runs:
+  using: composite
+  steps:
+    - id: key
+      shell: bash
+      run: |
+        set -euo pipefail
+        # A new Xcode recompiles everything anyway: its cache would be dead weight.
+        XCODE=$(xcodebuild -version | shasum | cut -c1-12)
+        echo "key=deriveddata-${{ inputs.configuration }}-$XCODE-${{ hashFiles('Package.resolved') }}" >> "$GITHUB_OUTPUT"
+
+    - id: restore
+      uses: actions/cache/restore@v6
+      with:
+        path: |
+          build
+          !build/Logs
+          !build/Index.noindex
+        key: ${{ steps.key.outputs.key }}
+        lookup-only: ${{ inputs.lookup-only }}
