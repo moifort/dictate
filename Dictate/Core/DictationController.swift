@@ -200,14 +200,16 @@ final class DictationController {
             onFieldContext?(context)
         }
 
-        var text = transcript.text
+        // Claude gets Parakeet's unknown tokens as is and picks the character
+        // they stand for; the fallback turns any it leaves into guillemets.
+        var text = UnknownTokens.resolved(transcript.text)
         var raw = false
         var enhancement: Duration?
         if enhancementEnabled() {
             phase = .enhancing
             let start = clock.now
             if let enhanced = await enhanceWithTimeout(transcript), !enhanced.isEmpty {
-                text = enhanced
+                text = UnknownTokens.resolved(enhanced)
             } else {
                 raw = true
             }

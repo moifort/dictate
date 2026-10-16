@@ -48,6 +48,7 @@ nonisolated enum PromptBuilder {
             """
         }
         prompt += doubtfulWordsRule
+        prompt += unknownTokenRule
         return prompt
     }
 
@@ -124,5 +125,16 @@ nonisolated enum PromptBuilder {
         Les mots hors balises sont probablement justes : n'en corrige l'orthographe que pour un terme technique \
         clairement mal transcrit. \
         N'écris jamais \(DoubtfulWords.open) ni \(DoubtfulWords.close) dans ta réponse.
+        """
+
+    /// Parakeet's vocabulary lacks these characters. Pairs of tokens arrive
+    /// already turned into guillemets: only single ones are left.
+    private static let unknownTokenRule = """
+
+
+        Symboles manquants : la reconnaissance vocale ne sait pas écrire certains symboles (@, #, &, \
+        parenthèse, tiret) et met \(UnknownTokens.token) à leur place. Remplace chaque \(UnknownTokens.token), \
+        exactement à sa place, par le symbole que le contexte demande, sans toucher aux mots autour ; \
+        si aucun ne convient, supprime-le. N'écris jamais \(UnknownTokens.token) dans ta réponse.
         """
 }

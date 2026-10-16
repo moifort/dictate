@@ -17,6 +17,11 @@ struct DoubtfulWordsTests {
         #expect(marked == "fais un <?>pouche</?>, puis (<?>rebaise</?>).")
     }
 
+    @Test func neverWrapsTheUnknownToken() {
+        let marked = DoubtfulWords.mark(transcription("dire <unk> oui <unk>, moi<unk>exemple", [0.9, 0.1, 0.2, 0.1, 0.1]))
+        #expect(marked == "dire <unk> <?>oui</?> <unk>, moi<unk>exemple")
+    }
+
     @Test func leavesTheTextAloneWhenEveryWordIsConfident() {
         #expect(DoubtfulWords.mark(transcription("fais un push", [0.9, 0.8, 0.5])) == "fais un push")
     }

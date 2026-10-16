@@ -38,8 +38,9 @@ nonisolated struct CorpusEvaluation: Equatable, Sendable {
             let setup = Setup(engine: entry.engine, vocabularyBoosted: entry.vocabularyBoosted ?? false)
             var line = lines[setup] ?? Line()
             line.dictations += 1
+            // The transcript as it would be inserted without Claude.
             line.transcript = line.transcript + WordErrorRate.count(
-                reference: reference, hypothesis: entry.transcript, normalization: normalization
+                reference: reference, hypothesis: UnknownTokens.resolved(entry.transcript), normalization: normalization
             )
             if entry.enhanced {
                 line.enhancedDictations += 1

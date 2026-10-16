@@ -42,6 +42,8 @@ nonisolated enum DoubtfulWords {
     }
 
     private static func wrap(_ word: String) -> String {
+        // Claude has its own rule for it, and `<<?>unk</?>>` would hide it.
+        guard !word.contains(UnknownTokens.token) else { return word }
         let scalars = word.unicodeScalars
         guard let first = scalars.firstIndex(where: { CharacterSet.alphanumerics.contains($0) }),
               let last = scalars.lastIndex(where: { CharacterSet.alphanumerics.contains($0) })

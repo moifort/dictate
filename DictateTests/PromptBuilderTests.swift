@@ -52,6 +52,17 @@ struct PromptBuilderTests {
         #expect(prompt.contains("N'écris jamais <?> ni </?>"))
     }
 
+    @Test func systemPromptExplainsTheUnknownToken() {
+        let prompt = PromptBuilder.systemPrompt(vocabulary: [], language: "fr")
+        #expect(prompt.contains("met <unk> à leur place"))
+        #expect(prompt.contains("N'écris jamais <unk>"))
+    }
+
+    @Test func userMessageKeepsTheUnknownTokenForClaude() {
+        let message = PromptBuilder.userMessage(transcript: "dire <unk> oui <unk>", context: DictationContext())
+        #expect(message.contains("dire <unk> oui <unk>"))
+    }
+
     @Test func userMessageMarksDoubtfulWords() {
         let words = [
             Transcription.Word(text: "déploie", confidence: 0.98),

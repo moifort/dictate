@@ -193,6 +193,33 @@ struct DictationControllerTests {
         #expect(fakes.inserter.pasted == ["fais un pouche"])
     }
 
+    @Test func claudeReceivesTheUnknownTokenAsParakeetWroteIt() async {
+        let (controller, fakes) = makeController(
+            transcript: .success("écris à moi <unk> exemple.com"), enhanced: .success("Écris à moi@exemple.com")
+        )
+        await dictate(controller)
+        #expect(fakes.enhancer.received.first?.transcription.text == "écris à moi <unk> exemple.com")
+        #expect(fakes.inserter.pasted == ["Écris à moi@exemple.com"])
+    }
+
+    @Test(arguments: [true, false])
+    func rawTranscriptGetsGuillemetsForTheUnknownTokens(enhancementEnabled: Bool) async {
+        let (controller, fakes) = makeController(
+            transcript: .success("qui s'appelait <unk> routine <unk> et"),
+            enhanced: .failure(FakeError()), enhancementEnabled: enhancementEnabled
+        )
+        await dictate(controller)
+        #expect(fakes.inserter.pasted == ["qui s'appelait « routine » et"])
+    }
+
+    @Test func anUnknownTokenClaudeLeftInIsResolvedToo() async {
+        let (controller, fakes) = makeController(
+            transcript: .success("dire <unk> oui <unk>"), enhanced: .success("Dire <unk> oui <unk>.")
+        )
+        await dictate(controller)
+        #expect(fakes.inserter.pasted == ["Dire « oui »."])
+    }
+
     @Test func disabledEnhancementSkipsEnhancer() async {
         let (controller, fakes) = makeController(enhancementEnabled: false)
         await dictate(controller)

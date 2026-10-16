@@ -149,6 +149,13 @@ struct CorpusEvaluationTests {
         #expect(evaluation.lines[parakeet]?.enhanced.referenceWords == 0)
     }
 
+    @Test func unknownTokensAreNotCountedAsWords() {
+        let evaluation = CorpusEvaluation(entries: [
+            entry(transcript: "dire <unk> oui <unk>", inserted: "Dire « oui ».", reference: "Dire « oui »."),
+        ])
+        #expect(evaluation.lines[parakeet]?.transcript.errors == 0)
+    }
+
     @Test func summaryNamesTheEngine() {
         let evaluation = CorpusEvaluation(entries: [
             entry(engine: .parakeet, transcript: "a", inserted: "a", reference: "a"),
