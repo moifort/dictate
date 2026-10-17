@@ -503,20 +503,24 @@
     }, 1400);
   }
 
-  // The cursor card types a few phrases.
+  // The cursor card types a phrase in one app after another.
   const typed = document.querySelector("[data-typed]");
+  const typedApp = document.querySelector("[data-typed-app]");
   if (typed) {
     const phrases = [
-      "merci pour ton retour, je corrige ça ce matin.",
-      "on se voit à 14 h, salle Lumière.",
-      "le dossier est dans le drive partagé.",
+      { app: "Mail", text: "Bonjour Marie, merci pour ton retour, je corrige ça ce matin." },
+      { app: "Slack", text: "on se voit à 14 h salle Lumière ?" },
+      { app: "Notes", text: "Idée : relancer le fournisseur avant la fin du mois." },
+      { app: "Terminal", text: "lance les tests du module de paiement" },
+      { app: "Claude", text: "Explique-moi ce que fait cette fonction." },
     ];
     (async () => {
       let p = 0;
       for (;;) {
         const phrase = phrases[p];
-        for (let i = 1; i <= phrase.length; i++) {
-          typed.textContent = phrase.slice(0, i);
+        if (typedApp) typedApp.textContent = phrase.app;
+        for (let i = 1; i <= phrase.text.length; i++) {
+          typed.textContent = phrase.text.slice(0, i);
           await sleep(reducedMotion ? 5 : 28);
         }
         await sleep(2400);
@@ -531,7 +535,7 @@
   // Reveal on scroll, latest version
   // ---------------------------------------------------------------------------
 
-  for (const el of document.querySelectorAll(".card, .flow-node, .privacy-points li, .section-title, .section-lead")) {
+  for (const el of document.querySelectorAll(".card, .pair, .faq-list details, .flow-node, .privacy-points li, .section-title, .section-lead")) {
     el.classList.add("reveal");
   }
   const revealer = new IntersectionObserver((entries) => {

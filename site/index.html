@@ -3,16 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dictate — À peine pensé, déjà écrit.</title>
-  <meta name="description" content="Dictée push-to-talk pour le Mac, totalement gratuite. Maintenez control, parlez, relâchez : environ 1,5 s plus tard, un texte propre relu par Claude apparaît là où vous écrivez.">
+  <title>Dictate — Dictée vocale pour Mac, gratuite et open source</title>
+  <meta name="description" content="Maintenez control, parlez, relâchez : un texte propre, relu par Claude, apparaît là où vous écrivez, dans n'importe quelle app. Transcription sur votre Mac, aucun compte, gratuit et open source.">
   <meta property="og:title" content="Dictate — À peine pensé, déjà écrit.">
-  <meta property="og:description" content="Dictée push-to-talk pour le Mac, totalement gratuite. Maintenez control, parlez, relâchez.">
+  <meta property="og:description" content="Dictée vocale pour Mac. Maintenez control, parlez, relâchez : un texte propre apparaît là où vous écrivez. Gratuit, open source, votre voix reste sur votre Mac.">
   <meta property="og:image" content="https://moifort.github.io/dictate/icon-256.png">
   <meta property="og:type" content="website">
+  <meta property="og:locale" content="fr_FR">
   <meta name="theme-color" content="#ffffff">
   <link rel="icon" href="favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="icon-256.png">
-  <link rel="stylesheet" href="style.css?v=20261017-26">
+  <link rel="stylesheet" href="style.css?v=20261017-27">
 </head>
 <body>
 
@@ -24,10 +25,11 @@
   </a>
   <nav class="nav-links" aria-label="Sections">
     <a href="#demo">Démo</a>
-    <a href="#features">Fonctions</a>
+    <a href="#features">Fonctionnalités</a>
     <a href="#privacy">Confidentialité</a>
+    <a href="#faq">Questions</a>
     <a class="nav-gh" href="https://github.com/moifort/dictate" rel="noopener"><svg class="nav-github" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>GitHub</a>
-    <a class="nav-cta" href="https://github.com/moifort/dictate/releases/latest">Télécharger</a>
+    <a class="nav-cta" href="https://github.com/moifort/dictate/releases/latest" data-download>Télécharger</a>
   </nav>
 </header>
 
@@ -35,17 +37,20 @@
 
   <!-- Hero -->
   <section class="hero">
+    <p class="eyebrow">Dictée vocale pour Mac</p>
     <h1 class="hero-title">À peine pensé,<br><span class="gradient-text">déjà écrit.</span></h1>
     <p class="hero-subtitle">
-      Maintenez <kbd class="key inline" data-key-hero><span class="key-glyph">⌃</span><span class="key-name">control</span></kbd>, parlez, relâchez.
+      Maintenez <kbd class="key inline" data-key-hero><span class="key-glyph">⌃</span><span class="key-name">control</span></kbd>, parlez, relâchez : un texte propre, relu par Claude, apparaît là où vous écrivez. Dans n'importe quelle app.
     </p>
     <div class="hero-actions">
       <a class="button primary" href="https://github.com/moifort/dictate/releases/latest" data-download>
-        Télécharger
+        <svg class="apple-mark" viewBox="0 0 17 20" width="15" height="18" aria-hidden="true"><path fill="currentColor" d="M14.2 10.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.4 1.2 0 1.6-.8 3.1-.8 1.4 0 1.8.8 3.1.7 1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.3-2.6 1.3-2.7-.1 0-2.7-1-2.7-3.7ZM11.9 3.8c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.7 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.7-1.3Z"/></svg>
+        Télécharger pour Mac
       </a>
+      <a class="button ghost" href="#demo">Voir la démo</a>
     </div>
     <p class="hero-meta">
-      <span data-version>Dernière version</span> · macOS 27 · Compatible à partir du M1 · open source
+      Gratuit · Open source · <span data-version>Dernière version</span> · macOS 27 · Apple Silicon
     </p>
 
     <div class="hero-wave" aria-hidden="true">
@@ -62,8 +67,8 @@
           <span class="window-title">Nouveau message</span>
         </div>
         <div class="mail-head">
-          <div><span>À :</span><em class="mail-chip" data-mail-to>Claire Dubois</em></div>
-          <div><span>Objet :</span><b data-mail-subject>Réunion de jeudi</b></div>
+          <div><span>À :</span><em class="mail-chip" data-mail-to>Claire Dubois</em></div>
+          <div><span>Objet :</span><b data-mail-subject>Réunion de jeudi</b></div>
         </div>
         <div class="window-body">
           <div class="field-text" data-field-text><span class="caret"></span></div>
@@ -106,7 +111,7 @@
           </div>
         </div>
         <h3>Push-to-talk</h3>
-        <p>Une seule touche, <kbd><span class="kbd-glyph">⌃</span>control</kbd> ou <kbd><span class="kbd-glyph">🌐︎</span>fn</kbd> au choix. Vous la tenez le temps de parler. Rien à activer, rien à fermer.</p>
+        <p>Une seule touche, <kbd><span class="kbd-glyph">⌃</span>control</kbd> ou <kbd><span class="kbd-glyph">🌐︎</span>fn</kbd> au choix. Vous la tenez le temps de parler, vous la relâchez, c'est écrit. Rien à activer, rien à fermer.</p>
       </article>
 
       <article class="card">
@@ -116,8 +121,8 @@
             <p class="clean">Je voulais te dire que la réunion est décalée à mardi.</p>
           </div>
         </div>
-        <h3>Relu et écrit par Claude</h3>
-        <p>Claude relit la transcription et l'écrit proprement : les « euh », les répétitions et les faux départs disparaissent, la ponctuation et les termes techniques sont corrigés. Vos mots restent les vôtres.</p>
+        <h3>Relu par Claude</h3>
+        <p>Claude relit la transcription et l'écrit proprement : les « euh », les répétitions et les faux départs disparaissent, la ponctuation et les termes techniques sont corrigés. Le sens et les mots restent les vôtres.</p>
       </article>
 
       <article class="card">
@@ -128,7 +133,7 @@
           </div>
         </div>
         <h3>Environ 1,5 seconde</h3>
-        <p>C'est le temps médian entre la fin de votre phrase et son apparition dans le champ, transcription et relecture comprises.</p>
+        <p>C'est le temps médian entre la fin de votre phrase et son apparition à l'écran, transcription et relecture comprises.</p>
       </article>
 
       <article class="card">
@@ -141,17 +146,18 @@
           </div>
         </div>
         <h3>S'adapte à l'app</h3>
-        <p>Le ton suit le contexte : un peu plus soigné dans un mail, direct dans un chat, brut et technique dans un éditeur ou un terminal.</p>
+        <p>Le ton suit l'app où vous écrivez : un peu plus soigné dans un mail, direct dans un chat, brut et technique dans un éditeur de code ou un terminal.</p>
       </article>
 
       <article class="card">
         <div class="card-visual">
           <div class="cursor-demo" aria-hidden="true">
-            <span class="cursor-line">Bonjour Marie, <span class="typed" data-typed></span><span class="caret"></span></span>
+            <span class="cursor-app" data-typed-app>Mail</span>
+            <span class="cursor-line"><span class="typed" data-typed></span><span class="caret"></span></span>
           </div>
         </div>
-        <h3>Au curseur</h3>
-        <p>La phrase est saisie dans le champ qui a le focus. S'il n'y en a pas, elle attend dans le presse-papiers.</p>
+        <h3>Partout où vous écrivez</h3>
+        <p>Mail, Messages, Slack, Notes, Cursor, Terminal, ChatGPT ou Claude : la phrase est saisie dans le champ qui a le focus. S'il n'y en a pas, elle attend dans le presse-papiers.</p>
       </article>
 
       <article class="card">
@@ -160,8 +166,8 @@
             <span>Français</span><span>English</span><span>Deutsch</span><span>Español</span><span>Italiano</span><span>Português</span><span>Nederlands</span><span>Polski</span><span>Svenska</span><span>+ 16</span>
           </div>
         </div>
-        <h3>25 langues, vos mots</h3>
-        <p>Choisissez la langue de dictée et ajoutez votre vocabulaire : noms, jargon, noms de produits, pour qu'ils s'écrivent bien.</p>
+        <h3>25 langues et votre vocabulaire</h3>
+        <p>Choisissez la langue de dictée et ajoutez vos mots : noms propres, jargon, noms de produits. Ils s'écrivent comme vous les écririez.</p>
       </article>
 
       <article class="card wide">
@@ -176,12 +182,38 @@
     </div>
   </section>
 
+  <!-- Before / after -->
+  <section class="examples" id="examples">
+    <h2 class="section-title">Ce que vous dites.<br>Ce qui s'écrit.</h2>
+    <p class="section-lead">Claude ne reformule pas et ne résume pas. Il enlève ce qui parasite, corrige ce qui a été mal entendu, et ajuste le ton à l'app. Le reste est à vous.</p>
+
+    <div class="pairs">
+      <article class="pair">
+        <span class="pair-app">Mail</span>
+        <p class="pair-said"><span class="pair-label">Vous dites</span>euh bonjour alors je reviens vers vous pour le le devis on est d'accord sur le prix mais euh il faudrait décaler la livraison au quinze</p>
+        <p class="pair-wrote"><span class="pair-label">Il s'écrit</span>Bonjour, je reviens vers vous pour le devis. Nous sommes d'accord sur le prix, mais il faudrait décaler la livraison au 15.</p>
+      </article>
+
+      <article class="pair">
+        <span class="pair-app">Slack</span>
+        <p class="pair-said"><span class="pair-label">Vous dites</span>ouais ouais je regarde ça après le déj euh et je je te dis</p>
+        <p class="pair-wrote"><span class="pair-label">Il s'écrit</span>Ouais, je regarde ça après le déj et je te dis.</p>
+      </article>
+
+      <article class="pair">
+        <span class="pair-app">Terminal</span>
+        <p class="pair-said"><span class="pair-label">Vous dites</span>fais un guitte stache euh puis un rebase sur main et et relance les tests</p>
+        <p class="pair-wrote"><span class="pair-label">Il s'écrit</span>Fais un git stash, puis un rebase sur main, et relance les tests.</p>
+      </article>
+    </div>
+  </section>
+
   <!-- Privacy -->
   <section class="privacy" id="privacy">
     <h2 class="section-title">Votre voix reste sur votre Mac.</h2>
     <p class="section-lead">
-      La parole est transcrite localement par Parakeet. L'audio ne quitte jamais l'ordinateur.
-      Seul le texte est envoyé à Claude pour la relecture, via votre propre abonnement Claude, et vous pouvez le désactiver.
+      La parole est transcrite sur votre Mac, par un modèle qui tourne en local. L'audio ne quitte jamais l'ordinateur.
+      Seul le texte part chez Claude pour la relecture, avec votre propre abonnement, et vous pouvez vous en passer.
     </p>
 
     <div class="flow" aria-label="Trajet de la dictée">
@@ -194,7 +226,7 @@
       <div class="flow-node">
         <span class="flow-icon">💻</span>
         <strong>Parakeet</strong>
-        <small>transcription sur l'appareil</small>
+        <small>transcription sur votre Mac</small>
       </div>
       <span class="flow-arrow optional" aria-hidden="true"><em>texte seulement · optionnel</em></span>
       <div class="flow-node">
@@ -206,9 +238,44 @@
 
     <ul class="privacy-points">
       <li><strong>Aucun compte.</strong> Pas d'inscription, pas de serveur à nous, pas de suivi de ce que vous dictez.</li>
-      <li><strong>Open source.</strong> Le code est public : vous pouvez lire exactement ce qui part et ce qui reste.</li>
-      <li><strong>Totalement gratuit.</strong> Pas d'abonnement, pas de version pro, pas d'essai limité. Les mises à jour arrivent toutes seules.</li>
+      <li><strong>Rien n'est conservé.</strong> Dictate ne garde aucune dictée. Ses statistiques comptent des mots et des secondes, jamais le texte.</li>
+      <li><strong>Open source.</strong> Le code est public : vous pouvez lire exactement ce qui part et ce qui reste.</li>
     </ul>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq" id="faq">
+    <h2 class="section-title">Questions fréquentes</h2>
+    <div class="faq-list">
+      <details>
+        <summary>Pourquoi c'est gratuit ?</summary>
+        <p>Parce que Dictate ne coûte rien à faire tourner : pas de serveur, pas de compte. La transcription se fait sur votre Mac et la relecture passe par l'abonnement Claude que vous avez déjà. Il n'y a rien à nous payer, donc rien à vous facturer. Pas de version pro, pas d'essai limité.</p>
+      </details>
+      <details>
+        <summary>Faut-il un abonnement Claude ?</summary>
+        <p>Non. Sans Claude, Dictate insère la transcription telle quelle. Avec, Claude relit chaque dictée via la commande <code>claude</code> de Claude Code ou de l'app Claude, sur votre abonnement. Si Claude ne répond pas, la transcription brute est insérée quand même.</p>
+      </details>
+      <details>
+        <summary>Ça marche hors ligne ?</summary>
+        <p>La transcription, oui : le modèle (environ 630 Mo, téléchargé à l'installation) tourne entièrement sur votre Mac. Seule la relecture par Claude a besoin d'une connexion.</p>
+      </details>
+      <details>
+        <summary>Quelle différence avec la dictée de macOS ?</summary>
+        <p>La dictée d'Apple écrit ce qu'elle entend, hésitations comprises, et il faut la lancer puis l'arrêter. Dictate tient dans une touche que vous maintenez, enlève les « euh » et les répétitions, corrige les termes techniques et adapte le ton à l'app. Et votre voix ne part pas chez Apple.</p>
+      </details>
+      <details>
+        <summary>Quelles langues ?</summary>
+        <p>Vingt-cinq langues européennes : français, anglais, allemand, espagnol, italien, portugais, néerlandais, polonais, suédois, danois, finnois, hongrois, grec, tchèque, roumain, ukrainien et d'autres. La langue se choisit dans les réglages, et votre vocabulaire s'ajoute dans le lexique.</p>
+      </details>
+      <details>
+        <summary>Que demande Dictate à l'installation ?</summary>
+        <p>Trois autorisations macOS : le micro, la surveillance du clavier pour la touche, et l'accessibilité pour trouver le champ et y écrire. Un assistant les règle une par une, puis télécharge le modèle de transcription. Après ça, Dictate vit dans la barre des menus et se met à jour tout seul.</p>
+      </details>
+      <details>
+        <summary>Sur quels Mac ?</summary>
+        <p>macOS 27 et une puce Apple, du M1 aux plus récentes. L'app est signée et notarisée par Apple.</p>
+      </details>
+    </div>
   </section>
 
   <!-- Download -->
@@ -217,22 +284,25 @@
       <canvas class="wave-canvas" data-wave="download" width="320" height="320"></canvas>
     </div>
     <h2 class="section-title">Gratuit. Pour de vrai.</h2>
-    <p class="section-lead">Téléchargez l'image disque, glissez Dictate dans Applications, lancez. Un court assistant règle les autorisations.</p>
+    <p class="section-lead">Téléchargez l'image disque, glissez Dictate dans Applications, lancez. Deux minutes plus tard, vous dictez.</p>
     <div class="hero-actions">
-      <a class="button primary" href="https://github.com/moifort/dictate/releases/latest" data-download>Télécharger Dictate</a>
+      <a class="button primary" href="https://github.com/moifort/dictate/releases/latest" data-download>
+        <svg class="apple-mark" viewBox="0 0 17 20" width="15" height="18" aria-hidden="true"><path fill="currentColor" d="M14.2 10.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.4 1.2 0 1.6-.8 3.1-.8 1.4 0 1.8.8 3.1.7 1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.3-2.6 1.3-2.7-.1 0-2.7-1-2.7-3.7ZM11.9 3.8c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.7 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.7-1.3Z"/></svg>
+        Télécharger pour Mac
+      </a>
       <a class="button ghost" href="https://github.com/moifort/dictate" rel="noopener">Voir le code</a>
     </div>
-    <p class="hero-meta"><span data-version>Dernière version</span> · macOS 27 · Compatible à partir du M1</p>
+    <p class="hero-meta"><span data-version>Dernière version</span> · macOS 27 · Apple Silicon · mises à jour automatiques</p>
   </section>
 
 </main>
 
 <footer class="footer">
   <p>Dictate est un projet open source de <a href="https://github.com/moifort" rel="noopener">Thibaut Mottet</a>.
-     Parakeet par NVIDIA via FluidAudio. Claude par Anthropic.</p>
-  <p><a href="https://github.com/moifort/dictate/releases">Toutes les versions</a> · <a href="https://github.com/moifort/dictate/issues">Signaler un problème</a></p>
+     Transcription par Parakeet (NVIDIA) via FluidAudio. Relecture par Claude (Anthropic).</p>
+  <p><a href="https://github.com/moifort/dictate/releases">Toutes les versions</a> · <a href="https://github.com/moifort/dictate/issues">Signaler un problème</a> · <a href="https://github.com/moifort/dictate#readme">Documentation</a></p>
 </footer>
 
-<script src="main.js?v=20261017-26" defer></script>
+<script src="main.js?v=20261017-27" defer></script>
 </body>
 </html>

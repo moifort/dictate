@@ -120,6 +120,10 @@ kbd .kbd-glyph { color: var(--text-muted); font-size: 0.95em; }
 @media (max-width: 720px) {
   .nav-links a:not(.nav-cta) { display: none; }
 }
+@media (max-width: 560px) {
+  section { padding-top: 88px; padding-bottom: 88px; }
+  .section-lead { margin-bottom: 40px; }
+}
 
 /* ---------- Layout ---------- */
 
@@ -128,6 +132,7 @@ main { display: block; }
 section {
   padding: 120px max(20px, calc((100% - var(--max)) / 2));
   text-align: center;
+  scroll-margin-top: var(--nav-h);
 }
 
 .section-title {
@@ -147,6 +152,16 @@ section {
 }
 
 /* ---------- Hero ---------- */
+
+/* What the product is, in a line above the catchphrase. */
+.eyebrow {
+  margin: 0 0 18px;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
 
 /* Exactly one screen under the nav: the demo only shows up on scroll. */
 .hero {
@@ -179,6 +194,7 @@ section {
 @media (min-width: 700px) { .wide-only { display: inline; } }
 
 .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.apple-mark { display: block; flex: 0 0 auto; margin-right: 9px; margin-top: -2px; }
 
 .button {
   display: inline-flex;
@@ -418,6 +434,11 @@ section {
 .key.inline .key-glyph { font-size: 15px; position: absolute; top: 7px; right: 9px; }
 .key.inline .key-name { font-size: 13px; }
 .key.inline.pressed { box-shadow: 0 1px 0 #c6c6ce, 0 3px 8px rgba(0, 0, 0, 0.12); transform: translateY(4px); }
+@media (max-width: 560px) {
+  .key.inline { width: 64px; height: 44px; padding: 5px 7px; border-radius: 9px; font-size: 12px; }
+  .key.inline .key-glyph { font-size: 12px; top: 5px; right: 7px; }
+  .key.inline .key-name { font-size: 11px; }
+}
 
 /* Under the window: the key on the left, where control sits on a keyboard,
    and the timeline centred on the page. */
@@ -568,14 +589,28 @@ section {
 
 .cursor-demo {
   width: 100%;
-  padding: 16px 18px;
+  padding: 14px 18px 16px;
   border-radius: 14px;
   background: #fff;
   border: 1px solid var(--line);
   color: #1d1d1f;
   font-size: 15px;
   line-height: 1.5;
-  min-height: 72px;
+  min-height: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cursor-app {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .lang-demo { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
@@ -601,6 +636,94 @@ section {
   justify-content: center;
   padding-bottom: 16px;
 }
+
+/* ---------- Before / after ---------- */
+
+.examples { padding-top: 40px; }
+
+.pairs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  text-align: left;
+}
+@media (max-width: 860px) { .pairs { grid-template-columns: 1fr; } }
+
+.pair {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px 24px 24px;
+  border-radius: 22px;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+}
+.pair-app {
+  align-self: flex-start;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 4px 10px;
+  border-radius: 7px;
+  background: #fff;
+  border: 1px solid var(--line);
+}
+.pair p { margin: 0; font-size: 15px; line-height: 1.5; }
+.pair-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+.pair-said { color: var(--text-dim); font-style: italic; }
+.pair-wrote {
+  color: var(--text);
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid var(--line);
+}
+.pair-wrote .pair-label { color: var(--blue); }
+
+/* ---------- FAQ ---------- */
+
+.faq-list {
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: left;
+  border-top: 1px solid var(--line);
+}
+.faq-list details { border-bottom: 1px solid var(--line); }
+.faq-list summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 20px 36px 20px 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  position: relative;
+}
+.faq-list summary::-webkit-details-marker { display: none; }
+.faq-list summary::after {
+  content: "";
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid var(--text-dim);
+  border-bottom: 2px solid var(--text-dim);
+  transform: translateY(-70%) rotate(45deg);
+  transition: transform 0.2s ease;
+}
+.faq-list details[open] summary::after { transform: translateY(-30%) rotate(225deg); }
+.faq-list p { margin: 0 0 22px; color: var(--text-muted); font-size: 16px; line-height: 1.55; max-width: 640px; }
+.faq-list code { font-family: var(--mono); font-size: 0.9em; background: rgba(0, 0, 0, 0.05); padding: 1px 6px; border-radius: 5px; }
 
 /* ---------- Privacy ---------- */
 
