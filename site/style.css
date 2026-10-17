@@ -457,6 +457,7 @@ section {
   font-size: 13px;
   color: var(--text);
 }
+.key { cursor: pointer; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
 .key .key-glyph { font-size: 16px; align-self: flex-end; opacity: 0.7; }
 .key .key-name { font-size: 12px; }
 .key.pressed {

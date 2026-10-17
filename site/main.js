@@ -470,6 +470,19 @@
     })();
   }
 
+  // Any key on the page sinks under the pointer, for as long as it is held.
+  for (const key of document.querySelectorAll(".key")) {
+    const press = (event) => {
+      if (event.button !== undefined && event.button !== 0) return;
+      key.classList.add("pressed", "held");
+    };
+    const release = () => key.classList.remove("pressed", "held");
+    key.addEventListener("pointerdown", press);
+    key.addEventListener("pointerup", release);
+    key.addEventListener("pointercancel", release);
+    key.addEventListener("pointerleave", release);
+  }
+
   // The latency card is a racing stopwatch. Crown pressed: the hand ticks one
   // graduation per tenth of a second, with a small bounce, up to the median.
   // Crown pressed again: it stops. Once more: it flies back to zero.
