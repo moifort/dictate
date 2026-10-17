@@ -81,7 +81,8 @@ Left to do by hand, once (no public API):
    build with the App Store flag and `-ScreenshotWindow setup|stats|settings`
    (`-ScreenshotTab general|dictation|lexicon|review`,
    `-ApplePersistenceIgnoreState YES -AppleLanguages "(en)"`).
-4. **App Review information**: contact name, email and phone, and these notes
+4. **App Review information**: done by `scripts/app-store/review.rb`, which
+   copies the contact from Shiori and sets these notes
    (Accessibility is the usual rejection reason, explain it):
    > Dictate is push-to-talk dictation. It needs Input Monitoring to see the
    > dictation key being held (listen-only event tap, nothing is modified),
@@ -91,8 +92,9 @@ Left to do by hand, once (no public API):
    > leave the Mac: transcription runs locally (Parakeet) and the cleanup
    > uses Apple Intelligence on device. To test: grant the permissions in
    > the setup window, focus any text field, hold Control, speak, release.
-5. **Push a tag**, wait for the build to be processed, pick it in the version
-   page and **submit for review**.
+5. **Push a tag**: the release uploads the build, then
+   `scripts/app-store/submit.rb <version> <build>` attaches it and submits it
+   for review, released automatically on approval.
 
 Once the app is live, add the App Store badge next to the download button on
 the site and in the README.
