@@ -243,11 +243,14 @@ section {
   padding: 0;
   position: relative;
   scroll-margin-top: var(--nav-h);
+  /* The icon's colours in the icon's order, left to right around the window:
+     magenta, blue behind it, cyan. Same weight on both sides, so the colour
+     sits under the window instead of pooling in a corner. */
   background:
-    radial-gradient(80% 70% at 25% 20%, rgba(26, 107, 242, 0.28), transparent 60%),
-    radial-gradient(60% 60% at 85% 90%, rgba(237, 23, 199, 0.22), transparent 60%),
-    radial-gradient(50% 50% at 70% 25%, rgba(20, 209, 204, 0.22), transparent 60%),
-    linear-gradient(160deg, #e9ecf6, #d7dbea);
+    radial-gradient(45% 55% at 12% 58%, rgba(237, 23, 199, 0.16), transparent 70%),
+    radial-gradient(55% 60% at 50% 50%, rgba(26, 107, 242, 0.22), transparent 70%),
+    radial-gradient(45% 55% at 88% 58%, rgba(20, 209, 204, 0.18), transparent 70%),
+    linear-gradient(180deg, #eceef7, #e1e4f0);
 }
 /* Fades in from the white hero above. */
 .demo::before {
