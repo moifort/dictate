@@ -239,7 +239,8 @@ section {
   pointer-events: none;
 }
 .demo::before { top: 0; background: linear-gradient(#fff, rgba(255, 255, 255, 0)); }
-.demo::after { bottom: 0; background: linear-gradient(rgba(255, 255, 255, 0), #fff); }
+/* The fade out only starts under the key and the timeline. */
+.demo::after { bottom: 0; height: 170px; background: linear-gradient(rgba(255, 255, 255, 0), #fff); }
 
 /* Exactly one screen under the sticky nav, so the window, the key and the
    timeline are all in view at once. */
@@ -249,7 +250,7 @@ section {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 36px 20px 150px;
+  padding: 36px 20px 330px;
   text-align: left;
 }
 
@@ -405,14 +406,14 @@ section {
 .key.inline.pressed { box-shadow: 0 1px 0 #c6c6ce, 0 3px 8px rgba(0, 0, 0, 0.12); transform: translateY(4px); }
 
 /* The demo's key, bottom left of the desktop, where control sits on a keyboard. */
-.desk-key { position: absolute; left: 40px; bottom: 32px; z-index: 2; }
+.desk-key { position: absolute; left: 40px; bottom: 200px; z-index: 2; }
 
 /* How it works: four steps along the bottom, lit as the dictation goes. */
 .timeline {
   position: absolute;
   left: 20px;
   right: 20px;
-  bottom: 44px;
+  bottom: 212px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -460,10 +461,10 @@ section {
 .timeline li.done .tl-dot { background: var(--blue); border-color: var(--blue); }
 
 @media (max-width: 760px) {
-  .desktop { padding-bottom: 190px; }
+  .desktop { padding-bottom: 370px; }
   .desk-key { top: 44px; left: 16px; bottom: auto; transform: scale(0.72); transform-origin: top left; }
   .desk-key.pressed { transform: scale(0.72) translateY(5px); }
-  .timeline { flex-wrap: wrap; row-gap: 22px; bottom: 28px; }
+  .timeline { flex-wrap: wrap; row-gap: 22px; bottom: 196px; }
   .timeline li { width: 50%; }
   .timeline li:nth-child(3)::before { display: none; }
 }
