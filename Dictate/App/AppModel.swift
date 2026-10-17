@@ -29,6 +29,8 @@ final class AppModel {
     private(set) var setup = SetupChecklist()
 
     @ObservationIgnored private let enhancer: SelectedEnhancer
+    /// Claude needs the network; without it the on-device model steps in.
+    @ObservationIgnored private let network = NetworkMonitor()
     @ObservationIgnored private let fnMonitor = FnKeyMonitor()
     @ObservationIgnored private let locator = ClaudeCLILocator()
     @ObservationIgnored private var hotkeyRetry: Timer?
@@ -47,8 +49,10 @@ final class AppModel {
         let locator = locator
         let focus = FocusInspector()
         let systemPrompt = { PromptBuilder.systemPrompt(vocabulary: settings.vocabulary, language: settings.language) }
+        let network = network
         enhancer = SelectedEnhancer(
             reviewer: { settings.reviewer },
+            isOnline: { network.isOnline },
             apple: AppleIntelligenceEnhancer(systemPrompt: systemPrompt),
             claude: ClaudeCLIEnhancer(
                 locate: { locator.locate(override: settings.cliPathOverride) },
@@ -361,6 +365,7 @@ final class AppModel {
 
     func shutdown() {
         enhancer.shutdown()
+        network.stop()
         fnMonitor.stop()
     }
 
