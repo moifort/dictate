@@ -304,6 +304,17 @@ private struct LevelWaves: View {
     /// How far the tilt moves the peaks, as a fraction of the width.
     private static let lean = 0.15
 
+    // The landing page's hero ribbon, scaled down: the motion gathers in the
+    // middle third and both tails lie flat, the three peaks sit close together
+    // and the waves cross each other more often. Same numbers as `hero` in
+    // site/main.js.
+    /// Sharpens the envelope; 1.5 is the icon's full-width swell.
+    private static let focus = 5.0
+    /// Pulls the three resting centres, and the lean, towards the middle.
+    private static let spread = 0.4
+    /// Extra periods across the width.
+    private static let frequencyScale = 1.8
+
     var body: some View {
         TimelineView(.animation(minimumInterval: 1 / 60)) { context in
             let time = context.date.timeIntervalSinceReferenceDate
@@ -311,23 +322,26 @@ private struct LevelWaves: View {
                 ForEach(Self.waves.indices, id: \.self) { index in
                     let wave = Self.waves[index]
                     let amplitude = 1 + 11 * min(1, CGFloat(spectrum[keyPath: wave.band]))
-                    let center = min(0.75, max(0.25, wave.center + Self.lean * Double(spectrum.tilt)))
+                    let rest = 0.5 + (wave.center - 0.5) * Self.spread
+                    let center = min(0.75, max(0.25, rest + Self.lean * Self.spread * Double(spectrum.tilt)))
+                    let frequency = wave.frequency * Self.frequencyScale
                     let gradient = LinearGradient(
                         colors: [wave.colors[0], wave.colors[1], wave.colors[0]],
                         startPoint: .leading, endPoint: .trailing
                     )
                     let phase = wave.phase + time * wave.speed
-                    WaveShape(amplitude: amplitude, center: center, frequency: wave.frequency, phase: phase, closed: true)
+                    WaveShape(amplitude: amplitude, center: center, frequency: frequency, phase: phase, focus: Self.focus, closed: true)
                         .fill(gradient)
                         .opacity(0.35)
                         .blur(radius: 3)
-                    WaveShape(amplitude: amplitude, center: center, frequency: wave.frequency, phase: phase, closed: false)
+                    WaveShape(amplitude: amplitude, center: center, frequency: frequency, phase: phase, focus: Self.focus, closed: false)
                         .stroke(gradient, style: StrokeStyle(lineWidth: 1.2, lineCap: .round, lineJoin: .round))
                 }
             }
             .animation(.interactiveSpring(response: 0.1, dampingFraction: 0.7), value: spectrum)
         }
-        .frame(width: 72, height: 26)
+        // Wider than tall, like the ribbon, so the flat tails have room.
+        .frame(width: 96, height: 26)
     }
 }
 
@@ -340,6 +354,9 @@ nonisolated private struct WaveShape: Shape {
     var center: Double
     let frequency: Double
     let phase: Double
+    /// Exponent on the envelope: higher gathers the wave in the middle and
+    /// flattens both ends.
+    let focus: Double
     /// Closes the wave back along the midline, for the glow under the stroke.
     let closed: Bool
 
@@ -358,7 +375,7 @@ nonisolated private struct WaveShape: Shape {
         for step in 0...steps {
             let u = Double(step) / Double(steps)
             let v = pow(u, warp)
-            let envelope = pow(4 * v * (1 - v), 1.5)
+            let envelope = pow(4 * v * (1 - v), focus)
             let y = midY - amplitude * envelope * sin(2 * .pi * frequency * u + phase)
             let point = CGPoint(x: rect.minX + u * rect.width, y: y)
             if step == 0 { path.move(to: point) } else { path.addLine(to: point) }
