@@ -470,28 +470,48 @@
     })();
   }
 
-  // The latency card counts up to the median and settles there, with the bar
-  // filling underneath.
+  // The latency card is a racing stopwatch. Crown pressed: the hand ticks one
+  // graduation per tenth of a second, with a small bounce, up to the median.
+  // Crown pressed again: it stops. Once more: it flies back to zero.
   for (const timer of document.querySelectorAll("[data-timer]")) {
-    const timerBar = timer.parentElement.querySelector("[data-timer-bar]");
-    if (!timerBar) continue;
+    const card = timer.parentElement;
+    const arc = card.querySelector("[data-timer-arc]");
+    const hand = card.querySelector("[data-timer-hand]");
+    const crown = card.querySelector("[data-timer-crown]");
+    if (!arc || !hand) continue;
     const median = 1.5;
+    const dial = 2; // seconds for one full turn
+    const steps = Math.round(median * 10);
+    const tick = "transform 70ms cubic-bezier(0.34, 1.8, 0.64, 1)";
+    const press = async () => {
+      crown?.classList.add("pressed");
+      await sleep(140);
+      crown?.classList.remove("pressed");
+    };
+    const show = (tenths) => {
+      hand.style.transform = `rotate(${(tenths / 10 / dial) * 360}deg)`;
+      arc.style.strokeDashoffset = String(100 - (tenths / 10 / dial) * 100);
+      timer.textContent = (tenths / 10).toFixed(1).replace(".", ",") + " s";
+    };
     (async () => {
+      show(0);
       for (;;) {
-        const start = performance.now();
-        timerBar.style.transition = "none";
-        timerBar.style.width = "0";
-        await sleep(20);
-        timerBar.style.transition = `width ${median}s linear`;
-        timerBar.style.width = "100%";
-        let elapsed = 0;
-        while (elapsed < median) {
-          elapsed = Math.min(median, (performance.now() - start) / 1000);
-          timer.textContent = elapsed.toFixed(1).replace(".", ",") + " s";
-          await sleep(50);
+        await sleep(700);
+        await press();
+        hand.style.transition = tick;
+        arc.style.transition = "stroke-dashoffset 70ms ease-out";
+        for (let i = 1; i <= steps; i++) {
+          await sleep(100);
+          show(i);
         }
-        timer.textContent = "1,5 s";
-        await sleep(2600);
+        await sleep(60);
+        await press();
+        await sleep(2400);
+        await press();
+        hand.style.transition = "transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1)";
+        arc.style.transition = "stroke-dashoffset 0.45s cubic-bezier(0.2, 0.8, 0.2, 1)";
+        show(0);
+        await sleep(500);
       }
     })();
   }

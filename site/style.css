@@ -589,13 +589,24 @@ section {
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
-.timer-bar { width: 70%; height: 6px; border-radius: 99px; background: rgba(0, 0, 0, 0.08); overflow: hidden; }
-.timer-bar i {
-  display: block;
-  height: 100%;
-  width: 0;
-  background: linear-gradient(90deg, var(--magenta), var(--blue), var(--cyan));
+/* A stopwatch: one turn of the dial is 2 s, so 1.5 s stops at three quarters. */
+.stopwatch { position: relative; width: 150px; height: 165px; gap: 0; }
+.stopwatch svg { display: block; overflow: visible; filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.1)); }
+.stopwatch .timer {
+  position: absolute;
+  left: 50%;
+  top: 121.9px; /* the readout window: 131 of 176 viewBox units */
+  transform: translate(-50%, -50%);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
 }
+.sw-ticks line { stroke: rgba(0, 0, 0, 0.22); stroke-width: 1.5; stroke-linecap: round; }
+.sw-ticks line.major { stroke: rgba(0, 0, 0, 0.5); stroke-width: 2; }
+.sw-crown { transition: transform 0.12s ease; }
+.sw-crown.pressed { transform: translateY(4px); }
+.sw-hand { transform-origin: 80px 100px; }
 
 .context-demo { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 .chip {
