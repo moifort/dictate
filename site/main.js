@@ -512,14 +512,14 @@
   // ---------------------------------------------------------------------------
 
   // The big key presses itself every few seconds.
-  const featureKey = document.querySelector("[data-key-feature]");
-  if (featureKey && !reducedMotion) {
+  for (const key of document.querySelectorAll("[data-key-feature], [data-key-hero]")) {
+    if (reducedMotion) break;
     (async () => {
       for (;;) {
         await sleep(2200);
-        featureKey.classList.add("pressed");
+        key.classList.add("pressed");
         await sleep(1600);
-        featureKey.classList.remove("pressed");
+        key.classList.remove("pressed");
       }
     })();
   }
