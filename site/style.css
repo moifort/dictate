@@ -790,6 +790,28 @@ section {
   line-height: 1.45;
 }
 .clean-demo p { margin: 0; }
+/* The cleaned-up sentence, then who did it: the two reviewers, Claude picked. */
+.review-demo { width: 100%; display: flex; flex-direction: column; gap: 6px; }
+.review-demo .clean-demo { padding: 12px 16px; font-size: 13px; }
+.review-demo .clean { margin-top: 8px; }
+.reviewer-pick { display: grid; gap: 6px; font-size: 12px; }
+
+.reviewer {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--text-muted);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.reviewer img { display: block; width: 16px; height: 16px; border-radius: 4px; }
+.reviewer svg { display: block; }
+.reviewer.selected { border-color: var(--blue); color: var(--text); box-shadow: 0 0 0 1px var(--blue); }
+.reviewer em { margin-left: auto; font-style: normal; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--blue); }
 .clean-demo .raw { color: var(--text-dim); text-decoration: line-through; text-decoration-color: rgba(237, 23, 199, 0.6); }
 .clean-demo .clean { color: var(--text); margin-top: 10px; }
 
