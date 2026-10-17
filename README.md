@@ -34,6 +34,10 @@ ready-to-send text.
   The app itself speaks English and French, following your Mac's language.
 - **Discreet.** A small pill at the bottom of the screen shows that Dictate is
   listening, then working, and disappears.
+- **Your numbers.** A statistics window charts words, dictations, speaking
+  pace and the delay before the text appears, by day, week or year. The
+  delay chart tells which model did the cleanup, so a day offline shows Apple
+  Intelligence standing in for Claude.
 
 ## Get it
 

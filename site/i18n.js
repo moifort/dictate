@@ -39,7 +39,7 @@
     "clean.title": "Reviewed by AI",
     "clean.text": "An AI reads the transcript back and writes it cleanly: the “ums”, repetitions and false starts disappear, punctuation and technical terms are fixed. The meaning and the words stay yours. By Claude with your subscription, or by Apple Intelligence on your Mac: with no network, it steps in and everything stays offline.",
     "latency.title": "About 1.5 seconds",
-    "latency.text": "That's the median time between the end of your sentence and its appearance on screen, transcription and review included.",
+    "latency.text": "That's the median time between the end of your sentence and its appearance on screen, transcription and review included. The statistics track it day by day and show which model did the review: Claude, or Apple Intelligence while you were offline.",
     "context.title": "Adapts to the context",
     "context.text": "The tone follows the app you're writing in: a bit more polished in Mail, direct in Slack, technical in Claude Code, raw in Terminal.",
     "cursor.title": "Wherever you type",
