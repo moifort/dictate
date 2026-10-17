@@ -622,14 +622,17 @@ section {
 .keyboard .key.big .key-name { font-size: calc(var(--u) * 0.125); }
 /* A soft glow in the icon's colours while control is held, fading out on
    release: magenta on the left, blue under, cyan on the right. */
+/* Every key paints above control, so its glow always stays behind them. */
+.keyboard .key.big { position: relative; z-index: 1; }
+.keyboard .key[data-key] { z-index: 0; }
 .keyboard .key[data-key] { transition: transform 0.12s ease, box-shadow 0.35s ease, background 0.12s ease; }
 .keyboard .key[data-key].pressed {
   box-shadow:
     0 1px 0 #c6c6ce,
     0 4px 10px rgba(0, 0, 0, 0.12),
-    -8px 0 22px rgba(237, 23, 199, 0.28),
-    0 8px 22px rgba(26, 107, 242, 0.28),
-    8px 0 22px rgba(20, 209, 204, 0.28);
+    -2px 0 6px rgba(237, 23, 199, 0.3),
+    0 2px 6px rgba(26, 107, 242, 0.3),
+    2px 0 6px rgba(20, 209, 204, 0.3);
   transition-duration: 0.12s, 0.15s, 0.12s;
 }
 
