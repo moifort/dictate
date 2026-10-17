@@ -230,17 +230,27 @@ section {
     radial-gradient(50% 50% at 70% 25%, rgba(20, 209, 204, 0.22), transparent 60%),
     linear-gradient(160deg, #e9ecf6, #d7dbea);
 }
-/* Fades in from the white hero above, and out into the white section below. */
-.demo::before, .demo::after {
+/* Fades in from the white hero above. */
+.demo::before {
   content: "";
   position: absolute;
-  left: 0; right: 0;
+  left: 0; right: 0; top: 0;
   height: 220px;
+  background: linear-gradient(#fff, rgba(255, 255, 255, 0));
   pointer-events: none;
 }
-.demo::before { top: 0; background: linear-gradient(#fff, rgba(255, 255, 255, 0)); }
-/* The fade out only starts under the key and the timeline. */
-.demo::after { bottom: 0; height: 170px; background: linear-gradient(rgba(255, 255, 255, 0), #fff); }
+/* Fades out below the key and the timeline along a blurred, wavy edge, so the
+   colour ends like a cloud rather than along a straight band. The shape
+   overflows the section on every side so the blur never shows a hard edge. */
+.demo-edge {
+  position: absolute;
+  left: -60px;
+  bottom: -60px;
+  width: calc(100% + 120px);
+  height: 230px;
+  filter: blur(26px);
+  pointer-events: none;
+}
 
 /* Exactly one screen under the sticky nav, so the window, the key and the
    timeline are all in view at once. */
