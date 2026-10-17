@@ -57,22 +57,28 @@ build in the version page and press "Add for Review". Automating it means a
 fastlane `deliver` lane (as in the book project) with `submit_for_review` and
 `automatic_release`, so each tag would reach the store with no human check.
 
-## One-time steps in App Store Connect
+## App Store Connect
 
-1. **Create the app**: Apps, +, New App, platform macOS, name "Dictate",
-   bundle ID `com.polyforms.dictate`, SKU `polyforms-dictate-macos`, primary
-   language French or English.
-2. **Pricing**: free, all territories.
-3. **App Privacy**: Data Not Collected, except Diagnostics (crash data via
-   Sentry, not linked to the user, no tracking).
-4. **Listing**: description, keywords, support URL
-   `https://github.com/moifort/dictate/issues`, marketing URL
-   `https://moifort.github.io/dictate/`, screenshots at 2880×1800 or
-   1440×900 (setup window, settings, the pill over an app).
-5. **Upload a build**: push a tag once the secrets are set, or run
-   `scripts/build-app-store.sh --upload` on the Mac. Wait for it to be
-   processed, then pick it in the version page.
-6. **App Review notes** (Accessibility is the usual rejection reason, explain it):
+The app record is "Dictate: Speech to Text" (`com.polyforms.dictate`, SKU
+`polyforms-dictate-macos`, Apple ID 6823997461), created on 2026-10-17.
+
+`scripts/app-store/listing.rb` sets, and can set again, the English and French
+listing (name, subtitle, description, keywords, promotional text, support,
+marketing and privacy URLs), the categories (Productivity, Utilities), the age
+rating, the copyright, the free price and the availability in every
+territory. The release workflow runs `scripts/app-store/version.rb` before each
+upload so the App Store version carries the tag's number.
+
+Left to do by hand, once (no public API):
+
+1. **Accept the updated Apple Developer Program License Agreement** at
+   developer.apple.com/account: until then no new app can be submitted.
+2. **App Privacy**: Data Not Collected, except Diagnostics, Crash Data (Sentry),
+   not linked to the user, not used for tracking.
+3. **Screenshots**: at least one at 2880×1800, 2560×1600, 1440×900 or
+   1280×800 (setup window, settings, the pill over an app).
+4. **App Review information**: contact name, email and phone, and these notes
+   (Accessibility is the usual rejection reason, explain it):
    > Dictate is push-to-talk dictation. It needs Input Monitoring to see the
    > dictation key being held (listen-only event tap, nothing is modified),
    > and Accessibility to paste the transcribed text into the focused field
@@ -81,7 +87,8 @@ fastlane `deliver` lane (as in the book project) with `submit_for_review` and
    > leave the Mac: transcription runs locally (Parakeet) and the cleanup
    > uses Apple Intelligence on device. To test: grant the permissions in
    > the setup window, focus any text field, hold Control, speak, release.
-7. **Submit for review**.
+5. **Push a tag**, wait for the build to be processed, pick it in the version
+   page and **submit for review**.
 
 Once the app is live, add the App Store badge next to the download button on
 the site and in the README.

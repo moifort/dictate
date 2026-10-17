@@ -411,6 +411,9 @@ jobs:
           set -euo pipefail
           mkdir -p "$HOME/.appstoreconnect/private_keys"
           printf '%s' "$ASC_KEY_P8" > "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+          # The build must match the version it goes to: give the App Store
+          # version the tag's number first.
+          ruby scripts/app-store/version.rb "$MARKETING"
           xcrun altool --upload-app --type macos \
             --file build/app-store/Dictate.pkg \
             --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"

@@ -80,6 +80,7 @@
     "price.note": "Paid plan prices, taken from the publishers' websites on October&nbsp;17,&nbsp;2026. The free tiers of Wispr Flow and Typeless limit the number of words.",
     "dl.code": "View the code",
     "dl.meta": "<span data-version>Latest version</span> · macOS 27 · Apple Silicon",
+    "footer.privacy": "Privacy",
     "dl.brew": "Or with Homebrew: <code>brew install --cask moifort/tap/dictate</code>",
     "footer.credit": "Dictate is an open-source project by <a href=\"https://github.com/moifort\" rel=\"noopener\">Polyforms</a>.\n     Transcription by Parakeet (NVIDIA) via FluidAudio. Review by Claude (Anthropic) or Apple Intelligence.",
     "footer.releases": "All releases",
