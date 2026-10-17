@@ -248,9 +248,9 @@ section {
 .demo-edge {
   position: absolute;
   left: -60px;
-  bottom: -60px;
+  bottom: -80px;
   width: calc(100% + 120px);
-  height: 230px;
+  height: 300px;
   filter: blur(26px);
   pointer-events: none;
 }
@@ -264,7 +264,7 @@ section {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px 150px;
+  padding: 96px 20px 210px;
   text-align: left;
 }
 
