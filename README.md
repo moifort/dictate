@@ -1,5 +1,10 @@
 # Dictate
 
+[![Latest release](https://img.shields.io/github/v/release/moifort/dictate?label=release)](https://github.com/moifort/dictate/releases/latest)
+[![macOS 27, Apple Silicon](https://img.shields.io/badge/macOS-27%20%C2%B7%20Apple%20Silicon-black?logo=apple)](#get-it)
+[![Homebrew](https://img.shields.io/badge/brew-moifort%2Ftap%2Fdictate-orange?logo=homebrew)](#get-it)
+[![MIT license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 **Hold `control`, speak, release: your words appear wherever you are typing.**
 
 Dictate is push-to-talk dictation for the Mac. It works in any app — mail,
