@@ -608,18 +608,26 @@ section {
 .sw-crown.pressed { transform: translateY(4px); }
 .sw-hand { transform-origin: 80px 100px; }
 
-.context-demo { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+/* Four apps, two by two, each with the tone Dictate takes there. */
+.context-demo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; width: 100%; }
 .chip {
-  padding: 8px 14px;
-  border-radius: 99px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 12px 8px 10px;
+  border-radius: 16px;
   background: #fff;
   border: 1px solid var(--line);
-  font-size: 14px;
-  color: var(--text-muted);
-  transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
-.chip em { font-style: normal; color: var(--text-dim); margin-left: 6px; }
-.chip.lit { color: var(--text); background: rgba(26, 107, 242, 0.1); border-color: rgba(26, 107, 242, 0.45); }
+.chip img { display: block; width: 34px; height: 34px; margin-bottom: 4px; border-radius: 8px; }
+.chip em { font-style: normal; font-weight: 500; font-size: 12px; color: var(--text-dim); transition: color 0.3s ease; }
+.chip.lit { background: rgba(26, 107, 242, 0.08); border-color: rgba(26, 107, 242, 0.45); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(26, 107, 242, 0.15); }
 .chip.lit em { color: var(--blue); }
 
 .cursor-demo {
