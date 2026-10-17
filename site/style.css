@@ -295,7 +295,8 @@ section {
 
 /* The demo's own heading, inside the fade from the white hero. */
 .demo-head { text-align: center; margin-bottom: 40px; position: relative; z-index: 1; }
-.demo-head .section-title { font-size: clamp(32px, 4.6vw, 52px); margin-bottom: 0; }
+.demo-head .section-title { font-size: clamp(32px, 4.6vw, 52px); margin-bottom: 12px; }
+.demo-head .section-lead { margin-bottom: 0; max-width: 560px; }
 /* A broadcast badge: frosted capsule, red LIVE tag with a pulsing dot. */
 .live-badge {
   display: inline-flex;
