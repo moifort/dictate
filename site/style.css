@@ -482,6 +482,7 @@ section {
 .timeline li.done .tl-dot { background: var(--blue); border-color: var(--blue); }
 
 @media (max-width: 760px) {
+  .window-body { min-height: 230px; }
   .desk-bar { display: flex; flex-direction: column; gap: 28px; margin-top: 40px; }
   .desk-key { transform: scale(0.8); }
   .desk-key.pressed { transform: scale(0.8) translateY(5px); }
