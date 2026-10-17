@@ -612,12 +612,22 @@
   }
 
   // The context shelf: the list is doubled for a seamless loop, and the
-  // chip closest to the middle of the shelf is the lit one.
+  // chip closest to the middle of the shelf is the lit one. The track glides
+  // half its width every 32 s, moved frame by frame rather than by a CSS
+  // animation, which iOS Safari paints only in part.
   const contextTrack = document.querySelector("[data-context-track]");
   if (contextTrack) {
     contextTrack.innerHTML += contextTrack.innerHTML;
     const chips = Array.from(contextTrack.querySelectorAll(".chip"));
     const shelf = contextTrack.parentElement;
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const glide = (now) => {
+        const half = contextTrack.scrollWidth / 2;
+        contextTrack.style.transform = `translate3d(${-((now / 32000) % 1) * half}px, 0, 0)`;
+        requestAnimationFrame(glide);
+      };
+      requestAnimationFrame(glide);
+    }
     let lit = null;
     const light = () => {
       const box = shelf.getBoundingClientRect();
