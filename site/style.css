@@ -227,12 +227,9 @@ section {
   padding: 0;
   position: relative;
   scroll-margin-top: var(--nav-h);
-  /* Strong magenta at the bottom right, fading out towards the left where the
-     white edge sits higher. */
   background:
     radial-gradient(80% 70% at 25% 20%, rgba(26, 107, 242, 0.28), transparent 60%),
-    radial-gradient(55% 60% at 88% 96%, rgba(237, 23, 199, 0.38), transparent 65%),
-    radial-gradient(45% 45% at 12% 100%, rgba(255, 255, 255, 0.75), transparent 70%),
+    radial-gradient(60% 60% at 85% 90%, rgba(237, 23, 199, 0.22), transparent 60%),
     radial-gradient(50% 50% at 70% 25%, rgba(20, 209, 204, 0.22), transparent 60%),
     linear-gradient(160deg, #e9ecf6, #d7dbea);
 }
