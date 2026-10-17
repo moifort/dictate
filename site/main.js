@@ -321,18 +321,18 @@
   // Two mails, dictated in turn in the same window.
   const SCENARIOS = [
     {
-      to: "Claire Dubois",
-      subject: "Réunion de jeudi",
-      prefix: "Bonjour Claire,\n\n",
-      heard: "euh donc je je voulais te dire que la réunion de de jeudi est décalée à mardi euh à la même heure et je t'envoie le lien dans la foulée",
-      clean: "Je voulais te dire que la réunion de jeudi est décalée à mardi, à la même heure. Je t'envoie le lien dans la foulée.",
+      to: "Arthur G.",
+      subject: "Les toupies",
+      prefix: "Bonjour Arthur,\n\n",
+      heard: "euh alors je je voulais te dire que les toupies sont arrivées euh on peut les essayer samedi si tu veux et et tu me dis laquelle tourne le plus longtemps",
+      clean: "Je voulais te dire que les toupies sont arrivées. On peut les essayer samedi si tu veux, et tu me dis laquelle tourne le plus longtemps.",
     },
     {
-      to: "Marc Lefèvre",
-      subject: "Re: Devis site web",
-      prefix: "Bonjour Marc,\n\n",
-      heard: "alors euh merci pour le devis euh on part sur la deuxième option et et je te confirme la date de démarrage d'ici vendredi",
-      clean: "Merci pour le devis. On part sur la deuxième option, et je te confirme la date de démarrage d'ici vendredi.",
+      to: "Colas D.",
+      subject: "Barbecue de dimanche",
+      prefix: "Salut Colas,\n\n",
+      heard: "alors euh pour dimanche je m'occupe des côtelettes de porc et et toi tu prends le pain euh et les boissons",
+      clean: "Pour dimanche, je m'occupe des côtelettes de porc, et toi tu prends le pain et les boissons.",
     },
   ];
 
