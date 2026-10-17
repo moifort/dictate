@@ -311,61 +311,36 @@
   // Dictation demo
   // ---------------------------------------------------------------------------
 
-  const SCENARIOS = {
-    mail: {
-      title: "Mail",
-      label: "Message",
-      theme: "",
+  // Two mails, dictated in turn in the same window.
+  const SCENARIOS = [
+    {
+      to: "Claire Dubois",
+      subject: "Réunion de jeudi",
       prefix: "Bonjour Claire,\n\n",
       heard: "euh donc je je voulais te dire que la réunion de de jeudi est décalée à mardi euh à la même heure et je t'envoie le lien dans la foulée",
-      fillers: ["euh", "je je", "de de"],
       clean: "Je voulais te dire que la réunion de jeudi est décalée à mardi, à la même heure. Je t'envoie le lien dans la foulée.",
     },
-    chat: {
-      title: "#projet-nova · Slack",
-      label: "Message",
-      theme: "dark",
-      prefix: "",
-      heard: "ouais euh c'est bon pour moi on déploie en fin de journée euh et je ping marc pour le post-mortem",
-      fillers: ["euh", "ouais"],
-      clean: "C'est bon pour moi, on déploie en fin de journée. Je ping Marc pour le post-mortem.",
+    {
+      to: "Marc Lefèvre",
+      subject: "Re: Devis site web",
+      prefix: "Bonjour Marc,\n\n",
+      heard: "alors euh merci pour le devis euh on part sur la deuxième option et et je te confirme la date de démarrage d'ici vendredi",
+      clean: "Merci pour le devis. On part sur la deuxième option, et je te confirme la date de démarrage d'ici vendredi.",
     },
-    code: {
-      title: "Transcriber.swift — Dictate",
-      label: "Commentaire",
-      theme: "dark code",
-      prefix: "// ",
-      heard: "alors euh on garde les deux cents dernières millisecondes après le relâchement de la touche parce que sinon on coupe la dernière syllabe",
-      fillers: ["alors euh", "euh"],
-      clean: "Keep the last 200 ms after the key is released, otherwise the last syllable is clipped.",
-    },
-    terminal: {
-      title: "zsh — ~/Code/dictate",
-      label: "Commande",
-      theme: "terminal",
-      prefix: "",
-      heard: "git commit moins m euh fixe deux points garde les deux cents millisecondes après le relâchement",
-      fillers: ["euh"],
-      clean: "git commit -m \"fix: keep 200 ms after the key is released\"",
-    },
-  };
-  const ORDER = Object.keys(SCENARIOS);
+  ];
 
   const dom = {
-    window: document.querySelector("[data-window]"),
-    title: document.querySelector("[data-window-title]"),
-    label: document.querySelector("[data-field-label]"),
+    to: document.querySelector("[data-mail-to]"),
+    subject: document.querySelector("[data-mail-subject]"),
     text: document.querySelector("[data-field-text]"),
     pill: document.querySelector("[data-pill]"),
     key: document.querySelector("[data-key]"),
-    keyState: document.querySelector("[data-key-state]"),
-    heard: document.querySelector("[data-heard]"),
     steps: Array.from(document.querySelectorAll("[data-step]")),
-    tabs: Array.from(document.querySelectorAll("[data-scenario]")),
   };
 
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+  /** Lights the timeline up to `name`: earlier steps done, that one active. */
   function setStep(name) {
     let reached = false;
     for (const li of dom.steps) {
@@ -385,8 +360,6 @@
 
   function setKey(pressed) {
     dom.key.classList.toggle("pressed", pressed);
-    dom.keyState.textContent = pressed ? "Maintenue" : "Relâchée";
-    dom.keyState.classList.toggle("on", pressed);
   }
 
   function setFieldText(text, withCaret = true) {
@@ -398,75 +371,55 @@
     }
   }
 
-  /** Shows the raw transcript word by word, then strikes the hesitations. */
-  function heardMarkup(scenario, upTo) {
-    const words = scenario.heard.split(" ");
-    return words.slice(0, upTo).join(" ");
-  }
-
-  function heardStruck(scenario) {
-    let html = scenario.heard
-      .replace(/&/g, "&amp;").replace(/</g, "&lt;");
-    for (const filler of [...scenario.fillers].sort((a, b) => b.length - a.length)) {
-      const re = new RegExp(`(^|\\s)(${filler.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})(?=\\s|$)`, "g");
-      html = html.replace(re, "$1<s>$2</s>");
-    }
-    return html;
-  }
-
-  let current = "mail";
   let run = 0;
   let demoVisible = false;
 
-  async function playScenario(name, token) {
-    const scenario = SCENARIOS[name];
+  async function playScenario(scenario, token) {
     const pillRenderer = renderers.get("pill");
     const alive = () => token === run;
 
     // Set the scene.
-    dom.window.className = "window " + scenario.theme;
-    dom.title.textContent = scenario.title;
-    dom.label.textContent = scenario.label;
+    dom.to.textContent = scenario.to;
+    dom.subject.textContent = scenario.subject;
     setFieldText(scenario.prefix);
-    dom.heard.innerHTML = "";
     setStep(null);
     setPill(null);
     setKey(false);
     await sleep(900);
     if (!alive()) return;
 
-    // Hold the key: the pill appears with the waves, the raw words come in.
+    // Hold the key: the pill appears with the waves.
     setKey(true);
-    setStep("recording");
+    setStep("hold");
     setPill("recording");
     if (pillRenderer) pillRenderer.source = speakingSpectrum;
+    await sleep(500);
+    if (!alive()) return;
+
+    // Speak: the recording lasts as long as the sentence takes to say.
+    setStep("speak");
     const words = scenario.heard.split(" ");
     const perWord = reducedMotion ? 60 : 210;
-    for (let i = 1; i <= words.length; i++) {
-      dom.heard.textContent = heardMarkup(scenario, i);
-      await sleep(perWord + (words[i - 1].length > 6 ? 70 : 0));
+    for (const word of words) {
+      await sleep(perWord + (word.length > 6 ? 70 : 0));
       if (!alive()) return;
     }
     await sleep(250);
     if (!alive()) return;
 
-    // Release: a short tail is kept, then the spinner.
+    // Release: a short tail is kept, then the spinner while the text is made.
     setKey(false);
+    setStep("release");
     if (pillRenderer) pillRenderer.source = idleSpectrum;
     await sleep(250);
     if (!alive()) return;
     setPill("processing");
-    setStep("transcribing");
-    await sleep(700);
-    if (!alive()) return;
-    setStep("enhancing");
-    dom.heard.innerHTML = heardStruck(scenario);
-    await sleep(1100);
+    await sleep(1500);
     if (!alive()) return;
 
     // The clean sentence lands at the cursor.
     setPill(null);
-    setStep("pasted");
+    setStep("written");
     const clean = scenario.clean;
     const perChar = reducedMotion ? 4 : 14;
     for (let i = 1; i <= clean.length; i++) {
@@ -474,30 +427,18 @@
       await sleep(perChar);
       if (!alive()) return;
     }
-    await sleep(3200);
+    await sleep(3600);
   }
 
   async function loop() {
+    let index = 0;
     for (;;) {
       const token = ++run;
-      await playScenario(current, token);
-      if (token !== run) continue; // a tab click restarted the loop
+      await playScenario(SCENARIOS[index], token);
+      if (token !== run) continue;
       if (!demoVisible) { await sleep(500); continue; }
-      current = ORDER[(ORDER.indexOf(current) + 1) % ORDER.length];
-      selectTab(current);
+      index = (index + 1) % SCENARIOS.length;
     }
-  }
-
-  function selectTab(name) {
-    for (const tab of dom.tabs) tab.setAttribute("aria-selected", String(tab.dataset.scenario === name));
-  }
-
-  for (const tab of dom.tabs) {
-    tab.addEventListener("click", () => {
-      current = tab.dataset.scenario;
-      selectTab(current);
-      run++; // interrupts the running scenario; loop() picks the new one up
-    });
   }
 
   const demoSection = document.getElementById("demo");

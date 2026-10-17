@@ -12,7 +12,7 @@
   <meta name="theme-color" content="#ffffff">
   <link rel="icon" href="favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="icon-256.png">
-  <link rel="stylesheet" href="style.css?v=20261017-3">
+  <link rel="stylesheet" href="style.css?v=20261017-4">
 </head>
 <body>
 
@@ -54,59 +54,35 @@
   </section>
 
   <!-- Live demo -->
-  <section class="demo" id="demo">
-    <h2 class="section-title">Dans n'importe quelle app.<br><span class="muted">Sans rien ouvrir.</span></h2>
-    <p class="section-lead">
-      Une fenêtre, un champ, une touche. Dictate écoute pendant que vous tenez
-      <kbd><span class="kbd-glyph">⌃</span>control</kbd>, puis écrit à la place du curseur. Voici une dictée, telle qu'elle se passe.
-    </p>
-
-    <div class="demo-stage">
-      <div class="screen">
-        <div class="window" data-window>
-          <div class="window-bar">
-            <span class="lights"><i></i><i></i><i></i></span>
-            <span class="window-title" data-window-title>Mail</span>
-          </div>
-          <div class="window-body">
-            <div class="field" data-field>
-              <span class="field-label" data-field-label>Message</span>
-              <div class="field-text" data-field-text><span class="caret"></span></div>
-            </div>
-          </div>
+  <section class="demo" id="demo" aria-label="Démonstration">
+    <div class="desktop">
+      <div class="window mail" data-window>
+        <div class="window-bar">
+          <span class="lights"><i></i><i></i><i></i></span>
+          <span class="window-title">Nouveau message</span>
         </div>
-
-        <div class="pill" data-pill aria-live="polite">
-          <canvas class="pill-waves" data-wave="pill" width="144" height="52" aria-hidden="true"></canvas>
-          <span class="pill-spinner" aria-hidden="true"></span>
+        <div class="mail-head">
+          <div><span>À :</span><em class="mail-chip" data-mail-to>Claire Dubois</em></div>
+          <div><span>Objet :</span><b data-mail-subject>Réunion de jeudi</b></div>
+        </div>
+        <div class="window-body">
+          <div class="field-text" data-field-text><span class="caret"></span></div>
         </div>
       </div>
 
-      <aside class="demo-side">
-        <div class="demo-key">
-          <kbd class="key" data-key><span class="key-glyph">⌃</span><span class="key-name">control</span></kbd>
-          <span class="key-state" data-key-state>Relâchée</span>
-        </div>
+      <div class="pill" data-pill aria-live="polite">
+        <canvas class="pill-waves" data-wave="pill" width="144" height="52" aria-hidden="true"></canvas>
+        <span class="pill-spinner" aria-hidden="true"></span>
+      </div>
 
-        <div class="demo-heard">
-          <span class="demo-caption">Ce que vous avez dit</span>
-          <p class="heard" data-heard></p>
-        </div>
+      <kbd class="key big desk-key" data-key aria-hidden="true"><span class="key-glyph">⌃</span><span class="key-name">control</span></kbd>
 
-        <ol class="demo-steps">
-          <li data-step="recording"><span class="dot"></span>Écoute</li>
-          <li data-step="transcribing"><span class="dot"></span>Transcription sur le Mac</li>
-          <li data-step="enhancing"><span class="dot"></span>Relecture par Claude</li>
-          <li data-step="pasted"><span class="dot"></span>Texte au curseur <em class="step-note">≈ 1,5 s en médiane</em></li>
-        </ol>
-      </aside>
-    </div>
-
-    <div class="demo-tabs" role="tablist" aria-label="Scénarios">
-      <button role="tab" data-scenario="mail" aria-selected="true">Mail</button>
-      <button role="tab" data-scenario="chat" aria-selected="false">Chat</button>
-      <button role="tab" data-scenario="code" aria-selected="false">Éditeur de code</button>
-      <button role="tab" data-scenario="terminal" aria-selected="false">Terminal</button>
+      <ol class="timeline" aria-label="Comment ça marche">
+        <li data-step="hold"><span class="tl-dot"></span><span class="tl-label">Maintenez <kbd><span class="kbd-glyph">⌃</span>control</kbd></span></li>
+        <li data-step="speak"><span class="tl-dot"></span><span class="tl-label">Parlez</span></li>
+        <li data-step="release"><span class="tl-dot"></span><span class="tl-label">Relâchez</span></li>
+        <li data-step="written"><span class="tl-dot"></span><span class="tl-label">C'est écrit <em>≈ 1,5 s</em></span></li>
+      </ol>
     </div>
   </section>
 
@@ -251,6 +227,6 @@
   <p><a href="https://github.com/moifort/dictate/releases">Toutes les versions</a> · <a href="https://github.com/moifort/dictate/issues">Signaler un problème</a></p>
 </footer>
 
-<script src="main.js?v=20261017-3" defer></script>
+<script src="main.js?v=20261017-4" defer></script>
 </body>
 </html>
