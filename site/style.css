@@ -240,6 +240,8 @@ section {
   line-height: 1;
 }
 .stats .timer-bar { display: block; width: 70%; margin: 14px auto 0; }
+.context-cycle { transition: opacity 0.25s ease, transform 0.25s ease; }
+.context-cycle.out { opacity: 0; transform: translateY(6px); }
 @media (max-width: 640px) { .stats { grid-template-columns: 1fr; } }
 
 /* ---------- Demo ---------- */

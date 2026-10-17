@@ -550,6 +550,20 @@
     })();
   }
 
+  // The hero's context tile cycles through the apps the tone adapts to.
+  const cycle = document.querySelector("[data-context-cycle]");
+  if (cycle && !reducedMotion) {
+    const apps = ["Mail", "Chat", "Code", "Terminal"];
+    let i = 0;
+    setInterval(async () => {
+      cycle.classList.add("out");
+      await sleep(250);
+      i = (i + 1) % apps.length;
+      cycle.textContent = apps[i];
+      cycle.classList.remove("out");
+    }, 1600);
+  }
+
   // The context chips light up one after another.
   const chips = Array.from(document.querySelectorAll(".context-demo .chip"));
   if (chips.length) {
