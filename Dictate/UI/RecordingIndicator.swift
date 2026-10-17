@@ -338,7 +338,9 @@ private struct LevelWaves: View {
                         .stroke(gradient, style: StrokeStyle(lineWidth: 1.2, lineCap: .round, lineJoin: .round))
                 }
             }
-            .animation(.interactiveSpring(response: 0.1, dampingFraction: 0.7), value: spectrum)
+            // Short enough to follow each syllable; the analyzer already
+            // smooths the fall.
+            .animation(.interactiveSpring(response: 0.07, dampingFraction: 0.75), value: spectrum)
         }
         // Wider than tall, like the ribbon, so the flat tails have room.
         .frame(width: 96, height: 26)

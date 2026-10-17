@@ -31,9 +31,13 @@ nonisolated final class SpectrumAnalyzer {
     /// How fast a band forgets its loudest moment, in dB per second.
     private static let peakDecay: Float = 8
     private static let peakFloor: Float = -90
-    /// The level and bands rise instantly and keep 7 % of their value after a
-    /// second: the waves breathe instead of flickering.
-    private static let fallPerSecond: Float = 0.073
+    /// The level and bands rise instantly and keep a quarter of their value
+    /// 200 ms later, about one syllable: each syllable swells the waves and
+    /// lets them drop before the next, like the landing page's hero.
+    private static let fallPerSecond: Float = 0.001
+    /// Lifts the bands so a normal voice fills the waves on each syllable;
+    /// the gate still keeps silence flat.
+    private static let bandGain: Float = 1.4
     /// Time constant of the tilt, in seconds.
     private static let tiltSmoothing: Float = 0.08
     /// How fast the speaker's usual balance follows the voice, per second of
@@ -79,6 +83,7 @@ nonisolated final class SpectrumAnalyzer {
         // Quieter sounds such as sibilants still need to show: the square root
         // lifts them while keeping silence at zero.
         let gate = level.squareRoot()
+        let lift = min(1, gate * Self.bandGain)
 
         let fall = pow(Self.fallPerSecond, seconds)
         let tiltBlend = 1 - exp(-seconds / Self.tiltSmoothing)
@@ -89,9 +94,9 @@ nonisolated final class SpectrumAnalyzer {
         let tilt = min(1, max(-1, (spread - balance) * gate * Self.tiltGain))
         smoothed = VoiceSpectrum(
             level: max(level, smoothed.level * fall),
-            low: max(shapes[0] * gate, smoothed.low * fall),
-            mid: max(shapes[1] * gate, smoothed.mid * fall),
-            high: max(shapes[2] * gate, smoothed.high * fall),
+            low: max(shapes[0] * lift, smoothed.low * fall),
+            mid: max(shapes[1] * lift, smoothed.mid * fall),
+            high: max(shapes[2] * lift, smoothed.high * fall),
             tilt: smoothed.tilt + (tilt - smoothed.tilt) * tiltBlend
         )
         return smoothed

@@ -68,4 +68,14 @@ struct SpectrumAnalyzerTests {
         #expect(after.level < 0.05)
         #expect(abs(after.tilt) < 0.05)
     }
+
+    /// Between two syllables, about 200 ms, the waves must come most of the
+    /// way down, or every syllable blurs into the next.
+    @Test func bandsDropWithinASyllable() {
+        let analyzer = SpectrumAnalyzer()
+        let speaking = Self.analyze(Self.tone(300, count: 8_000), with: analyzer)
+        let pause = Self.analyze([Float](repeating: 0, count: 3_200), with: analyzer)
+        #expect(speaking.low > 0.8)
+        #expect(pause.low < speaking.low * 0.35)
+    }
 }
