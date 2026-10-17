@@ -540,7 +540,6 @@ section {
   background: rgba(0, 0, 0, 0.12);
   transition: background 0.3s ease;
 }
-.timeline li.done + li::before, .timeline li.active + li.done::before { background: var(--blue); }
 .tl-dot {
   width: 12px;
   height: 12px;
@@ -552,20 +551,50 @@ section {
 }
 .tl-label { text-align: center; line-height: 1.3; }
 .tl-label small { display: block; font-size: 12px; opacity: 0.75; }
+/* The icon's gradient across the five steps: each dot shows its slice, and
+   the rail between done steps carries the same colours. */
+.timeline { --grad: linear-gradient(90deg, #ed17c7, #8a5cf6 30%, #1a6bf2 60%, #14d1cc); }
+.timeline li:nth-child(1) { --pos: 0%; }
+.timeline li:nth-child(2) { --pos: 25%; }
+.timeline li:nth-child(3) { --pos: 50%; }
+.timeline li:nth-child(4) { --pos: 75%; }
+.timeline li:nth-child(5) { --pos: 100%; }
+.timeline li.active .tl-dot, .timeline li.done .tl-dot {
+  background: var(--grad);
+  background-size: 500% 100%;
+  background-position: var(--pos) 0;
+  background-origin: border-box;
+  background-repeat: no-repeat;
+  border-color: transparent;
+}
+.timeline li.active .tl-dot { box-shadow: 0 0 0 5px rgba(138, 92, 246, 0.18); }
+.timeline li.done + li::before, .timeline li.active + li.done::before {
+  background: var(--grad);
+  background-size: 500% 100%;
+  background-position: calc(var(--pos) - 12.5%) 0;
+}
+.tl-caption .tl-context { display: flex !important; margin-top: 3px; }
+.tl-icon { display: none; }
+.tl-caption { display: none; margin: -14px 0 0; min-height: 40px; text-align: center; font-size: 15px; font-weight: 500; color: var(--text); line-height: 1.3; }
+.tl-caption small { display: block; font-size: 12px; font-weight: 400; color: var(--text-muted); }
 /* The app the dictation is reviewed for, with its icon: Mail, like the demo. */
 .tl-context { display: inline-flex !important; align-items: center; justify-content: center; gap: 5px; }
 .tl-context img { width: 14px; height: 14px; border-radius: 3px; }
 .timeline li.active { color: var(--text); }
-.timeline li.active .tl-dot { background: var(--blue); border-color: var(--blue); box-shadow: 0 0 0 5px rgba(26, 107, 242, 0.18); }
 .timeline li.done { color: rgba(0, 0, 0, 0.6); }
-.timeline li.done .tl-dot { background: var(--blue); border-color: var(--blue); }
 
 @media (max-width: 760px) {
   .window-body { min-height: 230px; }
   .desk-bar { gap: 28px; }
-  .timeline { width: 100%; flex-wrap: wrap; row-gap: 22px; }
-  .timeline li { width: 33.33%; }
-  .timeline li:nth-child(4)::before { display: none; }
+  /* One row of five icon dots, the current step named once underneath. */
+  .timeline { width: 100%; max-width: 340px; }
+  .timeline li { width: 20%; }
+  .tl-label { display: none; }
+  .tl-dot { width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, 0.85); }
+  .tl-icon { display: flex; font-size: 15px; line-height: 1; color: rgba(0, 0, 0, 0.4); transition: color 0.25s ease; }
+  .timeline li.active .tl-icon, .timeline li.done .tl-icon { color: #fff; }
+  .timeline li + li::before { top: 16px; right: calc(50% + 19px); width: calc(100% - 38px); }
+  .tl-caption { display: block; }
 }
 
 /* The keyboard: as wide as the Mail window above it. The row holds 7.1

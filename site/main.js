@@ -348,7 +348,13 @@
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   /** Lights the timeline up to `name`: earlier steps done, that one active. */
+  const caption = document.querySelector("[data-tl-caption]");
+
   function setStep(name) {
+    if (caption) {
+      const label = dom.steps.find((li) => li.dataset.step === name)?.querySelector(".tl-label");
+      caption.innerHTML = label ? label.innerHTML : "";
+    }
     let reached = false;
     for (const li of dom.steps) {
       const step = li.dataset.step;
