@@ -608,27 +608,30 @@ section {
 .sw-crown.pressed { transform: translateY(4px); }
 .sw-hand { transform-origin: 80px 100px; }
 
-/* Four apps, two by two, each with the tone Dictate takes there. */
-.context-demo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; width: 100%; }
+/* Four apps as on a phone's home screen, each with the tone Dictate takes
+   there underneath; the lit one lifts and its tone turns blue. */
+.context-demo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 12px; width: 100%; }
 .chip {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 12px 8px 10px;
-  border-radius: 16px;
-  background: #fff;
-  border: 1px solid var(--line);
+  gap: 8px;
   font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
+  font-weight: 500;
+  color: var(--text-dim);
   white-space: nowrap;
-  transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+  transition: color 0.3s ease;
 }
-.chip img { display: block; width: 34px; height: 34px; margin-bottom: 4px; border-radius: 8px; }
-.chip em { font-style: normal; font-weight: 500; font-size: 12px; color: var(--text-dim); transition: color 0.3s ease; }
-.chip.lit { background: rgba(26, 107, 242, 0.08); border-color: rgba(26, 107, 242, 0.45); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(26, 107, 242, 0.15); }
-.chip.lit em { color: var(--blue); }
+.chip img {
+  display: block;
+  width: 60px;
+  height: 60px;
+  border-radius: 14px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+}
+.chip.lit { color: var(--blue); font-weight: 600; }
+.chip.lit img { transform: translateY(-3px) scale(1.06); box-shadow: 0 10px 20px rgba(26, 107, 242, 0.25); }
 
 .cursor-demo {
   width: 100%;
