@@ -4,13 +4,20 @@ import Testing
 
 struct DictationLanguageTests {
     @Test func followsTheOSLanguageWhenSupported() {
-        #expect(DictationLanguage.preferred(for: Locale(identifier: "fr_FR")) == "fr")
-        #expect(DictationLanguage.preferred(for: Locale(identifier: "en_US")) == "en")
-        #expect(DictationLanguage.preferred(for: Locale(identifier: "pt_BR")) == "pt")
+        #expect(DictationLanguage.preferred(from: ["fr-FR"]) == "fr")
+        #expect(DictationLanguage.preferred(from: ["en-US"]) == "en")
+        #expect(DictationLanguage.preferred(from: ["pt-BR"]) == "pt")
+        // The interface has no German, but the dictation language must be German.
+        #expect(DictationLanguage.preferred(from: ["de-DE", "en-US"]) == "de")
+    }
+
+    @Test func skipsUnsupportedLanguagesForTheNextOne() {
+        #expect(DictationLanguage.preferred(from: ["ja-JP", "it-IT"]) == "it")
     }
 
     @Test func fallsBackToEnglishForUnsupportedLanguages() {
-        #expect(DictationLanguage.preferred(for: Locale(identifier: "gsw_CH")) == "en")
+        #expect(DictationLanguage.preferred(from: ["gsw-CH"]) == "en")
+        #expect(DictationLanguage.preferred(from: []) == "en")
     }
 
     @Test func namesLanguagesInFrench() {

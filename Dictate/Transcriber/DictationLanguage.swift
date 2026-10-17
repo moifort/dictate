@@ -14,12 +14,14 @@ nonisolated enum DictationLanguage {
     /// What the app falls back to when the OS language is not supported.
     static let fallback = "en"
 
-    /// The OS language, when it is supported.
-    static func preferred(for locale: Locale = .current) -> String {
-        guard let code = locale.language.languageCode?.identifier.lowercased(), supportedCodes.contains(code) else {
-            return fallback
-        }
-        return code
+    /// The first of the user's OS languages that is supported.
+    ///
+    /// Not `Locale.current`: its language is the app's localization, so a Mac
+    /// in German would read "en", the interface's language, instead of "de".
+    static func preferred(from languages: [String] = Locale.preferredLanguages) -> String {
+        languages.lazy
+            .compactMap { Locale(identifier: $0).language.languageCode?.identifier.lowercased() }
+            .first(where: supportedCodes.contains) ?? fallback
     }
 
     /// The language's name in French, for the Claude prompt, which is written in French.
