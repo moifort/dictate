@@ -49,6 +49,57 @@
     };
   }
 
+  /** Deterministic noise in [0, 1) for a given integer. */
+  function hash(n) {
+    const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+    return x - Math.floor(x);
+  }
+
+  /**
+   * A person talking: phrases of a few words separated by breaths, words of
+   * two or three syllables with short gaps, syllables at about five per second
+   * with a sharp attack and a slower decay. Consonants light up the highs at
+   * the start of a syllable, vowels carry the lows and mids.
+   */
+  function talkingSpectrum(t) {
+    // Phrases: 1.8 to 3.4 s of speech, then 0.45 to 0.9 s of silence.
+    let start = 0;
+    let phrase = 0;
+    for (;;) {
+      const length = 1.8 + 1.6 * hash(phrase) + 0.45 + 0.45 * hash(phrase + 50);
+      if (t < start + length) break;
+      start += length;
+      phrase++;
+      if (phrase > 100000) break;
+    }
+    const local = t - start;
+    const speech = 1.8 + 1.6 * hash(phrase);
+    const gate = local < speech
+      ? Math.min(1, local / 0.08) * Math.min(1, (speech - local) / 0.25)
+      : 0;
+
+    // Syllables at a slightly irregular rate, grouped into words.
+    const rate = 4.6 + 0.8 * hash(phrase + 7);
+    const position = local * rate;
+    const index = Math.floor(position);
+    const phase = position - index;
+    const seed = phrase * 97 + index;
+    const wordGap = hash(seed + 3) < 0.22 ? 0.25 : 1; // a short pause between words
+    const stress = 0.65 + 0.35 * hash(seed);
+    const attack = 0.18;
+    const shape = phase < attack ? phase / attack : Math.exp(-(phase - attack) * 2.2);
+    const gain = 1.7;
+    const vowel = gain * gate * wordGap * stress * shape;
+    const consonant = gain * gate * wordGap * (phase < 0.22 ? 1 - phase / 0.22 : 0) * (0.4 + 0.6 * hash(seed + 11));
+
+    return {
+      low: Math.min(1, vowel * (0.75 + 0.25 * Math.sin(t * 3.1))),
+      mid: Math.min(1, vowel * 0.85 + consonant * 0.25),
+      high: Math.min(1, consonant * 0.9 + vowel * 0.3),
+      tilt: gate * (hash(seed + 23) * 2 - 1) * 0.8,
+    };
+  }
+
   /** Builds the wave path, the way WaveShape does: a sine under a warped envelope. */
   function tracePath(ctx, width, midY, amplitude, center, frequency, phase, closed, focus = 1.5) {
     const warp = Math.log(0.5) / Math.log(center);
@@ -205,7 +256,7 @@
     // Full width, like the icon: a crisp 3 px gradient line over a soft translucent fill.
     // focus sharpens the envelope so the motion gathers in the middle third;
     // spread pulls the three peaks together; freq adds crossings there.
-    hero: { scale: 0.46, stroke: 3, glow: 12, inset: 0.0, floor: 0.55, focus: 5, spread: 0.4, freq: 1.8 },
+    hero: { scale: 0.46, stroke: 3, glow: 12, inset: 0.0, floor: 0.06, focus: 5, spread: 0.4, freq: 1.8 },
     download: { scale: 0.3, stroke: 4, glow: 10, inset: 0.0, floor: 0.45 },
     // The pill: 72×26 points like the real one, thin stroke.
     pill: { scale: 0.42, stroke: 1.2, glow: 3, inset: 0.0, floor: 0.08 },
@@ -225,10 +276,10 @@
     const s = speakingSpectrum(t * 0.35);
     return { low: s.low * 0.8, mid: s.mid * 0.8, high: s.high * 0.8, tilt: s.tilt };
   };
-  for (const kind of ["hero", "download"]) {
-    const r = renderers.get(kind);
-    if (r) r.source = iconBreath;
-  }
+  const download = renderers.get("download");
+  if (download) download.source = iconBreath;
+  const hero = renderers.get("hero");
+  if (hero) hero.source = talkingSpectrum;
   const featurePill = renderers.get("feature");
   if (featurePill) featurePill.source = (t) => speakingSpectrum(t * 0.7);
 
