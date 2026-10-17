@@ -148,11 +148,14 @@ section {
 
 /* ---------- Hero ---------- */
 
+/* Exactly one screen under the nav: the demo only shows up on scroll. */
 .hero {
+  min-height: calc(100vh - var(--nav-h));
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 96px;
+  justify-content: center;
+  padding-top: 40px;
   padding-bottom: 40px;
   position: relative;
 }
