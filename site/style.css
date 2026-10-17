@@ -233,7 +233,10 @@ section {
 /* The waves, edge to edge: thin at both ends, wide and tall in the middle. */
 .hero-wave {
   width: 100vw;
-  margin: 20px 0 10px calc(50% - 50vw);
+  /* The hero centres its children, so a 100vw block overflows evenly on both
+     sides: no negative margin, which would shift it by half the padding. */
+  margin: 20px 0 10px;
+  flex: 0 0 auto;
   height: clamp(170px, 26vw, 360px);
   position: relative;
 }
