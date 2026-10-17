@@ -7,7 +7,7 @@ notes, chat, code editor, terminal — and turns what you say into clean,
 ready-to-send text.
 
 <p align="center">
-  <img src="docs/assets/demo.gif" width="800" alt="Holding fn in TextEdit: a pill shows the voice level, then a spinner, and the cleaned-up sentence appears at the cursor">
+  <img src="docs/assets/demo.gif" width="800" alt="Dictating an email in Mail: holding control shows a pill with the voice waves, releasing shows a spinner while the AI reviews the sentence, then the clean text appears at the cursor">
 </p>
 
 ## What it does
