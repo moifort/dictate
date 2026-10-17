@@ -35,7 +35,7 @@
       if (!/^fr\b/i.test(lang)) document.documentElement.classList.add("i18n-en", "i18n-pending");
     })();
   </script>
-  <link rel="stylesheet" href="style.css?v=20261017-95">
+  <link rel="stylesheet" href="style.css?v=20261017-96">
 </head>
 <body>
 
@@ -324,16 +324,20 @@
     <p class="section-lead" data-i18n="cmp.lead">Une alternative gratuite et open source à Wispr Flow, Typeless, Superwhisper et VoiceInk.</p>
     <div class="compare-scroll">
       <table class="compare-table">
-        <thead><tr><th></th><th>Wispr Flow</th><th>Typeless</th><th>Superwhisper</th><th>VoiceInk</th><th class="us"><img src="icon-256.png" width="20" height="20" alt="">Dictate</th></tr></thead>
+        <thead><tr><th></th><th>Wispr Flow</th><th>Typeless</th><th>Superwhisper</th><th>VoiceInk</th><th class="us"><span><img src="icon-256.png" width="22" height="22" alt="">Dictate</span></th></tr></thead>
         <tbody>
-          <tr><th scope="row" data-i18n="cmp.row.offline">Fonctionne hors ligne</th><td class="no" data-i18n="cmp.no">Non</td><td class="no" data-i18n="cmp.no">Non</td><td class="some" data-i18n="cmp.localModels">Avec modèles locaux</td><td class="yes" data-i18n="cmp.yes">Oui</td><td class="yes" data-i18n="cmp.yes">Oui</td></tr>
-          <tr><th scope="row" data-i18n="cmp.row.voice">La voix reste sur le Mac</th><td class="no" data-i18n="cmp.no">Non</td><td class="no" data-i18n="cmp.no">Non</td><td class="some" data-i18n="cmp.localModels">Avec modèles locaux</td><td class="yes" data-i18n="cmp.yes">Oui</td><td class="yes" data-i18n="cmp.yes">Oui</td></tr>
-          <tr><th scope="row" data-i18n="cmp.row.oss">Open source</th><td class="no" data-i18n="cmp.no">Non</td><td class="no" data-i18n="cmp.no">Non</td><td class="no" data-i18n="cmp.no">Non</td><td class="yes" data-i18n="cmp.gpl">Oui, GPL</td><td class="yes" data-i18n="cmp.mit">Oui, MIT</td></tr>
-          <tr><th scope="row" data-i18n="cmp.row.review">Relecture par IA</th><td class="yes" data-i18n="cmp.cloud">Oui, dans le cloud</td><td class="yes" data-i18n="cmp.cloud">Oui, dans le cloud</td><td class="yes" data-i18n="cmp.yes">Oui</td><td class="some" data-i18n="cmp.apiKey">Avec votre clé d'API</td><td class="yes" data-i18n="cmp.ours">Claude ou Apple Intelligence, sans clé</td></tr>
-          <tr><th scope="row" data-i18n="cmp.row.langs">Langues</th><td class="yes" data-i18n="cmp.hundred">100+</td><td class="yes" data-i18n="cmp.hundred">100+</td><td class="yes" data-i18n="cmp.hundred">100+</td><td class="yes" data-i18n="cmp.hundred">100+</td><td class="some" data-i18n="cmp.european">25 européennes</td></tr>
-          <tr><th scope="row" data-i18n="cmp.row.price">Prix</th><td data-i18n="price.wispr">12&nbsp;€ / mois</td><td data-i18n="price.typeless">12&nbsp;$ / mois</td><td data-i18n="price.superwhisper">8,49&nbsp;$ / mois</td><td data-i18n="price.voiceink">25&nbsp;$ une fois</td><td class="yes" data-i18n="cmp.free"><b>Gratuit</b></td></tr>
+          <tr><th scope="row" data-i18n="cmp.row.transcribe">Transcription</th><td class="no"><span data-i18n="cmp.cloud">Cloud</span></td><td class="no"><span data-i18n="cmp.cloud">Cloud</span></td><td class="some"><span data-i18n="cmp.macOrCloud">Mac ou cloud</span></td><td class="yes"><span data-i18n="cmp.onMac">Sur le Mac</span></td><td class="yes"><span data-i18n="cmp.onMac">Sur le Mac</span></td></tr>
+          <tr><th scope="row" data-i18n="cmp.row.review">Relecture par IA</th><td class="no"><span data-i18n="cmp.cloud">Cloud</span></td><td class="no"><span data-i18n="cmp.cloud">Cloud</span></td><td class="some"><span data-i18n="cmp.macOrCloud">Mac ou cloud</span></td><td class="some"><span data-i18n="cmp.apiKey">Votre clé d'API</span></td><td class="yes"><span data-i18n="cmp.onMac">Sur le Mac</span><small data-i18n="cmp.appleOrClaude">Apple Intelligence, ou Claude</small></td></tr>
+          <tr><th scope="row" data-i18n="cmp.row.offline">Tout hors ligne</th><td class="no"><span data-i18n="cmp.no">Non</span></td><td class="no"><span data-i18n="cmp.no">Non</span></td><td class="some"><span data-i18n="cmp.localModels">Modèles locaux</span></td><td class="yes"><span data-i18n="cmp.yes">Oui</span></td><td class="yes"><span data-i18n="cmp.yes">Oui</span><small data-i18n="cmp.noAccount">Sans compte ni clé</small></td></tr>
+          <tr><th scope="row" data-i18n="cmp.row.oss">Open source</th><td class="no"><span data-i18n="cmp.no">Non</span></td><td class="no"><span data-i18n="cmp.no">Non</span></td><td class="no"><span data-i18n="cmp.no">Non</span></td><td class="yes"><span data-i18n="cmp.gpl">GPL</span></td><td class="yes"><span data-i18n="cmp.mit">MIT</span></td></tr>
+          <tr><th scope="row" data-i18n="cmp.row.langs">Langues</th><td class="plain"><span data-i18n="cmp.hundred">100+</span></td><td class="plain"><span data-i18n="cmp.hundred">100+</span></td><td class="plain"><span data-i18n="cmp.hundred">100+</span></td><td class="plain"><span data-i18n="cmp.hundred">100+</span></td><td class="plain"><span data-i18n="cmp.european">25 européennes</span></td></tr>
+          <tr><th scope="row" data-i18n="cmp.row.price">Prix</th><td class="plain"><span data-i18n="price.wispr">12&nbsp;€ / mois</span></td><td class="plain"><span data-i18n="price.typeless">12&nbsp;$ / mois</span></td><td class="plain"><span data-i18n="price.superwhisper">8,49&nbsp;$ / mois</span></td><td class="plain"><span data-i18n="price.voiceink">25&nbsp;$ une fois</span></td><td class="yes"><span data-i18n="cmp.free">Gratuit</span></td></tr>
         </tbody>
       </table>
+    </div>
+    <div class="offline-callout">
+      <div class="offline-callout-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 10.5a11 11 0 0 1 16 0M7 14a7 7 0 0 1 10 0M10 17.5a3 3 0 0 1 4 0M3 3l18 18"/></svg></div>
+      <p><b data-i18n="cmp.calloutTitle">Transcription et relecture, les deux sur le Mac.</b> <span data-i18n="cmp.calloutText">Avec Apple Intelligence, rien ne part sur internet : pas de compte, pas de clé, pas de réseau. Coupez le Wi-Fi, Dictate écrit quand même.</span></p>
     </div>
     <p class="prices-note" data-i18n="cmp.note">D'après les sites des éditeurs et leur documentation, au 17&nbsp;octobre&nbsp;2026. Dictate couvre moins de langues : Parakeet ne reconnaît que les langues européennes.</p>
   </section>
@@ -409,7 +413,7 @@
   <p><a href="https://github.com/moifort/dictate/releases" data-i18n="footer.releases">Toutes les versions</a> · <a href="https://github.com/moifort/dictate/issues" data-i18n="footer.issues">Signaler un problème</a> · <a href="https://github.com/moifort/dictate#readme" data-i18n="footer.docs">Documentation</a> · <a href="privacy.html" data-i18n="footer.privacy">Confidentialité</a></p>
 </footer>
 
-<script src="i18n.js?v=20261017-95"></script>
+<script src="i18n.js?v=20261017-96"></script>
 <script src="main.js?v=20261017-94" defer></script>
 </body>
 </html>

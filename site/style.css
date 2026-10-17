@@ -1029,32 +1029,85 @@ section {
 
 /* ---------- Comparison ---------- */
 
-/* Feature table against the paid apps, Dictate in the last column. Scrolls
-   sideways on narrow screens rather than squeezing the cells. */
-.compare-scroll { max-width: 960px; margin: 0 auto 14px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+/* Feature table against the paid apps, Dictate in the last column. Every
+   cell is one mark and one short word; the Dictate column is lifted with a
+   tinted background. Scrolls sideways on narrow screens. */
+.compare-scroll { max-width: 980px; margin: 0 auto 28px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .compare-table {
   width: 100%;
-  min-width: 720px;
+  min-width: 760px;
   border-collapse: separate;
   border-spacing: 0;
-  border-radius: 20px;
-  background: var(--bg-card);
+  table-layout: fixed;
+  border-radius: 22px;
+  background: #fff;
   border: 1px solid var(--line);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
   font-size: 15px;
   text-align: center;
 }
-.compare-table th, .compare-table td { padding: 14px 12px; color: var(--text-muted); }
-.compare-table thead th { font-weight: 600; color: var(--text); white-space: nowrap; }
-.compare-table tbody tr th { text-align: left; font-weight: 600; color: var(--text); padding-left: 22px; }
+.compare-table col.label { width: 150px; }
+.compare-table th, .compare-table td { padding: 18px 10px; vertical-align: middle; }
+.compare-table thead th { font-size: 14px; font-weight: 600; color: var(--text-dim); letter-spacing: 0.01em; padding-top: 20px; padding-bottom: 16px; }
+.compare-table thead th:first-child, .compare-table tbody th { width: 150px; }
+.compare-table thead .us { color: var(--text); font-size: 16px; }
+.compare-table thead .us span { display: inline-flex; align-items: center; gap: 8px; }
+.compare-table thead .us img { border-radius: 6px; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06); }
+.compare-table tbody th { text-align: left; font-weight: 600; color: var(--text); padding-left: 24px; }
 .compare-table tbody th, .compare-table tbody td { border-top: 1px solid var(--line); }
-.compare-table .us { color: var(--text); }
-.compare-table thead .us { display: flex; align-items: center; justify-content: center; gap: 8px; }
-.compare-table thead .us img { border-radius: 5px; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06); }
-.compare-table td:last-child { background: rgba(26, 107, 242, 0.05); color: var(--text); font-weight: 600; }
-.compare-table .yes::before { content: "✓ "; color: #1f9d55; font-weight: 700; }
-.compare-table .no::before { content: "✕ "; color: var(--text-dim); }
-.compare-table .some::before { content: "◐ "; color: #c98a00; }
+.compare-table td { color: var(--text-muted); line-height: 1.25; }
+.compare-table td span { display: inline-flex; align-items: center; gap: 7px; }
+.compare-table td small { display: block; margin-top: 5px; font-size: 12px; color: var(--text-dim); font-weight: 400; }
+/* The mark: a filled disc for yes, a hollow one for no, half for partly. */
+.compare-table td span::before {
+  content: "";
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+.compare-table td.yes span::before {
+  background: #22a35a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M4.5 8.3l2.3 2.3 4.7-4.9'/%3E%3C/svg%3E") center / 100% no-repeat;
+}
+.compare-table td.no span::before { border: 1.5px solid rgba(0, 0, 0, 0.18); }
+.compare-table td.some span::before { background: linear-gradient(90deg, #e8a200 50%, transparent 50%); border: 1.5px solid #e8a200; }
+.compare-table td.plain span::before { display: none; }
+.compare-table td.no { color: var(--text-dim); }
+.compare-table td:last-child, .compare-table thead th:last-child {
+  background: linear-gradient(180deg, rgba(26, 107, 242, 0.07), rgba(237, 23, 199, 0.05));
+}
+.compare-table td:last-child { color: var(--text); font-weight: 600; }
+.compare-table td:last-child small { color: var(--text-muted); }
+
+/* The point of the table, spelled out: nothing goes online with Apple Intelligence. */
+.offline-callout {
+  max-width: 760px;
+  margin: 0 auto 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+  padding: 18px 22px;
+  border-radius: 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+}
+.offline-callout-icon {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(135deg, var(--magenta), var(--blue) 60%, var(--cyan));
+}
+.offline-callout p { margin: 0; font-size: 15px; line-height: 1.5; color: var(--text-muted); }
+.offline-callout b { color: var(--text); font-weight: 600; }
 .compare .prices-note { max-width: 620px; }
+@media (max-width: 560px) { .offline-callout { flex-direction: column; align-items: flex-start; } }
 
 /* ---------- FAQ ---------- */
 
