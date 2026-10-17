@@ -1,0 +1,50 @@
+<!doctype html>
+<!-- Source of site/og.png, the 1200×630 share preview. Render with scripts/render-og.sh. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+    color: #1d1d1f;
+    background:
+      radial-gradient(circle at 0% 100%, rgba(237, 23, 199, 0.16), transparent 45%),
+      radial-gradient(circle at 100% 0%, rgba(20, 209, 204, 0.18), transparent 45%),
+      #fbfbfd;
+    display: flex;
+    align-items: center;
+    gap: 44px;
+    padding: 0 0 0 64px;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+  }
+  .text { flex: 0 0 430px; }
+  .brand { display: flex; align-items: center; gap: 16px; margin-bottom: 34px; }
+  .brand img { width: 72px; height: 72px; border-radius: 17px; box-shadow: 0 4px 14px rgba(0,0,0,0.12); }
+  .brand span { font-size: 38px; font-weight: 700; letter-spacing: -0.02em; }
+  h1 { font-size: 50px; line-height: 1.08; font-weight: 700; letter-spacing: -0.03em; margin: 0 0 22px; }
+  h1 em {
+    font-style: normal;
+    background: linear-gradient(90deg, #ed17c7, #1a6bf2 55%, #14d1cc);
+    -webkit-background-clip: text; color: transparent;
+  }
+  p { font-size: 23px; line-height: 1.4; color: #6e6e73; margin: 0; }
+  .shot {
+    flex: 1;
+    height: 400px;
+    border-radius: 18px 0 0 18px;
+    background: url(demo-frame.png) left center / cover no-repeat;
+    box-shadow: 0 24px 60px rgba(30, 30, 60, 0.18);
+  }
+</style>
+</head>
+<body>
+  <div class="text">
+    <div class="brand"><img src="icon.png" alt=""><span>Dictate</span></div>
+    <h1>Hold control, speak, <em>release.</em></h1>
+    <p>Free, open-source dictation for Mac. Clean text wherever you type. Your voice never leaves the Mac.</p>
+  </div>
+  <div class="shot"></div>
+</body>
+</html>
