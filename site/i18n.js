@@ -79,7 +79,7 @@
     "docs.language.text": "Settings → Dictation: the language is taken from macOS, change it if you dictate in another one. Twenty-five European languages, and English technical terms stay recognized whatever the language.",
     "docs.updates.title": "Updates and uninstalling",
     "docs.updates.text": "Dictate checks for new versions and installs them by itself; “Install updates automatically” can be turned off in Settings → General, where it can also be set to launch at login. The Uninstall button, in the same place, moves the app, its models and its statistics to the Trash and clears the settings.",
-    "dl.title": "Free. Open source.<br>For real.",
+    "dl.title": "Free &amp; Open source",
     "dl.lead": "Other dictation apps charge by the month or by the license. Dictate costs nothing, and its code is public.",
     "price.wispr": "€12&nbsp;/ month",
     "price.typeless": "$12&nbsp;/ month",
