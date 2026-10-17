@@ -560,7 +560,7 @@
   // Reveal on scroll, latest version
   // ---------------------------------------------------------------------------
 
-  for (const el of document.querySelectorAll(".card, .faq-list details, .flow-node, .privacy-points li, .section-title, .section-lead")) {
+  for (const el of document.querySelectorAll(".card, .faq-list details, .section-title, .section-lead")) {
     el.classList.add("reveal");
   }
   const revealer = new IntersectionObserver((entries) => {
