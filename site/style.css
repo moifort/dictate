@@ -1027,6 +1027,35 @@ section {
   padding-bottom: 16px;
 }
 
+/* ---------- Comparison ---------- */
+
+/* Feature table against the paid apps, Dictate in the last column. Scrolls
+   sideways on narrow screens rather than squeezing the cells. */
+.compare-scroll { max-width: 960px; margin: 0 auto 14px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.compare-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  font-size: 15px;
+  text-align: center;
+}
+.compare-table th, .compare-table td { padding: 14px 12px; color: var(--text-muted); }
+.compare-table thead th { font-weight: 600; color: var(--text); white-space: nowrap; }
+.compare-table tbody tr th { text-align: left; font-weight: 600; color: var(--text); padding-left: 22px; }
+.compare-table tbody th, .compare-table tbody td { border-top: 1px solid var(--line); }
+.compare-table .us { color: var(--text); }
+.compare-table thead .us { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.compare-table thead .us img { border-radius: 5px; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06); }
+.compare-table td:last-child { background: rgba(26, 107, 242, 0.05); color: var(--text); font-weight: 600; }
+.compare-table .yes::before { content: "✓ "; color: #1f9d55; font-weight: 700; }
+.compare-table .no::before { content: "✕ "; color: var(--text-dim); }
+.compare-table .some::before { content: "◐ "; color: #c98a00; }
+.compare .prices-note { max-width: 620px; }
+
 /* ---------- FAQ ---------- */
 
 .faq-list {
