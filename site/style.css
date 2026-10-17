@@ -261,16 +261,22 @@ section {
   background: linear-gradient(#fff, rgba(255, 255, 255, 0));
   pointer-events: none;
 }
-/* Fades out below the key and the timeline along a blurred, wavy edge, so the
-   colour ends like a cloud rather than along a straight band. The shape
-   overflows the section on every side so the blur never shows a hard edge. */
-.demo-edge {
+/* Fades out below the key and the timeline, straight and deep enough to see
+   the colour go. Eased stops so the fade has no visible start or end. */
+.demo::after {
+  content: "";
   position: absolute;
-  left: -60px;
-  bottom: -80px;
-  width: calc(100% + 120px);
-  height: 430px;
-  filter: blur(26px);
+  left: 0; right: 0; bottom: 0;
+  height: 380px;
+  background: linear-gradient(
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.08) 18%,
+    rgba(255, 255, 255, 0.25) 35%,
+    rgba(255, 255, 255, 0.5) 52%,
+    rgba(255, 255, 255, 0.75) 68%,
+    rgba(255, 255, 255, 0.92) 84%,
+    #fff 100%
+  );
   pointer-events: none;
 }
 
@@ -283,7 +289,7 @@ section {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 300px 20px 260px;
+  padding: 300px 20px 380px;
   text-align: left;
 }
 
@@ -517,8 +523,8 @@ section {
 
 /* ---------- Features ---------- */
 
-/* Right under the demo's fade: the title sits close to the colour. */
-.features { padding-top: 24px; }
+/* Clear of the demo's fade: the title sits on white. */
+.features { padding-top: 64px; }
 
 .bento {
   display: grid;
