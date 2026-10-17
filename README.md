@@ -34,6 +34,9 @@ ready-to-send text.
 
 ## Get it
 
+The website, [moifort.github.io/dictate](https://moifort.github.io/dictate/),
+shows what a dictation looks like and links to the latest download.
+
 Download the latest `Dictate-<version>.dmg` from
 [Releases](https://github.com/moifort/dictate/releases/latest), open it, drag
 Dictate onto Applications and launch it. A short setup walks you through the

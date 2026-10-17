@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dictate — Parlez. C'est écrit.</title>
+  <meta name="description" content="Dictée push-to-talk pour le Mac. Maintenez control, parlez, relâchez : un texte propre apparaît là où vous écrivez. Gratuit, open source, transcription sur votre Mac.">
+  <meta property="og:title" content="Dictate — Parlez. C'est écrit.">
+  <meta property="og:description" content="Dictée push-to-talk pour le Mac, gratuite et open source. Maintenez control, parlez, relâchez.">
+  <meta property="og:image" content="https://moifort.github.io/dictate/icon-256.png">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#0b0b10">
+  <link rel="icon" href="favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="icon-256.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="nav">
+  <a class="nav-brand" href="#top" aria-label="Dictate">
+    <span class="nav-icon"><canvas class="wave-canvas" data-wave="nav" width="36" height="36" aria-hidden="true"></canvas></span>
+    <span>Dictate</span>
+  </a>
+  <nav class="nav-links" aria-label="Sections">
+    <a href="#demo">Démo</a>
+    <a href="#features">Fonctions</a>
+    <a href="#privacy">Confidentialité</a>
+    <a href="https://github.com/moifort/dictate" rel="noopener">GitHub</a>
+    <a class="nav-cta" href="https://github.com/moifort/dictate/releases/latest">Télécharger</a>
+  </nav>
+</header>
+
+<main id="top">
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-icon" aria-hidden="true">
+      <canvas class="wave-canvas" data-wave="hero" width="640" height="640"></canvas>
+    </div>
+    <h1 class="hero-title">Parlez.<br><span class="gradient-text">C'est écrit.</span></h1>
+    <p class="hero-subtitle">
+      Maintenez <kbd>control</kbd>, parlez, relâchez.<br class="wide-only">
+      Vos mots apparaissent là où vous écrivez, propres et prêts à envoyer.
+    </p>
+    <div class="hero-actions">
+      <a class="button primary" href="https://github.com/moifort/dictate/releases/latest" data-download>
+        Télécharger gratuitement
+      </a>
+      <a class="button ghost" href="#demo">Voir la démo</a>
+    </div>
+    <p class="hero-meta">
+      <span data-version>Dernière version</span> · macOS 27 · Apple Silicon · Gratuit et open source
+    </p>
+  </section>
+
+  <!-- Live demo -->
+  <section class="demo" id="demo">
+    <h2 class="section-title">Dans n'importe quelle app.<br><span class="muted">Sans rien ouvrir.</span></h2>
+    <p class="section-lead">
+      Une fenêtre, un champ, une touche. Dictate écoute pendant que vous tenez
+      <kbd>control</kbd>, puis écrit à la place du curseur. Voici une dictée, telle qu'elle se passe.
+    </p>
+
+    <div class="demo-stage">
+      <div class="screen">
+        <div class="window" data-window>
+          <div class="window-bar">
+            <span class="lights"><i></i><i></i><i></i></span>
+            <span class="window-title" data-window-title>Mail</span>
+          </div>
+          <div class="window-body">
+            <div class="field" data-field>
+              <span class="field-label" data-field-label>Message</span>
+              <div class="field-text" data-field-text><span class="caret"></span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pill" data-pill aria-live="polite">
+          <canvas class="pill-waves" data-wave="pill" width="144" height="52" aria-hidden="true"></canvas>
+          <span class="pill-spinner" aria-hidden="true"></span>
+        </div>
+      </div>
+
+      <aside class="demo-side">
+        <div class="demo-key">
+          <kbd class="key" data-key><span class="key-glyph">⌃</span><span class="key-name">control</span></kbd>
+          <span class="key-state" data-key-state>Relâchée</span>
+        </div>
+
+        <div class="demo-heard">
+          <span class="demo-caption">Ce que vous avez dit</span>
+          <p class="heard" data-heard></p>
+        </div>
+
+        <ol class="demo-steps">
+          <li data-step="recording"><span class="dot"></span>Écoute</li>
+          <li data-step="transcribing"><span class="dot"></span>Transcription sur le Mac</li>
+          <li data-step="enhancing"><span class="dot"></span>Nettoyage par Claude</li>
+          <li data-step="pasted"><span class="dot"></span>Texte au curseur</li>
+        </ol>
+      </aside>
+    </div>
+
+    <div class="demo-tabs" role="tablist" aria-label="Scénarios">
+      <button role="tab" data-scenario="mail" aria-selected="true">Mail</button>
+      <button role="tab" data-scenario="chat" aria-selected="false">Chat</button>
+      <button role="tab" data-scenario="code" aria-selected="false">Éditeur de code</button>
+      <button role="tab" data-scenario="terminal" aria-selected="false">Terminal</button>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <h2 class="section-title">Pensé pour disparaître.</h2>
+    <p class="section-lead">Pas de fenêtre à ouvrir, pas de bouton à cliquer, pas de transcription brute à corriger.</p>
+
+    <div class="bento">
+      <article class="card wide">
+        <div class="card-visual">
+          <div class="keycap-demo" aria-hidden="true">
+            <kbd class="key big" data-key-feature><span class="key-glyph">⌃</span><span class="key-name">control</span></kbd>
+            <span class="keycap-hint">maintenir · parler · relâcher</span>
+          </div>
+        </div>
+        <h3>Push-to-talk</h3>
+        <p>Une seule touche, <kbd>control</kbd> ou <kbd>fn</kbd> au choix. Vous la tenez le temps de parler. Rien à activer, rien à fermer.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-visual">
+          <div class="clean-demo" aria-hidden="true">
+            <p class="raw">euh donc en fait je je voulais te dire que la la réunion est décalée à mardi</p>
+            <p class="clean">Je voulais te dire que la réunion est décalée à mardi.</p>
+          </div>
+        </div>
+        <h3>Du texte propre</h3>
+        <p>Les « euh », les répétitions et les faux départs disparaissent. Ponctuation, majuscules et termes techniques sont corrigés. Vos mots restent les vôtres.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-visual">
+          <div class="context-demo" aria-hidden="true">
+            <span class="chip">Mail <em>soigné</em></span>
+            <span class="chip">Chat <em>direct</em></span>
+            <span class="chip">Code <em>brut</em></span>
+            <span class="chip">Terminal <em>technique</em></span>
+          </div>
+        </div>
+        <h3>S'adapte à l'app</h3>
+        <p>Le ton suit le contexte : un peu plus soigné dans un mail, direct dans un chat, brut et technique dans un éditeur ou un terminal.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-visual">
+          <div class="cursor-demo" aria-hidden="true">
+            <span class="cursor-line">Bonjour Marie, <span class="typed" data-typed></span><span class="caret"></span></span>
+          </div>
+        </div>
+        <h3>Au curseur</h3>
+        <p>La phrase est saisie dans le champ qui a le focus. S'il n'y en a pas, elle attend dans le presse-papiers.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-visual">
+          <div class="lang-demo" aria-hidden="true">
+            <span>Français</span><span>English</span><span>Deutsch</span><span>Español</span><span>Italiano</span><span>Português</span><span>Nederlands</span><span>Polski</span><span>Svenska</span><span>+ 16</span>
+          </div>
+        </div>
+        <h3>25 langues, vos mots</h3>
+        <p>Choisissez la langue de dictée et ajoutez votre vocabulaire : noms, jargon, noms de produits, pour qu'ils s'écrivent bien.</p>
+      </article>
+
+      <article class="card wide">
+        <div class="card-visual">
+          <div class="pill-demo" aria-hidden="true">
+            <div class="pill static"><canvas class="pill-waves" data-wave="feature" width="144" height="52"></canvas></div>
+          </div>
+        </div>
+        <h3>Discret</h3>
+        <p>Une petite pastille en bas de l'écran montre que Dictate écoute, puis travaille, puis s'efface. C'est tout ce que vous verrez.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- Privacy -->
+  <section class="privacy" id="privacy">
+    <h2 class="section-title">Votre voix reste sur votre Mac.</h2>
+    <p class="section-lead">
+      La parole est transcrite localement par Parakeet. L'audio ne quitte jamais l'ordinateur.
+      Seul le texte est envoyé à Claude pour le nettoyage, via votre propre abonnement, et vous pouvez le désactiver.
+    </p>
+
+    <div class="flow" aria-label="Trajet de la dictée">
+      <div class="flow-node">
+        <span class="flow-icon">🎙️</span>
+        <strong>Votre voix</strong>
+        <small>micro du Mac</small>
+      </div>
+      <span class="flow-arrow local" aria-hidden="true"><em>reste sur le Mac</em></span>
+      <div class="flow-node">
+        <span class="flow-icon">💻</span>
+        <strong>Parakeet</strong>
+        <small>transcription sur l'appareil</small>
+      </div>
+      <span class="flow-arrow optional" aria-hidden="true"><em>texte seulement · optionnel</em></span>
+      <div class="flow-node">
+        <span class="flow-icon">✨</span>
+        <strong>Claude</strong>
+        <small>nettoyage, avec votre abonnement</small>
+      </div>
+    </div>
+
+    <ul class="privacy-points">
+      <li><strong>Aucun compte.</strong> Pas d'inscription, pas de serveur à nous, pas de suivi de ce que vous dictez.</li>
+      <li><strong>Open source.</strong> Le code est public : vous pouvez lire exactement ce qui part et ce qui reste.</li>
+      <li><strong>Gratuit.</strong> Pas d'abonnement, pas de version pro. Les mises à jour arrivent toutes seules.</li>
+    </ul>
+  </section>
+
+  <!-- Download -->
+  <section class="download" id="download">
+    <div class="download-icon" aria-hidden="true">
+      <canvas class="wave-canvas" data-wave="download" width="320" height="320"></canvas>
+    </div>
+    <h2 class="section-title">Gratuit. Pour de vrai.</h2>
+    <p class="section-lead">Téléchargez l'image disque, glissez Dictate dans Applications, lancez. Un court assistant règle les autorisations.</p>
+    <div class="hero-actions">
+      <a class="button primary" href="https://github.com/moifort/dictate/releases/latest" data-download>Télécharger Dictate</a>
+      <a class="button ghost" href="https://github.com/moifort/dictate" rel="noopener">Voir le code</a>
+    </div>
+    <p class="hero-meta"><span data-version>Dernière version</span> · macOS 27 · Apple Silicon</p>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>Dictate est un projet open source de <a href="https://github.com/moifort" rel="noopener">Thibaut Mottet</a>.
+     Parakeet par NVIDIA via FluidAudio. Claude par Anthropic.</p>
+  <p><a href="https://github.com/moifort/dictate/releases">Toutes les versions</a> · <a href="https://github.com/moifort/dictate/issues">Signaler un problème</a></p>
+</footer>
+
+<script src="main.js" defer></script>
+</body>
+</html>
