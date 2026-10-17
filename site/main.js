@@ -524,8 +524,8 @@
     })();
   }
 
-  // The latency counters (hero tile and feature card) count up to the median
-  // and settle there, with the bar filling underneath.
+  // The latency card counts up to the median and settles there, with the bar
+  // filling underneath.
   for (const timer of document.querySelectorAll("[data-timer]")) {
     const timerBar = timer.parentElement.querySelector("[data-timer-bar]");
     if (!timerBar) continue;
@@ -548,20 +548,6 @@
         await sleep(2600);
       }
     })();
-  }
-
-  // The hero's context tile cycles through the apps the tone adapts to.
-  const cycle = document.querySelector("[data-context-cycle]");
-  if (cycle && !reducedMotion) {
-    const apps = ["Mail", "Chat", "Code", "Terminal"];
-    let i = 0;
-    setInterval(async () => {
-      cycle.classList.add("out");
-      await sleep(250);
-      i = (i + 1) % apps.length;
-      cycle.textContent = apps[i];
-      cycle.classList.remove("out");
-    }, 1600);
   }
 
   // The context chips light up one after another.
