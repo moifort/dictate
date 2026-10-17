@@ -13,7 +13,7 @@
   <meta name="theme-color" content="#ffffff">
   <link rel="icon" href="favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="icon-256.png">
-  <link rel="stylesheet" href="style.css?v=20261017-45">
+  <link rel="stylesheet" href="style.css?v=20261017-47">
 </head>
 <body>
 
@@ -63,7 +63,7 @@
       <div class="demo-head">
         <p class="live-badge"><span class="live-tag"><i aria-hidden="true"></i>Live</span>Démo</p>
         <h2 class="section-title">Pas touche au clavier.</h2>
-        <p class="section-lead">Un mail entier sans taper une lettre. Enfin si, une seule : control.</p>
+        <p class="section-lead">Un mail entier sans rien taper. Enfin presque : une touche, control.</p>
       </div>
       <div class="window mail" data-window>
         <div class="window-bar">
@@ -85,7 +85,6 @@
       </div>
 
       <div class="desk-bar">
-        <kbd class="key big desk-key" data-key aria-hidden="true"><span class="key-glyph">⌃</span><span class="key-name">control</span></kbd>
         <ol class="timeline" aria-label="Comment ça marche">
           <li data-step="hold"><span class="tl-dot"></span><span class="tl-label">Maintenez</span></li>
           <li data-step="speak"><span class="tl-dot"></span><span class="tl-label">Parlez</span></li>
@@ -93,6 +92,11 @@
           <li data-step="review"><span class="tl-dot"></span><span class="tl-label">Relu par l'IA<small>selon le contexte</small></span></li>
           <li data-step="written"><span class="tl-dot"></span><span class="tl-label">C'est écrit</span></li>
         </ol>
+        <!-- The bottom of a Mac keyboard; the row above fades out to suggest the rest. -->
+        <div class="keyboard" aria-hidden="true">
+          <div class="kb-row fade"><kbd class="key" style="--w:2.3"><span class="key-glyph">⇧</span><span class="key-name">shift</span></kbd><kbd class="key letter"><span class="key-name">Z</span></kbd><kbd class="key letter"><span class="key-name">X</span></kbd><kbd class="key letter"><span class="key-name">C</span></kbd><kbd class="key letter"><span class="key-name">V</span></kbd><kbd class="key letter"><span class="key-name">B</span></kbd><kbd class="key letter"><span class="key-name">N</span></kbd><kbd class="key letter"><span class="key-name">M</span></kbd><kbd class="key letter"><span class="key-name">,</span></kbd><kbd class="key letter"><span class="key-name">.</span></kbd><kbd class="key letter"><span class="key-name">/</span></kbd><kbd class="key" style="--w:2.3"><span class="key-glyph">⇧</span><span class="key-name">shift</span></kbd></div>
+          <div class="kb-row"><kbd class="key"><span class="key-glyph">🌐︎</span><span class="key-name">fn</span></kbd><kbd class="key" data-key><span class="key-glyph">⌃</span><span class="key-name">control</span></kbd><kbd class="key"><span class="key-glyph">⌥</span><span class="key-name">option</span></kbd><kbd class="key" style="--w:1.25"><span class="key-glyph">⌘</span><span class="key-name">command</span></kbd><kbd class="key space" style="--w:5.1"><span class="key-name"></span></kbd><kbd class="key" style="--w:1.25"><span class="key-glyph">⌘</span><span class="key-name">command</span></kbd><kbd class="key"><span class="key-glyph">⌥</span><span class="key-name">option</span></kbd><span class="kb-arrows"><kbd class="key arrow"><span class="key-name">◀</span></kbd><span class="kb-updown"><kbd class="key arrow half"><span class="key-name">▲</span></kbd><kbd class="key arrow half"><span class="key-name">▼</span></kbd></span><kbd class="key arrow"><span class="key-name">▶</span></kbd></span></div>
+        </div>
       </div>
     </div>
   </section>
