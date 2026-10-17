@@ -746,14 +746,15 @@ section {
 .card.wide p { grid-column: 1; grid-row: 3; }
 .card.wide .card-visual { grid-column: 2; grid-row: 1 / -1; padding-top: 0; }
 @media (max-width: 900px) {
-  /* Two columns: the last wide tile takes one, beside the languages, so no row is left half empty. */
-  .card.wide:last-child { grid-column: span 1; }
   .card.wide { display: flex; }
   .card.wide .card-visual { padding-top: 16px; }
+  /* Two columns: the wide tile on top leaves seven singles, so the last one
+     takes a whole row rather than leaving it half empty. */
+  .card.fill { grid-column: span 2; }
 }
 @media (max-width: 560px) {
   .card { padding: 24px 22px 22px; min-height: 0; }
-  .card.wide { grid-column: span 1; }
+  .card.wide, .card.fill { grid-column: span 1; }
 }
 
 .card.dark { background: #000; }
@@ -810,6 +811,23 @@ section {
 .reviewer img { display: block; width: 16px; height: 16px; border-radius: 4px; }
 .reviewer svg { display: block; }
 .reviewer.selected { border-color: var(--blue); color: var(--text); box-shadow: 0 0 0 1px var(--blue); }
+/* No network: the two on-device models, both lit. */
+.offline-demo { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.offline-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+.offline-badge svg { color: #ff3b30; }
+.offline-demo .reviewer-pick { width: 100%; }
+.offline-caption { font-size: 12px; color: var(--text-dim); }
 .reviewer em { margin-left: auto; font-style: normal; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--blue); }
 .clean-demo .raw { color: var(--text-dim); text-decoration: line-through; text-decoration-color: rgba(237, 23, 199, 0.6); }
 .clean-demo .clean { color: var(--text); margin-top: 10px; }
