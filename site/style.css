@@ -23,6 +23,9 @@
 
 * { box-sizing: border-box; }
 
+/* Hidden for the few milliseconds i18n.js takes to put English in. */
+html.i18n-pending body { visibility: hidden; }
+
 html { scroll-behavior: smooth; }
 
 body {
