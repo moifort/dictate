@@ -106,6 +106,8 @@ kbd .kbd-glyph { color: var(--text-muted); font-size: 0.95em; }
 
 .nav-links { display: flex; align-items: center; gap: 26px; color: var(--text-muted); }
 .nav-links a:hover { color: var(--text); }
+.nav-gh { display: inline-flex; align-items: center; gap: 6px; }
+.nav-github { display: block; }
 .nav-cta {
   color: #fff !important;
   background: var(--text);
