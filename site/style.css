@@ -564,22 +564,30 @@ section {
   .timeline li:nth-child(4)::before { display: none; }
 }
 
-/* The keyboard: big keys, one unit per key, widths in units. */
-/* 7.1 units and 4 gaps, never wider than the page minus its margins. */
-.keyboard { --g: 10px; --u: min(136px, calc((100vw - 80px - 4 * var(--g)) / 7.1)); }
-.kb-row { display: flex; gap: var(--g); justify-content: center; }
+/* The keyboard: as wide as the Mail window above it. The row holds 7.1
+   units and 4 gaps; each key takes its share, and the height follows. */
+.keyboard {
+  width: 100%;
+  max-width: 880px;
+  container-type: inline-size;
+  --g: 10px;
+  --u: calc((100cqw - 4 * var(--g)) / 7.1);
+}
+.kb-row { display: flex; gap: var(--g); }
 .keyboard .key.big {
   --w: 1;
-  width: calc(var(--u) * var(--w) + var(--g) * (var(--w) - 1));
+  flex: 0 0 calc(var(--u) * var(--w) + var(--g) * (var(--w) - 1));
+  width: auto;
   height: calc(var(--u) * 0.68);
+  padding: calc(var(--u) * 0.09) calc(var(--u) * 0.11);
+  border-radius: calc(var(--u) * 0.15);
+  font-size: calc(var(--u) * 0.13);
 }
-/* On phones the unit comes from the screen width: 7.1 units and 4 gaps
-   between the page margins. Labels scale with the unit. */
+.keyboard .key.big .key-glyph { font-size: calc(var(--u) * 0.2); }
+.keyboard .key.big .key-name { font-size: calc(var(--u) * 0.125); }
 @media (max-width: 760px) {
-  .keyboard { --g: 6px; --u: min(136px, calc((100vw - 40px - 4 * var(--g)) / 7.1)); }
-  .keyboard .key.big { padding: calc(var(--u) * 0.08) calc(var(--u) * 0.1); border-radius: calc(var(--u) * 0.14); font-size: calc(var(--u) * 0.12); box-shadow: 0 3px 0 #c6c6ce, 0 6px 12px rgba(0, 0, 0, 0.12); }
-  .keyboard .key.big .key-glyph { font-size: calc(var(--u) * 0.18); }
-  .keyboard .key.big .key-name { font-size: calc(var(--u) * 0.12); }
+  .keyboard { --g: 6px; }
+  .keyboard .key.big { box-shadow: 0 3px 0 #c6c6ce, 0 6px 12px rgba(0, 0, 0, 0.12); }
   .keyboard .key.big.pressed { transform: translateY(3px); box-shadow: 0 0 0 #c6c6ce, 0 3px 6px rgba(0, 0, 0, 0.12); }
 }
 
