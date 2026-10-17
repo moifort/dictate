@@ -36,6 +36,7 @@
     <a href="#demo" data-i18n="nav.demo">Démo</a>
     <a href="#features" data-i18n="nav.features">Fonctionnalités</a>
     <a href="#faq" data-i18n="nav.faq">Questions</a>
+    <a href="#docs" data-i18n="nav.docs">Documentation</a>
     <a class="nav-gh" href="https://github.com/moifort/dictate" rel="noopener"><svg class="nav-github" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>GitHub</a>
     <a class="nav-cta" href="https://github.com/moifort/dictate/releases/latest" data-download data-i18n="nav.download">Télécharger</a>
   </nav>
@@ -307,6 +308,46 @@
     </div>
   </section>
 
+  <!-- Documentation -->
+  <section class="docs" id="docs">
+    <h2 class="section-title" data-i18n="docs.title">Documentation</h2>
+    <p class="section-lead" data-i18n="docs.lead">Tout se règle dans la fenêtre Réglages, depuis l'icône de Dictate dans la barre des menus.</p>
+
+    <div class="docs-list">
+      <article class="docs-entry">
+        <h3 data-i18n="docs.dictate.title">Dicter</h3>
+        <p data-i18n="docs.dictate.text">Maintenez <kbd><span class="kbd-glyph">⌃</span>control</kbd>, parlez, relâchez. La touche se change dans Réglages → Dictée : <kbd><span class="kbd-glyph">🌐︎</span>fn</kbd> marche aussi, à condition que macOS la laisse libre (Clavier → « Appuyer sur la touche 🌐 pour » → « Ne rien faire »). Un raccourci comme control-C n'enregistre rien. Dictate écoute encore un court instant après le relâchement, pour ne pas couper la dernière syllabe.</p>
+      </article>
+
+      <article class="docs-entry">
+        <h3 data-i18n="docs.review.title">Relecture</h3>
+        <p data-i18n="docs.review.intro">Réglages → Relecture choisit qui relit chaque dictée avant qu'elle soit écrite :</p>
+        <ul data-i18n="docs.review.list">
+          <li><strong>Claude</strong> : le modèle Haiku, via la commande <code>claude</code> de Claude Code ou de l'app Claude, sur votre abonnement. Le plus rapide, et le plus sûr sur le jargon. Il lui faut une connexion.</li>
+          <li><strong>Apple Intelligence</strong> : le modèle intégré à macOS. Rien ne quitte le Mac, aucun compte, ça marche hors ligne. Il faut Apple Intelligence activé dans Réglages Système, et un Mac qui le prend en charge.</li>
+          <li><strong>Aucun</strong> : la transcription est écrite telle quelle, hésitations comprises.</li>
+        </ul>
+        <p data-i18n="docs.review.default">Tant que vous ne choisissez pas, Dictate prend Claude si sa commande est installée, sinon Apple Intelligence, sinon aucun. Si la relecture ne répond pas dans les huit secondes, la transcription brute est écrite quand même, et le menu de Dictate le signale.</p>
+        <p data-i18n="docs.review.context">« Lire le texte autour du curseur » envoie au relecteur ce qui est déjà écrit dans le champ, le titre de la fenêtre et le domaine du site, pour qu'il reprenne vos noms et votre ton. Jamais un mot de passe. Désactivez-le si vous préférez que seule la dictée parte.</p>
+      </article>
+
+      <article class="docs-entry">
+        <h3 data-i18n="docs.lexicon.title">Lexique</h3>
+        <p data-i18n="docs.lexicon.text">Réglages → Lexique : un terme par ligne, noms, outils, sigles. La relecture les écrit exactement ainsi. Avec « Suggérer des mots pour le vocabulaire », Dictate relit le champ quelques secondes après chaque dictée, repère les noms que vous corrigez et vous propose de les ajouter, depuis son menu. Tout reste sur le Mac.</p>
+      </article>
+
+      <article class="docs-entry">
+        <h3 data-i18n="docs.language.title">Langue</h3>
+        <p data-i18n="docs.language.text">Réglages → Dictée : la langue est reprise de macOS, changez-la si vous dictez dans une autre. Vingt-cinq langues européennes, et les termes techniques anglais restent reconnus quelle que soit la langue.</p>
+      </article>
+
+      <article class="docs-entry">
+        <h3 data-i18n="docs.updates.title">Mises à jour et désinstallation</h3>
+        <p data-i18n="docs.updates.text">Dictate vérifie les nouvelles versions et les installe tout seul ; « Installer les mises à jour automatiquement » se désactive dans Réglages → Général, où l'on peut aussi le lancer à l'ouverture de session. Le bouton Désinstaller, au même endroit, met l'app, ses modèles et ses statistiques à la Corbeille et efface les réglages.</p>
+      </article>
+    </div>
+  </section>
+
   <!-- Download -->
   <section class="download" id="download">
     <div class="download-icon" aria-hidden="true">
@@ -339,10 +380,10 @@
 <footer class="footer">
   <p data-i18n="footer.credit">Dictate est un projet open source de <a href="https://github.com/moifort" rel="noopener">Thibaut Mottet</a>.
      Transcription par Parakeet (NVIDIA) via FluidAudio. Relecture par Claude (Anthropic) ou Apple Intelligence.</p>
-  <p><a href="https://github.com/moifort/dictate/releases" data-i18n="footer.releases">Toutes les versions</a> · <a href="https://github.com/moifort/dictate/issues" data-i18n="footer.issues">Signaler un problème</a> · <a href="https://github.com/moifort/dictate#readme" data-i18n="footer.docs">Documentation</a></p>
+  <p><a href="https://github.com/moifort/dictate/releases" data-i18n="footer.releases">Toutes les versions</a> · <a href="https://github.com/moifort/dictate/issues" data-i18n="footer.issues">Signaler un problème</a> · <a href="#docs" data-i18n="footer.docs">Documentation</a></p>
 </footer>
 
-<script src="i18n.js?v=20261017-72"></script>
-<script src="main.js?v=20261017-72" defer></script>
+<script src="i18n.js?v=20261017-73"></script>
+<script src="main.js?v=20261017-73" defer></script>
 </body>
 </html>
