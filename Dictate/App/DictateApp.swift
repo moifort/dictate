@@ -22,13 +22,14 @@ struct DictateApp: App {
         }
         .windowResizability(.contentSize)
         .windowStyle(.hiddenTitleBar)
-        .defaultLaunchBehavior(appDelegate.needsSetup ? .presented : .suppressed)
+        .defaultLaunchBehavior(appDelegate.needsSetup || ScreenshotMode.window == "setup" ? .presented : .suppressed)
 
         Window("Statistiques", id: "stats") {
             StatsView(history: appDelegate.model.history)
+                .modifier(ScreenshotSettingsOpener())
         }
         .defaultSize(width: 560, height: 860)
-        .defaultLaunchBehavior(.suppressed)
+        .defaultLaunchBehavior(["stats", "settings"].contains(ScreenshotMode.window) ? .presented : .suppressed)
 
         #if !APP_STORE
         Window("Mise à jour", id: "update") {
@@ -73,6 +74,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         guard !Self.isRunningTests else { return }
         model.start()
         if needsSetup { NSApp.activate() }
+        // Active, so the window is drawn as the front one.
+        if ScreenshotMode.window != nil { NSApp.activate() }
     }
 
     func applicationWillTerminate(_ notification: Notification) {

@@ -3417,18 +3417,18 @@
         }
       }
     },
-    "Un second modèle cherche ces termes dans l'audio et corrige la transcription avant Claude. Entraîné surtout sur l'anglais : son effet en français reste à mesurer. Environ 100 Mo à télécharger.": {
+    "Un second modèle cherche ces termes dans l'audio et corrige la transcription avant la relecture. Entraîné surtout sur l'anglais : son effet en français reste à mesurer. Environ 100 Mo à télécharger.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "A second model looks for these terms in the audio and fixes the transcript before Claude. Trained mostly on English: its effect in other languages is still to be measured. About 100 MB to download."
+            "value": "A second model looks for these terms in the audio and fixes the transcript before the review. Trained mostly on English: its effect in other languages is still to be measured. About 100 MB to download."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Un second modèle cherche ces termes dans l'audio et corrige la transcription avant Claude. Entraîné surtout sur l'anglais : son effet en français reste à mesurer. Environ 100 Mo à télécharger."
+            "value": "Un second modèle cherche ces termes dans l'audio et corrige la transcription avant la relecture. Entraîné surtout sur l'anglais : son effet en français reste à mesurer. Environ 100 Mo à télécharger."
           }
         }
       }

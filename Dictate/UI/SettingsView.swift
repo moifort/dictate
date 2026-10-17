@@ -5,19 +5,20 @@ import SwiftUI
 /// the words it must get right, the review pass.
 struct SettingsView: View {
     @Bindable var model: AppModel
+    @State private var tab = ScreenshotMode.settingsTab ?? "general"
 
     var body: some View {
-        TabView {
-            Tab("Général", systemImage: "gearshape") {
+        TabView(selection: $tab) {
+            Tab("Général", systemImage: "gearshape", value: "general") {
                 GeneralSettings(model: model)
             }
-            Tab("Dictée", systemImage: "mic") {
+            Tab("Dictée", systemImage: "mic", value: "dictation") {
                 DictationSettings(model: model)
             }
-            Tab("Lexique", systemImage: "character.book.closed") {
+            Tab("Lexique", systemImage: "character.book.closed", value: "lexicon") {
                 LexiconSettings(model: model)
             }
-            Tab("Relecture", systemImage: "sparkles") {
+            Tab("Relecture", systemImage: "sparkles", value: "review") {
                 ReviewSettings(model: model)
             }
         }
@@ -225,7 +226,7 @@ private struct LexiconSettings: View {
                     )
                     .onChange(of: model.settings.boostVocabulary) { model.vocabularyBoostingChanged() }
                     Hint("""
-                        Un second modèle cherche ces termes dans l'audio et corrige la transcription avant Claude. \
+                        Un second modèle cherche ces termes dans l'audio et corrige la transcription avant la relecture. \
                         Entraîné surtout sur l'anglais : son effet en français reste à mesurer. \
                         Environ 100 Mo à télécharger.
                         """)
@@ -589,7 +590,9 @@ private struct ReviewerPicker: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            ForEach(ReviewerTile.allCases.filter { $0 != .claude || !Distribution.isAppStore }) { reviewer in
+            // The App Store build shows only the reviewers it has: no Claude, no
+            // service still to come.
+            ForEach(ReviewerTile.allCases.filter { !Distribution.isAppStore || ($0.isAvailable && $0 != .claude) }) { reviewer in
                 Button {
                     selection = reviewer
                 } label: {

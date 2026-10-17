@@ -75,8 +75,12 @@ Left to do by hand, once (no public API):
    developer.apple.com/account: until then no new app can be submitted.
 2. **App Privacy**: Data Not Collected, except Diagnostics, Crash Data (Sentry),
    not linked to the user, not used for tracking.
-3. **Screenshots**: at least one at 2880×1800, 2560×1600, 1440×900 or
-   1280×800 (setup window, settings, the pill over an app).
+3. **Screenshots**: done. Five 2880×1800 panels in
+   `docs/app-store-screenshots/`, uploaded to both locales by
+   `scripts/app-store/screenshots.rb`. To retake the windows, launch a Debug
+   build with the App Store flag and `-ScreenshotWindow setup|stats|settings`
+   (`-ScreenshotTab general|dictation|lexicon|review`,
+   `-ApplePersistenceIgnoreState YES -AppleLanguages "(en)"`).
 4. **App Review information**: contact name, email and phone, and these notes
    (Accessibility is the usual rejection reason, explain it):
    > Dictate is push-to-talk dictation. It needs Input Monitoring to see the
