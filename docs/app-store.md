@@ -75,8 +75,8 @@ Left to do by hand, once (no public API):
    developer.apple.com/account: until then no new app can be submitted.
 2. **App Privacy**: Data Not Collected, except Diagnostics, Crash Data (Sentry),
    not linked to the user, not used for tracking.
-3. **Screenshots**: done. Five 2880×1800 panels in
-   `docs/app-store-screenshots/`, uploaded to both locales by
+3. **Screenshots**: done. Six 2880×1800 panels per locale, the site's
+   dictation demo first, in `docs/app-store-screenshots/<locale>/`, uploaded by
    `scripts/app-store/screenshots.rb`. To retake the windows, launch a Debug
    build with the App Store flag and `-ScreenshotWindow setup|stats|settings`
    (`-ScreenshotTab general|dictation|lexicon|review`,

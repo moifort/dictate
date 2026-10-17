@@ -43,10 +43,11 @@ if [ -n "${ASC_KEY_ID:-}" ] && [ -n "${ASC_ISSUER_ID:-}" ] && [ -n "${ASC_KEY_PA
 fi
 
 if [ -n "${MAS_PROFILE_NAME:-}" ]; then
+  # Read by the Dictate target only (project.yml).
   SIGNING=(
-    CODE_SIGN_STYLE=Manual
-    CODE_SIGN_IDENTITY="Apple Distribution"
-    PROVISIONING_PROFILE_SPECIFIER="$MAS_PROFILE_NAME"
+    MAS_SIGN_STYLE=Manual
+    MAS_SIGN_IDENTITY="Apple Distribution"
+    MAS_PROFILE_NAME="$MAS_PROFILE_NAME"
   )
   PORTAL=()
   EXPORT_SIGNING="<key>signingStyle</key><string>manual</string>
@@ -54,7 +55,7 @@ if [ -n "${MAS_PROFILE_NAME:-}" ]; then
   <key>installerSigningCertificate</key><string>3rd Party Mac Developer Installer</string>
   <key>provisioningProfiles</key><dict><key>$BUNDLE_ID</key><string>$MAS_PROFILE_NAME</string></dict>"
 else
-  SIGNING=(CODE_SIGN_STYLE=Automatic)
+  SIGNING=(MAS_SIGN_STYLE=Automatic)
   PORTAL=(-allowProvisioningUpdates ${AUTH[@]+"${AUTH[@]}"})
   EXPORT_SIGNING="<key>signingStyle</key><string>automatic</string>"
 fi

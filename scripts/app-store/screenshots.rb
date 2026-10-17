@@ -1,13 +1,12 @@
-# Uploads the Mac App Store screenshots (docs/app-store-screenshots/*.jpg,
-# 2880×1800, in name order) to every locale of the editable macOS version,
-# replacing what is there.
+# Uploads the Mac App Store screenshots (docs/app-store-screenshots/<locale>/*.jpg,
+# 2880×1800, in name order) to the matching locale of the editable macOS
+# version, replacing what is there.
 #
 #   ASC_KEY_ID=… ASC_ISSUER_ID=… ruby scripts/app-store/screenshots.rb
 require_relative "asc"
 require "digest"
 
-FILES = Dir[File.expand_path("../../docs/app-store-screenshots/*.jpg", __dir__)].sort
-abort("No screenshots") if FILES.empty?
+ROOT = File.expand_path("../../docs/app-store-screenshots", __dir__)
 
 app = ASC.get("/v1/apps?filter[bundleId]=com.polyforms.dictate")["data"].first or abort("No Dictate app")
 version = ASC.get("/v1/apps/#{app['id']}/appStoreVersions?filter[platform]=MAC_OS")["data"]
@@ -32,6 +31,8 @@ def upload(set_id, path)
 end
 
 ASC.get("/v1/appStoreVersions/#{version['id']}/appStoreVersionLocalizations")["data"].each do |loc|
+  files = Dir[File.join(ROOT, loc["attributes"]["locale"], "*.jpg")].sort
+  next puts("#{loc['attributes']['locale']}: no screenshots, left as is") if files.empty?
   sets = ASC.get("/v1/appStoreVersionLocalizations/#{loc['id']}/appScreenshotSets")["data"]
   set = sets.find { |s| s["attributes"]["screenshotDisplayType"] == "APP_DESKTOP" }
   if set
@@ -42,6 +43,6 @@ ASC.get("/v1/appStoreVersions/#{version['id']}/appStoreVersionLocalizations")["d
       relationships: { appStoreVersionLocalization: { data: { type: "appStoreVersionLocalizations", id: loc["id"] } } } } })
     set = created["data"]
   end
-  FILES.each { |f| upload(set["id"], f) }
-  puts "#{loc['attributes']['locale']}: #{FILES.size} screenshots uploaded"
+  files.each { |f| upload(set["id"], f) }
+  puts "#{loc['attributes']['locale']}: #{files.size} screenshots uploaded"
 end

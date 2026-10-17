@@ -67,6 +67,12 @@ targets:
         # A new app on the store: under the Polyforms identifier from the start.
         AppStore:
           PRODUCT_BUNDLE_IDENTIFIER: com.polyforms.dictate
+          # Automatic on the Mac; the release workflow sets the MAS_* settings
+          # for manual signing. Here rather than on the command line, where the
+          # profile would reach the Swift packages, which refuse one.
+          CODE_SIGN_STYLE: "$(MAS_SIGN_STYLE:default=Automatic)"
+          CODE_SIGN_IDENTITY: "$(MAS_SIGN_IDENTITY:default=Apple Development)"
+          PROVISIONING_PROFILE_SPECIFIER: "$(MAS_PROFILE_NAME)"
           CODE_SIGN_ENTITLEMENTS: Dictate/Resources/DictateAppStore.entitlements
           SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) APP_STORE"
   DictateTests:
