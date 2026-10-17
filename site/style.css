@@ -608,8 +608,8 @@ section {
 .sw-crown.pressed { transform: translateY(4px); }
 .sw-hand { transform-origin: 80px 100px; }
 
-/* Four apps as on a phone's home screen, each with the tone Dictate takes
-   there underneath; the lit one lifts and its tone turns blue. */
+/* Four apps as on a phone's home screen, named underneath; the lit one
+   lifts and its name turns blue. */
 .context-demo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 12px; width: 100%; }
 .chip {
   display: flex;
@@ -618,7 +618,7 @@ section {
   gap: 8px;
   font-size: 13px;
   font-weight: 500;
-  color: var(--text-dim);
+  color: var(--text-muted);
   white-space: nowrap;
   transition: color 0.3s ease;
 }
