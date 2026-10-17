@@ -30,6 +30,25 @@ The Parakeet integration tests only run once the model
 has been downloaded by the app; the vocabulary boosting ones also need the
 CTC model, downloaded when the setting is turned on.
 
+## Localization
+
+The app speaks French and English. Strings are written in French in the code
+and translated in the String Catalogs `Dictate/Resources/Localizable.xcstrings`
+and `InfoPlist.xcstrings`. The bundle's development region is English, so
+every Mac not set to French gets English; for French not to fall back to
+English as well, every key carries its French value explicitly.
+
+Text shown from a `String` variable is not localized by SwiftUI: build it with
+`String(localized:)`, or type the property as `LocalizedStringKey`. After
+adding strings, build with `SWIFT_EMIT_LOC_STRINGS=YES` and merge them into
+the catalog (Xcode does it on build; on the command line, `xcrun xcstringstool
+sync` with the `.stringsdata` files from the build), then give each new key
+its French and English values. The tests run in French (`language: fr` in the
+scheme), since some of them read user-facing text.
+
+The disk image's background is one picture for every Mac: its instruction is
+written in English, then French.
+
 ## Updates
 
 Dictate checks GitHub releases shortly after launch and every six hours. A

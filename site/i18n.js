@@ -60,7 +60,7 @@
     "faq.q4": "How is it different from macOS dictation?",
     "faq.a4": "Apple's dictation writes what it hears, hesitations included, and you have to start it and stop it. Dictate fits in one key you hold, removes the “ums” and repetitions, fixes technical terms and adapts the tone to the app. And your voice doesn't go to Apple.",
     "faq.q5": "Which languages?",
-    "faq.a5": "Twenty-five European languages: English, French, German, Spanish, Italian, Portuguese, Dutch, Polish, Swedish, Danish, Finnish, Hungarian, Greek, Czech, Romanian, Ukrainian and more. You pick the language in Settings and add your vocabulary in the lexicon.",
+    "faq.a5": "Twenty-five European languages: English, French, German, Spanish, Italian, Portuguese, Dutch, Polish, Swedish, Danish, Finnish, Hungarian, Greek, Czech, Romanian, Ukrainian and more. You pick the language in Settings and add your vocabulary in the lexicon. The app itself is in English and French, following your Mac's language.",
     "faq.q6": "What does Dictate ask for at setup?",
     "faq.a6": "Three macOS permissions: the microphone, input monitoring for the key, and accessibility to find the field and type into it. An assistant walks you through them one by one, then downloads the transcription model. After that, Dictate lives in the menu bar and keeps itself up to date.",
     "faq.q7": "Which Macs?",
