@@ -59,7 +59,7 @@
     "faq.q1": "Why is it free?",
     "faq.a1": "Because Dictate costs nothing to run: no server, no account. Transcription happens on your Mac, and the review goes through the Claude subscription you already have, or through Apple Intelligence on your Mac. There's nothing to pay us, so nothing to bill you. No pro version, no limited trial.",
     "faq.q2": "Do I need a Claude subscription?",
-    "faq.a2": "No. With Claude Code or the Claude app installed, Claude reviews each dictation through the <code>claude</code> command, on your subscription. Without Claude, Apple Intelligence reviews it right on your Mac. You pick one or the other in Settings, and if the review doesn't answer, the raw transcript is inserted anyway.",
+    "faq.a2": "No. With Claude Code or the Claude app installed and signed in to your account, Claude reviews each dictation through the <code>claude</code> command, on your subscription. Without Claude, Apple Intelligence reviews it right on your Mac. You pick one or the other in Settings, and if the review doesn't answer, the raw transcript is inserted anyway.",
     "faq.q3": "Does it work offline?",
     "faq.a3": "Yes. The transcription model (about 630 MB, downloaded at setup) runs entirely on your Mac, and so does the review when it goes through Apple Intelligence. Only the review by Claude needs a connection.",
     "faq.q4": "How is it different from macOS dictation?",

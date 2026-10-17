@@ -24,14 +24,16 @@ ready-to-send text.
   or a terminal.
 - **Private by design.** Speech is transcribed on your Mac with Parakeet; the
   audio never leaves it. The cleanup is done by Claude through your own Claude
-  subscription when Claude Code is installed, or else by Apple Intelligence's
+  subscription when Claude Code is installed and signed in, or else by Apple Intelligence's
   on-device model, so nothing leaves the Mac. Pick either in Settings, or turn
   the cleanup off entirely. Crashes and errors are reported to Sentry without
   any of your text.
 - **Your language, your words.** Pick the dictation language among 25
   European languages and add your own
   vocabulary — names, jargon, product terms — so they come out spelled right.
-  The app itself speaks English and French, following your Mac's language.
+  The app itself speaks English and French, following your Mac's language;
+  the dictation language starts as your Mac's even when the interface falls
+  back to English.
 - **Discreet.** A small pill at the bottom of the screen shows that Dictate is
   listening, then working, and disappears.
 - **Your numbers.** A statistics window charts words, dictations, speaking

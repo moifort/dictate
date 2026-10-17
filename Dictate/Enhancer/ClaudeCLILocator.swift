@@ -64,6 +64,40 @@ nonisolated struct ClaudeCLILocator: Sendable {
         }.value
     }
 
+    /// Runs `claude auth status`: whether an account is signed in, nil when the
+    /// CLI does not answer in JSON (versions without the command) or hangs.
+    static func isSignedIn(_ executable: URL, timeout: TimeInterval = 5) async -> Bool? {
+        await Task.detached {
+            let process = Process()
+            let output = Pipe()
+            process.executableURL = executable
+            process.arguments = ["auth", "status"]
+            process.standardInput = FileHandle.nullDevice
+            process.standardOutput = output
+            process.standardError = FileHandle.nullDevice
+            do {
+                try process.run()
+            } catch {
+                ErrorReporter.capture(error, "claude auth status could not be run", category: "enhancer", level: .warning)
+                return nil
+            }
+            // An older CLI may take "auth status" for a prompt and wait.
+            DispatchQueue.global().asyncAfter(deadline: .now() + timeout) {
+                if process.isRunning { process.terminate() }
+            }
+            let data = output.fileHandleForReading.readDataToEndOfFile()
+            process.waitUntilExit()
+            // Signed out exits non-zero but still answers in JSON.
+            return parseSignedIn(data)
+        }.value
+    }
+
+    /// `{"loggedIn": true, …}` → `true`.
+    static func parseSignedIn(_ output: Data) -> Bool? {
+        struct Status: Decodable { let loggedIn: Bool }
+        return (try? JSONDecoder().decode(Status.self, from: output))?.loggedIn
+    }
+
     /// `2.1.3 (Claude Code)` → `2.1.3`.
     static func parseVersion(_ output: String) -> String? {
         guard let first = output.split(whereSeparator: \.isWhitespace).first, first.first?.isNumber == true else {

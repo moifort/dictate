@@ -849,22 +849,6 @@
         }
       }
     },
-    "Choix automatique : Claude si sa commande est installée, sinon Apple Intelligence, sinon aucun.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Automatic choice: Claude if its command is installed, otherwise Apple Intelligence, otherwise none."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choix automatique : Claude si sa commande est installée, sinon Apple Intelligence, sinon aucun."
-          }
-        }
-      }
-    },
     "Claude": {
       "localizations": {
         "en": {
@@ -3805,6 +3789,70 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Choix automatique : Claude si sa commande est installée et connectée à un compte, sinon Apple Intelligence, sinon aucun.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic choice: Claude if its command is installed and signed in to an account, otherwise Apple Intelligence, otherwise none."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choix automatique : Claude si sa commande est installée et connectée à un compte, sinon Apple Intelligence, sinon aucun."
+          }
+        }
+      }
+    },
+    "Claude n'est connecté à aucun compte : Apple Intelligence relit sur ce Mac. Connectez-vous à Claude pour qu'il prenne le relais.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude is not signed in to any account: Apple Intelligence reviews on this Mac. Sign in to Claude for it to take over."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude n'est connecté à aucun compte : Apple Intelligence relit sur ce Mac. Connectez-vous à Claude pour qu'il prenne le relais."
+          }
+        }
+      }
+    },
+    "claude %@, non connecté": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "claude %@, not signed in"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "claude %@, non connecté"
+          }
+        }
+      }
+    },
+    "Nécessite Claude Code ou l'app Claude, connecté à votre abonnement Claude.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Requires Claude Code or the Claude app, signed in to your Claude subscription."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nécessite Claude Code ou l'app Claude, connecté à votre abonnement Claude."
           }
         }
       }

@@ -68,6 +68,29 @@ struct ClaudeCLILocatorTests {
         #expect(await ClaudeCLILocator.version(of: script) == "2.1.293")
     }
 
+    @Test func parsesTheAuthStatus() {
+        #expect(ClaudeCLILocator.parseSignedIn(Data(#"{"loggedIn": true, "subscriptionType": "max"}"#.utf8)) == true)
+        #expect(ClaudeCLILocator.parseSignedIn(Data(#"{"loggedIn": false, "authMethod": "none"}"#.utf8)) == false)
+        #expect(ClaudeCLILocator.parseSignedIn(Data("Unknown command: auth".utf8)) == nil)
+    }
+
+    @Test func readsTheSignedOutStatusDespiteTheExitCode() async throws {
+        let script = try executable("#!/bin/sh\necho '{\"loggedIn\": false}'\nexit 1\n")
+        #expect(await ClaudeCLILocator.isSignedIn(script) == false)
+    }
+
+    @Test func givesUpOnACLIThatHangs() async throws {
+        let script = try executable("#!/bin/sh\nexec sleep 30\n")
+        #expect(await ClaudeCLILocator.isSignedIn(script, timeout: 0.5) == nil)
+    }
+
+    private func executable(_ contents: String) throws -> URL {
+        let script = home.appending(path: "claude")
+        try Data(contents.utf8).write(to: script)
+        try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: script.path)
+        return script
+    }
+
     @Test func shortensDisplayedPaths() {
         let locator = ClaudeCLILocator(home: home, systemDirectories: [])
         #expect(locator.displayPath(of: home.appending(path: ".local/bin/claude")) == "~/.local/bin/claude")

@@ -344,15 +344,18 @@ private struct ReviewStep: View {
 
         case .apple:
             if model.appleIntelligence.isAvailable {
-                (model.settings.reviewerIsChosen || Distribution.isAppStore
-                     ? Text("Apple Intelligence est prêt : la relecture se fait sur ce Mac.")
-                     : Text("Claude est introuvable : Apple Intelligence relit sur ce Mac. Installez Claude pour qu'il prenne le relais."))
+                appleReadyText
                     .font(.caption)
                     .foregroundStyle(.tertiary)
                 if !model.settings.reviewerIsChosen && !Distribution.isAppStore {
                     Actions {
-                        Link("Télécharger Claude", destination: URL(string: "https://claude.ai/download")!)
-                            .buttonStyle(.glass)
+                        if model.claudeCLIPath == nil {
+                            Link("Télécharger Claude", destination: URL(string: "https://claude.ai/download")!)
+                                .buttonStyle(.glass)
+                        } else {
+                            Button("Revérifier") { model.recheckClaude() }
+                                .buttonStyle(.glass)
+                        }
                     }
                 }
             } else {
@@ -372,7 +375,7 @@ private struct ReviewStep: View {
             }
 
         case .claude:
-            if let path = model.claudeCLIPath {
+            if let path = model.claudeCLIPath, model.claudeSignedIn {
                 Text(path.path)
                     .font(.caption.monospaced())
                     .foregroundStyle(.tertiary)
@@ -381,13 +384,15 @@ private struct ReviewStep: View {
                     .textSelection(.enabled)
             } else {
                 Actions {
-                    Link("Télécharger Claude", destination: URL(string: "https://claude.ai/download")!)
-                        .buttonStyle(.glassProminent)
-                    Button("Revérifier") {
-                        model.refreshClaudeCLI()
-                        model.refreshSetup()
+                    if model.claudeCLIPath == nil {
+                        Link("Télécharger Claude", destination: URL(string: "https://claude.ai/download")!)
+                            .buttonStyle(.glassProminent)
+                        Button("Revérifier") { model.recheckClaude() }
+                            .buttonStyle(.glass)
+                    } else {
+                        Button("Revérifier") { model.recheckClaude() }
+                            .buttonStyle(.glassProminent)
                     }
-                    .buttonStyle(.glass)
                     if model.appleIntelligence.isAvailable {
                         Button("Utiliser Apple Intelligence") { model.selectReviewer(.apple) }
                             .buttonStyle(.glass)
@@ -400,6 +405,18 @@ private struct ReviewStep: View {
                     .foregroundStyle(.tertiary)
             }
         }
+    }
+
+    /// Why the on-device model reviews: picked, or the automatic choice
+    /// because Claude is missing or signed out.
+    private var appleReadyText: Text {
+        if model.settings.reviewerIsChosen || Distribution.isAppStore {
+            return Text("Apple Intelligence est prêt : la relecture se fait sur ce Mac.")
+        }
+        if model.claudeCLIPath == nil {
+            return Text("Claude est introuvable : Apple Intelligence relit sur ce Mac. Installez Claude pour qu'il prenne le relais.")
+        }
+        return Text("Claude n'est connecté à aucun compte : Apple Intelligence relit sur ce Mac. Connectez-vous à Claude pour qu'il prenne le relais.")
     }
 }
 

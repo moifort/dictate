@@ -20,6 +20,9 @@ final class AppModel {
     /// Version reported by `claude --version`: nil while probing or when the binary does not answer.
     private(set) var claudeCLIVersion: String?
     private(set) var isProbingClaudeCLI = false
+    /// Whether `claude auth status` reports a signed-in account; false until
+    /// the first answer. Claude cannot review without one.
+    private(set) var claudeSignedIn = false
     private(set) var hotkeyActive = false
     private(set) var lastError: String?
     private(set) var reviewTestResult: String?
@@ -106,12 +109,15 @@ final class AppModel {
         refreshSetup()
     }
 
-    /// Until the user picks: Claude when its CLI is here, else the on-device
-    /// model when this Mac has it, else the raw transcript.
+    /// Until the user picks: Claude when its CLI is here and signed in, else
+    /// the on-device model when this Mac has it, else the raw transcript.
     private var automaticReviewer: Reviewer {
-        if claudeCLIPath != nil { return .claude }
+        if claudeReady { return .claude }
         return appleIntelligence.isAvailable ? .apple : .none
     }
+
+    /// Claude can review: its CLI is here and an account is signed in.
+    var claudeReady: Bool { claudeCLIPath != nil && claudeSignedIn }
 
     func start() {
         Log.app.info("""
@@ -140,7 +146,7 @@ final class AppModel {
             "language": settings.language,
             "reviewer": settings.reviewer.rawValue,
             "vocabulary_boosting": settings.boostedVocabulary.isEmpty ? "off" : "on",
-            "claude_cli": claudeCLIPath == nil ? "missing" : "found",
+            "claude_cli": claudeCLIPath == nil ? "missing" : claudeSignedIn ? "signed_in" : "signed_out",
             "apple_intelligence": appleIntelligence.isAvailable ? "available" : "unavailable",
         ])
     }
@@ -168,7 +174,7 @@ final class AppModel {
         switch settings.reviewer {
         case .none: true
         case .apple: appleIntelligence.isAvailable
-        case .claude: claudeCLIPath != nil
+        case .claude: claudeReady
         }
     }
 
@@ -249,6 +255,14 @@ final class AppModel {
         if settings.reviewer != before { enhancer.reset() }
     }
 
+    /// Asks the CLI again, e.g. after the user signed in to Claude.
+    func recheckClaude() {
+        let path = claudeCLIPath
+        refreshClaudeCLI()
+        // A new path was already probed.
+        if claudeCLIPath == path { probeClaudeCLI() }
+    }
+
     func claudeCLIDisplayPath(_ url: URL) -> String {
         locator.displayPath(of: url)
     }
@@ -258,14 +272,25 @@ final class AppModel {
         claudeCLIVersion = nil
         guard let path = claudeCLIPath else {
             isProbingClaudeCLI = false
+            claudeSignedIn = false
             return
         }
         isProbingClaudeCLI = true
         probeTask = Task {
-            let version = await ClaudeCLILocator.version(of: path)
+            async let version = ClaudeCLILocator.version(of: path)
+            // A CLI too old to answer keeps working as before: assume signed in.
+            async let signedIn = ClaudeCLILocator.isSignedIn(path)
+            let (probedVersion, probedSignedIn) = await (version, signedIn ?? true)
             guard !Task.isCancelled else { return }
-            claudeCLIVersion = version
+            let before = settings.reviewer
+            claudeCLIVersion = probedVersion
+            claudeSignedIn = probedSignedIn
             isProbingClaudeCLI = false
+            Log.app.info("claude signed in: \(probedSignedIn)")
+            // The automatic choice may have moved with the account: warm up the right one.
+            if settings.reviewer != before { enhancer.reset() }
+            refreshSetup()
+            reportSettings()
         }
     }
 

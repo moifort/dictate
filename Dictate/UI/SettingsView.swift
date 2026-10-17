@@ -398,10 +398,12 @@ private struct ReviewSettings: View {
         Form {
             LabeledContent("Relecture par :") {
                 VStack(alignment: .leading, spacing: 6) {
-                    ReviewerPicker(selection: reviewer)
+                    ReviewerPicker(selection: reviewer, claudeReady: model.claudeReady)
                     Hint(reviewerHint)
                 }
             }
+            // Signing in to Claude happens elsewhere: ask again each time the tab shows.
+            .onAppear { model.recheckClaude() }
 
             // Greyed out rather than removed under "Aucun", so that the window
             // keeps its height: it is sized to its content.
@@ -437,7 +439,7 @@ private struct ReviewSettings: View {
             String(localized: "Modèle Haiku, via votre compte Claude Code. Un peu plus rapide et plus sûr sur le jargon.")
         }
         guard !model.settings.reviewerIsChosen, !Distribution.isAppStore else { return hint }
-        return String(localized: "Choix automatique : Claude si sa commande est installée, sinon Apple Intelligence, sinon aucun.") + " " + hint
+        return String(localized: "Choix automatique : Claude si sa commande est installée et connectée à un compte, sinon Apple Intelligence, sinon aucun.") + " " + hint
     }
 
     private var appleStatus: some View {
@@ -513,7 +515,7 @@ private struct ReviewSettings: View {
     private var claudeCLIStatusIcon: some View {
         if model.isProbingClaudeCLI {
             ProgressView().controlSize(.small)
-        } else if model.claudeCLIVersion != nil {
+        } else if model.claudeCLIVersion != nil, model.claudeSignedIn {
             Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
         } else {
             Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
@@ -522,7 +524,9 @@ private struct ReviewSettings: View {
 
     private var claudeCLITitle: String {
         if model.claudeCLIPath == nil { return String(localized: "claude introuvable") }
-        if let version = model.claudeCLIVersion { return "claude \(version)" }
+        if let version = model.claudeCLIVersion {
+            return model.claudeSignedIn ? "claude \(version)" : String(localized: "claude \(version), non connecté")
+        }
         return model.isProbingClaudeCLI ? "claude" : String(localized: "claude ne répond pas")
     }
 
@@ -552,6 +556,8 @@ private struct ReviewSettings: View {
 /// A row of icon tiles, like the appearance picker in System Settings.
 private struct ReviewerPicker: View {
     @Binding var selection: ReviewerTile
+    /// Claude's tile is greyed out until its CLI is here and signed in.
+    let claudeReady: Bool
 
     var body: some View {
         HStack(spacing: 12) {
@@ -573,10 +579,18 @@ private struct ReviewerPicker: View {
                     }
                 }
                 .buttonStyle(.plain)
-                .disabled(!reviewer.isAvailable)
-                .help(reviewer.isAvailable ? Text(verbatim: "") : Text("Bientôt"))
+                .disabled(!reviewer.isAvailable || (reviewer == .claude && !claudeReady))
+                .help(help(for: reviewer))
             }
         }
+    }
+
+    private func help(for reviewer: ReviewerTile) -> Text {
+        if !reviewer.isAvailable { return Text("Bientôt") }
+        if reviewer == .claude && !claudeReady {
+            return Text("Nécessite Claude Code ou l'app Claude, connecté à votre abonnement Claude.")
+        }
+        return Text(verbatim: "")
     }
 }
 
