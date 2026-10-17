@@ -551,6 +551,9 @@ section {
 }
 .tl-label { text-align: center; line-height: 1.3; }
 .tl-label small { display: block; font-size: 12px; opacity: 0.75; }
+/* The app the dictation is reviewed for, with its icon: Mail, like the demo. */
+.tl-context { display: inline-flex !important; align-items: center; justify-content: center; gap: 5px; }
+.tl-context img { width: 14px; height: 14px; border-radius: 3px; }
 .timeline li.active { color: var(--text); }
 .timeline li.active .tl-dot { background: var(--blue); border-color: var(--blue); box-shadow: 0 0 0 5px rgba(26, 107, 242, 0.18); }
 .timeline li.done { color: rgba(0, 0, 0, 0.6); }
