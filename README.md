@@ -45,4 +45,14 @@ Download the latest `Dictate-<version>.dmg` from
 Dictate onto Applications and launch it. A short setup walks you through the
 permissions. Dictate then keeps itself up to date.
 
+Or, with [Homebrew](https://brew.sh):
+
+```bash
+brew install --cask moifort/tap/dictate
+```
+
 Requires macOS 27 on Apple Silicon.
+
+## License
+
+Dictate is released under the [MIT License](LICENSE).

@@ -15,6 +15,9 @@ name: Release
 #
 # Dictate cannot ship on the Mac App Store: its event tap, Accessibility access
 # and the `claude` subprocess are all incompatible with the sandbox.
+#
+# The Homebrew cask (moifort/homebrew-tap) needs nothing from here: its own
+# workflow checks the latest release every hour and bumps version and sha256.
 on:
   push:
     tags: ['v*']
