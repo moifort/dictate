@@ -583,15 +583,16 @@ section {
   width: auto;
   height: calc(var(--u) * 0.68);
   padding: calc(var(--u) * 0.09) calc(var(--u) * 0.11);
-  border-radius: calc(var(--u) * 0.15);
+  border-radius: calc(var(--u) * 0.065); /* a real Mac keycap's corners are tight */
   font-size: calc(var(--u) * 0.13);
 }
 .keyboard .key.big .key-glyph { font-size: calc(var(--u) * 0.2); }
 .keyboard .key.big .key-name { font-size: calc(var(--u) * 0.125); }
+/* On phones, only the control key, centred, at a fixed size. */
 @media (max-width: 760px) {
-  .keyboard { --g: 6px; }
-  .keyboard .key.big { box-shadow: 0 3px 0 #c6c6ce, 0 6px 12px rgba(0, 0, 0, 0.12); }
-  .keyboard .key.big.pressed { transform: translateY(3px); box-shadow: 0 0 0 #c6c6ce, 0 3px 6px rgba(0, 0, 0, 0.12); }
+  .keyboard { --g: 10px; --u: 124px; }
+  .kb-row { justify-content: center; }
+  .keyboard .key.big:not([data-key]) { display: none; }
 }
 
 /* ---------- Features ---------- */
