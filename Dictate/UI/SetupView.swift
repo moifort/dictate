@@ -629,7 +629,7 @@ private struct TryItPage: View {
     var body: some View {
         PageLayout(
             title: model.setup.isComplete ? "Tout est prêt" : "Essayer",
-            explanation: "Cliquez dans le champ, maintenez fn, parlez, relâchez."
+            explanation: "Cliquez dans le champ, maintenez \(model.settings.pushToTalkKey.displayName), parlez, relâchez."
         ) {
             Image(systemName: model.setup.isComplete ? "checkmark.seal.fill" : "waveform")
                 .font(.system(size: 60, weight: .medium))
