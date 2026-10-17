@@ -100,6 +100,13 @@
     };
   }
 
+  /** Start time and spoken length of talkingSpectrum's n-th phrase. */
+  function talkingPhrase(n) {
+    let start = 0;
+    for (let i = 0; i < n; i++) start += 1.8 + 1.6 * hash(i) + 0.45 + 0.45 * hash(i + 50);
+    return { start, speech: 1.8 + 1.6 * hash(n) };
+  }
+
   /** Builds the wave path, the way WaveShape does: a sine under a warped envelope. */
   function tracePath(ctx, width, midY, amplitude, center, frequency, phase, closed, focus = 1.5) {
     const warp = Math.log(0.5) / Math.log(center);
@@ -279,7 +286,7 @@
   const download = renderers.get("download");
   if (download) download.source = iconBreath;
   const hero = renderers.get("hero");
-  if (hero) hero.source = talkingSpectrum;
+  if (hero && reducedMotion) hero.source = talkingSpectrum;
   const featurePill = renderers.get("feature");
   if (featurePill) featurePill.source = (t) => speakingSpectrum(t * 0.7);
 
@@ -453,8 +460,44 @@
   // Feature cards
   // ---------------------------------------------------------------------------
 
-  // The big key presses itself every few seconds.
-  for (const key of document.querySelectorAll("[data-key-feature], [data-key-hero]")) {
+  // The hero: the key is held for one spoken phrase and the waves talk only
+  // while it is down, idle otherwise. Holding it with the pointer does the same.
+  const heroKey = document.querySelector("[data-key-hero]");
+  if (heroKey && hero && !reducedMotion) {
+    let phrase = 0;
+    let holding = false;
+    const startTalking = () => {
+      const { start } = talkingPhrase(phrase);
+      const pressedAt = performance.now() / 1000;
+      hero.source = (t) => talkingSpectrum(t - pressedAt + start);
+      heroKey.classList.add("pressed");
+      holding = true;
+      return talkingPhrase(phrase++).speech;
+    };
+    const stopTalking = () => {
+      hero.source = idleSpectrum;
+      heroKey.classList.remove("pressed");
+      holding = false;
+    };
+    heroKey.addEventListener("pointerdown", (e) => { if (e.button === 0) startTalking(); });
+    for (const type of ["pointerup", "pointercancel", "pointerleave"]) heroKey.addEventListener(type, stopTalking);
+    (async () => {
+      for (;;) {
+        await sleep(1800);
+        if (holding) continue;
+        const speech = startTalking();
+        const until = performance.now() + speech * 1000 + 150;
+        while (performance.now() < until) {
+          await sleep(50);
+          if (!heroKey.classList.contains("held") && !holding) break; // released by the pointer
+        }
+        if (!heroKey.classList.contains("held")) stopTalking();
+      }
+    })();
+  }
+
+  // The feature card's key presses itself every few seconds.
+  for (const key of document.querySelectorAll("[data-key-feature]")) {
     if (reducedMotion) break;
     (async () => {
       // The aviation mic in the same card is held along with the key.
