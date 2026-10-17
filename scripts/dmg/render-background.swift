@@ -123,10 +123,11 @@ func drawCentered(_ text: String, size: CGFloat, weight: NSFont.Weight, color: N
     let width = string.size().width
     string.draw(at: NSPoint(x: (pointSize.width - width) / 2, y: y))
 }
-drawCentered("Glissez Dictate dans Applications", size: 17, weight: .semibold,
+// One picture for every Mac, whatever its language: English first, then
+// French, the two languages the app speaks. The setup explains the rest.
+drawCentered("Drag Dictate to Applications", size: 17, weight: .semibold,
              color: NSColor(srgbRed: 0.18, green: 0.19, blue: 0.24, alpha: 1), y: 94)
-drawCentered("Puis maintenez la touche control pour dicter, relâchez pour écrire",
-             size: 12, weight: .regular,
+drawCentered("Glissez Dictate dans Applications", size: 13, weight: .regular,
              color: NSColor(srgbRed: 0.38, green: 0.39, blue: 0.46, alpha: 1), y: 74)
 
 NSGraphicsContext.restoreGraphicsState()
