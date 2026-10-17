@@ -685,9 +685,9 @@ section {
 .features { padding-top: 64px; }
 
 /* Apple-style highlights: borderless tiles on white, every row the same
-   height, the statement on top and a fixed-height visual pinned to the
-   bottom so the visuals line up across the row. Wide tiles put the text on
-   the left and the visual on the right. One dark tile. */
+   height, the statement on top and the visual centred in whatever room is
+   left below it, so a short statement never leaves a hole. Wide tiles put
+   the text on the left and the visual on the right. One dark tile. */
 .bento {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -726,9 +726,8 @@ section {
 }
 .card-visual {
   order: 3;
-  flex: none;
-  height: 190px;
-  margin-top: auto;
+  flex: 1 1 auto;
+  min-height: 190px;
   padding-top: 16px;
   display: flex;
   align-items: center;
@@ -745,12 +744,12 @@ section {
 }
 .card.wide h3 { grid-column: 1; grid-row: 2; }
 .card.wide p { grid-column: 1; grid-row: 3; }
-.card.wide .card-visual { grid-column: 2; grid-row: 1 / -1; height: auto; margin-top: 0; padding-top: 0; }
+.card.wide .card-visual { grid-column: 2; grid-row: 1 / -1; padding-top: 0; }
 @media (max-width: 900px) {
   /* Two columns: the last wide tile takes one, beside the languages, so no row is left half empty. */
   .card.wide:last-child { grid-column: span 1; }
   .card.wide { display: flex; }
-  .card.wide .card-visual { height: 190px; margin-top: auto; padding-top: 16px; }
+  .card.wide .card-visual { padding-top: 16px; }
 }
 @media (max-width: 560px) {
   .card { padding: 24px 22px 22px; min-height: 0; }
@@ -842,10 +841,21 @@ section {
 .sw-crown.pressed { transform: translateY(4px); }
 .sw-hand { transform-origin: 80px 100px; }
 
-/* Four apps as on a phone's home screen, named underneath; the lit one
-   lifts and its name turns blue. */
-.context-demo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 10px; width: 100%; }
+/* A shelf of apps gliding past, named underneath; the one passing the
+   middle lifts and its name turns blue. The track holds the list twice and
+   slides by half its width, so the loop never shows a seam; each chip
+   carries its own spacing so that half is exact. */
+.context-demo {
+  width: 100%;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+}
+.context-track { display: flex; width: max-content; padding: 8px 0 4px; animation: context-glide 32s linear infinite; }
+@keyframes context-glide { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .context-track { animation: none; } }
 .chip {
+  margin-right: 22px;
   display: flex;
   flex-direction: column;
   align-items: center;

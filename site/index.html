@@ -22,7 +22,7 @@
       if (!/^fr\b/i.test(lang)) document.documentElement.classList.add("i18n-en", "i18n-pending");
     })();
   </script>
-  <link rel="stylesheet" href="style.css?v=20261017-72">
+  <link rel="stylesheet" href="style.css?v=20261017-81">
 </head>
 <body>
 
@@ -235,10 +235,19 @@
       <article class="card">
         <div class="card-visual">
           <div class="context-demo" aria-hidden="true">
-            <span class="chip"><img src="apps/mail.png" width="60" height="60" alt="">Mail</span>
-            <span class="chip"><img src="apps/slack.svg" width="60" height="60" alt="">Slack</span>
-            <span class="chip"><img src="apps/claude.png" width="60" height="60" alt="">Claude Code</span>
-            <span class="chip"><img src="apps/terminal.png" width="60" height="60" alt="">Terminal</span>
+            <div class="context-track" data-context-track>
+              <span class="chip"><img src="apps/mail.png" width="60" height="60" alt="">Mail</span>
+              <span class="chip"><img src="apps/messages.png" width="60" height="60" alt="">Messages</span>
+              <span class="chip"><img src="apps/slack.svg" width="60" height="60" alt="">Slack</span>
+              <span class="chip"><img src="apps/discord.svg" width="60" height="60" alt="">Discord</span>
+              <span class="chip"><img src="apps/notes.png" width="60" height="60" alt="">Notes</span>
+              <span class="chip"><img src="apps/claude.png" width="60" height="60" alt="">Claude Code</span>
+              <span class="chip"><img src="apps/cursor.svg" width="60" height="60" alt="">Cursor</span>
+              <span class="chip"><img src="apps/terminal.png" width="60" height="60" alt="">Terminal</span>
+              <span class="chip"><img src="apps/textedit.png" width="60" height="60" alt="">TextEdit</span>
+              <span class="chip"><img src="apps/notion.png" width="60" height="60" alt="">Notion</span>
+              <span class="chip"><img src="apps/xcode.png" width="60" height="60" alt="">Xcode</span>
+            </div>
           </div>
         </div>
         <h3 data-i18n="context.title">S'adapte au contexte</h3>
@@ -348,7 +357,7 @@
   <p><a href="https://github.com/moifort/dictate/releases" data-i18n="footer.releases">Toutes les versions</a> · <a href="https://github.com/moifort/dictate/issues" data-i18n="footer.issues">Signaler un problème</a> · <a href="https://github.com/moifort/dictate#readme" data-i18n="footer.docs">Documentation</a></p>
 </footer>
 
-<script src="i18n.js?v=20261017-80"></script>
-<script src="main.js?v=20261017-80" defer></script>
+<script src="i18n.js?v=20261017-81"></script>
+<script src="main.js?v=20261017-81" defer></script>
 </body>
 </html>

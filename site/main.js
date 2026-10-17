@@ -611,16 +611,32 @@
     })();
   }
 
-  // The context chips light up one after another.
-  const chips = Array.from(document.querySelectorAll(".context-demo .chip"));
-  if (chips.length) {
-    let i = 0;
-    chips[0].classList.add("lit");
-    setInterval(() => {
-      chips[i].classList.remove("lit");
-      i = (i + 1) % chips.length;
-      chips[i].classList.add("lit");
-    }, 1400);
+  // The context shelf: the list is doubled for a seamless loop, and the
+  // chip closest to the middle of the shelf is the lit one.
+  const contextTrack = document.querySelector("[data-context-track]");
+  if (contextTrack) {
+    contextTrack.innerHTML += contextTrack.innerHTML;
+    const chips = Array.from(contextTrack.querySelectorAll(".chip"));
+    const shelf = contextTrack.parentElement;
+    let lit = null;
+    const light = () => {
+      const box = shelf.getBoundingClientRect();
+      const middle = box.left + box.width / 2;
+      let best = null;
+      let bestDistance = Infinity;
+      for (const chip of chips) {
+        const rect = chip.getBoundingClientRect();
+        const distance = Math.abs(rect.left + rect.width / 2 - middle);
+        if (distance < bestDistance) { bestDistance = distance; best = chip; }
+      }
+      if (best !== lit) {
+        if (lit) lit.classList.remove("lit");
+        best.classList.add("lit");
+        lit = best;
+      }
+    };
+    light();
+    setInterval(light, 120);
   }
 
   // The cursor card types a phrase in one app after another.
