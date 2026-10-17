@@ -741,6 +741,8 @@ section {
 .card.wide p { grid-column: 1; grid-row: 3; }
 .card.wide .card-visual { grid-column: 2; grid-row: 1 / -1; height: auto; margin-top: 0; padding-top: 0; }
 @media (max-width: 900px) {
+  /* Two columns: the last wide tile takes one, beside the languages, so no row is left half empty. */
+  .card.wide:last-child { grid-column: span 1; }
   .card.wide { display: flex; }
   .card.wide .card-visual { height: 190px; margin-top: auto; padding-top: 16px; }
 }
