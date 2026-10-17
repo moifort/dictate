@@ -86,6 +86,11 @@ version = ASC.get("/v1/apps/#{app_id}/appStoreVersions?filter[platform]=MAC_OS")
 abort("No editable macOS version") unless info && version
 puts "App #{app_id}, info #{info['id']}, version #{version['attributes']['versionString']} (#{version['id']})"
 
+# Dictate shows no third-party content: the speech model is not content.
+ASC.request(:patch, "/v1/apps/#{app_id}", { data: { type: "apps", id: app_id, attributes: {
+  contentRightsDeclaration: "DOES_NOT_USE_THIRD_PARTY_CONTENT"
+} } })
+
 # Categories, then the age rating: nothing in Dictate calls for a rating.
 ASC.request(:patch, "/v1/appInfos/#{info['id']}", { data: { type: "appInfos", id: info["id"], relationships: {
   primaryCategory: { data: { type: "appCategories", id: "PRODUCTIVITY" } },

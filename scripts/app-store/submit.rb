@@ -25,11 +25,20 @@ ASC.request(:patch, "/v1/appStoreVersions/#{version['id']}", { data: { type: "ap
   relationships: { build: { data: { type: "builds", id: build["id"] } } } } })
 puts "Build #{build_number} attached to #{marketing}"
 
-_, submission = ASC.request(:post, "/v1/reviewSubmissions", { data: { type: "reviewSubmissions",
-  attributes: { platform: "MAC_OS" }, relationships: { app: { data: { type: "apps", id: app["id"] } } } } })
-submission_id = submission["data"]["id"]
-ASC.request(:post, "/v1/reviewSubmissionItems", { data: { type: "reviewSubmissionItems",
-  relationships: { reviewSubmission: { data: { type: "reviewSubmissions", id: submission_id } },
-                   appStoreVersion: { data: { type: "appStoreVersions", id: version["id"] } } } } })
+# Reuse a submission left open by an earlier, refused attempt.
+open_submission = ASC.get("/v1/reviewSubmissions?filter[app]=#{app['id']}&filter[platform]=MAC_OS&filter[state]=READY_FOR_REVIEW")["data"].first
+if open_submission
+  submission_id = open_submission["id"]
+else
+  _, submission = ASC.request(:post, "/v1/reviewSubmissions", { data: { type: "reviewSubmissions",
+    attributes: { platform: "MAC_OS" }, relationships: { app: { data: { type: "apps", id: app["id"] } } } } })
+  submission_id = submission["data"]["id"]
+end
+items = ASC.get("/v1/reviewSubmissions/#{submission_id}/items")["data"]
+if items.empty?
+  ASC.request(:post, "/v1/reviewSubmissionItems", { data: { type: "reviewSubmissionItems",
+    relationships: { reviewSubmission: { data: { type: "reviewSubmissions", id: submission_id } },
+                     appStoreVersion: { data: { type: "appStoreVersions", id: version["id"] } } } } })
+end
 ASC.request(:patch, "/v1/reviewSubmissions/#{submission_id}", { data: { type: "reviewSubmissions", id: submission_id, attributes: { submitted: true } } })
 puts "Dictate #{marketing} (#{build_number}) submitted for review"
