@@ -28,7 +28,7 @@ settings:
     CODE_SIGN_STYLE: Automatic
     MACOSX_DEPLOYMENT_TARGET: "27.0"
     # Overridden by the release workflow from the tag and the commit count.
-    MARKETING_VERSION: "0.1.0"
+    MARKETING_VERSION: "1.0.0"
     CURRENT_PROJECT_VERSION: "1"
 packages:
   FluidAudio:
