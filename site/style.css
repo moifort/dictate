@@ -230,25 +230,26 @@ section {
     radial-gradient(50% 50% at 70% 25%, rgba(20, 209, 204, 0.22), transparent 60%),
     linear-gradient(160deg, #e9ecf6, #d7dbea);
 }
-/* Fades in from the white hero above. */
-.demo::before {
+/* Fades in from the white hero above, and out into the white section below. */
+.demo::before, .demo::after {
   content: "";
   position: absolute;
-  left: 0; right: 0; top: 0;
+  left: 0; right: 0;
   height: 220px;
-  background: linear-gradient(#fff, rgba(255, 255, 255, 0));
   pointer-events: none;
 }
+.demo::before { top: 0; background: linear-gradient(#fff, rgba(255, 255, 255, 0)); }
+.demo::after { bottom: 0; background: linear-gradient(rgba(255, 255, 255, 0), #fff); }
 
 /* Exactly one screen under the sticky nav, so the window, the key and the
    timeline are all in view at once. */
 .desktop {
   position: relative;
-  min-height: min(calc(100vh - var(--nav-h)), 720px);
+  min-height: min(calc(100vh - var(--nav-h)), 760px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 36px 20px 132px;
+  padding: 36px 20px 150px;
   text-align: left;
 }
 
