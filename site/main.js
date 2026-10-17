@@ -466,38 +466,51 @@
   // Feature cards
   // ---------------------------------------------------------------------------
 
-  // The hero: the key is held for one spoken phrase and the waves talk only
-  // while it is down, idle otherwise. Holding it with the pointer does the same.
+  // The hero: on its own, the key is held for one spoken phrase every few
+  // seconds and the waves talk only while it is down. When the visitor holds
+  // it, with the pointer or with the real control key, someone talks until
+  // they let go; then the loop takes over again.
   const heroKey = document.querySelector("[data-key-hero]");
   if (heroKey && hero && !reducedMotion) {
     let phrase = 0;
-    let holding = false;
+    let userHolding = false;
     const startTalking = () => {
-      const { start } = talkingPhrase(phrase);
+      const { start, speech } = talkingPhrase(phrase++);
       const pressedAt = performance.now() / 1000;
       hero.source = (t) => talkingSpectrum(t - pressedAt + start);
       heroKey.classList.add("pressed");
-      holding = true;
-      return talkingPhrase(phrase++).speech;
+      return speech;
     };
     const stopTalking = () => {
       hero.source = idleSpectrum;
       heroKey.classList.remove("pressed");
-      holding = false;
     };
-    heroKey.addEventListener("pointerdown", (e) => { if (e.button === 0) startTalking(); });
-    for (const type of ["pointerup", "pointercancel", "pointerleave"]) heroKey.addEventListener(type, stopTalking);
+    const userDown = () => {
+      if (userHolding) return;
+      userHolding = true;
+      startTalking();
+    };
+    const userUp = () => {
+      if (!userHolding) return;
+      userHolding = false;
+      stopTalking();
+    };
+    heroKey.addEventListener("pointerdown", (e) => {
+      if (e.button !== 0) return;
+      heroKey.setPointerCapture?.(e.pointerId); // a drift off the key does not let go
+      userDown();
+    });
+    for (const type of ["pointerup", "pointercancel", "lostpointercapture"]) heroKey.addEventListener(type, userUp);
+    window.addEventListener("keydown", (e) => { if (e.key === "Control" && !e.repeat) userDown(); });
+    window.addEventListener("keyup", (e) => { if (e.key === "Control") userUp(); });
+    window.addEventListener("blur", userUp);
     (async () => {
       for (;;) {
         await sleep(1800);
-        if (holding) continue;
-        const speech = startTalking();
-        const until = performance.now() + speech * 1000 + 150;
-        while (performance.now() < until) {
-          await sleep(50);
-          if (!heroKey.classList.contains("held") && !holding) break; // released by the pointer
-        }
-        if (!heroKey.classList.contains("held")) stopTalking();
+        if (userHolding) continue;
+        const until = performance.now() + startTalking() * 1000 + 150;
+        while (performance.now() < until && !userHolding) await sleep(50);
+        if (!userHolding) stopTalking();
       }
     })();
   }
@@ -520,7 +533,7 @@
   }
 
   // Any key on the page sinks under the pointer, for as long as it is held.
-  for (const key of document.querySelectorAll(".key")) {
+  for (const key of document.querySelectorAll(".key:not([data-key-hero])")) {
     const press = (event) => {
       if (event.button !== undefined && event.button !== 0) return;
       key.classList.add("pressed", "held");
