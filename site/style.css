@@ -88,13 +88,9 @@ kbd {
   width: 26px;
   height: 26px;
   border-radius: 7px;
-  overflow: hidden;
-  background: linear-gradient(var(--icon-bg-top), var(--icon-bg-bottom));
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
-  display: grid;
-  place-items: center;
+  display: block;
 }
-.nav-icon canvas { width: 26px; height: 26px; }
 
 .nav-links { display: flex; align-items: center; gap: 26px; color: var(--text-muted); }
 .nav-links a:hover { color: var(--text); }

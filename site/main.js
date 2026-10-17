@@ -202,7 +202,6 @@
     // Full-width ribbon: hairline at the edges, up to 22 px thick in the middle.
     hero: { scale: 0.4, stroke: 0, glow: 18, inset: 0.0, floor: 0.5, ribbon: [0.5, 26] },
     download: { scale: 0.3, stroke: 4, glow: 10, inset: 0.0, floor: 0.45 },
-    nav: { scale: 0.3, stroke: 1.6, glow: 1.5, inset: 0.0, floor: 0.45 },
     // The pill: 72×26 points like the real one, thin stroke.
     pill: { scale: 0.42, stroke: 1.2, glow: 3, inset: 0.0, floor: 0.08 },
     feature: { scale: 0.42, stroke: 1.2, glow: 3, inset: 0.0, floor: 0.08 },
@@ -221,7 +220,7 @@
     const s = speakingSpectrum(t * 0.35);
     return { low: s.low * 0.8, mid: s.mid * 0.8, high: s.high * 0.8, tilt: s.tilt };
   };
-  for (const kind of ["hero", "download", "nav"]) {
+  for (const kind of ["hero", "download"]) {
     const r = renderers.get(kind);
     if (r) r.source = iconBreath;
   }
