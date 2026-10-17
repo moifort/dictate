@@ -8,10 +8,10 @@ nonisolated enum UpdateError: LocalizedError, Equatable {
 
     var errorDescription: String? {
         switch self {
-        case .extractionFailed: "L'archive téléchargée n'a pas pu être extraite."
-        case .appBundleNotFound: "L'archive ne contient pas d'application."
-        case .signatureRejected(let details): "La signature de la mise à jour est invalide. \(details)"
-        case .notInstalled: "Dictate ne tourne pas depuis un emplacement où il peut se mettre à jour."
+        case .extractionFailed: String(localized: "L'archive téléchargée n'a pas pu être extraite.")
+        case .appBundleNotFound: String(localized: "L'archive ne contient pas d'application.")
+        case .signatureRejected(let details): String(localized: "La signature de la mise à jour est invalide. \(details)")
+        case .notInstalled: String(localized: "Dictate ne tourne pas depuis un emplacement où il peut se mettre à jour.")
         }
     }
 }

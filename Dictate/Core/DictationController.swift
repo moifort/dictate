@@ -127,7 +127,7 @@ final class DictationController {
                 phase = .recording
             } catch {
                 ErrorReporter.capture(error, "microphone could not start", category: "recorder")
-                finish(.failed("Micro indisponible : \(error.localizedDescription)"))
+                finish(.failed(String(localized: "Micro indisponible : \(error.localizedDescription)")))
             }
 
         case .cancelled:
@@ -187,7 +187,7 @@ final class DictationController {
             Log.dictation.info("transcribed \(audio, format: .fixed(precision: 1)) s of audio in \(Self.milliseconds(transcription)) ms, \(doubtful) doubtful words")
         } catch {
             ErrorReporter.capture(error, "transcription with \(engine.rawValue) failed", category: "transcriber")
-            return finish(.failed("Transcription impossible : \(error.localizedDescription)"))
+            return finish(.failed(String(localized: "Transcription impossible : \(error.localizedDescription)")))
         }
         guard !transcript.text.isEmpty else { return finish(.discarded) }
 

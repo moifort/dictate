@@ -9,11 +9,11 @@ nonisolated enum ClaudeCLIError: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .notFound:
-            "CLI claude introuvable. Installez Claude Code ou indiquez son chemin dans les réglages."
+            String(localized: "CLI claude introuvable. Installez Claude Code ou indiquez son chemin dans les réglages.")
         case .failed(let message):
-            "Claude a renvoyé une erreur : \(message)"
+            String(localized: "Claude a renvoyé une erreur : \(message)")
         case .noResult(let details):
-            "Claude Code s'est arrêté sans réponse. \(details)"
+            String(localized: "Claude Code s'est arrêté sans réponse. \(details)")
         }
     }
 }

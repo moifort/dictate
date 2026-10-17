@@ -55,14 +55,14 @@ nonisolated struct CorpusEvaluation: Equatable, Sendable {
     /// Plain-text summary, for the log and the alert.
     var summary: String {
         let withReference = lines.values.reduce(0) { $0 + $1.dictations }
-        var summary = ["\(total) dictées, \(withReference) avec une référence."]
+        var summary = [String(localized: "\(total) dictées, \(withReference) avec une référence.")]
         for engine in TranscriptionEngine.allCases {
             for boosted in [false, true] {
                 guard let line = lines[Setup(engine: engine, vocabularyBoosted: boosted)] else { continue }
-                let name = engine.displayName + (boosted ? " avec lexique renforcé" : "")
-                summary.append("\(name) seul : WER \(Self.format(line.transcript)) sur \(line.dictations) dictées")
+                let name = boosted ? String(localized: "\(engine.displayName) avec lexique renforcé") : engine.displayName
+                summary.append(String(localized: "\(name) seul : WER \(Self.format(line.transcript)) sur \(line.dictations) dictées"))
                 if line.enhancedDictations > 0 {
-                    summary.append("\(name) + Claude : WER \(Self.format(line.enhanced)) sur \(line.enhancedDictations) dictées")
+                    summary.append(String(localized: "\(name) + Claude : WER \(Self.format(line.enhanced)) sur \(line.enhancedDictations) dictées"))
                 }
             }
         }
@@ -71,6 +71,6 @@ nonisolated struct CorpusEvaluation: Equatable, Sendable {
 
     private static func format(_ count: WordErrorRate.Count) -> String {
         guard let rate = count.rate else { return "—" }
-        return "\(rate.formatted(.percent.precision(.fractionLength(1)))) (\(count.errors)/\(count.referenceWords) mots)"
+        return String(localized: "\(rate.formatted(.percent.precision(.fractionLength(1)))) (\(count.errors)/\(count.referenceWords) mots)")
     }
 }

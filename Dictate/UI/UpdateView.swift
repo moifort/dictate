@@ -44,12 +44,12 @@ struct UpdateView: View {
     }
 
     private var title: String {
-        if updater.state == .checking { return "Recherche en cours" }
-        return updater.available.map { "Dictate \($0.version)" } ?? "Dictate est à jour"
+        if updater.state == .checking { return String(localized: "Recherche en cours") }
+        return updater.available.map { "Dictate \($0.version)" } ?? String(localized: "Dictate est à jour")
     }
 
     private var notes: AttributedString {
-        let markdown = updater.releases.reversed().map { "**\($0.version)**\n\n\($0.notes.isEmpty ? "Pas de notes." : $0.notes)" }
+        let markdown = updater.releases.reversed().map { "**\($0.version)**\n\n\($0.notes.isEmpty ? String(localized: "Pas de notes.") : $0.notes)" }
             .joined(separator: "\n\n")
         return (try? AttributedString(markdown: markdown, options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)))
             ?? AttributedString(markdown)

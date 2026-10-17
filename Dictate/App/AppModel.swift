@@ -296,15 +296,16 @@ final class AppModel {
 
     /// Runs the chosen reviewer on a sample dictation, for the settings.
     func testReviewer() async {
-        reviewTestResult = "Test en cours…"
+        reviewTestResult = String(localized: "Test en cours…")
         let start = ContinuousClock.now
         do {
             let result = try await enhancer.enhance(
-                transcript: "euh bon ben je vais faire un pouche sur la branche main",
+                // A sample in the interface language, hesitations and a misheard term included.
+                transcript: String(localized: "euh bon ben je vais faire un pouche sur la branche main"),
                 context: DictationContext(category: .code)
             )
             let elapsed = (ContinuousClock.now - start).formatted(.units(allowed: [.seconds, .milliseconds], width: .narrow))
-            reviewTestResult = "« \(result) » en \(elapsed)"
+            reviewTestResult = String(localized: "« \(result) » en \(elapsed)")
         } catch {
             ErrorReporter.capture(error, "review test from the settings failed", category: "enhancer")
             reviewTestResult = error.localizedDescription
@@ -317,15 +318,14 @@ final class AppModel {
         Log.app.info("corpus evaluation:\n\(evaluation.summary, privacy: .public)")
         NSApp.activate()
         let alert = NSAlert()
-        alert.messageText = "Taux d'erreur sur le corpus"
-        alert.informativeText = evaluation.summary + """
-
-
-            Référence : le texte laissé dans le champ \(PostInsertionObserver.defaultDelay.components.seconds) s \
+        alert.messageText = String(localized: "Taux d'erreur sur le corpus")
+        let seconds = PostInsertionObserver.defaultDelay.components.seconds
+        alert.informativeText = evaluation.summary + "\n\n" + String(localized: """
+            Référence : le texte laissé dans le champ \(seconds) s \
             après l'insertion. Une erreur non corrigée compte comme juste : ces taux sont des minimums.
-            """
+            """)
         alert.addButton(withTitle: "OK")
-        alert.addButton(withTitle: "Afficher dans le Finder")
+        alert.addButton(withTitle: String(localized: "Afficher dans le Finder"))
         if alert.runModal() == .alertSecondButtonReturn {
             NSWorkspace.shared.activateFileViewerSelecting([corpus.folder])
         }
@@ -336,10 +336,10 @@ final class AppModel {
         NSApp.activate()
         let alert = NSAlert()
         alert.alertStyle = .warning
-        alert.messageText = "Supprimer le corpus d'évaluation ?"
-        alert.informativeText = "Les \(corpus.entries.count) enregistrements et leurs textes seront effacés de ce Mac."
-        alert.addButton(withTitle: "Supprimer").hasDestructiveAction = true
-        alert.addButton(withTitle: "Annuler")
+        alert.messageText = String(localized: "Supprimer le corpus d'évaluation ?")
+        alert.informativeText = String(localized: "Les \(corpus.entries.count) enregistrements et leurs textes seront effacés de ce Mac.")
+        alert.addButton(withTitle: String(localized: "Supprimer")).hasDestructiveAction = true
+        alert.addButton(withTitle: String(localized: "Annuler"))
         guard alert.runModal() == .alertFirstButtonReturn else { return }
         corpus.deleteAll()
     }
@@ -381,12 +381,12 @@ final class AppModel {
                 break
             case .apple:
                 refreshSetup()
-                lastError = appleIntelligence.explanation ?? "Apple Intelligence n'a pas répondu : texte brut inséré."
+                lastError = appleIntelligence.explanation ?? String(localized: "Apple Intelligence n'a pas répondu : texte brut inséré.")
             case .claude:
                 refreshClaudeCLI()
                 lastError = claudeCLIPath == nil
                     ? ClaudeCLIError.notFound.localizedDescription
-                    : "Claude n'a pas répondu : texte brut inséré."
+                    : String(localized: "Claude n'a pas répondu : texte brut inséré.")
             }
         default:
             lastError = nil

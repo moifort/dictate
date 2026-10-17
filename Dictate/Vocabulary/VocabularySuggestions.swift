@@ -19,8 +19,8 @@ nonisolated struct VocabularySuggestion: Codable, Equatable, Identifiable, Senda
     /// Why the term comes up, for the settings and the menu.
     var reasonDescription: String {
         switch reason {
-        case .corrected(let wrong): "Corrigé depuis « \(wrong) »"
-        case .recurring(let count): "Déjà écrit dans \(count) dictées"
+        case .corrected(let wrong): String(localized: "Corrigé depuis « \(wrong) »")
+        case .recurring(let count): String(localized: "Déjà écrit dans \(count) dictées")
         }
     }
 }

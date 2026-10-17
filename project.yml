@@ -4,6 +4,9 @@ options:
   deploymentTarget:
     macOS: "27.0"
   createIntermediateGroups: true
+  # The strings in the code are French; English is a translation in the
+  # String Catalogs (Dictate/Resources/*.xcstrings).
+  developmentLanguage: fr
   # The project is generated, so the pinned package versions live at the
   # root and are copied in. After updating a package in Xcode, copy the
   # project's Package.resolved back to the root.
@@ -73,5 +76,8 @@ schemes:
         Dictate: all
         DictateTests: [test]
     test:
+      # Some tests read user-facing text: pin it whatever the runner's language.
+      language: fr
+      region: FR
       targets:
         - DictateTests

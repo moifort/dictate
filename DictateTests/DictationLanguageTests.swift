@@ -20,7 +20,14 @@ struct DictationLanguageTests {
 
     @Test func pickerListsEverySupportedLanguageSortedByName() {
         #expect(Set(DictationLanguage.pickerCodes) == DictationLanguage.supportedCodes)
-        let names = DictationLanguage.pickerCodes.map { DictationLanguage.name(of: $0) }
-        #expect(names == names.sorted { $0.localizedStandardCompare($1) == .orderedAscending })
+        for locale in [Locale(identifier: "fr"), Locale(identifier: "en")] {
+            let names = DictationLanguage.pickerCodes(in: locale).map { DictationLanguage.name(of: $0, in: locale) }
+            #expect(names == names.sorted { $0.localizedStandardCompare($1) == .orderedAscending })
+        }
+    }
+
+    @Test func namesLanguagesInTheGivenLocale() {
+        #expect(DictationLanguage.name(of: "de", in: Locale(identifier: "en")) == "German")
+        #expect(DictationLanguage.name(of: "de", in: Locale(identifier: "fr")) == "allemand")
     }
 }

@@ -15,7 +15,7 @@ struct WordsCard: View {
                 series: series,
                 peak: Double(series.buckets.map(\.words).max() ?? 0),
                 floor: 100,
-                value: { $0.dictations > 0 ? "\($0.words.formatted(.number)) mots" : nil }
+                value: { $0.dictations > 0 ? String(localized: "\($0.words.formatted(.number)) mots") : nil }
             ) { bucket, dimmed in
                 BarMark(
                     x: .value("Date", bucket.date, unit: series.period.unit),
@@ -43,7 +43,7 @@ struct DictationsCard: View {
                 series: series,
                 peak: Double(series.buckets.map(\.dictations).max() ?? 0),
                 floor: 10,
-                value: { $0.dictations > 0 ? "\($0.dictations.formatted(.number)) dictées" : nil }
+                value: { $0.dictations > 0 ? String(localized: "\($0.dictations) dictées") : nil }
             ) { bucket, dimmed in
                 BarMark(
                     x: .value("Date", bucket.date, unit: series.period.unit),
@@ -129,7 +129,7 @@ struct PaceCard: View {
                 series: series,
                 peak: series.buckets.compactMap(\.pace).max() ?? 0,
                 floor: 100,
-                value: { $0.pace.map { "\(StatsFormat.count($0)) mots/min" } }
+                value: { $0.pace.map { String(localized: "\(StatsFormat.count($0)) mots/min") } }
             ) { bucket, dimmed in
                 BarMark(
                     x: .value("Date", bucket.date, unit: series.period.unit),

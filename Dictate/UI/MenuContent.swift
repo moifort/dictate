@@ -50,17 +50,17 @@ struct MenuContent: View {
     private var statusLine: String? {
         let engine = model.transcriber.engine.displayName
         return switch model.transcriber.state {
-        case .notLoaded, .loading: "Chargement de \(engine)…"
-        case .downloading(let fraction): "Téléchargement de \(engine)… \(fraction.formatted(.percent.precision(.fractionLength(0))))"
-        case .failed(let message): "\(engine) indisponible : \(message)"
-        case .ready: model.hotkeyActive ? boosterStatusLine : "Touche \(model.settings.pushToTalkKey.displayName) inactive"
+        case .notLoaded, .loading: String(localized: "Chargement de \(engine)…")
+        case .downloading(let fraction): String(localized: "Téléchargement de \(engine)… \(fraction.formatted(.percent.precision(.fractionLength(0))))")
+        case .failed(let message): String(localized: "\(engine) indisponible : \(message)")
+        case .ready: model.hotkeyActive ? boosterStatusLine : String(localized: "Touche \(model.settings.pushToTalkKey.displayName) inactive")
         }
     }
 
     /// Only its download: the rest is in the settings, and dictation never waits for it.
     private var boosterStatusLine: String? {
         guard case .downloading(let fraction) = model.booster.state else { return nil }
-        return "Téléchargement du modèle de vocabulaire… \(fraction.formatted(.percent.precision(.fractionLength(0))))"
+        return String(localized: "Téléchargement du modèle de vocabulaire… \(fraction.formatted(.percent.precision(.fractionLength(0))))")
     }
 
     /// An accessory app must be activated for its windows to come forward.

@@ -81,9 +81,9 @@ private struct DictationSettings: View {
     private var keyHint: String {
         switch model.settings.pushToTalkKey {
         case .fn:
-            "Maintenez 🌐 fn pour dicter. macOS doit la laisser libre : Clavier → « Appuyer sur la touche 🌐 pour » → « Ne rien faire »."
+            String(localized: "Maintenez 🌐 fn pour dicter. macOS doit la laisser libre : Clavier → « Appuyer sur la touche 🌐 pour » → « Ne rien faire ».")
         case .control:
-            "Maintenez l'une des touches control pour dicter. Un raccourci comme control-C n'enregistre rien."
+            String(localized: "Maintenez l'une des touches control pour dicter. Un raccourci comme control-C n'enregistre rien.")
         }
     }
 }
@@ -117,7 +117,7 @@ private struct EngineStatus: View {
         .animation(.snappy, value: model.transcriber.state)
     }
 
-    private func status(_ text: String) -> some View {
+    private func status(_ text: LocalizedStringKey) -> some View {
         HStack(spacing: 8) {
             ProgressView().controlSize(.small)
             Text(text)
@@ -159,7 +159,7 @@ private struct BoosterStatus: View {
         .animation(.snappy, value: model.booster.state)
     }
 
-    private func status(_ text: String) -> some View {
+    private func status(_ text: LocalizedStringKey) -> some View {
         HStack(spacing: 8) {
             ProgressView().controlSize(.small)
             Text(text)
@@ -189,9 +189,11 @@ private struct ModelWeights: View {
     }
 
     private var description: String {
-        let weights = "Poids : \(engine.weightsName), \(engine.parameterCount) M de paramètres"
-        guard let diskUsage else { return weights + "." }
-        return weights + ", \(diskUsage.formatted(.byteCount(style: .file))) sur le disque."
+        guard let diskUsage else {
+            return String(localized: "Poids : \(engine.weightsName), \(engine.parameterCount) M de paramètres.")
+        }
+        let size = diskUsage.formatted(.byteCount(style: .file))
+        return String(localized: "Poids : \(engine.weightsName), \(engine.parameterCount) M de paramètres, \(size) sur le disque.")
     }
 }
 
@@ -347,7 +349,7 @@ private enum ReviewerTile: String, CaseIterable, Identifiable {
         }
     }
 
-    var displayName: String {
+    var displayName: LocalizedStringKey {
         switch self {
         case .none: "Aucun"
         case .apple: "Apple"
@@ -418,14 +420,14 @@ private struct ReviewSettings: View {
     private var reviewerHint: String {
         let hint = switch model.settings.reviewer {
         case .none:
-            "Le texte transcrit est inséré tel quel, hésitations comprises."
+            String(localized: "Le texte transcrit est inséré tel quel, hésitations comprises.")
         case .apple:
-            "Le modèle d'Apple Intelligence, sur ce Mac. Rien ne sort de l'ordinateur, aucun compte nécessaire."
+            String(localized: "Le modèle d'Apple Intelligence, sur ce Mac. Rien ne sort de l'ordinateur, aucun compte nécessaire.")
         case .claude:
-            "Modèle Haiku, via votre compte Claude Code. Un peu plus rapide et plus sûr sur le jargon."
+            String(localized: "Modèle Haiku, via votre compte Claude Code. Un peu plus rapide et plus sûr sur le jargon.")
         }
         guard !model.settings.reviewerIsChosen else { return hint }
-        return "Choix automatique : Claude si sa commande est installée, sinon Apple Intelligence, sinon aucun. " + hint
+        return String(localized: "Choix automatique : Claude si sa commande est installée, sinon Apple Intelligence, sinon aucun.") + " " + hint
     }
 
     private var appleStatus: some View {
@@ -509,9 +511,9 @@ private struct ReviewSettings: View {
     }
 
     private var claudeCLITitle: String {
-        if model.claudeCLIPath == nil { return "claude introuvable" }
+        if model.claudeCLIPath == nil { return String(localized: "claude introuvable") }
         if let version = model.claudeCLIVersion { return "claude \(version)" }
-        return model.isProbingClaudeCLI ? "claude" : "claude ne répond pas"
+        return model.isProbingClaudeCLI ? "claude" : String(localized: "claude ne répond pas")
     }
 
     private var overrideIgnored: Bool {
@@ -528,8 +530,8 @@ private struct ReviewSettings: View {
         panel.treatsFilePackagesAsDirectories = true
         panel.showsHiddenFiles = true
         panel.directoryURL = model.claudeCLIPath?.deletingLastPathComponent()
-        panel.message = "Choisissez l'exécutable claude"
-        panel.prompt = "Choisir"
+        panel.message = String(localized: "Choisissez l'exécutable claude")
+        panel.prompt = String(localized: "Choisir")
         NSApp.activate()
         guard panel.runModal() == .OK, let url = panel.url else { return }
         model.settings.cliPathOverride = url.path
@@ -562,7 +564,7 @@ private struct ReviewerPicker: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(!reviewer.isAvailable)
-                .help(reviewer.isAvailable ? "" : "Bientôt")
+                .help(reviewer.isAvailable ? Text(verbatim: "") : Text("Bientôt"))
             }
         }
     }
@@ -570,12 +572,16 @@ private struct ReviewerPicker: View {
 
 /// The small grey explanation under a control.
 private struct Hint: View {
-    let text: String
+    let text: Text
 
-    init(_ text: String) { self.text = text }
+    init(_ key: LocalizedStringKey) { text = Text(key) }
+
+    /// Already localized, or not meant to be: a path, a test result.
+    @_disfavoredOverload
+    init(_ string: String) { text = Text(verbatim: string) }
 
     var body: some View {
-        Text(text)
+        text
             .font(.caption)
             .foregroundStyle(.secondary)
             .fixedSize(horizontal: false, vertical: true)

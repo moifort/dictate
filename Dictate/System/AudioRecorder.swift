@@ -20,7 +20,7 @@ final class AudioRecorder: AudioRecording {
     enum RecorderError: LocalizedError {
         case noInputDevice
 
-        var errorDescription: String? { "Aucun micro disponible." }
+        var errorDescription: String? { String(localized: "Aucun micro disponible.") }
     }
 
     init() {

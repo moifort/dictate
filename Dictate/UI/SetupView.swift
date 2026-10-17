@@ -94,7 +94,7 @@ struct SetupView: View {
         )
     }
 
-    private var primaryTitle: String {
+    private var primaryTitle: LocalizedStringKey {
         switch page {
         case .welcome, .checklist: "Continuer"
         case .tryIt: model.setup.isComplete ? "Commencer" : "Plus tard"
@@ -161,7 +161,7 @@ private struct ChecklistPage: View {
             Text("Configuration")
                 .font(.system(size: 30, weight: .bold))
 
-            Text(model.setup.isComplete ? "Tout est prêt." : "Chaque ligne se coche dès que c'est accordé.")
+            (model.setup.isComplete ? Text("Tout est prêt.") : Text("Chaque ligne se coche dès que c'est accordé."))
                 .font(.title3)
                 .foregroundStyle(.secondary)
                 .contentTransition(.opacity)
@@ -344,9 +344,9 @@ private struct ReviewStep: View {
 
         case .apple:
             if model.appleIntelligence.isAvailable {
-                Text(model.settings.reviewerIsChosen
-                     ? "Apple Intelligence est prêt : la relecture se fait sur ce Mac."
-                     : "Claude est introuvable : Apple Intelligence relit sur ce Mac. Installez Claude pour qu'il prenne le relais.")
+                (model.settings.reviewerIsChosen
+                     ? Text("Apple Intelligence est prêt : la relecture se fait sur ce Mac.")
+                     : Text("Claude est introuvable : Apple Intelligence relit sur ce Mac. Installez Claude pour qu'il prenne le relais."))
                     .font(.caption)
                     .foregroundStyle(.tertiary)
                 if !model.settings.reviewerIsChosen {
@@ -404,7 +404,7 @@ private struct ReviewStep: View {
 // MARK: - Step copy
 
 private extension SetupStep {
-    var heading: String {
+    var heading: LocalizedStringKey {
         switch self {
         case .language: "Langue de dictée"
         case .microphone: "Micro"
@@ -416,7 +416,7 @@ private extension SetupStep {
         }
     }
 
-    var explanation: String {
+    var explanation: LocalizedStringKey {
         switch self {
         case .language:
             "La transcription est plus fiable quand elle sait à l'avance dans quelle langue vous parlez. Dictate a repris celle de macOS ; changez-la si vous dictez dans une autre. Les termes techniques anglais restent reconnus."
@@ -454,8 +454,8 @@ private extension SetupStep {
 /// content. The bottom bar is not part of it, so that it stays put while
 /// pages slide.
 private struct PageLayout<Hero: View, Content: View>: View {
-    let title: String
-    let explanation: String
+    let title: LocalizedStringKey
+    let explanation: LocalizedStringKey
     @ViewBuilder let hero: Hero
     @ViewBuilder let content: Content
 
@@ -493,7 +493,7 @@ private struct PageLayout<Hero: View, Content: View>: View {
 
 /// Primary button and page dots.
 private struct BottomBar: View {
-    let primary: String
+    let primary: LocalizedStringKey
     var primaryEnabled = true
     var prominent = true
     let onPrimary: () -> Void
@@ -580,8 +580,8 @@ private struct AppTile: View {
 
 private struct FeatureRow: View {
     let symbol: String
-    let title: String
-    let detail: String
+    let title: LocalizedStringKey
+    let detail: LocalizedStringKey
 
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
@@ -694,9 +694,9 @@ private struct Actions<Content: View>: View {
 }
 
 private struct Instructions: View {
-    let lines: [String]
+    let lines: [LocalizedStringKey]
 
-    init(_ lines: [String]) { self.lines = lines }
+    init(_ lines: [LocalizedStringKey]) { self.lines = lines }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -739,7 +739,7 @@ private struct TranscriptionModelProgress: View {
             case .loading, .notLoaded:
                 HStack(spacing: 10) {
                     ProgressView().controlSize(.small)
-                    Text(model.setup.transcriptionModel ? "Préparation du modèle pour ce Mac…" : "Connexion…")
+                    (model.setup.transcriptionModel ? Text("Préparation du modèle pour ce Mac…") : Text("Connexion…"))
                         .font(.callout)
                         .foregroundStyle(.secondary)
                 }

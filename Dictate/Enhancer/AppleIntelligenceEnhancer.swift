@@ -28,10 +28,10 @@ nonisolated enum AppleIntelligenceStatus: Equatable, Sendable {
     var explanation: String? {
         switch self {
         case .available: nil
-        case .deviceNotEligible: "Ce Mac ne prend pas en charge Apple Intelligence."
-        case .notEnabled: "Apple Intelligence est désactivé dans les Réglages Système."
-        case .modelNotReady: "Le modèle d'Apple Intelligence se télécharge ou se prépare : réessayez dans un instant."
-        case .unavailable: "Apple Intelligence est indisponible."
+        case .deviceNotEligible: String(localized: "Ce Mac ne prend pas en charge Apple Intelligence.")
+        case .notEnabled: String(localized: "Apple Intelligence est désactivé dans les Réglages Système.")
+        case .modelNotReady: String(localized: "Le modèle d'Apple Intelligence se télécharge ou se prépare : réessayez dans un instant.")
+        case .unavailable: String(localized: "Apple Intelligence est indisponible.")
         }
     }
 }
@@ -44,9 +44,9 @@ nonisolated enum AppleIntelligenceError: LocalizedError, Equatable {
 
     var errorDescription: String? {
         switch self {
-        case .unavailable(let status): status.explanation ?? "Apple Intelligence est indisponible."
-        case .refused: "Apple Intelligence a refusé ce texte."
-        case .tooLong: "Dictée trop longue pour Apple Intelligence."
+        case .unavailable(let status): status.explanation ?? String(localized: "Apple Intelligence est indisponible.")
+        case .refused: String(localized: "Apple Intelligence a refusé ce texte.")
+        case .tooLong: String(localized: "Dictée trop longue pour Apple Intelligence.")
         }
     }
 }

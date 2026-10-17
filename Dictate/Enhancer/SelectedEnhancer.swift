@@ -3,7 +3,7 @@ import Foundation
 nonisolated enum SelectedEnhancerError: LocalizedError {
     case noReviewer
 
-    var errorDescription: String? { "Aucun relecteur choisi." }
+    var errorDescription: String? { String(localized: "Aucun relecteur choisi.") }
 }
 
 /// An enhancer that keeps something ready between dictations.

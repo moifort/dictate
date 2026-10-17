@@ -15,11 +15,11 @@ struct HighlightsCard: View {
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 200), spacing: 10, alignment: .top)], spacing: 10) {
                 TrendTile(
                     title: "Mots par jour", symbol: "text.word.spacing", trend: stats.wordsPerDay,
-                    color: StatsPalette.words, format: StatsFormat.count, unit: "mots"
+                    color: StatsPalette.words, format: StatsFormat.count, unit: String(localized: "mots")
                 )
                 TrendTile(
                     title: "Dictées par jour", symbol: "mic.fill", trend: stats.dictationsPerDay,
-                    color: StatsPalette.dictations, format: StatsFormat.count, unit: "dictées"
+                    color: StatsPalette.dictations, format: StatsFormat.count, unit: String(localized: "dictées")
                 )
                 TrendTile(
                     title: "Délai d'affichage", symbol: "timer", trend: stats.latency,
@@ -27,7 +27,7 @@ struct HighlightsCard: View {
                 )
                 TrendTile(
                     title: "Débit de parole", symbol: "speedometer", trend: stats.pace,
-                    color: StatsPalette.pace, format: StatsFormat.count, unit: "mots/min"
+                    color: StatsPalette.pace, format: StatsFormat.count, unit: String(localized: "mots/min")
                 )
             }
         }

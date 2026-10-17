@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>fr</string>
+	<string>en</string>
 	<key>CFBundleDisplayName</key>
 	<string>Dictate</string>
 	<key>CFBundleExecutable</key>
@@ -25,6 +25,6 @@
 	<key>LSUIElement</key>
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Dictate enregistre votre voix pendant que vous maintenez la touche fn, pour la transcrire localement.</string>
+	<string>Dictate enregistre votre voix pendant que vous maintenez la touche de dictée, pour la transcrire sur ce Mac.</string>
 </dict>
 </plist>

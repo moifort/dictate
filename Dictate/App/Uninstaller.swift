@@ -34,13 +34,13 @@ struct Uninstaller {
         NSApp.activate()
         let alert = NSAlert()
         alert.alertStyle = .warning
-        alert.messageText = "Désinstaller Dictate ?"
-        alert.informativeText = """
+        alert.messageText = String(localized: "Désinstaller Dictate ?")
+        alert.informativeText = String(localized: """
             L'application, les modèles de transcription, les statistiques et les réglages \
             seront placés dans la Corbeille ou effacés, et Dictate quittera.
-            """
-        alert.addButton(withTitle: "Désinstaller").hasDestructiveAction = true
-        alert.addButton(withTitle: "Annuler")
+            """)
+        alert.addButton(withTitle: String(localized: "Désinstaller")).hasDestructiveAction = true
+        alert.addButton(withTitle: String(localized: "Annuler"))
         guard alert.runModal() == .alertFirstButtonReturn else { return }
         run()
     }

@@ -3,12 +3,12 @@ import SwiftUI
 /// Picks the dictation language; shared by the onboarding and the settings.
 struct LanguagePicker: View {
     @Bindable var model: AppModel
-    var label = "Langue"
+    var label: LocalizedStringKey = "Langue"
 
     var body: some View {
         Picker(label, selection: Bindable(model.settings).language) {
             ForEach(DictationLanguage.pickerCodes, id: \.self) { code in
-                Text(DictationLanguage.name(of: code).localizedCapitalized).tag(code)
+                Text(DictationLanguage.displayName(of: code).localizedCapitalized).tag(code)
             }
         }
         // The Claude prompt names the language: the waiting process is stale.

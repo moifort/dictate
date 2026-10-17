@@ -22,13 +22,31 @@ nonisolated enum DictationLanguage {
         return code
     }
 
-    /// The language's name in French, for the UI and the Claude prompt.
+    /// The language's name in French, for the Claude prompt, which is written in French.
     static func name(of code: String) -> String {
-        Locale(identifier: "fr").localizedString(forLanguageCode: code) ?? code
+        name(of: code, in: Locale(identifier: "fr"))
     }
 
-    /// All supported codes, sorted by their French name for a picker.
-    static let pickerCodes: [String] = supportedCodes.sorted {
-        name(of: $0).localizedStandardCompare(name(of: $1)) == .orderedAscending
+    /// The language's name in the interface language, for the picker.
+    static func displayName(of code: String) -> String {
+        name(of: code, in: interfaceLocale)
+    }
+
+    static func name(of code: String, in locale: Locale) -> String {
+        locale.localizedString(forLanguageCode: code) ?? code
+    }
+
+    /// The localization the app runs in, which may differ from the region's.
+    static var interfaceLocale: Locale {
+        Locale(identifier: Bundle.main.preferredLocalizations.first ?? "fr")
+    }
+
+    /// All supported codes, sorted by their name in the interface language for a picker.
+    static var pickerCodes: [String] { pickerCodes(in: interfaceLocale) }
+
+    static func pickerCodes(in locale: Locale) -> [String] {
+        supportedCodes.sorted {
+            name(of: $0, in: locale).localizedStandardCompare(name(of: $1, in: locale)) == .orderedAscending
+        }
     }
 }
