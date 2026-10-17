@@ -406,13 +406,17 @@ section {
   padding: 7px 9px;
   gap: 0;
   border-radius: 11px;
-  vertical-align: middle;
+  /* Only the name stays in the flow, so the key's baseline is the name's and it
+     sits on the sentence's baseline; the glyph is pinned to the top right. */
+  position: relative;
+  justify-content: flex-end;
+  vertical-align: baseline;
   font-size: 14px;
   font-weight: 400;
   line-height: 1;
   box-shadow: 0 5px 0 #c6c6ce, 0 9px 18px rgba(0, 0, 0, 0.12);
 }
-.key.inline .key-glyph { font-size: 15px; }
+.key.inline .key-glyph { font-size: 15px; position: absolute; top: 7px; right: 9px; }
 .key.inline .key-name { font-size: 13px; }
 .key.inline.pressed { box-shadow: 0 1px 0 #c6c6ce, 0 3px 8px rgba(0, 0, 0, 0.12); transform: translateY(4px); }
 .key.big { width: 150px; height: 100px; font-size: 16px; border-radius: 18px; padding: 12px 14px; }
