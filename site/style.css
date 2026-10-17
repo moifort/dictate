@@ -621,21 +621,50 @@ section {
 }
 .keyboard .key.big .key-glyph { font-size: calc(var(--u) * 0.2); }
 .keyboard .key.big .key-name { font-size: calc(var(--u) * 0.125); }
-/* A soft glow in the icon's colours while control is held, fading out on
-   release: magenta on the left, blue under, cyan on the right. */
-/* Every key paints above control, so its glow always stays behind them. */
+/* While control is held: a glow in the icon's colours around the key,
+   magenta left, blue under, cyan right, and a ring that bursts outward at
+   the moment of the press. Every other key paints above control, so both
+   stay behind them. */
 .keyboard .key.big { position: relative; z-index: 1; }
-.keyboard .key[data-key] { z-index: 0; }
-.keyboard .key[data-key] { transition: transform 0.12s ease, box-shadow 0.35s ease, background 0.12s ease; }
+.keyboard .key[data-key] { z-index: 0; transition: transform 0.12s ease, box-shadow 0.4s ease, background 0.12s ease; }
 .keyboard .key[data-key].pressed {
-  box-shadow:
-    0 1px 0 #c6c6ce,
-    0 4px 10px rgba(0, 0, 0, 0.12),
-    -2px 0 6px rgba(237, 23, 199, 0.3),
-    0 2px 6px rgba(26, 107, 242, 0.3),
-    2px 0 6px rgba(20, 209, 204, 0.3);
+  animation: key-glow 0.9s ease-in-out infinite;
   transition-duration: 0.12s, 0.15s, 0.12s;
 }
+/* The glow breathes while the key is down. */
+@keyframes key-glow {
+  0%, 100% {
+    box-shadow:
+      0 1px 0 #c6c6ce,
+      0 4px 10px rgba(0, 0, 0, 0.12),
+      -4px 0 12px rgba(237, 23, 199, 0.45),
+      0 5px 12px rgba(26, 107, 242, 0.45),
+      4px 0 12px rgba(20, 209, 204, 0.45);
+  }
+  50% {
+    box-shadow:
+      0 1px 0 #c6c6ce,
+      0 4px 10px rgba(0, 0, 0, 0.12),
+      -7px 0 22px rgba(237, 23, 199, 0.8),
+      0 8px 22px rgba(26, 107, 242, 0.8),
+      7px 0 22px rgba(20, 209, 204, 0.8);
+  }
+}
+.keyboard .key[data-key]::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  border: 2px solid rgba(26, 107, 242, 0.7);
+  opacity: 0;
+  pointer-events: none;
+}
+.keyboard .key[data-key].pressed::after { animation: key-burst 0.7s ease-out; }
+@keyframes key-burst {
+  0% { opacity: 0.9; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.45); }
+}
+@media (prefers-reduced-motion: reduce) { .keyboard .key[data-key].pressed, .keyboard .key[data-key].pressed::after { animation: none; } }
 
 /* On phones, only the control key, centred, at a fixed size. */
 @media (max-width: 760px) {
