@@ -31,6 +31,32 @@ Signing is automatic. Xcode created the Apple Distribution and Mac Installer
 Distribution certificates on first run; the first `productbuild` asks for
 keychain access to the installer key: answer "Always Allow".
 
+## Automatic upload on each release
+
+Every `v*` tag runs the `app-store` job of the release workflow next to the
+Developer ID build: it archives the AppStore configuration with manual signing
+and uploads the package to App Store Connect with `altool`. A manual run of the
+workflow archives and signs but does not upload. Until the secrets below exist,
+the job only prints a notice and the GitHub release goes out as before.
+
+Secrets to add to the repository (`gh secret set NAME < file`):
+
+| Secret | Content |
+|---|---|
+| `MAS_DIST_CERT_P12`, `MAS_DIST_CERT_PASSWORD` | "Apple Distribution" identity exported from Keychain Access as .p12, base64 |
+| `MAS_INSTALLER_CERT_P12`, `MAS_INSTALLER_CERT_PASSWORD` | "3rd Party Mac Developer Installer" identity as .p12, base64 |
+| `MAS_PROVISION_PROFILE` | a Mac App Store profile for `com.thibautmottet.dictate`, created in the developer portal (Profiles, +, Mac App Store Connect), base64 |
+| `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` | already set for notarization |
+
+```bash
+base64 -i distribution.p12 | gh secret set MAS_DIST_CERT_P12
+```
+
+Submitting the uploaded build for review is not automated yet: pick the
+build in the version page and press "Add for Review". Automating it means a
+fastlane `deliver` lane (as in the book project) with `submit_for_review` and
+`automatic_release`, so each tag would reach the store with no human check.
+
 ## One-time steps in App Store Connect
 
 1. **Create the app**: Apps, +, New App, platform macOS, name "Dictate",
@@ -43,8 +69,9 @@ keychain access to the installer key: answer "Always Allow".
    `https://github.com/moifort/dictate/issues`, marketing URL
    `https://moifort.github.io/dictate/`, screenshots at 2880×1800 or
    1440×900 (setup window, settings, the pill over an app).
-5. **Upload a build** with `scripts/build-app-store.sh --upload`, wait for it
-   to be processed, pick it in the version page.
+5. **Upload a build**: push a tag once the secrets are set, or run
+   `scripts/build-app-store.sh --upload` on the Mac. Wait for it to be
+   processed, then pick it in the version page.
 6. **App Review notes** (Accessibility is the usual rejection reason, explain it):
    > Dictate is push-to-talk dictation. It needs Input Monitoring to see the
    > dictation key being held (listen-only event tap, nothing is modified),

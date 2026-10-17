@@ -301,3 +301,117 @@ jobs:
             gh release create "$GITHUB_REF_NAME" --title "Dictate $MARKETING" --notes-file notes.txt
           fi
           gh release upload "$GITHUB_REF_NAME" "Dictate-$MARKETING.dmg" "Dictate-$MARKETING.zip" --clobber
+
+  # The Mac App Store build, from the same tag: sandboxed, signed with the
+  # Apple Distribution and Mac Installer Distribution certificates and a Mac
+  # App Store profile, uploaded to App Store Connect. Without those secrets the
+  # job is skipped and the GitHub release goes out alone. Submitting the
+  # uploaded build for review stays a click in App Store Connect.
+  app-store:
+    name: 🍎 Mac App Store upload
+    needs: test
+    runs-on: xcode-27
+    timeout-minutes: 60
+    env:
+      ENABLED: ${{ secrets.MAS_DIST_CERT_P12 != '' && secrets.MAS_PROVISION_PROFILE != '' && secrets.ASC_KEY_P8 != '' }}
+    steps:
+      - name: Skip without the App Store secrets
+        if: env.ENABLED != 'true'
+        run: echo "::notice::MAS_DIST_CERT_P12, MAS_PROVISION_PROFILE or ASC_KEY_P8 is not set, no App Store upload (docs/app-store.md)"
+
+      - uses: actions/checkout@v7
+        if: env.ENABLED == 'true'
+        with:
+          fetch-depth: 0   # the build number depends on it
+
+      - name: Select Xcode 27
+        if: env.ENABLED == 'true'
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest
+
+      - name: Compute version numbers
+        if: env.ENABLED == 'true'
+        run: |
+          set -euo pipefail
+          echo "BUILD=$(git rev-list --count HEAD)" >> "$GITHUB_ENV"
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then
+            echo "MARKETING=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+          else
+            echo "MARKETING=$(git describe --tags --abbrev=0 --match 'v*' | sed 's/^v//')" >> "$GITHUB_ENV"
+          fi
+
+      # Both identities in one throwaway keychain: the login keychain is locked
+      # on a runner and codesign would wait for a password nobody will type.
+      - name: Import the distribution certificates
+        if: env.ENABLED == 'true'
+        env:
+          MAS_DIST_CERT_P12: ${{ secrets.MAS_DIST_CERT_P12 }}
+          MAS_DIST_CERT_PASSWORD: ${{ secrets.MAS_DIST_CERT_PASSWORD }}
+          MAS_INSTALLER_CERT_P12: ${{ secrets.MAS_INSTALLER_CERT_P12 }}
+          MAS_INSTALLER_CERT_PASSWORD: ${{ secrets.MAS_INSTALLER_CERT_PASSWORD }}
+        run: |
+          set -euo pipefail
+          KEYCHAIN="$RUNNER_TEMP/dictate-mas.keychain-db"
+          KEYCHAIN_PASSWORD="$(uuidgen)"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          import_p12() {
+            local cert="$RUNNER_TEMP/$1.p12"
+            printf '%s' "$2" | base64 -d > "$cert"
+            security import "$cert" -P "$3" -A -t cert -f pkcs12 -k "$KEYCHAIN"
+            rm -f "$cert"
+          }
+          import_p12 distribution "$MAS_DIST_CERT_P12" "$MAS_DIST_CERT_PASSWORD"
+          import_p12 installer "$MAS_INSTALLER_CERT_P12" "$MAS_INSTALLER_CERT_PASSWORD"
+          security set-key-partition-list -S apple-tool:,apple:,productbuild: \
+            -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" >/dev/null
+          security list-keychains -d user -s "$KEYCHAIN" \
+            $(security list-keychains -d user | sed 's/["[:space:]]//g')
+          security find-identity -v "$KEYCHAIN"
+
+      # Xcode looks a profile up by the UUID in its file name: read it from the
+      # profile, so a renewed one only needs the secret replaced.
+      - name: Install the Mac App Store provisioning profile
+        if: env.ENABLED == 'true'
+        env:
+          MAS_PROVISION_PROFILE: ${{ secrets.MAS_PROVISION_PROFILE }}
+        run: |
+          set -euo pipefail
+          PROFILE="$RUNNER_TEMP/dictate.provisionprofile"
+          printf '%s' "$MAS_PROVISION_PROFILE" | base64 -d > "$PROFILE"
+          security cms -D -i "$PROFILE" > "$RUNNER_TEMP/profile.plist"
+          UUID=$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$RUNNER_TEMP/profile.plist")
+          NAME=$(/usr/libexec/PlistBuddy -c 'Print :Name' "$RUNNER_TEMP/profile.plist")
+          for DIR in "$HOME/Library/Developer/Xcode/UserData/Provisioning Profiles" \
+                     "$HOME/Library/MobileDevice/Provisioning Profiles"; do
+            mkdir -p "$DIR"
+            cp "$PROFILE" "$DIR/$UUID.provisionprofile"
+          done
+          echo "MAS_PROFILE_NAME=$NAME" >> "$GITHUB_ENV"
+          echo "Installed profile $NAME ($UUID)"
+
+      - name: Archive and export the App Store package
+        if: env.ENABLED == 'true'
+        run: |
+          set -euo pipefail
+          brew install xcodegen
+          scripts/build-app-store.sh
+
+      # A manual run proves the archive and the signature without spending a
+      # build number on App Store Connect: only a tag uploads.
+      - name: Upload to App Store Connect
+        if: env.ENABLED == 'true' && startsWith(github.ref, 'refs/tags/v')
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.appstoreconnect/private_keys"
+          printf '%s' "$ASC_KEY_P8" > "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
+          xcrun altool --upload-app --type macos \
+            --file build/app-store/Dictate.pkg \
+            --apiKey "$ASC_KEY_ID" --apiIssuer "$ASC_ISSUER_ID"
+          echo "::notice::Dictate $MARKETING ($BUILD) uploaded to App Store Connect"
