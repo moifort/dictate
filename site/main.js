@@ -524,10 +524,11 @@
     })();
   }
 
-  // The latency card counts up to the median and settles there.
-  const timer = document.querySelector("[data-timer]");
-  const timerBar = document.querySelector("[data-timer-bar]");
-  if (timer && timerBar) {
+  // The latency counters (hero tile and feature card) count up to the median
+  // and settle there, with the bar filling underneath.
+  for (const timer of document.querySelectorAll("[data-timer]")) {
+    const timerBar = timer.parentElement.querySelector("[data-timer-bar]");
+    if (!timerBar) continue;
     const median = 1.5;
     (async () => {
       for (;;) {

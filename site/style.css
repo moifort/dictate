@@ -239,6 +239,7 @@ section {
   letter-spacing: -0.03em;
   line-height: 1;
 }
+.stats .timer-bar { display: block; width: 70%; margin: 14px auto 0; }
 @media (max-width: 640px) { .stats { grid-template-columns: 1fr; } }
 
 /* ---------- Demo ---------- */
