@@ -24,10 +24,15 @@ nonisolated struct UpdateInstaller: Sendable {
         var bundleIdentifier: String
         /// Required when the running app is signed with a real certificate.
         var teamIdentifier: String?
+        /// Other identifiers the same app may ship under: Dictate moves from
+        /// `com.thibautmottet.dictate` to `com.polyforms.dictate`.
+        var alsoAccepted: [String] = []
 
         /// `codesign` requirement language.
         var requirement: String {
-            var clauses = ["identifier \"\(bundleIdentifier)\""]
+            let identifiers = ([bundleIdentifier] + alsoAccepted.filter { $0 != bundleIdentifier })
+                .map { "identifier \"\($0)\"" }
+            var clauses = [identifiers.count == 1 ? identifiers[0] : "(" + identifiers.joined(separator: " or ") + ")"]
             if let teamIdentifier {
                 clauses.append("anchor apple generic")
                 clauses.append("certificate leaf[subject.OU] = \"\(teamIdentifier)\"")

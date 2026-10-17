@@ -81,7 +81,7 @@
     "dl.code": "View the code",
     "dl.meta": "<span data-version>Latest version</span> · macOS 27 · Apple Silicon",
     "dl.brew": "Or with Homebrew: <code>brew install --cask moifort/tap/dictate</code>",
-    "footer.credit": "Dictate is an open-source project by <a href=\"https://github.com/moifort\" rel=\"noopener\">Thibaut Mottet</a>.\n     Transcription by Parakeet (NVIDIA) via FluidAudio. Review by Claude (Anthropic) or Apple Intelligence.",
+    "footer.credit": "Dictate is an open-source project by <a href=\"https://github.com/moifort\" rel=\"noopener\">Polyforms</a>.\n     Transcription by Parakeet (NVIDIA) via FluidAudio. Review by Claude (Anthropic) or Apple Intelligence.",
     "footer.releases": "All releases",
     "footer.issues": "Report an issue",
     "footer.docs": "Documentation",

@@ -45,7 +45,7 @@ Secrets to add to the repository (`gh secret set NAME < file`):
 |---|---|
 | `MAS_DIST_CERT_P12`, `MAS_DIST_CERT_PASSWORD` | "Apple Distribution" identity exported from Keychain Access as .p12, base64 |
 | `MAS_INSTALLER_CERT_P12`, `MAS_INSTALLER_CERT_PASSWORD` | "3rd Party Mac Developer Installer" identity as .p12, base64 |
-| `MAS_PROVISION_PROFILE` | a Mac App Store profile for `com.thibautmottet.dictate`, created in the developer portal (Profiles, +, Mac App Store Connect), base64 |
+| `MAS_PROVISION_PROFILE` | a Mac App Store profile for `com.polyforms.dictate`, created in the developer portal (Profiles, +, Mac App Store Connect), base64 |
 | `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` | already set for notarization |
 
 ```bash
@@ -60,7 +60,7 @@ fastlane `deliver` lane (as in the book project) with `submit_for_review` and
 ## One-time steps in App Store Connect
 
 1. **Create the app**: Apps, +, New App, platform macOS, name "Dictate",
-   bundle ID `com.thibautmottet.dictate`, SKU `dictate-macos`, primary
+   bundle ID `com.polyforms.dictate`, SKU `polyforms-dictate-macos`, primary
    language French or English.
 2. **Pricing**: free, all territories.
 3. **App Privacy**: Data Not Collected, except Diagnostics (crash data via

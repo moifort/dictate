@@ -1,6 +1,7 @@
 name: Dictate
 options:
   bundleIdPrefix: com.thibautmottet
+  organizationName: Polyforms
   deploymentTarget:
     macOS: "27.0"
   createIntermediateGroups: true
@@ -63,7 +64,9 @@ targets:
           PRODUCT_BUNDLE_IDENTIFIER: com.thibautmottet.dictate.dev
         # Sandboxed, without the updater, the uninstaller and the Claude reviewer
         # (Dictate/App/Distribution.swift). Signed by Xcode at export time.
+        # A new app on the store: under the Polyforms identifier from the start.
         AppStore:
+          PRODUCT_BUNDLE_IDENTIFIER: com.polyforms.dictate
           CODE_SIGN_ENTITLEMENTS: Dictate/Resources/DictateAppStore.entitlements
           SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) APP_STORE"
   DictateTests:

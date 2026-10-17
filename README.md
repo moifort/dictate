@@ -61,4 +61,4 @@ Requires macOS 27 on Apple Silicon.
 
 ## License
 
-Dictate is released under the [MIT License](LICENSE).
+Dictate is made by Polyforms and released under the [MIT License](LICENSE).

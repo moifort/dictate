@@ -27,7 +27,7 @@ DESTINATION=export
 [ "${1:-}" = "--upload" ] && DESTINATION=upload
 
 TEAM_ID=46C337T7YN
-BUNDLE_ID=com.thibautmottet.dictate
+BUNDLE_ID=com.polyforms.dictate
 MARKETING="${MARKETING:-$(git describe --tags --abbrev=0 --match 'v*' | sed 's/^v//')}"
 BUILD="${BUILD:-$(git rev-list --count HEAD)}"
 OUT=build/app-store

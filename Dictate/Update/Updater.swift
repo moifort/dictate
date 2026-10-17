@@ -203,7 +203,10 @@ final class Updater {
         }
     }
 
-    /// Same identifier, and the same team when this build carries one.
+    /// The identifiers Dictate ships under, old and new (Polyforms).
+    static let releaseIdentifiers = ["com.thibautmottet.dictate", "com.polyforms.dictate"]
+
+    /// Same app, and the same team when this build carries one.
     static func expectation(bundle: Bundle = .main) -> UpdateInstaller.Expectation {
         var code: SecCode?
         var info: CFDictionary?
@@ -213,7 +216,12 @@ final class Updater {
            let info = info as? [String: Any] {
             team = info[kSecCodeInfoTeamIdentifier as String] as? String
         }
-        return .init(bundleIdentifier: bundle.bundleIdentifier ?? "com.thibautmottet.dictate", teamIdentifier: team)
+        let identifier = bundle.bundleIdentifier ?? releaseIdentifiers[0]
+        return .init(
+            bundleIdentifier: identifier,
+            teamIdentifier: team,
+            alsoAccepted: releaseIdentifiers.contains(identifier) ? releaseIdentifiers : []
+        )
     }
 
     @Sendable nonisolated static func fetchFromGitHub(_ url: URL) async throws -> Data {

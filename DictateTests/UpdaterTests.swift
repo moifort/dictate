@@ -225,6 +225,24 @@ struct UpdaterFlowTests {
         if let team = expectation.teamIdentifier { #expect(team == "46C337T7YN") }
     }
 
+    /// Installed copies must accept a release under the Polyforms identifier.
+    @Test func releasesUnderEitherIdentifierAreAccepted() {
+        let expectation = UpdateInstaller.Expectation(
+            bundleIdentifier: "com.thibautmottet.dictate",
+            teamIdentifier: "46C337T7YN",
+            alsoAccepted: Updater.releaseIdentifiers
+        )
+        #expect(expectation.requirement == """
+            (identifier "com.thibautmottet.dictate" or identifier "com.polyforms.dictate") \
+            and anchor apple generic and certificate leaf[subject.OU] = "46C337T7YN"
+            """)
+    }
+
+    @Test func anOtherAppOnlyAcceptsItsOwnIdentifier() {
+        let expectation = UpdateInstaller.Expectation(bundleIdentifier: "test.fake", teamIdentifier: nil)
+        #expect(expectation.requirement == #"identifier "test.fake""#)
+    }
+
     private func shell(_ tool: String, _ arguments: [String]) throws {
         let process = Process()
         process.executableURL = URL(filePath: tool)
