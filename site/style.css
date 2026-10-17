@@ -255,22 +255,23 @@ section {
   pointer-events: none;
 }
 
-/* Exactly one screen under the sticky nav, so the window, the key and the
-   timeline are all in view at once. */
+/* Exactly one screen under the sticky nav; the window, the key and the
+   timeline form one block centred in it, kept above the fade at the bottom. */
 .desktop {
   position: relative;
-  min-height: min(calc(100vh - var(--nav-h)), 760px);
+  min-height: calc(100vh - var(--nav-h));
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 36px 20px 330px;
+  justify-content: center;
+  padding: 40px 20px 150px;
   text-align: left;
 }
 
 .window {
   width: 100%;
-  max-width: 820px;
-  margin: auto 0;
+  max-width: 880px;
+  margin: 0;
   border-radius: 14px;
   background: #ffffff;
   color: #1d1d1f;
@@ -305,7 +306,7 @@ section {
 .mail-chip { font-style: normal; background: rgba(26, 107, 242, 0.12); color: #0b4fc2; padding: 2px 10px; border-radius: 99px; font-size: 14px; }
 .mail-head b { font-weight: 500; }
 
-.window-body { padding: 18px 20px 80px; min-height: 220px; }
+.window-body { padding: 18px 20px 84px; min-height: 330px; }
 
 .field-text {
   font-size: 17px;
@@ -418,22 +419,29 @@ section {
 .key.inline .key-name { font-size: 13px; }
 .key.inline.pressed { box-shadow: 0 1px 0 #c6c6ce, 0 3px 8px rgba(0, 0, 0, 0.12); transform: translateY(4px); }
 
-/* The demo's key, bottom left of the desktop, where control sits on a keyboard. */
-.desk-key { position: absolute; left: 40px; bottom: 200px; z-index: 2; }
+/* Under the window: the key on the left, where control sits on a keyboard,
+   and the timeline centred on the page. */
+.desk-bar {
+  width: 100%;
+  max-width: 1040px;
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr) 150px;
+  align-items: center;
+  margin-top: 56px;
+  position: relative;
+  z-index: 1;
+}
+.desk-key { grid-column: 1; }
 
-/* How it works: four steps along the bottom, lit as the dictation goes. */
+/* How it works: four steps, lit as the dictation goes. */
 .timeline {
-  position: absolute;
-  left: 20px;
-  right: 20px;
-  bottom: 212px;
+  grid-column: 2;
   margin: 0;
   padding: 0;
   list-style: none;
   display: flex;
   justify-content: center;
   gap: 0;
-  z-index: 1;
 }
 .timeline li {
   position: relative;
@@ -474,10 +482,10 @@ section {
 .timeline li.done .tl-dot { background: var(--blue); border-color: var(--blue); }
 
 @media (max-width: 760px) {
-  .desktop { padding-bottom: 370px; }
-  .desk-key { top: 44px; left: 16px; bottom: auto; transform: scale(0.72); transform-origin: top left; }
-  .desk-key.pressed { transform: scale(0.72) translateY(5px); }
-  .timeline { flex-wrap: wrap; row-gap: 22px; bottom: 196px; }
+  .desk-bar { display: flex; flex-direction: column; gap: 28px; margin-top: 40px; }
+  .desk-key { transform: scale(0.8); }
+  .desk-key.pressed { transform: scale(0.8) translateY(5px); }
+  .timeline { width: 100%; flex-wrap: wrap; row-gap: 22px; }
   .timeline li { width: 50%; }
   .timeline li:nth-child(3)::before { display: none; }
 }
