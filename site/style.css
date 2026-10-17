@@ -562,6 +562,20 @@ section {
 .keycap-demo { display: flex; flex-direction: column; align-items: center; gap: 18px; }
 .keycap-hint { font-size: 13px; color: var(--text-dim); letter-spacing: 0.04em; }
 
+/* The keycap next to an aviation hand mic: both pressed together. */
+.ptt-row { display: flex; align-items: center; gap: 44px; }
+@media (max-width: 560px) { .ptt-row { gap: 24px; } }
+.ptt-mic { display: block; overflow: visible; filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.18)); }
+.ptt-mic .mic-button { transform-box: fill-box; transition: transform 0.12s ease; }
+.ptt-mic.pressed .mic-button { transform: translateX(4px); }
+.ptt-mic .mic-led { fill: #4a4a52; transition: fill 0.15s ease, filter 0.15s ease; }
+.ptt-mic.pressed .mic-led { fill: #ff3b30; filter: drop-shadow(0 0 4px rgba(255, 59, 48, 0.9)); }
+.ptt-mic .mic-waves path { opacity: 0; transition: opacity 0.2s ease; }
+.ptt-mic.pressed .mic-waves path { animation: mic-wave 1.2s ease-in-out infinite; }
+.ptt-mic.pressed .mic-waves path:nth-child(2) { animation-delay: 0.15s; }
+.ptt-mic.pressed .mic-waves path:nth-child(3) { animation-delay: 0.3s; }
+@keyframes mic-wave { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+
 .clean-demo { width: 100%; position: relative; font-size: 15px; line-height: 1.5; }
 .clean-demo p { margin: 0; }
 .clean-demo .raw { color: var(--text-dim); text-decoration: line-through; text-decoration-color: rgba(237, 23, 199, 0.6); }

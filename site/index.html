@@ -13,7 +13,7 @@
   <meta name="theme-color" content="#ffffff">
   <link rel="icon" href="favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="icon-256.png">
-  <link rel="stylesheet" href="style.css?v=20261017-31">
+  <link rel="stylesheet" href="style.css?v=20261017-32">
 </head>
 <body>
 
@@ -102,7 +102,47 @@
       <article class="card wide">
         <div class="card-visual">
           <div class="keycap-demo" aria-hidden="true">
-            <kbd class="key big" data-key-feature><span class="key-glyph">⌃</span><span class="key-name">control</span></kbd>
+            <div class="ptt-row">
+              <kbd class="key big" data-key-feature><span class="key-glyph">⌃</span><span class="key-name">control</span></kbd>
+              <svg class="ptt-mic" data-mic viewBox="0 0 140 200" width="98" height="140">
+                <defs>
+                  <linearGradient id="mic-body" x1="0" x2="1">
+                    <stop offset="0" stop-color="#4a4a52"/>
+                    <stop offset="0.45" stop-color="#2c2c32"/>
+                    <stop offset="1" stop-color="#1a1a1e"/>
+                  </linearGradient>
+                  <linearGradient id="mic-ptt" x1="0" x2="1">
+                    <stop offset="0" stop-color="#d9d9df"/>
+                    <stop offset="1" stop-color="#f6f6f8"/>
+                  </linearGradient>
+                  <pattern id="mic-grille" width="6" height="6" patternUnits="userSpaceOnUse">
+                    <circle cx="3" cy="3" r="1.3" fill="#3f3f47"/>
+                  </pattern>
+                </defs>
+                <!-- Sound, while the button is held. -->
+                <g class="mic-waves" fill="none" stroke-linecap="round" stroke-width="3">
+                  <path d="M108 40 q8 9 0 18" stroke="#ed17c7"/>
+                  <path d="M116 33 q14 16 0 32" stroke="#1a6bf2"/>
+                  <path d="M124 26 q20 23 0 46" stroke="#14d1cc"/>
+                </g>
+                <!-- Coiled cord. -->
+                <path d="M65 150 c0 7 -13 7 -13 13 s13 6 13 12 s-13 6 -13 12 s13 6 13 13" fill="none" stroke="#2a2a30" stroke-width="4" stroke-linecap="round"/>
+                <rect x="57" y="138" width="16" height="16" rx="4" fill="#232328"/>
+                <!-- Body, grille, highlight. -->
+                <rect x="30" y="14" width="70" height="130" rx="30" fill="url(#mic-body)"/>
+                <rect x="42" y="26" width="46" height="46" rx="20" fill="#121215"/>
+                <rect x="42" y="26" width="46" height="46" rx="20" fill="url(#mic-grille)"/>
+                <rect x="35" y="24" width="6" height="96" rx="3" fill="#fff" opacity="0.08"/>
+                <!-- On-air light and label. -->
+                <circle class="mic-led" cx="65" cy="92" r="4"/>
+                <text x="65" y="122" text-anchor="middle" font-size="9" font-weight="600" letter-spacing="1.5" fill="#8e8e93">PTT</text>
+                <!-- The push-to-talk bar on the side. -->
+                <g class="mic-button">
+                  <rect x="19" y="62" width="15" height="56" rx="6" fill="url(#mic-ptt)" stroke="rgba(0,0,0,0.18)"/>
+                  <path d="M23 74 h7 M23 82 h7 M23 90 h7 M23 98 h7 M23 106 h7" stroke="rgba(0,0,0,0.18)" stroke-width="1.5" stroke-linecap="round"/>
+                </g>
+              </svg>
+            </div>
             <span class="keycap-hint">maintenir · parler · relâcher</span>
           </div>
         </div>
@@ -299,6 +339,6 @@
   <p><a href="https://github.com/moifort/dictate/releases">Toutes les versions</a> · <a href="https://github.com/moifort/dictate/issues">Signaler un problème</a> · <a href="https://github.com/moifort/dictate#readme">Documentation</a></p>
 </footer>
 
-<script src="main.js?v=20261017-31" defer></script>
+<script src="main.js?v=20261017-32" defer></script>
 </body>
 </html>

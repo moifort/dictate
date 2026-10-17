@@ -457,11 +457,15 @@
   for (const key of document.querySelectorAll("[data-key-feature], [data-key-hero]")) {
     if (reducedMotion) break;
     (async () => {
+      // The aviation mic in the same card is held along with the key.
+      const mic = key.closest(".card")?.querySelector("[data-mic]");
       for (;;) {
         await sleep(2200);
         key.classList.add("pressed");
+        mic?.classList.add("pressed");
         await sleep(1600);
         key.classList.remove("pressed");
+        mic?.classList.remove("pressed");
       }
     })();
   }
