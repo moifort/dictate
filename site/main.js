@@ -70,6 +70,32 @@
     }
   }
 
+  /**
+   * Same wave, drawn as a ribbon whose thickness follows the envelope: hairline
+   * at both edges, widest where the wave is tallest. For the full-width hero.
+   */
+  function traceRibbon(ctx, width, midY, amplitude, center, frequency, phase, minWidth, maxWidth) {
+    const warp = Math.log(0.5) / Math.log(center);
+    const steps = Math.max(80, Math.floor(width / 2));
+    const top = [];
+    const bottom = [];
+    for (let step = 0; step <= steps; step++) {
+      const u = step / steps;
+      const v = Math.pow(u, warp);
+      const envelope = Math.pow(4 * v * (1 - v), 1.5);
+      const y = midY - amplitude * envelope * Math.sin(2 * Math.PI * frequency * u + phase);
+      const half = (minWidth + (maxWidth - minWidth) * envelope) / 2;
+      const x = u * width;
+      top.push([x, y - half]);
+      bottom.push([x, y + half]);
+    }
+    ctx.beginPath();
+    ctx.moveTo(top[0][0], top[0][1]);
+    for (let i = 1; i < top.length; i++) ctx.lineTo(top[i][0], top[i][1]);
+    for (let i = bottom.length - 1; i >= 0; i--) ctx.lineTo(bottom[i][0], bottom[i][1]);
+    ctx.closePath();
+  }
+
   class WaveRenderer {
     /**
      * @param {HTMLCanvasElement} canvas
@@ -133,6 +159,25 @@
         gradient.addColorStop(0.5, wave.colors[1]);
         gradient.addColorStop(1, wave.colors[0]);
 
+        if (style.ribbon) {
+          const minWidth = style.ribbon[0] * this.dpr;
+          const maxWidth = style.ribbon[1] * this.dpr;
+          // Soft halo under the ribbon.
+          ctx.save();
+          ctx.filter = `blur(${style.glow * this.dpr}px)`;
+          ctx.globalAlpha = 0.3;
+          ctx.fillStyle = gradient;
+          traceRibbon(ctx, width, midY, amplitude, center, wave.frequency, phase, minWidth, maxWidth * 1.8);
+          ctx.fill();
+          ctx.restore();
+          ctx.globalAlpha = 0.92;
+          ctx.fillStyle = gradient;
+          traceRibbon(ctx, width, midY, amplitude, center, wave.frequency, phase, minWidth, maxWidth);
+          ctx.fill();
+          ctx.globalAlpha = 1;
+          continue;
+        }
+
         // Glow: the closed shape, blurred and translucent.
         ctx.save();
         ctx.filter = `blur(${style.glow * this.dpr}px)`;
@@ -154,7 +199,8 @@
 
   const STYLES = {
     // Big icon: wide strokes, generous glow, waves across most of the square.
-    hero: { scale: 0.3, stroke: 7, glow: 16, inset: 0.0, floor: 0.45 },
+    // Full-width ribbon: hairline at the edges, up to 22 px thick in the middle.
+    hero: { scale: 0.4, stroke: 0, glow: 18, inset: 0.0, floor: 0.5, ribbon: [0.5, 26] },
     download: { scale: 0.3, stroke: 4, glow: 10, inset: 0.0, floor: 0.45 },
     nav: { scale: 0.3, stroke: 1.6, glow: 1.5, inset: 0.0, floor: 0.45 },
     // The pill: 72×26 points like the real one, thin stroke.
@@ -419,6 +465,31 @@
         featureKey.classList.add("pressed");
         await sleep(1600);
         featureKey.classList.remove("pressed");
+      }
+    })();
+  }
+
+  // The latency card counts up to the median and settles there.
+  const timer = document.querySelector("[data-timer]");
+  const timerBar = document.querySelector("[data-timer-bar]");
+  if (timer && timerBar) {
+    const median = 1.5;
+    (async () => {
+      for (;;) {
+        const start = performance.now();
+        timerBar.style.transition = "none";
+        timerBar.style.width = "0";
+        await sleep(20);
+        timerBar.style.transition = `width ${median}s linear`;
+        timerBar.style.width = "100%";
+        let elapsed = 0;
+        while (elapsed < median) {
+          elapsed = Math.min(median, (performance.now() - start) / 1000);
+          timer.textContent = elapsed.toFixed(1).replace(".", ",") + " s";
+          await sleep(50);
+        }
+        timer.textContent = "1,5 s";
+        await sleep(2600);
       }
     })();
   }

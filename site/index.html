@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dictate — Parlez. C'est écrit.</title>
-  <meta name="description" content="Dictée push-to-talk pour le Mac. Maintenez control, parlez, relâchez : un texte propre apparaît là où vous écrivez. Gratuit, open source, transcription sur votre Mac.">
+  <meta name="description" content="Dictée push-to-talk pour le Mac, totalement gratuite. Maintenez control, parlez, relâchez : environ 1,5 s plus tard, un texte propre relu par Claude apparaît là où vous écrivez.">
   <meta property="og:title" content="Dictate — Parlez. C'est écrit.">
-  <meta property="og:description" content="Dictée push-to-talk pour le Mac, gratuite et open source. Maintenez control, parlez, relâchez.">
+  <meta property="og:description" content="Dictée push-to-talk pour le Mac, totalement gratuite. Maintenez control, parlez, relâchez.">
   <meta property="og:image" content="https://moifort.github.io/dictate/icon-256.png">
   <meta property="og:type" content="website">
-  <meta name="theme-color" content="#0b0b10">
+  <meta name="theme-color" content="#ffffff">
   <link rel="icon" href="favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="icon-256.png">
   <link rel="stylesheet" href="style.css">
@@ -34,13 +34,11 @@
 
   <!-- Hero -->
   <section class="hero">
-    <div class="hero-icon" aria-hidden="true">
-      <canvas class="wave-canvas" data-wave="hero" width="640" height="640"></canvas>
-    </div>
+    <p class="hero-eyebrow">Dictée pour le Mac · totalement gratuite</p>
     <h1 class="hero-title">Parlez.<br><span class="gradient-text">C'est écrit.</span></h1>
     <p class="hero-subtitle">
       Maintenez <kbd>control</kbd>, parlez, relâchez.<br class="wide-only">
-      Vos mots apparaissent là où vous écrivez, propres et prêts à envoyer.
+      Vos mots apparaissent là où vous écrivez, relus par Claude, prêts à envoyer.
     </p>
     <div class="hero-actions">
       <a class="button primary" href="https://github.com/moifort/dictate/releases/latest" data-download>
@@ -49,8 +47,27 @@
       <a class="button ghost" href="#demo">Voir la démo</a>
     </div>
     <p class="hero-meta">
-      <span data-version>Dernière version</span> · macOS 27 · Apple Silicon · Gratuit et open source
+      <span data-version>Dernière version</span> · macOS 27 · Apple Silicon · open source
     </p>
+
+    <div class="hero-wave" aria-hidden="true">
+      <canvas class="wave-canvas" data-wave="hero" width="1600" height="360"></canvas>
+    </div>
+
+    <dl class="stats">
+      <div>
+        <dt>Temps médian, de la parole au texte</dt>
+        <dd>≈ 1,5 s</dd>
+      </div>
+      <div>
+        <dt>Relecture et écriture</dt>
+        <dd>Claude</dd>
+      </div>
+      <div>
+        <dt>Prix, maintenant et après</dt>
+        <dd>0 €</dd>
+      </div>
+    </dl>
   </section>
 
   <!-- Live demo -->
@@ -96,8 +113,8 @@
         <ol class="demo-steps">
           <li data-step="recording"><span class="dot"></span>Écoute</li>
           <li data-step="transcribing"><span class="dot"></span>Transcription sur le Mac</li>
-          <li data-step="enhancing"><span class="dot"></span>Nettoyage par Claude</li>
-          <li data-step="pasted"><span class="dot"></span>Texte au curseur</li>
+          <li data-step="enhancing"><span class="dot"></span>Relecture par Claude</li>
+          <li data-step="pasted"><span class="dot"></span>Texte au curseur <em class="step-note">≈ 1,5 s en médiane</em></li>
         </ol>
       </aside>
     </div>
@@ -134,8 +151,19 @@
             <p class="clean">Je voulais te dire que la réunion est décalée à mardi.</p>
           </div>
         </div>
-        <h3>Du texte propre</h3>
-        <p>Les « euh », les répétitions et les faux départs disparaissent. Ponctuation, majuscules et termes techniques sont corrigés. Vos mots restent les vôtres.</p>
+        <h3>Relu et écrit par Claude</h3>
+        <p>Claude relit la transcription et l'écrit proprement : les « euh », les répétitions et les faux départs disparaissent, la ponctuation et les termes techniques sont corrigés. Vos mots restent les vôtres.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-visual">
+          <div class="timer-demo" aria-hidden="true">
+            <span class="timer" data-timer>0,0 s</span>
+            <span class="timer-bar"><i data-timer-bar></i></span>
+          </div>
+        </div>
+        <h3>Environ 1,5 seconde</h3>
+        <p>C'est le temps médian entre la fin de votre phrase et son apparition dans le champ, transcription et relecture comprises.</p>
       </article>
 
       <article class="card">
@@ -188,7 +216,7 @@
     <h2 class="section-title">Votre voix reste sur votre Mac.</h2>
     <p class="section-lead">
       La parole est transcrite localement par Parakeet. L'audio ne quitte jamais l'ordinateur.
-      Seul le texte est envoyé à Claude pour le nettoyage, via votre propre abonnement, et vous pouvez le désactiver.
+      Seul le texte est envoyé à Claude pour la relecture, via votre propre abonnement Claude, et vous pouvez le désactiver.
     </p>
 
     <div class="flow" aria-label="Trajet de la dictée">
@@ -207,14 +235,14 @@
       <div class="flow-node">
         <span class="flow-icon">✨</span>
         <strong>Claude</strong>
-        <small>nettoyage, avec votre abonnement</small>
+        <small>relecture, avec votre abonnement</small>
       </div>
     </div>
 
     <ul class="privacy-points">
       <li><strong>Aucun compte.</strong> Pas d'inscription, pas de serveur à nous, pas de suivi de ce que vous dictez.</li>
       <li><strong>Open source.</strong> Le code est public : vous pouvez lire exactement ce qui part et ce qui reste.</li>
-      <li><strong>Gratuit.</strong> Pas d'abonnement, pas de version pro. Les mises à jour arrivent toutes seules.</li>
+      <li><strong>Totalement gratuit.</strong> Pas d'abonnement, pas de version pro, pas d'essai limité. Les mises à jour arrivent toutes seules.</li>
     </ul>
   </section>
 
