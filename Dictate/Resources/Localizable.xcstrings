@@ -3856,6 +3856,38 @@
           }
         }
       }
+    },
+    "Claude introuvable.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude not found."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude introuvable."
+          }
+        }
+      }
+    },
+    "Claude n'est connecté à aucun compte.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude is not signed in to any account."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude n'est connecté à aucun compte."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

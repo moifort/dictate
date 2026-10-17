@@ -400,6 +400,11 @@ private struct ReviewSettings: View {
                 VStack(alignment: .leading, spacing: 6) {
                     ReviewerPicker(selection: reviewer, claudeReady: model.claudeReady)
                     Hint(reviewerHint)
+                    // The binary section only shows under Claude: a greyed tile
+                    // still needs a way to point at a CLI the search missed.
+                    if !model.claudeReady && model.settings.reviewer != .claude && !Distribution.isAppStore {
+                        claudeUnavailable
+                    }
                 }
             }
             // Signing in to Claude happens elsewhere: ask again each time the tab shows.
@@ -427,6 +432,29 @@ private struct ReviewSettings: View {
         }
         .formStyle(.columns)
         .padding(20)
+    }
+
+    private var claudeUnavailable: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                Group {
+                    if model.claudeCLIPath == nil {
+                        Text("Claude introuvable.")
+                    } else {
+                        Text("Claude n'est connecté à aucun compte.")
+                    }
+                }
+                .foregroundStyle(.secondary)
+                Button("Choisir…", action: chooseClaudeCLI)
+                Button("Revérifier") { model.recheckClaude() }
+            }
+            .buttonStyle(.link)
+            if overrideIgnored {
+                Text("Fichier non exécutable : détection automatique utilisée.")
+                    .foregroundStyle(.orange)
+            }
+        }
+        .font(.caption)
     }
 
     private var reviewerHint: String {
