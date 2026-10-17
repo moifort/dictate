@@ -414,6 +414,7 @@
     await sleep(250);
     if (!alive()) return;
     setPill("processing");
+    setStep("review");
     await sleep(1500);
     if (!alive()) return;
 
