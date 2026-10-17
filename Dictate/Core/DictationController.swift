@@ -42,6 +42,10 @@ final class DictationController {
     @ObservationIgnored private let shareFieldContext: () -> Bool
     /// The engine behind `transcriber`, for the statistics.
     @ObservationIgnored private let transcriptionEngine: () -> TranscriptionEngine
+    /// The model behind `enhancer` for the cleanup just done, for the
+    /// statistics: read once the cleanup is over, since the enhancer may
+    /// fall back to another model along the way.
+    @ObservationIgnored private let reviewer: () -> Reviewer?
     /// The engine whose model is not in memory yet, nil once dictation can start.
     @ObservationIgnored private let loadingEngine: () -> TranscriptionEngine?
     @ObservationIgnored private let enhancementTimeout: Duration
@@ -89,6 +93,7 @@ final class DictationController {
         enhancementEnabled: @escaping () -> Bool,
         shareFieldContext: @escaping () -> Bool,
         transcriptionEngine: @escaping () -> TranscriptionEngine = { .parakeet },
+        reviewer: @escaping () -> Reviewer? = { nil },
         loadingEngine: @escaping () -> TranscriptionEngine? = { nil },
         enhancementTimeout: Duration = .seconds(8),
         releaseTail: Duration = defaultReleaseTail,
@@ -103,6 +108,7 @@ final class DictationController {
         self.enhancementEnabled = enhancementEnabled
         self.shareFieldContext = shareFieldContext
         self.transcriptionEngine = transcriptionEngine
+        self.reviewer = reviewer
         self.loadingEngine = loadingEngine
         self.enhancementTimeout = enhancementTimeout
         self.releaseTail = releaseTail
@@ -208,6 +214,7 @@ final class DictationController {
         var text = UnknownTokens.resolved(transcript.text)
         var raw = false
         var enhancement: Duration?
+        var reviewer: Reviewer?
         if enhancementEnabled() {
             phase = .enhancing
             let start = clock.now
@@ -218,7 +225,8 @@ final class DictationController {
             }
             let elapsed = clock.now - start
             enhancement = elapsed
-            Log.dictation.info("enhanced in \(Self.milliseconds(elapsed)) ms, raw: \(raw)")
+            reviewer = self.reviewer()
+            Log.dictation.info("enhanced in \(Self.milliseconds(elapsed)) ms by \(reviewer?.rawValue ?? "nobody", privacy: .public), raw: \(raw)")
         }
 
         let start = clock.now
@@ -263,6 +271,7 @@ final class DictationController {
             engine: engine,
             transcription: Self.seconds(transcription),
             enhancement: enhancement.map(Self.seconds),
+            reviewer: reviewer,
             insertion: Self.seconds(insertion)
         ))
         finish(outcome)

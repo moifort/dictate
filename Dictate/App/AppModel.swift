@@ -50,7 +50,7 @@ final class AppModel {
         let focus = FocusInspector()
         let systemPrompt = { PromptBuilder.systemPrompt(vocabulary: settings.vocabulary, language: settings.language) }
         let network = network
-        enhancer = SelectedEnhancer(
+        let enhancer = SelectedEnhancer(
             reviewer: { settings.reviewer },
             isOnline: { network.isOnline },
             apple: AppleIntelligenceEnhancer(systemPrompt: systemPrompt),
@@ -59,6 +59,7 @@ final class AppModel {
                 systemPrompt: systemPrompt
             )
         )
+        self.enhancer = enhancer
         controller = DictationController(
             recorder: recorder,
             transcriber: transcriber,
@@ -69,6 +70,7 @@ final class AppModel {
             enhancementEnabled: { settings.enhancementEnabled },
             shareFieldContext: { settings.shareFieldContext },
             transcriptionEngine: { [transcriber] in transcriber.engine },
+            reviewer: { [enhancer] in enhancer.lastUsed },
             loadingEngine: { [transcriber] in
                 // A failed load is retried by the dictation itself.
                 transcriber.state.isBusy || transcriber.state == .notLoaded ? transcriber.engine : nil

@@ -59,7 +59,10 @@ struct DictationsCard: View {
 
 /// How long the text took to appear after `fn` was released, with the
 /// current engine only: Whisper's dictations were several times slower and
-/// would drown its median. The engine's time is stacked under Claude's.
+/// would drown its median. The cleanup's time is stacked over the engine's,
+/// coloured by the model that did it: a day offline shows Apple Intelligence
+/// where Claude usually is. A column where both worked splits its cleanup
+/// time between them, in the proportion of the dictations each took.
 struct LatencyCard: View {
     let records: [DictationRecord]
     let period: StatsPeriod
@@ -80,7 +83,9 @@ struct LatencyCard: View {
                 Spacer()
                 HStack(spacing: 12) {
                     legend(engine.displayName, color: StatsPalette.latency)
-                    legend("Claude", color: StatsPalette.claude)
+                    ForEach(series.reviewers) { reviewer in
+                        legend(reviewer.displayName, color: StatsPalette.color(for: reviewer))
+                    }
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -89,21 +94,41 @@ struct LatencyCard: View {
                 series: series,
                 peak: series.buckets.map { $0.transcription + $0.enhancement }.max() ?? 0,
                 floor: 1,
-                value: { $0.dictations > 0 ? "\(StatsFormat.seconds($0.transcription + $0.enhancement)) s" : nil }
+                value: { $0.dictations > 0 ? Self.label($0) : nil }
             ) { bucket, dimmed in
+                // Without a model, what is left of the cleanup time is the
+                // paste alone: it stays with the engine rather than vanishing.
                 BarMark(
                     x: .value("Date", bucket.date, unit: series.period.unit),
-                    y: .value("Transcription", bucket.transcription)
+                    y: .value("Transcription", bucket.transcription + (bucket.reviewers.isEmpty ? bucket.enhancement : 0))
                 )
                 .foregroundStyle(StatsPalette.latency)
                 .opacity(dimmed ? 0.4 : 1)
-                BarMark(
-                    x: .value("Date", bucket.date, unit: series.period.unit),
-                    y: .value("Claude", bucket.enhancement)
-                )
-                .foregroundStyle(StatsPalette.claude)
-                .opacity(dimmed ? 0.4 : 1)
+                ForEach(series.reviewers) { reviewer in
+                    BarMark(
+                        x: .value("Date", bucket.date, unit: series.period.unit),
+                        y: .value(reviewer.displayName, bucket.enhancement * bucket.share(of: reviewer))
+                    )
+                    .foregroundStyle(StatsPalette.color(for: reviewer))
+                    .opacity(dimmed ? 0.4 : 1)
+                }
             }
+        }
+    }
+
+    /// The column's wait, and the model behind it: named alone when it did
+    /// every cleanup, with its share when the column mixes two.
+    static func label(_ bucket: DictationSeries.Bucket) -> String {
+        let seconds = "\(StatsFormat.seconds(bucket.transcription + bucket.enhancement)) s"
+        let used = Reviewer.allCases.filter { bucket.reviewers[$0, default: 0] > 0 }
+        switch used.count {
+        case 0: return seconds
+        case 1: return "\(seconds) · \(used[0].displayName)"
+        default:
+            let shares = used.map { reviewer in
+                "\(reviewer.displayName) \(bucket.share(of: reviewer).formatted(.percent.precision(.fractionLength(0))))"
+            }
+            return "\(seconds) · \(shares.joined(separator: ", "))"
         }
     }
 

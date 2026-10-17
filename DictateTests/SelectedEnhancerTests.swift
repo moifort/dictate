@@ -59,6 +59,19 @@ struct SelectedEnhancerTests {
         #expect(enhancer.effectiveReviewer == .apple)
     }
 
+    @Test func theReviewerActuallyUsedIsRemembered() async throws {
+        let (chosen, _, _) = make(reviewer: .claude)
+        #expect(chosen.lastUsed == nil)
+        _ = try await chosen.enhance(transcript: "x", context: DictationContext())
+        #expect(chosen.lastUsed == .claude)
+        let (offline, _, _) = make(reviewer: .claude, online: false)
+        _ = try await offline.enhance(transcript: "x", context: DictationContext())
+        #expect(offline.lastUsed == .apple)
+        let (failing, _, _) = make(reviewer: .claude, claude: FakeEnhancer(.failure(FakeError())))
+        _ = try await failing.enhance(transcript: "x", context: DictationContext())
+        #expect(failing.lastUsed == .apple)
+    }
+
     @Test func offlineWithoutAppleIntelligenceStillAsksClaude() async throws {
         let (enhancer, _, claude) = make(reviewer: .claude, online: false, appleAvailable: false)
         #expect(try await enhancer.enhance(transcript: "x", context: DictationContext()) == "claude")

@@ -28,6 +28,9 @@ final class SelectedEnhancer: Enhancer {
     private let appleAvailable: () -> Bool
     let apple: any WarmableEnhancer
     let claude: any WarmableEnhancer
+    /// The reviewer the last dictation actually went to, fallbacks included;
+    /// nil before the first one. Read by the statistics after each cleanup.
+    private(set) var lastUsed: Reviewer?
 
     init(
         reviewer: @escaping () -> Reviewer,
@@ -86,12 +89,15 @@ final class SelectedEnhancer: Enhancer {
         case .none:
             throw SelectedEnhancerError.noReviewer
         case .apple:
+            lastUsed = .apple
             return try await apple.enhance(transcription, context: context)
         case .claude:
             if !isOnline(), appleAvailable() {
                 Log.dictation.info("offline: Apple Intelligence reviews instead of Claude")
+                lastUsed = .apple
                 return try await apple.enhance(transcription, context: context)
             }
+            lastUsed = .claude
             do {
                 return try await claude.enhance(transcription, context: context)
             } catch is CancellationError {
@@ -99,6 +105,7 @@ final class SelectedEnhancer: Enhancer {
             } catch where appleAvailable() {
                 Log.dictation.error("claude failed, Apple Intelligence reviews instead: \(error.localizedDescription, privacy: .public)")
                 ErrorReporter.capture(error, "claude failed, falling back to Apple Intelligence", category: "enhancer", level: .warning)
+                lastUsed = .apple
                 return try await apple.enhance(transcription, context: context)
             }
         }

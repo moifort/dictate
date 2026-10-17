@@ -25,7 +25,8 @@ struct DictationSeriesTests {
         words: Int = 10,
         audio: TimeInterval = 4,
         transcription: TimeInterval = 2,
-        enhancement: TimeInterval? = 1
+        enhancement: TimeInterval? = 1,
+        reviewer: Reviewer? = .claude
     ) -> DictationRecord {
         let day = calendar.date(byAdding: .day, value: -daysAgo, to: calendar.startOfDay(for: now))!
         return DictationRecord(
@@ -34,6 +35,7 @@ struct DictationSeriesTests {
             audio: audio,
             transcription: transcription,
             enhancement: enhancement,
+            reviewer: reviewer,
             insertion: 0
         )
     }
@@ -123,6 +125,42 @@ struct DictationSeriesTests {
         let series = series([record(daysAgo: 0, enhancement: nil)], .week)
         #expect(series.buckets.last?.enhancement == 0)
         #expect(series.buckets.last?.latency == 2)
+        #expect(series.buckets.last?.reviewers.isEmpty == true)
+        #expect(series.reviewers.isEmpty)
+    }
+
+    // MARK: - Reviewers
+
+    @Test func eachColumnCountsTheDictationsPerReviewer() {
+        let series = series([
+            record(daysAgo: 0, hour: 9, reviewer: .claude),
+            record(daysAgo: 0, hour: 10, reviewer: .claude),
+            record(daysAgo: 0, hour: 11, reviewer: .claude),
+            // Offline for the afternoon.
+            record(daysAgo: 0, hour: 15, reviewer: .apple),
+            record(daysAgo: 0, hour: 16, enhancement: nil),
+            record(daysAgo: 1, reviewer: .claude),
+        ], .week)
+        let today = series.buckets.last!
+        #expect(today.reviewers == [.claude: 3, .apple: 1])
+        #expect(today.share(of: .claude) == 0.75)
+        #expect(today.share(of: .apple) == 0.25)
+        #expect(series.buckets[5].reviewers == [.claude: 1])
+        #expect(series.reviewers == [.apple, .claude])
+    }
+
+    @Test func theDelayLabelNamesTheModelBehindTheColumn() {
+        let claude = series([record(daysAgo: 0, transcription: 2, enhancement: 1)], .week).buckets.last!
+        #expect(LatencyCard.label(claude) == "\(StatsFormat.seconds(3)) s · Claude")
+        let mixed = series([
+            record(daysAgo: 0, hour: 9, reviewer: .claude),
+            record(daysAgo: 0, hour: 10, reviewer: .apple),
+        ], .week).buckets.last!
+        // The percent sign is spaced or not with the locale.
+        let label = LatencyCard.label(mixed)
+        #expect(label.contains("· Apple Intelligence 50") && label.contains(", Claude 50"))
+        let raw = series([record(daysAgo: 0, enhancement: nil)], .week).buckets.last!
+        #expect(LatencyCard.label(raw) == "\(StatsFormat.seconds(2)) s")
     }
 
     @Test func paceIsWordsPerMinuteOfSpeech() {

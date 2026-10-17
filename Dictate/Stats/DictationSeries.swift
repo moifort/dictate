@@ -46,15 +46,25 @@ nonisolated struct DictationSeries: Equatable {
         let audio: TimeInterval
         /// Median transcription time, in seconds.
         let transcription: TimeInterval
-        /// Median Claude time, insertion included, in seconds.
+        /// Median cleanup time, insertion included, in seconds.
         let enhancement: TimeInterval
         /// Median wait after releasing `fn`, in seconds.
         let latency: TimeInterval
+        /// How many dictations each model cleaned up; the ones without
+        /// cleanup are not counted.
+        let reviewers: [Reviewer: Int]
 
         var id: Date { date }
         var midpoint: Date { date.addingTimeInterval(end.timeIntervalSince(date) / 2) }
         /// Words per minute of speech; nil without speech.
         var pace: Double? { DictationSeries.pace(words: words, audio: audio) }
+        /// The part of the cleaned-up dictations each model took, by count,
+        /// so a column's cleanup time can be coloured by model.
+        func share(of reviewer: Reviewer) -> Double {
+            let total = reviewers.values.reduce(0, +)
+            guard total > 0 else { return 0 }
+            return Double(reviewers[reviewer] ?? 0) / Double(total)
+        }
     }
 
     let period: StatsPeriod
@@ -71,6 +81,9 @@ nonisolated struct DictationSeries: Equatable {
     let latency: TimeInterval?
     /// Words per minute of speech over the period; nil without speech.
     let pace: Double?
+    /// The models that cleaned up at least one dictation over the period,
+    /// in the order of the settings.
+    let reviewers: [Reviewer]
 
     init(records: [DictationRecord], period: StatsPeriod, now: Date = .now, calendar: Calendar = .current) {
         self.period = period
@@ -104,6 +117,8 @@ nonisolated struct DictationSeries: Equatable {
         dictations = covered.count
         latency = DictationStats.median(covered.map(\.latency))
         pace = Self.pace(words: words, audio: covered.reduce(0) { $0 + $1.audio })
+        let used = Set(covered.compactMap(\.reviewer))
+        reviewers = Reviewer.allCases.filter(used.contains)
     }
 
     /// The column an instant falls in, if any.
@@ -120,7 +135,8 @@ nonisolated struct DictationSeries: Equatable {
             audio: records.reduce(0) { $0 + $1.audio },
             transcription: DictationStats.median(records.map(\.transcription)) ?? 0,
             enhancement: DictationStats.median(records.map { ($0.enhancement ?? 0) + $0.insertion }) ?? 0,
-            latency: DictationStats.median(records.map(\.latency)) ?? 0
+            latency: DictationStats.median(records.map(\.latency)) ?? 0,
+            reviewers: Dictionary(grouping: records.compactMap(\.reviewer)) { $0 }.mapValues(\.count)
         )
     }
 

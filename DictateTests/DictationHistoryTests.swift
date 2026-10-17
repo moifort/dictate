@@ -53,6 +53,33 @@ struct DictationHistoryTests {
         #expect(records.first?.transcription == 2.1)
     }
 
+    @Test func theReviewerSurvivesARelaunch() {
+        let apple = DictationRecord(
+            date: Date(timeIntervalSince1970: 1_800_000_000), words: 4, audio: 3,
+            transcription: 0.2, enhancement: 1, reviewer: .apple, insertion: 0
+        )
+        let raw = DictationRecord(
+            date: Date(timeIntervalSince1970: 1_800_000_001), words: 4, audio: 3,
+            transcription: 0.2, enhancement: nil, insertion: 0
+        )
+        let history = DictationHistory(file: file)
+        history.append(apple)
+        history.append(raw)
+        let records = DictationHistory(file: file).records
+        #expect(records == [apple, raw])
+        #expect(records.map(\.reviewer) == [.apple, nil])
+    }
+
+    @Test func dictationsCleanedUpBeforeTheReviewerWasRecordedAreClaudes() throws {
+        try FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
+        let lines = [
+            #"{"date":"2026-10-15T17:39:57Z","words":4,"audio":1.5,"engine":"parakeet","transcription":0.3,"enhancement":1.2,"insertion":0.03}"#,
+            #"{"date":"2026-10-15T17:40:57Z","words":4,"audio":1.5,"engine":"parakeet","transcription":0.3,"insertion":0.03}"#,
+        ]
+        try Data((lines.joined(separator: "\n") + "\n").utf8).write(to: file)
+        #expect(DictationHistory(file: file).records.map(\.reviewer) == [.claude, nil])
+    }
+
     @Test func aDamagedLineDoesNotLoseTheOthers() throws {
         let history = DictationHistory(file: file)
         history.append(record(words: 3))

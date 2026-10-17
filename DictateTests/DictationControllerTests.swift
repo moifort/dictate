@@ -18,6 +18,7 @@ struct DictationControllerTests {
         enhancementEnabled: Bool = true,
         shareFieldContext: Bool = true,
         engine: TranscriptionEngine = .parakeet,
+        reviewer: Reviewer? = .claude,
         loadingEngine: TranscriptionEngine? = nil,
         tail: ((Fakes) async -> Void)? = nil
     ) -> (DictationController, Fakes) {
@@ -40,6 +41,7 @@ struct DictationControllerTests {
             enhancementEnabled: { enhancementEnabled },
             shareFieldContext: { shareFieldContext },
             transcriptionEngine: { engine },
+            reviewer: { reviewer },
             loadingEngine: { loadingEngine },
             enhancementTimeout: .milliseconds(200),
             sleep: { duration in
@@ -308,6 +310,15 @@ struct DictationControllerTests {
         await dictate(controller)
         #expect(records.first?.words == 4)
         #expect(records.first?.enhancement == nil)
+        #expect(records.first?.reviewer == nil)
+    }
+
+    @Test func dictationIsRecordedWithTheModelThatCleanedItUp() async {
+        let (controller, _) = makeController(reviewer: .apple)
+        var records: [DictationRecord] = []
+        controller.onRecord = { records.append($0) }
+        await dictate(controller)
+        #expect(records.first?.reviewer == .apple)
     }
 
     @Test func discardedDictationIsNotRecorded() async {

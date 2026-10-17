@@ -74,7 +74,17 @@ enum StatsPalette {
     static let dictations = Color.green
     static let latency = Color.cyan
     static let claude = Color.purple
+    static let apple = Color.blue
     static let pace = Color.orange
+
+    /// The colour of each model's cleanup time in the delay chart.
+    static func color(for reviewer: Reviewer) -> Color {
+        switch reviewer {
+        case .claude: claude
+        case .apple: apple
+        case .none: latency
+        }
+    }
 }
 
 enum StatsFormat {

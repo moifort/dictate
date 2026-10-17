@@ -13,8 +13,11 @@ nonisolated struct DictationRecord: Codable, Equatable, Sendable {
     let engine: TranscriptionEngine?
     /// Transcription, in seconds.
     let transcription: TimeInterval
-    /// Claude, in seconds; nil when the cleanup is turned off.
+    /// Cleanup, in seconds; nil when it is turned off.
     let enhancement: TimeInterval?
+    /// The model that cleaned up the text, the one that stepped in offline
+    /// included; nil when the cleanup is turned off.
+    let reviewer: Reviewer?
     /// Pasting or copying, in seconds.
     let insertion: TimeInterval
 
@@ -25,6 +28,7 @@ nonisolated struct DictationRecord: Codable, Equatable, Sendable {
         engine: TranscriptionEngine? = .parakeet,
         transcription: TimeInterval,
         enhancement: TimeInterval?,
+        reviewer: Reviewer? = .claude,
         insertion: TimeInterval
     ) {
         self.date = date
@@ -33,11 +37,14 @@ nonisolated struct DictationRecord: Codable, Equatable, Sendable {
         self.engine = engine
         self.transcription = transcription
         self.enhancement = enhancement
+        self.reviewer = enhancement == nil ? nil : reviewer
         self.insertion = insertion
     }
 
     /// Lines written before the engine was recorded all come from Whisper:
-    /// like the lines naming it, they keep their words but no engine.
+    /// like the lines naming it, they keep their words but no engine. Lines
+    /// written before the reviewer was recorded were all cleaned up by
+    /// Claude, the only reviewer there was.
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         date = try container.decode(Date.self, forKey: .date)
@@ -46,6 +53,7 @@ nonisolated struct DictationRecord: Codable, Equatable, Sendable {
         engine = try container.decodeIfPresent(String.self, forKey: .engine).flatMap(TranscriptionEngine.init(rawValue:))
         transcription = try container.decode(TimeInterval.self, forKey: .transcription)
         enhancement = try container.decodeIfPresent(TimeInterval.self, forKey: .enhancement)
+        reviewer = enhancement == nil ? nil : try container.decodeIfPresent(Reviewer.self, forKey: .reviewer) ?? .claude
         insertion = try container.decode(TimeInterval.self, forKey: .insertion)
     }
 
