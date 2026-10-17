@@ -45,12 +45,12 @@ final class AppSettings {
 
     /// The model that cleans up each transcript.
     var reviewer: Reviewer {
-        get { reviewerChoice ?? defaultReviewer() }
+        get { reviewerChoice.flatMap { $0.isAvailable ? $0 : nil } ?? defaultReviewer() }
         set { reviewerChoice = newValue }
     }
 
     /// Whether the reviewer was picked by the user rather than by the app.
-    var reviewerIsChosen: Bool { reviewerChoice != nil }
+    var reviewerIsChosen: Bool { reviewerChoice?.isAvailable == true }
 
     /// Whether a reviewer cleans up the transcript before insertion.
     var enhancementEnabled: Bool { reviewer != .none }

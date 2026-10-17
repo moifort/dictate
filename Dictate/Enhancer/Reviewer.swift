@@ -11,6 +11,9 @@ nonisolated enum Reviewer: String, CaseIterable, Codable, Identifiable, Sendable
 
     var id: String { rawValue }
 
+    /// Claude goes through the `claude` CLI, which the App Store sandbox cannot reach.
+    var isAvailable: Bool { self != .claude || !Distribution.isAppStore }
+
     var displayName: String {
         switch self {
         case .none: "Aucun"

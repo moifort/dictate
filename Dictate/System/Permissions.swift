@@ -36,6 +36,8 @@ enum Permissions {
     static func requestAccessibility() {
         let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
         AXIsProcessTrustedWithOptions(options)
+        // The sandbox denies the system prompt: show the list to switch Dictate on in.
+        if Distribution.isAppStore { openPrivacySettings("Privacy_Accessibility") }
     }
 
     static func openKeyboardSettings() {

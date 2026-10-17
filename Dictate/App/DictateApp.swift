@@ -30,12 +30,14 @@ struct DictateApp: App {
         .defaultSize(width: 560, height: 860)
         .defaultLaunchBehavior(.suppressed)
 
+        #if !APP_STORE
         Window("Mise à jour", id: "update") {
             UpdateView(updater: appDelegate.model.updater)
         }
         .windowResizability(.contentSize)
         .windowStyle(.hiddenTitleBar)
         .defaultLaunchBehavior(.suppressed)
+        #endif
     }
 
     private var menuBarSymbol: String {

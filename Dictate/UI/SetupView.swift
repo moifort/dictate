@@ -344,12 +344,12 @@ private struct ReviewStep: View {
 
         case .apple:
             if model.appleIntelligence.isAvailable {
-                (model.settings.reviewerIsChosen
+                (model.settings.reviewerIsChosen || Distribution.isAppStore
                      ? Text("Apple Intelligence est prêt : la relecture se fait sur ce Mac.")
                      : Text("Claude est introuvable : Apple Intelligence relit sur ce Mac. Installez Claude pour qu'il prenne le relais."))
                     .font(.caption)
                     .foregroundStyle(.tertiary)
-                if !model.settings.reviewerIsChosen {
+                if !model.settings.reviewerIsChosen && !Distribution.isAppStore {
                     Actions {
                         Link("Télécharger Claude", destination: URL(string: "https://claude.ai/download")!)
                             .buttonStyle(.glass)
@@ -359,8 +359,10 @@ private struct ReviewStep: View {
                 Actions {
                     Button("Ouvrir les Réglages") { Permissions.openAppleIntelligenceSettings() }
                         .buttonStyle(.glassProminent)
-                    Button("Utiliser Claude") { model.selectReviewer(.claude) }
-                        .buttonStyle(.glass)
+                    if !Distribution.isAppStore {
+                        Button("Utiliser Claude") { model.selectReviewer(.claude) }
+                            .buttonStyle(.glass)
+                    }
                     Button("Continuer sans relecture") { model.selectReviewer(.none) }
                         .buttonStyle(.glass)
                 }

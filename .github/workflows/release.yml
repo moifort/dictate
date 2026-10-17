@@ -13,8 +13,9 @@ name: Release
 # The tests and the build run side by side; the release is only published
 # once both pass.
 #
-# Dictate cannot ship on the Mac App Store: its event tap, Accessibility access
-# and the `claude` subprocess are all incompatible with the sandbox.
+# This is the Developer ID build. The Mac App Store build is a separate,
+# sandboxed configuration without the `claude` reviewer and the updater:
+# scripts/build-app-store.sh.
 #
 # The Homebrew cask (moifort/homebrew-tap) needs nothing from here: its own
 # workflow checks the latest release every hour and bumps version and sha256.

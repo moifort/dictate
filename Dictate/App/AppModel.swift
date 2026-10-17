@@ -102,7 +102,7 @@ final class AppModel {
         }
         fnMonitor.key = settings.pushToTalkKey
         claudeCLIPath = locator.locate(override: settings.cliPathOverride)
-        settings.defaultReviewer = { [weak self] in self?.automaticReviewer ?? .claude }
+        settings.defaultReviewer = { [weak self] in self?.automaticReviewer ?? (Distribution.isAppStore ? .apple : .claude) }
         refreshSetup()
     }
 
@@ -126,7 +126,9 @@ final class AppModel {
         Task.detached(priority: .background) { ModelStorage.removeWhisperModel() }
         startHotkey()
         pollSetupUntilComplete()
-        updater.startPeriodicChecks { [settings] in settings.autoUpdate }
+        if !Distribution.isAppStore {
+            updater.startPeriodicChecks { [settings] in settings.autoUpdate }
+        }
         reportSettings()
     }
 

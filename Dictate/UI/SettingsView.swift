@@ -293,32 +293,42 @@ private struct GeneralSettings: View {
             LabeledContent("Application :") {
                 VStack(alignment: .leading, spacing: 8) {
                     LaunchAtLoginToggle(settings: model.settings)
-                    Toggle("Installer les mises à jour automatiquement", isOn: Bindable(model.settings).autoUpdate)
-                    HStack {
+                    if Distribution.isAppStore {
+                        // The App Store installs the updates, and deleting the app removes its container.
                         Text("Version \(model.updater.currentVersion)")
-                        if let release = model.updater.available {
-                            Button("Installer \(release.version)…") {
-                                NSApp.activate()
-                                openWindow(id: "update")
-                            }
-                        } else {
-                            Button("Rechercher") { Task { await model.updater.check() } }
-                                .disabled(model.updater.isBusy)
-                        }
-                        if model.updater.state == .checking {
-                            ProgressView().controlSize(.small)
-                        } else if let lastCheck = model.updater.lastCheck, model.updater.available == nil {
-                            Hint("À jour, vérifié \(lastCheck.formatted(.relative(presentation: .named)))")
-                        }
+                    } else {
+                        selfDistributedControls
                     }
-                    Button("Désinstaller Dictate…") { Uninstaller().confirmAndRun() }
-                        .padding(.top, 8)
-                    Hint("Met l'application, les modèles et les statistiques à la Corbeille, efface les réglages.")
                 }
             }
         }
         .formStyle(.columns)
         .padding(20)
+    }
+
+    /// Updates and uninstall, for the copies downloaded from the website.
+    @ViewBuilder private var selfDistributedControls: some View {
+        Toggle("Installer les mises à jour automatiquement", isOn: Bindable(model.settings).autoUpdate)
+        HStack {
+            Text("Version \(model.updater.currentVersion)")
+            if let release = model.updater.available {
+                Button("Installer \(release.version)…") {
+                    NSApp.activate()
+                    openWindow(id: "update")
+                }
+            } else {
+                Button("Rechercher") { Task { await model.updater.check() } }
+                    .disabled(model.updater.isBusy)
+            }
+            if model.updater.state == .checking {
+                ProgressView().controlSize(.small)
+            } else if let lastCheck = model.updater.lastCheck, model.updater.available == nil {
+                Hint("À jour, vérifié \(lastCheck.formatted(.relative(presentation: .named)))")
+            }
+        }
+        Button("Désinstaller Dictate…") { Uninstaller().confirmAndRun() }
+            .padding(.top, 8)
+        Hint("Met l'application, les modèles et les statistiques à la Corbeille, efface les réglages.")
     }
 }
 
@@ -405,7 +415,7 @@ private struct ReviewSettings: View {
 
                 Divider()
 
-                if model.settings.reviewer == .apple {
+                if model.settings.reviewer == .apple || Distribution.isAppStore {
                     appleStatus
                 } else {
                     claudeBinary
@@ -426,7 +436,7 @@ private struct ReviewSettings: View {
         case .claude:
             String(localized: "Modèle Haiku, via votre compte Claude Code. Un peu plus rapide et plus sûr sur le jargon.")
         }
-        guard !model.settings.reviewerIsChosen else { return hint }
+        guard !model.settings.reviewerIsChosen, !Distribution.isAppStore else { return hint }
         return String(localized: "Choix automatique : Claude si sa commande est installée, sinon Apple Intelligence, sinon aucun.") + " " + hint
     }
 
@@ -545,7 +555,7 @@ private struct ReviewerPicker: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            ForEach(ReviewerTile.allCases) { reviewer in
+            ForEach(ReviewerTile.allCases.filter { $0 != .claude || !Distribution.isAppStore }) { reviewer in
                 Button {
                     selection = reviewer
                 } label: {

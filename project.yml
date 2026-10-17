@@ -13,6 +13,11 @@ options:
   postGenCommand: >-
     mkdir -p Dictate.xcodeproj/project.xcworkspace/xcshareddata/swiftpm &&
     cp Package.resolved Dictate.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+# AppStore is the sandboxed Mac App Store build: scripts/build-app-store.sh.
+configs:
+  Debug: debug
+  Release: release
+  AppStore: release
 settings:
   base:
     SWIFT_VERSION: "6.0"
@@ -56,6 +61,11 @@ targets:
       configs:
         Debug:
           PRODUCT_BUNDLE_IDENTIFIER: com.thibautmottet.dictate.dev
+        # Sandboxed, without the updater, the uninstaller and the Claude reviewer
+        # (Dictate/App/Distribution.swift). Signed by Xcode at export time.
+        AppStore:
+          CODE_SIGN_ENTITLEMENTS: Dictate/Resources/DictateAppStore.entitlements
+          SWIFT_ACTIVE_COMPILATION_CONDITIONS: "$(inherited) APP_STORE"
   DictateTests:
     type: bundle.unit-test
     platform: macOS

@@ -7,6 +7,7 @@ nonisolated struct ClaudeCLILocator: Sendable {
     var systemDirectories: [URL] = [URL(filePath: "/opt/homebrew/bin"), URL(filePath: "/usr/local/bin")]
 
     func locate(override: String?) -> URL? {
+        guard !Distribution.isAppStore else { return nil }
         if let override, !override.isEmpty, isExecutable(URL(filePath: override)) {
             return URL(filePath: override)
         }
