@@ -50,14 +50,14 @@
   }
 
   /** Builds the wave path, the way WaveShape does: a sine under a warped envelope. */
-  function tracePath(ctx, width, midY, amplitude, center, frequency, phase, closed) {
+  function tracePath(ctx, width, midY, amplitude, center, frequency, phase, closed, focus = 1.5) {
     const warp = Math.log(0.5) / Math.log(center);
     const steps = Math.max(40, Math.floor(width));
     ctx.beginPath();
     for (let step = 0; step <= steps; step++) {
       const u = step / steps;
       const v = Math.pow(u, warp);
-      const envelope = Math.pow(4 * v * (1 - v), 1.5);
+      const envelope = Math.pow(4 * v * (1 - v), focus);
       const y = midY - amplitude * envelope * Math.sin(2 * Math.PI * frequency * u + phase);
       const x = u * width;
       if (step === 0) ctx.moveTo(x, y);
@@ -152,7 +152,10 @@
       for (const wave of WAVES) {
         const level = Math.min(1, s[wave.band]);
         const amplitude = maxAmp * (style.floor + (1 - style.floor) * level);
-        const center = Math.min(0.75, Math.max(0.25, wave.center + LEAN * s.tilt));
+        const spread = style.spread ?? 1;
+        const center = Math.min(0.75, Math.max(0.25, 0.5 + (wave.center - 0.5) * spread + LEAN * spread * s.tilt));
+        const frequency = wave.frequency * (style.freq ?? 1);
+        const focus = style.focus ?? 1.5;
         const phase = wave.phase + time * wave.speed;
         const gradient = ctx.createLinearGradient(0, 0, width, 0);
         gradient.addColorStop(0, wave.colors[0]);
@@ -183,14 +186,14 @@
         ctx.filter = `blur(${style.glow * this.dpr}px)`;
         ctx.globalAlpha = 0.35;
         ctx.fillStyle = gradient;
-        tracePath(ctx, width, midY, amplitude, center, wave.frequency, phase, true);
+        tracePath(ctx, width, midY, amplitude, center, frequency, phase, true, focus);
         ctx.fill();
         ctx.restore();
 
         // Stroke on top.
         ctx.strokeStyle = gradient;
         ctx.lineWidth = style.stroke * this.dpr;
-        tracePath(ctx, width, midY, amplitude, center, wave.frequency, phase, false);
+        tracePath(ctx, width, midY, amplitude, center, frequency, phase, false, focus);
         ctx.stroke();
       }
       ctx.restore();
@@ -200,7 +203,9 @@
   const STYLES = {
     // Big icon: wide strokes, generous glow, waves across most of the square.
     // Full width, like the icon: a crisp 3 px gradient line over a soft translucent fill.
-    hero: { scale: 0.4, stroke: 3, glow: 12, inset: 0.0, floor: 0.5 },
+    // focus sharpens the envelope so the motion gathers in the middle third;
+    // spread pulls the three peaks together; freq adds crossings there.
+    hero: { scale: 0.46, stroke: 3, glow: 12, inset: 0.0, floor: 0.55, focus: 5, spread: 0.4, freq: 1.8 },
     download: { scale: 0.3, stroke: 4, glow: 10, inset: 0.0, floor: 0.45 },
     // The pill: 72×26 points like the real one, thin stroke.
     pill: { scale: 0.42, stroke: 1.2, glow: 3, inset: 0.0, floor: 0.08 },
