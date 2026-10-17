@@ -42,6 +42,11 @@ enum Permissions {
         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.Keyboard-Settings.extension")!)
     }
 
+    /// The "Apple Intelligence & Siri" pane, where the on-device model is turned on.
+    static func openAppleIntelligenceSettings() {
+        NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.Siri-Settings.extension")!)
+    }
+
     static func openPrivacySettings(_ anchor: String) {
         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?\(anchor)")!)
     }

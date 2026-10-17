@@ -51,7 +51,7 @@ private struct DictationSettings: View {
             LabeledContent("Moteur :") {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(model.transcriber.engine.displayName)
-                    Hint("25 langues européennes, sur cette machine. Le lexique est appliqué par Claude, et par Parakeet si vous renforcez le vocabulaire (onglet Lexique). 610 Mo à télécharger au premier usage.")
+                    Hint("25 langues européennes, sur cette machine. Le lexique est appliqué par la relecture, et par Parakeet si vous renforcez le vocabulaire (onglet Lexique). 610 Mo à télécharger au premier usage.")
                     ModelWeights(model: model)
                     EngineStatus(model: model)
                 }
@@ -211,7 +211,7 @@ private struct LexiconSettings: View {
                             model.settingsChanged()
                             model.vocabularyBoostingChanged()
                         }
-                    Hint("Un par ligne : noms, outils, sigles. Claude les écrit exactement ainsi.")
+                    Hint("Un par ligne : noms, outils, sigles. La relecture les écrit exactement ainsi.")
                 }
             }
 
@@ -322,14 +322,35 @@ private struct GeneralSettings: View {
 
 /// Who reviews a dictation. Only Claude is wired today; the others show
 /// where this is going, and "Aucun" keeps the raw transcription.
-private enum Reviewer: String, CaseIterable, Identifiable {
-    case none, claude, chatGPT, gemini
+/// The tiles of the reviewer picker: the reviewers Dictate has, and the
+/// services it may get one day.
+private enum ReviewerTile: String, CaseIterable, Identifiable {
+    case none, apple, claude, chatGPT, gemini
 
     var id: String { rawValue }
+
+    init(_ reviewer: Reviewer) {
+        switch reviewer {
+        case .none: self = .none
+        case .apple: self = .apple
+        case .claude: self = .claude
+        }
+    }
+
+    /// Nil for the services that are not available yet.
+    var reviewer: Reviewer? {
+        switch self {
+        case .none: Reviewer.none
+        case .apple: .apple
+        case .claude: .claude
+        case .chatGPT, .gemini: nil
+        }
+    }
 
     var displayName: String {
         switch self {
         case .none: "Aucun"
+        case .apple: "Apple"
         case .claude: "Claude"
         case .chatGPT: "ChatGPT"
         case .gemini: "Gemini"
@@ -340,91 +361,140 @@ private enum Reviewer: String, CaseIterable, Identifiable {
     var symbol: String {
         switch self {
         case .none: "nosign"
+        case .apple: "apple.intelligence"
         case .claude: "sparkles"
         case .chatGPT: "bubble.left.and.text.bubble.right"
         case .gemini: "star.circle"
         }
     }
 
-    var isAvailable: Bool { self == .none || self == .claude }
+    var isAvailable: Bool { reviewer != nil }
 }
 
 /// The pass that turns the raw transcription into clean text.
 private struct ReviewSettings: View {
     @Bindable var model: AppModel
 
-    /// "Aucun" is the enhancement switch under another name.
-    private var reviewer: Binding<Reviewer> {
+    private var reviewer: Binding<ReviewerTile> {
         Binding(
-            get: { model.settings.enhancementEnabled ? .claude : .none },
-            set: {
-                model.settings.enhancementEnabled = $0 == .claude
-                model.settingsChanged()
-            }
+            get: { ReviewerTile(model.settings.reviewer) },
+            set: { if let reviewer = $0.reviewer { model.selectReviewer(reviewer) } }
         )
     }
 
     var body: some View {
         Form {
             LabeledContent("Relecture par :") {
-                ReviewerPicker(selection: reviewer)
+                VStack(alignment: .leading, spacing: 6) {
+                    ReviewerPicker(selection: reviewer)
+                    Hint(reviewerHint)
+                }
             }
 
             // Greyed out rather than removed under "Aucun", so that the window
             // keeps its height: it is sized to its content.
             Group {
-                LabeledContent("Claude :") {
+                LabeledContent("Contexte :") {
                     VStack(alignment: .leading, spacing: 6) {
-                        Hint("Modèle Haiku, via votre compte Claude Code. Ponctuation, hésitations retirées, lexique appliqué.")
                         Toggle("Lire le texte autour du curseur", isOn: Bindable(model.settings).shareFieldContext)
-                            .padding(.top, 4)
                         Hint("Texte du champ, titre de la fenêtre et domaine du site, pour reprendre vos noms et votre ton. Jamais un mot de passe.")
                     }
                 }
 
                 Divider()
 
-                LabeledContent("Binaire :") {
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack(spacing: 8) {
-                            claudeCLIStatusIcon
-                            Text(claudeCLITitle)
-                            Spacer()
-                            Button("Tester") { Task { await model.testClaude() } }
-                                .disabled(model.claudeCLIPath == nil)
-                            Button("Choisir…", action: chooseClaudeCLI)
-                        }
-                        if let path = model.claudeCLIPath {
-                            Text(model.claudeCLIDisplayPath(path))
-                                .font(.caption.monospaced())
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                                .truncationMode(.middle)
-                                .help(path.path)
-                        }
-                        if overrideIgnored {
-                            Text("Fichier non exécutable : détection automatique utilisée.")
-                                .font(.caption)
-                                .foregroundStyle(.orange)
-                        }
-                        if !model.settings.cliPathOverride.isEmpty {
-                            Button("Détection automatique") {
-                                model.settings.cliPathOverride = ""
-                                model.settingsChanged()
-                            }
-                            .buttonStyle(.link)
-                            .font(.caption)
-                        }
-                        if let result = model.claudeTestResult {
-                            Hint(result)
-                        }
-                    }
+                if model.settings.reviewer == .apple {
+                    appleStatus
+                } else {
+                    claudeBinary
                 }
             }
             .disabled(!model.settings.enhancementEnabled)
         }
         .formStyle(.columns)
         .padding(20)
+    }
+
+    private var reviewerHint: String {
+        let hint = switch model.settings.reviewer {
+        case .none:
+            "Le texte transcrit est inséré tel quel, hésitations comprises."
+        case .apple:
+            "Le modèle d'Apple Intelligence, sur ce Mac. Rien ne sort de l'ordinateur, aucun compte nécessaire."
+        case .claude:
+            "Modèle Haiku, via votre compte Claude Code. Un peu plus rapide et plus sûr sur le jargon."
+        }
+        guard !model.settings.reviewerIsChosen else { return hint }
+        return "Choix automatique : Claude si sa commande est installée, sinon Apple Intelligence, sinon aucun. " + hint
+    }
+
+    private var appleStatus: some View {
+        LabeledContent("Modèle :") {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 8) {
+                    if model.appleIntelligence.isAvailable {
+                        Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+                        Text("Apple Intelligence prêt")
+                    } else {
+                        Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+                        Text("Apple Intelligence indisponible")
+                    }
+                    Spacer()
+                    Button("Tester") { Task { await model.testReviewer() } }
+                        .disabled(!model.appleIntelligence.isAvailable)
+                }
+                if let explanation = model.appleIntelligence.explanation {
+                    Text(explanation)
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                    Button("Ouvrir les Réglages") { Permissions.openAppleIntelligenceSettings() }
+                        .buttonStyle(.link)
+                        .font(.caption)
+                }
+                if let result = model.reviewTestResult {
+                    Hint(result)
+                }
+            }
+        }
+    }
+
+    private var claudeBinary: some View {
+        LabeledContent("Binaire :") {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 8) {
+                    claudeCLIStatusIcon
+                    Text(claudeCLITitle)
+                    Spacer()
+                    Button("Tester") { Task { await model.testReviewer() } }
+                        .disabled(model.claudeCLIPath == nil)
+                    Button("Choisir…", action: chooseClaudeCLI)
+                }
+                if let path = model.claudeCLIPath {
+                    Text(model.claudeCLIDisplayPath(path))
+                        .font(.caption.monospaced())
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                        .help(path.path)
+                }
+                if overrideIgnored {
+                    Text("Fichier non exécutable : détection automatique utilisée.")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                }
+                if !model.settings.cliPathOverride.isEmpty {
+                    Button("Détection automatique") {
+                        model.settings.cliPathOverride = ""
+                        model.settingsChanged()
+                    }
+                    .buttonStyle(.link)
+                    .font(.caption)
+                }
+                if let result = model.reviewTestResult {
+                    Hint(result)
+                }
+            }
+        }
     }
 
     @ViewBuilder
@@ -469,11 +539,11 @@ private struct ReviewSettings: View {
 
 /// A row of icon tiles, like the appearance picker in System Settings.
 private struct ReviewerPicker: View {
-    @Binding var selection: Reviewer
+    @Binding var selection: ReviewerTile
 
     var body: some View {
         HStack(spacing: 12) {
-            ForEach(Reviewer.allCases) { reviewer in
+            ForEach(ReviewerTile.allCases) { reviewer in
                 Button {
                     selection = reviewer
                 } label: {

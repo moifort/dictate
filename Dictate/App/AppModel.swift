@@ -22,11 +22,13 @@ final class AppModel {
     private(set) var isProbingClaudeCLI = false
     private(set) var hotkeyActive = false
     private(set) var lastError: String?
-    private(set) var claudeTestResult: String?
+    private(set) var reviewTestResult: String?
+    /// Whether the on-device model can be used, refreshed with the setup.
+    private(set) var appleIntelligence = AppleIntelligenceEnhancer.status
     /// What the onboarding still needs. Polled, because macOS does not notify permission changes.
     private(set) var setup = SetupChecklist()
 
-    @ObservationIgnored private let enhancer: ClaudeCLIEnhancer
+    @ObservationIgnored private let enhancer: SelectedEnhancer
     @ObservationIgnored private let fnMonitor = FnKeyMonitor()
     @ObservationIgnored private let locator = ClaudeCLILocator()
     @ObservationIgnored private var hotkeyRetry: Timer?
@@ -44,9 +46,14 @@ final class AppModel {
         self.transcriber = transcriber
         let locator = locator
         let focus = FocusInspector()
-        enhancer = ClaudeCLIEnhancer(
-            locate: { locator.locate(override: settings.cliPathOverride) },
-            systemPrompt: { PromptBuilder.systemPrompt(vocabulary: settings.vocabulary, language: settings.language) }
+        let systemPrompt = { PromptBuilder.systemPrompt(vocabulary: settings.vocabulary, language: settings.language) }
+        enhancer = SelectedEnhancer(
+            reviewer: { settings.reviewer },
+            apple: AppleIntelligenceEnhancer(systemPrompt: systemPrompt),
+            claude: ClaudeCLIEnhancer(
+                locate: { locator.locate(override: settings.cliPathOverride) },
+                systemPrompt: systemPrompt
+            )
         )
         controller = DictationController(
             recorder: recorder,
@@ -89,7 +96,15 @@ final class AppModel {
         }
         fnMonitor.key = settings.pushToTalkKey
         claudeCLIPath = locator.locate(override: settings.cliPathOverride)
+        settings.defaultReviewer = { [weak self] in self?.automaticReviewer ?? .claude }
         refreshSetup()
+    }
+
+    /// Until the user picks: Claude when its CLI is here, else the on-device
+    /// model when this Mac has it, else the raw transcript.
+    private var automaticReviewer: Reviewer {
+        if claudeCLIPath != nil { return .claude }
+        return appleIntelligence.isAvailable ? .apple : .none
     }
 
     func start() {
@@ -115,14 +130,19 @@ final class AppModel {
             "engine": settings.transcriptionEngine.rawValue,
             "push_to_talk": settings.pushToTalkKey.rawValue,
             "language": settings.language,
-            "enhancement": settings.enhancementEnabled ? "on" : "off",
+            "reviewer": settings.reviewer.rawValue,
             "vocabulary_boosting": settings.boostedVocabulary.isEmpty ? "off" : "on",
             "claude_cli": claudeCLIPath == nil ? "missing" : "found",
+            "apple_intelligence": appleIntelligence.isAvailable ? "available" : "unavailable",
         ])
     }
 
     func refreshSetup() {
-        if settings.enhancementEnabled, claudeCLIPath == nil { refreshClaudeCLI() }
+        // Claude is the default when its CLI is here: while it is not, keep
+        // looking, so that installing it is picked up.
+        if settings.reviewer != .claude || claudeCLIPath == nil { refreshClaudeCLI() }
+        let status = AppleIntelligenceEnhancer.status
+        if status != appleIntelligence { appleIntelligence = status }
         let checklist = SetupChecklist(
             language: settings.languageConfirmed,
             microphone: Permissions.microphone,
@@ -130,9 +150,18 @@ final class AppModel {
             accessibility: Permissions.accessibility,
             fnKeyFree: !settings.pushToTalkKey.needsSystemKeyFreed || Permissions.fnKeyFree,
             transcriptionModel: transcriptionModelReady,
-            claude: !settings.enhancementEnabled || claudeCLIPath != nil
+            review: reviewerReady
         )
         if checklist != setup { setup = checklist }
+    }
+
+    /// Whether the chosen reviewer can answer the next dictation.
+    private var reviewerReady: Bool {
+        switch settings.reviewer {
+        case .none: true
+        case .apple: appleIntelligence.isAvailable
+        case .claude: claudeCLIPath != nil
+        }
     }
 
     /// Ready, or on disk and still being compiled: launch must not wait for that.
@@ -159,10 +188,14 @@ final class AppModel {
         refreshSetup()
     }
 
-    /// Dictation without Claude inserts the raw transcript.
-    func continueWithoutClaude() {
-        settings.enhancementEnabled = false
-        refreshSetup()
+    /// Picks the reviewer, from the onboarding or the settings: the waiting
+    /// process or session belongs to the previous one.
+    func selectReviewer(_ reviewer: Reviewer) {
+        guard reviewer != settings.reviewer else { return }
+        settings.reviewer = reviewer
+        reviewTestResult = nil
+        enhancer.reset()
+        settingsChanged()
     }
 
     private func pollSetupUntilComplete() {
@@ -201,8 +234,11 @@ final class AppModel {
     func refreshClaudeCLI() {
         let path = locator.locate(override: settings.cliPathOverride)
         guard path != claudeCLIPath else { return }
+        let before = settings.reviewer
         claudeCLIPath = path
         probeClaudeCLI()
+        // The automatic choice may have moved with the CLI: warm up the right one.
+        if settings.reviewer != before { enhancer.reset() }
     }
 
     func claudeCLIDisplayPath(_ url: URL) -> String {
@@ -254,8 +290,9 @@ final class AppModel {
         Task { await booster.load() }
     }
 
-    func testClaude() async {
-        claudeTestResult = "Test en cours…"
+    /// Runs the chosen reviewer on a sample dictation, for the settings.
+    func testReviewer() async {
+        reviewTestResult = "Test en cours…"
         let start = ContinuousClock.now
         do {
             let result = try await enhancer.enhance(
@@ -263,10 +300,10 @@ final class AppModel {
                 context: DictationContext(category: .code)
             )
             let elapsed = (ContinuousClock.now - start).formatted(.units(allowed: [.seconds, .milliseconds], width: .narrow))
-            claudeTestResult = "« \(result) » en \(elapsed)"
+            reviewTestResult = "« \(result) » en \(elapsed)"
         } catch {
-            ErrorReporter.capture(error, "claude test from the settings failed", category: "enhancer")
-            claudeTestResult = error.localizedDescription
+            ErrorReporter.capture(error, "review test from the settings failed", category: "enhancer")
+            reviewTestResult = error.localizedDescription
         }
     }
 
@@ -334,7 +371,13 @@ final class AppModel {
         case .failed(let message):
             lastError = message
         case .pasted(raw: true), .copied(raw: true):
-            if settings.enhancementEnabled {
+            switch settings.reviewer {
+            case .none:
+                break
+            case .apple:
+                refreshSetup()
+                lastError = appleIntelligence.explanation ?? "Apple Intelligence n'a pas répondu : texte brut inséré."
+            case .claude:
                 refreshClaudeCLI()
                 lastError = claudeCLIPath == nil
                     ? ClaudeCLIError.notFound.localizedDescription

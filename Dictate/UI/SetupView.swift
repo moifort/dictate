@@ -324,12 +324,53 @@ private struct StepActions: View {
         case .transcriptionModel:
             TranscriptionModelProgress(model: model)
 
+        case .review:
+            ReviewStep(model: model)
+        }
+    }
+}
+
+/// The reviewer's own line of the checklist: which one is chosen, whether it
+/// is ready, and how to switch when it is not.
+private struct ReviewStep: View {
+    let model: AppModel
+
+    var body: some View {
+        switch model.settings.reviewer {
+        case .none:
+            Text("Dictate insère le texte brut transcrit. La relecture s'active dans les Réglages.")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+
+        case .apple:
+            if model.appleIntelligence.isAvailable {
+                Text(model.settings.reviewerIsChosen
+                     ? "Apple Intelligence est prêt : la relecture se fait sur ce Mac."
+                     : "Claude est introuvable : Apple Intelligence relit sur ce Mac. Installez Claude pour qu'il prenne le relais.")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                if !model.settings.reviewerIsChosen {
+                    Actions {
+                        Link("Télécharger Claude", destination: URL(string: "https://claude.ai/download")!)
+                            .buttonStyle(.glass)
+                    }
+                }
+            } else {
+                Actions {
+                    Button("Ouvrir les Réglages") { Permissions.openAppleIntelligenceSettings() }
+                        .buttonStyle(.glassProminent)
+                    Button("Utiliser Claude") { model.selectReviewer(.claude) }
+                        .buttonStyle(.glass)
+                    Button("Continuer sans relecture") { model.selectReviewer(.none) }
+                        .buttonStyle(.glass)
+                }
+                Text(model.appleIntelligence.explanation ?? "")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+
         case .claude:
-            if !model.settings.enhancementEnabled {
-                Text("Dictate insère le texte brut transcrit. Claude s'active dans les Réglages.")
-                    .font(.callout)
-                    .foregroundStyle(.secondary)
-            } else if let path = model.claudeCLIPath {
+            if let path = model.claudeCLIPath {
                 Text(path.path)
                     .font(.caption.monospaced())
                     .foregroundStyle(.tertiary)
@@ -345,7 +386,11 @@ private struct StepActions: View {
                         model.refreshSetup()
                     }
                     .buttonStyle(.glass)
-                    Button("Continuer sans Claude") { model.continueWithoutClaude() }
+                    if model.appleIntelligence.isAvailable {
+                        Button("Utiliser Apple Intelligence") { model.selectReviewer(.apple) }
+                            .buttonStyle(.glass)
+                    }
+                    Button("Continuer sans relecture") { model.selectReviewer(.none) }
                         .buttonStyle(.glass)
                 }
                 Text("Connectez-vous une fois dans Claude Code ou l'app Claude, puis revérifiez.")
@@ -367,7 +412,7 @@ private extension SetupStep {
         case .accessibility: "Insertion du texte"
         case .fnKey: "Libérer la touche 🌐"
         case .transcriptionModel: "Modèle de transcription"
-        case .claude: "Correction par Claude"
+        case .review: "Relecture du texte"
         }
     }
 
@@ -385,8 +430,8 @@ private extension SetupStep {
             "Par défaut, macOS ouvre les emoji ou sa propre dictée quand on appuie sur 🌐 fn. Vous pouvez aussi dicter avec control, qui n'a rien à régler."
         case .transcriptionModel:
             "Un modèle de transcription tourne sur ce Mac, sans réseau. Il se télécharge une seule fois, environ 630 Mo."
-        case .claude:
-            "Claude Haiku retire les hésitations et corrige la ponctuation et votre jargon, avec votre abonnement Claude, via la commande claude de Claude Code ou de l'app Claude."
+        case .review:
+            "Un modèle de langage retire les hésitations et corrige la ponctuation et votre jargon : Claude Haiku avec votre abonnement Claude, via la commande claude, ou à défaut Apple Intelligence sur ce Mac. Au choix dans les Réglages."
         }
     }
 
@@ -398,7 +443,7 @@ private extension SetupStep {
         case .accessibility: "accessibility"
         case .fnKey: "globe"
         case .transcriptionModel: "waveform"
-        case .claude: "sparkles"
+        case .review: "sparkles"
         }
     }
 }
@@ -507,8 +552,8 @@ private struct WelcomePage: View {
             VStack(alignment: .leading, spacing: 22) {
                 FeatureRow(symbol: "lock.shield", title: "Transcription sur ce Mac",
                            detail: "Le modèle tourne en local. Votre voix ne quitte pas l'ordinateur.")
-                FeatureRow(symbol: "sparkles", title: "Nettoyage par Claude",
-                           detail: "Hésitations, ponctuation et jargon corrigés avec votre abonnement Claude.")
+                FeatureRow(symbol: "sparkles", title: "Texte relu par l'IA",
+                           detail: "Hésitations, ponctuation et jargon corrigés, par Apple Intelligence sur ce Mac ou par Claude.")
                 FeatureRow(symbol: "keyboard", title: "Une seule touche",
                            detail: "control suffit, même par-dessus une app en plein écran. fn au choix dans les Réglages.")
             }
@@ -619,7 +664,7 @@ private struct TryItPage: View {
         case "transcribing":
             Label("Transcription…", systemImage: "waveform").foregroundStyle(.secondary)
         case "enhancing":
-            Label("Correction par Claude…", systemImage: "sparkles").foregroundStyle(.secondary)
+            Label("Relecture…", systemImage: "sparkles").foregroundStyle(.secondary)
         case "failed":
             if case .failed(let message) = model.transcriber.state {
                 Label(message, systemImage: "exclamationmark.triangle").foregroundStyle(.orange)

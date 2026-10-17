@@ -4,7 +4,7 @@ import Testing
 struct SetupChecklistTests {
     private let ready = SetupChecklist(
         language: true, microphone: true, inputMonitoring: true, accessibility: true,
-        fnKeyFree: true, transcriptionModel: true, claude: true
+        fnKeyFree: true, transcriptionModel: true, review: true
     )
 
     @Test func freshInstallStartsWithTheLanguage() {
@@ -18,9 +18,9 @@ struct SetupChecklistTests {
     @Test func currentIsTheFirstMissingStepInOrder() {
         var checklist = ready
         checklist.fnKeyFree = false
-        checklist.claude = false
+        checklist.review = false
         #expect(checklist.current == .fnKey)
-        #expect(checklist.pending == [.fnKey, .claude])
+        #expect(checklist.pending == [.fnKey, .review])
         #expect(checklist.completedCount == 5)
     }
 
@@ -40,7 +40,7 @@ struct SetupChecklistTests {
         #expect(checklist.hasStarted)
     }
 
-    @Test func onlyClaudeIsOptional() {
-        #expect(SetupStep.allCases.filter(\.isOptional) == [.claude])
+    @Test func onlyTheReviewIsOptional() {
+        #expect(SetupStep.allCases.filter(\.isOptional) == [.review])
     }
 }

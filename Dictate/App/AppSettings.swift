@@ -13,7 +13,7 @@ final class AppSettings {
 
     @ObservationIgnored private let defaults: UserDefaults
 
-    /// ISO 639-1 code of the dictated language, for Parakeet and the Claude
+    /// ISO 639-1 code of the dictated language, for Parakeet and the review
     /// prompt. Starts as the OS language.
     var language: String {
         didSet { defaults.set(language, forKey: Keys.language) }
@@ -34,11 +34,28 @@ final class AppSettings {
         didSet { defaults.set(pushToTalkKey.rawValue, forKey: Keys.pushToTalkKey) }
     }
 
-    var enhancementEnabled: Bool {
-        didSet { defaults.set(enhancementEnabled, forKey: Keys.enhancementEnabled) }
+    /// The reviewer the user picked, nil until they do.
+    private(set) var reviewerChoice: Reviewer? {
+        didSet { defaults.set(reviewerChoice?.rawValue, forKey: Keys.reviewer) }
     }
 
-    /// Send the text before the cursor to Claude, so names and tone match
+    /// What to use until the user picks: the app sets it from what this Mac
+    /// has (Claude's CLI first, then Apple Intelligence, else nothing).
+    @ObservationIgnored var defaultReviewer: () -> Reviewer = { .claude }
+
+    /// The model that cleans up each transcript.
+    var reviewer: Reviewer {
+        get { reviewerChoice ?? defaultReviewer() }
+        set { reviewerChoice = newValue }
+    }
+
+    /// Whether the reviewer was picked by the user rather than by the app.
+    var reviewerIsChosen: Bool { reviewerChoice != nil }
+
+    /// Whether a reviewer cleans up the transcript before insertion.
+    var enhancementEnabled: Bool { reviewer != .none }
+
+    /// Send the text before the cursor to the reviewer, so names and tone match
     /// what is already written. Password fields are never read.
     var shareFieldContext: Bool {
         didSet { defaults.set(shareFieldContext, forKey: Keys.shareFieldContext) }
@@ -83,7 +100,7 @@ final class AppSettings {
     }
 
     /// Search the audio for the vocabulary and fix the transcript before
-    /// Claude, with a second model. Experimental, off by default: its effect
+    /// the review, with a second model. Experimental, off by default: its effect
     /// on French is still to be measured.
     var boostVocabulary: Bool {
         didSet { defaults.set(boostVocabulary, forKey: Keys.boostVocabulary) }
@@ -108,6 +125,14 @@ final class AppSettings {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+        if let saved = defaults.string(forKey: Keys.reviewer).flatMap(Reviewer.init(rawValue:)) {
+            reviewerChoice = saved
+        } else if defaults.object(forKey: Keys.enhancementEnabled) as? Bool == false {
+            // Saved by versions that only had Claude: "off" stays off.
+            reviewerChoice = Reviewer.none
+        } else {
+            reviewerChoice = nil
+        }
         // A language only Whisper understood falls back to the OS language,
         // and must be confirmed again in the onboarding.
         let saved = defaults.string(forKey: Keys.language)
@@ -118,7 +143,6 @@ final class AppSettings {
         transcriptionEngine = defaults.string(forKey: Keys.transcriptionEngine)
             .flatMap(TranscriptionEngine.init(rawValue:)) ?? .parakeet
         pushToTalkKey = defaults.string(forKey: Keys.pushToTalkKey).flatMap(PushToTalkKey.init(rawValue:)) ?? .control
-        enhancementEnabled = defaults.object(forKey: Keys.enhancementEnabled) as? Bool ?? true
         shareFieldContext = defaults.object(forKey: Keys.shareFieldContext) as? Bool ?? true
         autoUpdate = defaults.object(forKey: Keys.autoUpdate) as? Bool ?? true
         keepEvaluationCorpus = defaults.bool(forKey: Keys.keepEvaluationCorpus)
@@ -133,6 +157,8 @@ final class AppSettings {
         static let languageConfirmed = "languageConfirmed"
         static let transcriptionEngine = "transcriptionEngine"
         static let pushToTalkKey = "pushToTalkKey"
+        static let reviewer = "reviewer"
+        /// Older versions' on/off switch, read once for the migration.
         static let enhancementEnabled = "enhancementEnabled"
         static let shareFieldContext = "shareFieldContext"
         static let autoUpdate = "autoUpdate"

@@ -70,6 +70,35 @@ struct AppSettingsTests {
         #expect(settings.boostedVocabulary.isEmpty)
     }
 
+    @Test func reviewerFollowsTheDefaultUntilPickedThenPersists() {
+        let suite = "AppSettingsTests-\(UUID().uuidString)"
+        let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!)
+        #expect(!settings.reviewerIsChosen)
+        #expect(settings.reviewer == .claude)
+        settings.defaultReviewer = { .apple }
+        #expect(settings.reviewer == .apple)
+        #expect(settings.enhancementEnabled)
+        settings.reviewer = .claude
+        #expect(settings.reviewerIsChosen)
+        let reloaded = AppSettings(defaults: UserDefaults(suiteName: suite)!)
+        reloaded.defaultReviewer = { .apple }
+        #expect(reloaded.reviewer == .claude)
+    }
+
+    @Test func noReviewerMeansNoEnhancement() {
+        let settings = makeSettings()
+        settings.reviewer = .none
+        #expect(!settings.enhancementEnabled)
+    }
+
+    @Test func anEnhancementSwitchedOffByAnOlderVersionStaysOff() {
+        let defaults = UserDefaults(suiteName: "AppSettingsTests-\(UUID().uuidString)")!
+        defaults.set(false, forKey: "enhancementEnabled")
+        #expect(AppSettings(defaults: defaults).reviewer == Reviewer.none)
+        defaults.set(true, forKey: "enhancementEnabled")
+        #expect(!AppSettings(defaults: defaults).reviewerIsChosen)
+    }
+
     @Test func fieldContextIsSharedByDefaultAndPersists() {
         let suite = "AppSettingsTests-\(UUID().uuidString)"
         let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!)

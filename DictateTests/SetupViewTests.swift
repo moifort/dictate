@@ -19,7 +19,7 @@ struct SetupViewTests {
     @Test func completeSetupOpensOnTheTryItPage() {
         let checklist = SetupChecklist(
             language: true, microphone: true, inputMonitoring: true, accessibility: true,
-            fnKeyFree: true, transcriptionModel: true, claude: true
+            fnKeyFree: true, transcriptionModel: true, review: true
         )
         #expect(SetupView.firstPage(for: checklist) == .tryIt)
     }
