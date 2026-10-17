@@ -23,9 +23,11 @@ ready-to-send text.
   more polished in a mail, direct in a chat, raw and technical in a code editor
   or a terminal.
 - **Private by design.** Speech is transcribed on your Mac with Parakeet; the
-  audio never leaves it. Only the text is sent to Claude for the cleanup, through
-  your own Claude subscription, and you can turn that off entirely. Crashes
-  and errors are reported to Sentry without any of your text.
+  audio never leaves it. The cleanup is done by Claude through your own Claude
+  subscription when Claude Code is installed, or else by Apple Intelligence's
+  on-device model, so nothing leaves the Mac. Pick either in Settings, or turn
+  the cleanup off entirely. Crashes and errors are reported to Sentry without
+  any of your text.
 - **Your language, your words.** Pick the dictation language among 25
   European languages and add your own
   vocabulary — names, jargon, product terms — so they come out spelled right.
