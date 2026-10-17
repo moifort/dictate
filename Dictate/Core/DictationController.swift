@@ -167,6 +167,9 @@ final class DictationController {
 
     private func process(_ samples: [Float], fieldContext: Task<FieldContext, Never>?) async {
         guard samples.count >= Self.minimumSampleCount, !AudioAnalysis.isSilent(samples) else {
+            let audio = Double(samples.count) / Double(AudioAnalysis.sampleRate)
+            let peak = AudioAnalysis.peakRMS(samples)
+            Log.dictation.info("discarded \(audio, format: .fixed(precision: 1)) s of audio, peak RMS \(peak, format: .fixed(precision: 4)) (threshold \(AudioAnalysis.silenceThreshold, format: .fixed(precision: 4)))")
             return finish(.discarded)
         }
 

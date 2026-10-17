@@ -62,17 +62,27 @@ nonisolated enum AudioAnalysis {
         return min(1, max(0, (decibels + 50) / 40))
     }
 
+    /// Below the quietest speech peak measured on a MacBook Pro microphone at
+    /// half input volume (0.012 RMS) and above its noise floor (0.0021 at most).
+    static let silenceThreshold: Float = 0.004
+
     /// True when no 100 ms window rises above the speech energy threshold.
-    static func isSilent(_ samples: [Float], threshold: Float = 0.01) -> Bool {
+    static func isSilent(_ samples: [Float], threshold: Float = silenceThreshold) -> Bool {
+        peakRMS(samples) <= threshold
+    }
+
+    /// The RMS of the loudest 100 ms window, 0 for no samples.
+    static func peakRMS(_ samples: [Float]) -> Float {
         let window = sampleRate / 10
+        var peak: Float = 0
         var index = 0
         while index < samples.count {
             let end = min(index + window, samples.count)
             var sum: Float = 0
             for i in index..<end { sum += samples[i] * samples[i] }
-            if (sum / Float(end - index)).squareRoot() > threshold { return false }
+            peak = max(peak, (sum / Float(end - index)).squareRoot())
             index = end
         }
-        return true
+        return peak
     }
 }

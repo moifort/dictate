@@ -10,6 +10,21 @@ struct AudioAnalysisTests {
         #expect(AudioAnalysis.isSilent([Float](repeating: 0.002, count: 16_000)))
     }
 
+    /// Measured on a MacBook Pro microphone at half input volume: speech peaks
+    /// as low as 0.012 RMS, the noise floor never above 0.0021.
+    @Test func quietSpeechIsNotSilent() {
+        var samples = [Float](repeating: 0.002, count: 16_000)
+        for i in 8_000..<9_600 { samples[i] = i.isMultiple(of: 2) ? 0.006 : -0.006 }
+        #expect(!AudioAnalysis.isSilent(samples))
+    }
+
+    @Test func peakRMSIsTheLoudestWindow() {
+        var samples = [Float](repeating: 0, count: 16_000)
+        for i in 8_000..<9_600 { samples[i] = i.isMultiple(of: 2) ? 0.3 : -0.3 }
+        #expect(abs(AudioAnalysis.peakRMS(samples) - 0.3) < 0.001)
+        #expect(AudioAnalysis.peakRMS([]) == 0)
+    }
+
     @Test func shortBurstOfSpeechIsNotSilent() {
         var samples = [Float](repeating: 0, count: 16_000)
         for i in 8_000..<9_600 { samples[i] = i.isMultiple(of: 2) ? 0.3 : -0.3 }
