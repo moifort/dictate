@@ -20,6 +20,9 @@ struct MenuContent: View {
             Button("Mettre à jour vers \(release.version)…") { open { openWindow(id: "update") } }
         }
         Divider()
+        if let timeSavedLine {
+            Text(timeSavedLine)
+        }
         Button("Statistiques…") { open { openWindow(id: "stats") } }
         if model.settings.suggestVocabulary {
             let suggestions = model.pendingVocabularySuggestions
@@ -55,6 +58,15 @@ struct MenuContent: View {
         case .failed(let message): String(localized: "\(engine) indisponible : \(message)")
         case .ready: model.hotkeyActive ? boosterStatusLine : String(localized: "Touche \(model.settings.pushToTalkKey.displayName) inactive")
         }
+    }
+
+    /// The headline of the statistics, once there is a dictation to count.
+    private var timeSavedLine: String? {
+        let stats = DictationStats(records: model.history.records)
+        guard !stats.isEmpty else { return nil }
+        let today = StatsFormat.duration(stats.timeSavedToday)
+        let total = StatsFormat.duration(stats.timeSaved)
+        return String(localized: "Temps gagné : \(today.value) \(today.unit) aujourd'hui, \(total.value) \(total.unit) au total")
     }
 
     /// Only its download: the rest is in the settings, and dictation never waits for it.
