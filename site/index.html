@@ -237,7 +237,7 @@
           </div>
         </div>
         <h3 data-i18n="latency.title">Environ 1,5 seconde</h3>
-        <p data-i18n="latency.text">C'est le temps médian entre la fin de votre phrase et son apparition à l'écran, transcription et relecture comprises. Les statistiques le suivent jour après jour et montrent quel modèle a relu : Claude, ou Apple Intelligence quand vous étiez hors ligne. Elles comptent aussi le temps gagné sur la frappe au clavier.</p>
+        <p data-i18n="latency.text">C'est le temps médian entre la fin de votre phrase et son apparition à l'écran, transcription et relecture comprises. Les statistiques le suivent jour après jour et montrent quel modèle a relu : Claude, ou Apple Intelligence quand vous étiez hors ligne.</p>
       </article>
 
       <article class="card">
@@ -271,6 +271,30 @@
         </div>
         <h3 data-i18n="cursor.title">Partout où vous écrivez</h3>
         <p data-i18n="cursor.text">Mail, Messages, Slack, Notes, Cursor, Terminal, ChatGPT ou Claude : la phrase est saisie dans le champ qui a le focus. S'il n'y en a pas, elle attend dans le presse-papiers.</p>
+      </article>
+
+      <article class="card wide full">
+        <div class="card-visual">
+          <div class="saved-demo" aria-hidden="true">
+            <div class="race-row typing">
+              <span class="race-label"><svg viewBox="0 0 24 24" width="16" height="16"><rect x="2.5" y="6" width="19" height="12" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M6 10h1M9.5 10h1M13 10h1M16.5 10h1M6 13.5h1M17 13.5h1M9 14h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span data-i18n="saved.typing">Au clavier</span></span>
+              <span class="race-time" data-race-time="typing">0 s</span>
+              <span class="race-track"><i data-race-bar="typing"></i></span>
+            </div>
+            <div class="race-row dictate">
+              <span class="race-label"><svg viewBox="0 0 24 24" width="16" height="16"><rect x="8.5" y="2.5" width="7" height="12" rx="3.5" fill="currentColor"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Dictate</span>
+              <span class="race-time" data-race-time="dictate">0 s</span>
+              <span class="race-track"><i data-race-bar="dictate"></i></span>
+            </div>
+            <div class="saved-total">
+              <span class="saved-icon"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M6 3h12M6 21h12M7 3c0 5 10 5 10 9s-10 4-10 9M17 3c0 5-10 5-10 9s10 4 10 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="saved-caption" data-i18n="saved.caption">Temps gagné depuis le début</span>
+              <span class="saved-value"><span class="saved-gain" data-saved-gain></span><span data-saved>5 h 12 min</span></span>
+            </div>
+          </div>
+        </div>
+        <h3 data-i18n="saved.title">Le temps gagné, compté</h3>
+        <p data-i18n="saved.text">Les statistiques comparent chaque dictée au temps qu'il aurait fallu pour la taper, à 40 mots par minute. Le temps passé à parler et à attendre le texte est déduit : il reste le temps vraiment gagné, jour après jour, et depuis votre première dictée.</p>
       </article>
 
       <article class="card">

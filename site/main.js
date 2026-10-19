@@ -685,6 +685,67 @@
     })();
   }
 
+  // The time-saved card races the same 150-word message typed at 40 words per
+  // minute against Dictate: spoken at 150, plus the display delay. Both clocks
+  // run at the same scale, and the gap joins the total since the start.
+  const savedTotal = document.querySelector("[data-saved]");
+  if (savedTotal) {
+    const demo = savedTotal.closest(".saved-demo");
+    const gain = demo.querySelector("[data-saved-gain]");
+    const lanes = ["typing", "dictate"].map((name) => ({
+      row: demo.querySelector(`.race-row.${name}`),
+      bar: demo.querySelector(`[data-race-bar="${name}"]`),
+      time: demo.querySelector(`[data-race-time="${name}"]`),
+      seconds: name === "typing" ? (150 / 40) * 60 : 60 + 1.5,
+    }));
+    const saved = lanes[0].seconds - lanes[1].seconds;
+    const msPerSecond = 4200 / lanes[0].seconds;
+    const clock = (s) => {
+      const minutes = Math.floor(s / 60);
+      const seconds = Math.floor(s % 60);
+      return minutes ? `${minutes} min ${String(seconds).padStart(2, "0")} s` : `${seconds} s`;
+    };
+    const hours = (s) => `${Math.floor(s / 3600)} h ${String(Math.floor((s % 3600) / 60)).padStart(2, "0")} min`;
+    const show = (elapsed) => {
+      for (const lane of lanes) {
+        const s = Math.min(elapsed, lane.seconds);
+        lane.bar.style.width = `${(s / lane.seconds) * 100}%`;
+        lane.time.textContent = clock(s);
+        lane.row.classList.toggle("done", elapsed >= lane.seconds);
+      }
+    };
+    let total = 5 * 3600 + 12 * 60;
+    savedTotal.textContent = hours(total);
+    gain.textContent = `+ ${clock(saved)}`;
+    if (reducedMotion) {
+      show(Infinity);
+    } else {
+      (async () => {
+        for (;;) {
+          show(0);
+          await sleep(900);
+          const start = performance.now();
+          await new Promise((resolve) => {
+            const step = (now) => {
+              const elapsed = (now - start) / msPerSecond;
+              show(elapsed);
+              if (elapsed < lanes[0].seconds) requestAnimationFrame(step);
+              else resolve();
+            };
+            requestAnimationFrame(step);
+          });
+          gain.classList.remove("show");
+          void gain.offsetWidth;
+          gain.classList.add("show");
+          await sleep(700);
+          total += saved;
+          savedTotal.textContent = hours(total);
+          await sleep(2600);
+        }
+      })();
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // Reveal on scroll, latest version
   // ---------------------------------------------------------------------------
