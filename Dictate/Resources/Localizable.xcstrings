@@ -3936,22 +3936,6 @@
           }
         }
       }
-    },
-    "Temps gagné : %@ %@ aujourd'hui, %@ %@ au total": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Time saved: %1$@ %2$@ today, %3$@ %4$@ in total"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Temps gagné : %1$@ %2$@ aujourd'hui, %3$@ %4$@ au total"
-          }
-        }
-      }
     }
   },
   "version": "1.0"

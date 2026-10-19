@@ -67,7 +67,6 @@ struct DictationStatsTests {
         // 10 words: 15 s to type, 4 s spoken and 3 s waited.
         let stats = stats([record(daysAgo: 0), record(daysAgo: 90)])
         #expect(stats.timeSaved == 16)
-        #expect(stats.timeSavedToday == 8)
     }
 
     // MARK: - Trends
