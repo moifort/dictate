@@ -128,12 +128,19 @@ struct DictationStatsTests {
 }
 
 struct StatsFormatTests {
-    @Test func durationReadsInTheLargestUnitItFills() {
-        #expect(StatsFormat.duration(42).value == "42")
-        #expect(StatsFormat.duration(42).unit == "s")
-        #expect(StatsFormat.duration(150).value == "3")
-        #expect(StatsFormat.duration(150).unit == "min")
-        #expect(StatsFormat.duration(5400).unit == "h")
-        #expect(StatsFormat.duration(-10).value == "0")
+    @Test func durationReadsAsAClock() {
+        #expect(StatsFormat.durationText(42) == "42 s")
+        #expect(StatsFormat.durationText(150) == "3 min")
+        #expect(StatsFormat.durationText(16_560) == "4 h 36 min")
+        #expect(StatsFormat.durationText(7_200) == "2 h")
+        // 59 min 50 s rounds up to the hour, not to "60 min".
+        #expect(StatsFormat.durationText(3_590) == "1 h")
+        #expect(StatsFormat.durationText(-10) == "0 s")
+    }
+
+    @Test func durationSplitsHoursAndMinutesForTheHeadline() {
+        let parts = StatsFormat.duration(16_560)
+        #expect(parts.map(\.value) == ["4", "36"])
+        #expect(parts.map(\.unit) == ["h", "min"])
     }
 }

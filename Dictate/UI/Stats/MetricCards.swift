@@ -9,27 +9,22 @@ struct TimeSavedCard: View {
     let total: TimeInterval
 
     var body: some View {
-        let period = StatsFormat.duration(series.timeSaved)
-        let overall = StatsFormat.duration(total)
         StatsCard(title: "Temps gagné", symbol: "hourglass", color: StatsPalette.timeSaved) {
-            Text("Depuis le début : \(overall.value) \(overall.unit)")
+            Text("Depuis le début : \(StatsFormat.durationText(total))")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
                 .contentTransition(.numericText())
         } content: {
             MetricHeadline(
-                caption: "Total", value: period.value, unit: LocalizedStringKey(period.unit),
+                caption: "Total",
+                parts: StatsFormat.duration(series.timeSaved).map { ($0.value, LocalizedStringKey($0.unit)) },
                 range: StatsFormat.range(series)
             )
             PeriodChart(
                 series: series,
                 peak: series.buckets.map(\.timeSaved).max() ?? 0,
                 floor: 10,
-                value: { bucket in
-                    guard bucket.dictations > 0 else { return nil }
-                    let saved = StatsFormat.duration(bucket.timeSaved)
-                    return "\(saved.value) \(saved.unit)"
-                }
+                value: { $0.dictations > 0 ? StatsFormat.durationText($0.timeSaved) : nil }
             ) { bucket, dimmed in
                 BarMark(
                     x: .value("Date", bucket.date, unit: series.period.unit),

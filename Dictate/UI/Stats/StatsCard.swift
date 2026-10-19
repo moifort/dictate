@@ -42,9 +42,19 @@ extension StatsCard where Accessory == EmptyView {
 /// capitals, the figure itself with its unit, and the dates it covers.
 struct MetricHeadline: View {
     let caption: LocalizedStringKey
-    let value: String
-    let unit: LocalizedStringKey
+    /// The figure, one number per unit: "4 h 36 min" is two of them.
+    let parts: [(value: String, unit: LocalizedStringKey)]
     let range: String
+
+    init(caption: LocalizedStringKey, value: String, unit: LocalizedStringKey, range: String) {
+        self.init(caption: caption, parts: [(value, unit)], range: range)
+    }
+
+    init(caption: LocalizedStringKey, parts: [(value: String, unit: LocalizedStringKey)], range: String) {
+        self.caption = caption
+        self.parts = parts
+        self.range = range
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -53,12 +63,14 @@ struct MetricHeadline: View {
                 .foregroundStyle(.secondary)
                 .textCase(.uppercase)
             HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text(value)
-                    .font(.system(.title, design: .rounded, weight: .bold))
-                    .contentTransition(.numericText())
-                Text(unit)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                ForEach(parts.indices, id: \.self) { index in
+                    Text(parts[index].value)
+                        .font(.system(.title, design: .rounded, weight: .bold))
+                        .contentTransition(.numericText())
+                    Text(parts[index].unit)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
             }
             Text(range)
                 .font(.caption)
@@ -97,13 +109,21 @@ enum StatsFormat {
         Int(value.rounded()).formatted(.number)
     }
 
-    /// A time saved, in the largest unit it fills: seconds, minutes, then
-    /// hours to the tenth. A loss reads as nothing saved.
-    static func duration(_ seconds: TimeInterval) -> (value: String, unit: String) {
-        let seconds = max(0, seconds)
-        if seconds < 60 { return (count(seconds), "s") }
-        if seconds < 3600 { return (count(seconds / 60), "min") }
-        return ((seconds / 3600).formatted(.number.precision(.fractionLength(0...1))), "h")
+    /// A time saved as a clock reads it: seconds under a minute, minutes under
+    /// an hour, then hours and minutes, never a fraction of an hour. A loss
+    /// reads as nothing saved.
+    static func duration(_ seconds: TimeInterval) -> [(value: String, unit: String)] {
+        let seconds = Int(max(0, seconds).rounded())
+        if seconds < 60 { return [(seconds.formatted(.number), "s")] }
+        let minutes = Int((Double(seconds) / 60).rounded())
+        if minutes < 60 { return [(minutes.formatted(.number), "min")] }
+        let hours = [((minutes / 60).formatted(.number), "h")]
+        return minutes % 60 == 0 ? hours : hours + [((minutes % 60).formatted(.number), "min")]
+    }
+
+    /// The same, in a line: "4 h 36 min".
+    static func durationText(_ seconds: TimeInterval) -> String {
+        duration(seconds).map { "\($0.value) \($0.unit)" }.joined(separator: " ")
     }
 
     /// The dates a series covers, under its headline figure, up to today: the

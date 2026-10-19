@@ -3905,22 +3905,6 @@
         }
       }
     },
-    "Depuis le début : %@ %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Since the start: %1$@ %2$@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Depuis le début : %1$@ %2$@"
-          }
-        }
-      }
-    },
     "Par rapport à une frappe au clavier à %lld mots/min, temps de parole et d'attente déduits.": {
       "localizations": {
         "en": {
@@ -3933,6 +3917,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Par rapport à une frappe au clavier à %lld mots/min, temps de parole et d'attente déduits."
+          }
+        }
+      }
+    },
+    "Depuis le début : %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Since the start: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Depuis le début : %@"
           }
         }
       }
