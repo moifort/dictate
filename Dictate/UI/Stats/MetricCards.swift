@@ -1,6 +1,51 @@
 import Charts
 import SwiftUI
 
+/// The time dictating saved over typing the same words, over the period and
+/// since the first dictation.
+struct TimeSavedCard: View {
+    let series: DictationSeries
+    /// Seconds saved since the first dictation.
+    let total: TimeInterval
+
+    var body: some View {
+        let period = StatsFormat.duration(series.timeSaved)
+        let overall = StatsFormat.duration(total)
+        StatsCard(title: "Temps gagné", symbol: "hourglass", color: StatsPalette.timeSaved) {
+            Text("Depuis le début : \(overall.value) \(overall.unit)")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .contentTransition(.numericText())
+        } content: {
+            MetricHeadline(
+                caption: "Total", value: period.value, unit: LocalizedStringKey(period.unit),
+                range: StatsFormat.range(series)
+            )
+            PeriodChart(
+                series: series,
+                peak: series.buckets.map(\.timeSaved).max() ?? 0,
+                floor: 10,
+                value: { bucket in
+                    guard bucket.dictations > 0 else { return nil }
+                    let saved = StatsFormat.duration(bucket.timeSaved)
+                    return "\(saved.value) \(saved.unit)"
+                }
+            ) { bucket, dimmed in
+                BarMark(
+                    x: .value("Date", bucket.date, unit: series.period.unit),
+                    y: .value("Minutes", max(0, bucket.timeSaved) / 60)
+                )
+                .foregroundStyle(StatsPalette.timeSaved)
+                .opacity(dimmed ? 0.4 : 1)
+                .cornerRadius(3)
+            }
+            Text("Par rapport à une frappe au clavier à \(Int(DictationRecord.typingPace)) mots/min, temps de parole et d'attente déduits.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+}
+
 /// Words dictated over the period, one column per unit of time.
 struct WordsCard: View {
     let series: DictationSeries

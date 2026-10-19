@@ -42,10 +42,13 @@ nonisolated struct DictationStats {
     let pace: Trend
     /// True before the first dictation ever.
     let isEmpty: Bool
+    /// Seconds saved against typing, since the first dictation.
+    let timeSaved: TimeInterval
 
     init(records: [DictationRecord], now: Date = .now, calendar: Calendar = .current) {
         let today = calendar.startOfDay(for: now)
         isEmpty = records.isEmpty
+        timeSaved = records.reduce(0) { $0 + $1.timeSaved }
 
         func window(from start: Int, count: Int) -> [DictationRecord] {
             let lower = calendar.date(byAdding: .day, value: -(start + count - 1), to: today)!

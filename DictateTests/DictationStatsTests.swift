@@ -52,6 +52,23 @@ struct DictationStatsTests {
         #expect(raw.latency == 2.5)
     }
 
+    @Test func timeSavedIsTypingTimeLessSpeechAndWait() {
+        // 40 words take a minute to type; saying them took 15 s, then 5 s of wait.
+        let record = DictationRecord(date: now, words: 40, audio: 15, transcription: 4, enhancement: 1, insertion: 0)
+        #expect(record.timeSaved == 40)
+    }
+
+    @Test func aWordOrTwoAreQuickerTyped() {
+        let record = DictationRecord(date: now, words: 1, audio: 1, transcription: 1, enhancement: nil, insertion: 0)
+        #expect(record.timeSaved == -0.5)
+    }
+
+    @Test func timeSavedAddsUpSinceTheFirstDictation() {
+        // 10 words: 15 s to type, 4 s spoken and 3 s waited.
+        let stats = stats([record(daysAgo: 0), record(daysAgo: 90)])
+        #expect(stats.timeSaved == 16)
+    }
+
     // MARK: - Trends
 
     @Test func wordsTrendComparesActiveDaysOfTheLastWeekToTheFourBefore() {
@@ -107,5 +124,16 @@ struct DictationStatsTests {
     @Test func medianOfAnEvenCountAveragesTheMiddlePair() {
         #expect(DictationStats.median([4, 1, 3, 2]) == 2.5)
         #expect(DictationStats.median([]) == nil)
+    }
+}
+
+struct StatsFormatTests {
+    @Test func durationReadsInTheLargestUnitItFills() {
+        #expect(StatsFormat.duration(42).value == "42")
+        #expect(StatsFormat.duration(42).unit == "s")
+        #expect(StatsFormat.duration(150).value == "3")
+        #expect(StatsFormat.duration(150).unit == "min")
+        #expect(StatsFormat.duration(5400).unit == "h")
+        #expect(StatsFormat.duration(-10).value == "0")
     }
 }

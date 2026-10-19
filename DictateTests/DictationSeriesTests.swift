@@ -121,6 +121,14 @@ struct DictationSeriesTests {
         #expect(series.latency == 3)
     }
 
+    @Test func timeSavedAddsUpByColumnAndPeriod() {
+        // 10 words: 15 s to type, 4 s spoken and 3 s waited.
+        let series = series([record(daysAgo: 0), record(daysAgo: 0, hour: 11), record(daysAgo: 2)], .week)
+        #expect(series.buckets.last?.timeSaved == 16)
+        #expect(series.buckets[4].timeSaved == 8)
+        #expect(series.timeSaved == 24)
+    }
+
     @Test func dictationWithoutClaudeCountsNoEnhancement() {
         let series = series([record(daysAgo: 0, enhancement: nil)], .week)
         #expect(series.buckets.last?.enhancement == 0)

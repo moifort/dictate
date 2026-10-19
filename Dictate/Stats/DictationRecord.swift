@@ -60,6 +60,17 @@ nonisolated struct DictationRecord: Codable, Equatable, Sendable {
     /// From releasing `fn` to the text being on screen.
     var latency: TimeInterval { transcription + (enhancement ?? 0) + insertion }
 
+    /// The typing speed the time saved is measured against, in words per
+    /// minute: an average for composing at a keyboard. Copy typists reach 52
+    /// (Aalto University, 136 million keystrokes), but writing one's own text
+    /// is slower than copying.
+    static let typingPace: Double = 40
+
+    /// Seconds these words would have taken to type, less the time spent
+    /// dictating them: speaking, then waiting for the text. Negative for a
+    /// word or two, which are quicker typed than said.
+    var timeSaved: TimeInterval { Double(words) / Self.typingPace * 60 - audio - latency }
+
     /// Words as the system segments them: punctuation alone is not a word.
     static func wordCount(of text: String) -> Int {
         var count = 0

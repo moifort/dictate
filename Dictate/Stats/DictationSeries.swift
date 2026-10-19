@@ -53,6 +53,8 @@ nonisolated struct DictationSeries: Equatable {
         /// How many dictations each model cleaned up; the ones without
         /// cleanup are not counted.
         let reviewers: [Reviewer: Int]
+        /// Seconds saved against typing the same words.
+        let timeSaved: TimeInterval
 
         var id: Date { date }
         var midpoint: Date { date.addingTimeInterval(end.timeIntervalSince(date) / 2) }
@@ -84,6 +86,8 @@ nonisolated struct DictationSeries: Equatable {
     /// The models that cleaned up at least one dictation over the period,
     /// in the order of the settings.
     let reviewers: [Reviewer]
+    /// Seconds saved against typing the same words over the period.
+    let timeSaved: TimeInterval
 
     init(records: [DictationRecord], period: StatsPeriod, now: Date = .now, calendar: Calendar = .current) {
         self.period = period
@@ -119,6 +123,7 @@ nonisolated struct DictationSeries: Equatable {
         pace = Self.pace(words: words, audio: covered.reduce(0) { $0 + $1.audio })
         let used = Set(covered.compactMap(\.reviewer))
         reviewers = Reviewer.allCases.filter(used.contains)
+        timeSaved = covered.reduce(0) { $0 + $1.timeSaved }
     }
 
     /// The column an instant falls in, if any.
@@ -136,7 +141,8 @@ nonisolated struct DictationSeries: Equatable {
             transcription: DictationStats.median(records.map(\.transcription)) ?? 0,
             enhancement: DictationStats.median(records.map { ($0.enhancement ?? 0) + $0.insertion }) ?? 0,
             latency: DictationStats.median(records.map(\.latency)) ?? 0,
-            reviewers: Dictionary(grouping: records.compactMap(\.reviewer)) { $0 }.mapValues(\.count)
+            reviewers: Dictionary(grouping: records.compactMap(\.reviewer)) { $0 }.mapValues(\.count),
+            timeSaved: records.reduce(0) { $0 + $1.timeSaved }
         )
     }
 

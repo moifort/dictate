@@ -76,6 +76,7 @@ enum StatsPalette {
     static let claude = Color.purple
     static let apple = Color.blue
     static let pace = Color.orange
+    static let timeSaved = Color.indigo
 
     /// The colour of each model's cleanup time in the delay chart.
     static func color(for reviewer: Reviewer) -> Color {
@@ -94,6 +95,15 @@ enum StatsFormat {
 
     static func count(_ value: Double) -> String {
         Int(value.rounded()).formatted(.number)
+    }
+
+    /// A time saved, in the largest unit it fills: seconds, minutes, then
+    /// hours to the tenth. A loss reads as nothing saved.
+    static func duration(_ seconds: TimeInterval) -> (value: String, unit: String) {
+        let seconds = max(0, seconds)
+        if seconds < 60 { return (count(seconds), "s") }
+        if seconds < 3600 { return (count(seconds / 60), "min") }
+        return ((seconds / 3600).formatted(.number.precision(.fractionLength(0...1))), "h")
     }
 
     /// The dates a series covers, under its headline figure, up to today: the
