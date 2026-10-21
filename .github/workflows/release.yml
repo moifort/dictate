@@ -305,7 +305,8 @@ jobs:
   # The Mac App Store build, from the same tag: sandboxed, signed with the
   # Apple Distribution and Mac Installer Distribution certificates and a Mac
   # App Store profile, uploaded to App Store Connect. Without those secrets the
-  # job is skipped and the GitHub release goes out alone. Submitting the
+  # job is skipped and the GitHub release goes out alone. The upload itself
+  # also waits for the repository variable APP_STORE_UPLOAD=true. Submitting the
   # uploaded build for review stays a click in App Store Connect.
   app-store:
     name: 🍎 Mac App Store upload
@@ -402,7 +403,9 @@ jobs:
       # A manual run proves the archive and the signature without spending a
       # build number on App Store Connect: only a tag uploads.
       - name: Upload to App Store Connect
-        if: env.ENABLED == 'true' && startsWith(github.ref, 'refs/tags/v')
+        # Off until the repository variable APP_STORE_UPLOAD is "true": while a
+        # version is in review, a tag must not rename or replace it.
+        if: env.ENABLED == 'true' && startsWith(github.ref, 'refs/tags/v') && vars.APP_STORE_UPLOAD == 'true'
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
