@@ -297,8 +297,11 @@ final class DictationController {
         do {
             return try await work.value.trimmingCharacters(in: .whitespacesAndNewlines)
         } catch is CancellationError {
-            Log.dictation.error("enhancement timed out")
-            ErrorReporter.capture(message: "enhancement timed out after \(enhancementTimeout)", category: "enhancer", level: .warning)
+            // The cutoff doing its job: the raw transcript goes in and the
+            // record keeps no enhancement time, which is where a slow Claude
+            // shows. Not a failure to look into.
+            Log.dictation.notice("enhancement timed out after \(self.enhancementTimeout), raw transcript inserted")
+            ErrorReporter.breadcrumb("enhancement timed out after \(enhancementTimeout)", category: "enhancer")
             return nil
         } catch {
             Log.dictation.error("enhancement failed: \(error.localizedDescription, privacy: .public)")
