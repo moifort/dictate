@@ -10,7 +10,7 @@
 require_relative "asc"
 
 BUNDLE_ID = "com.polyforms.dictate"
-SITE = "https://moifort.github.io/dictate/"
+SITE = "https://dictate.polyforms.co/"
 SUPPORT = "https://github.com/moifort/dictate/issues"
 
 LISTING = {
