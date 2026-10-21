@@ -303,6 +303,12 @@ final class DictationController {
             Log.dictation.notice("enhancement timed out after \(self.enhancementTimeout), raw transcript inserted")
             ErrorReporter.breadcrumb("enhancement timed out after \(enhancementTimeout)", category: "enhancer")
             return nil
+        } catch let error as ClaudeCLIError where error.isUsageLimit {
+            // The subscription's limit is spent until it resets: Claude's
+            // answer, not a failure of ours. The raw transcript goes in.
+            Log.dictation.notice("claude usage limit reached, raw transcript inserted: \(error.localizedDescription, privacy: .public)")
+            ErrorReporter.breadcrumb("claude usage limit reached", category: "enhancer")
+            return nil
         } catch {
             Log.dictation.error("enhancement failed: \(error.localizedDescription, privacy: .public)")
             ErrorReporter.capture(error, "enhancement failed, raw transcript inserted", category: "enhancer")

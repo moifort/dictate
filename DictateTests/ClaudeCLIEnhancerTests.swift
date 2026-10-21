@@ -183,3 +183,29 @@ struct ClaudeCLIProcessTests {
         await #expect(throws: (any Error).self) { try await process.send("hello") }
     }
 }
+
+/// A usage limit is Claude declining for the day, not a failure of Dictate's.
+struct ClaudeCLIErrorTests {
+    @Test(arguments: [
+        "You've hit your session limit · resets 3:20pm (Europe/Paris)",
+        "You've hit your weekly limit · resets Oct 24, 9am (Europe/Paris)",
+        "You've hit your monthly spend limit.",
+        "Usage limit reached",
+        "You've reached your weekly usage limit",
+    ])
+    func usageLimitsAreRecognised(message: String) {
+        #expect(ClaudeCLIError.failed(message).isUsageLimit)
+    }
+
+    @Test(arguments: [
+        "Please run /login",
+        "Invalid API key · Please run /login",
+        "error_during_execution",
+        "Context limit reached",
+    ])
+    func otherFailuresAreNot(message: String) {
+        #expect(!ClaudeCLIError.failed(message).isUsageLimit)
+        #expect(!ClaudeCLIError.noResult(message).isUsageLimit)
+        #expect(!ClaudeCLIError.notFound.isUsageLimit)
+    }
+}
