@@ -81,9 +81,9 @@ final class FnKeyMonitor {
             flags.contains(key.flag) ? .fnDown(at: time) : .fnUp(at: time)
         case .flagsChanged:
             // Only a modifier going down counts: releasing Shift mid-dictation is not a shortcut.
-            flags.isDisjoint(with: otherModifiers) ? nil : .otherKeyDown
+            flags.isDisjoint(with: otherModifiers) ? nil : .otherKeyDown(at: time)
         case .keyDown:
-            .otherKeyDown
+            .otherKeyDown(at: time)
         default:
             nil
         }

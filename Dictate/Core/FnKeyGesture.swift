@@ -4,7 +4,7 @@ nonisolated enum FnKeyEvent: Equatable, Sendable {
     case fnDown(at: TimeInterval)
     case fnUp(at: TimeInterval)
     /// Any other key or modifier pressed while `fn` may be held.
-    case otherKeyDown
+    case otherKeyDown(at: TimeInterval)
 }
 
 nonisolated enum FnKeyGestureOutput: Equatable, Sendable {
@@ -16,8 +16,9 @@ nonisolated enum FnKeyGestureOutput: Equatable, Sendable {
 /// Turns raw `fn` key events into push-to-talk gestures.
 ///
 /// Recording starts on `pressed` so no speech is lost. A press shorter than
-/// `minimumDuration`, or `fn` used as a modifier for another key, ends with
-/// `cancelled` instead of `released`.
+/// `minimumDuration`, or `fn` used as a modifier for another key within that
+/// same window, ends with `cancelled` instead of `released`. Past the window
+/// the user is dictating: a stray key is ignored and the dictation goes on.
 nonisolated struct FnKeyGesture: Sendable {
     var minimumDuration: TimeInterval = 0.3
 
@@ -32,8 +33,8 @@ nonisolated struct FnKeyGesture: Sendable {
             interrupted = false
             return .pressed
 
-        case .otherKeyDown:
-            guard downAt != nil, !interrupted else { return nil }
+        case .otherKeyDown(let time):
+            guard let start = downAt, !interrupted, time - start < minimumDuration else { return nil }
             interrupted = true
             return .cancelled
 

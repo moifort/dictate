@@ -14,8 +14,8 @@ struct FnKeyMonitorTests {
     }
 
     @Test func otherModifierOrKeyIsOtherKey() {
-        #expect(FnKeyMonitor.classify(type: .flagsChanged, keyCode: 56, flags: .maskShift, time: 0) == .otherKeyDown)
-        #expect(FnKeyMonitor.classify(type: .keyDown, keyCode: 0, flags: .maskSecondaryFn, time: 0) == .otherKeyDown)
+        #expect(FnKeyMonitor.classify(type: .flagsChanged, keyCode: 56, flags: .maskShift, time: 0) == .otherKeyDown(at: 0))
+        #expect(FnKeyMonitor.classify(type: .keyDown, keyCode: 0, flags: .maskSecondaryFn, time: 0) == .otherKeyDown(at: 0))
     }
 
     @Test func modifierReleaseIsIgnored() {
@@ -40,8 +40,8 @@ struct FnKeyMonitorTests {
     }
 
     @Test func withControlTheOtherModifiersStillInterrupt() {
-        #expect(FnKeyMonitor.classify(key: .control, type: .flagsChanged, keyCode: 55, flags: [.maskControl, .maskCommand], time: 0) == .otherKeyDown)
-        #expect(FnKeyMonitor.classify(key: .control, type: .keyDown, keyCode: 8, flags: .maskControl, time: 0) == .otherKeyDown)
+        #expect(FnKeyMonitor.classify(key: .control, type: .flagsChanged, keyCode: 55, flags: [.maskControl, .maskCommand], time: 0) == .otherKeyDown(at: 0))
+        #expect(FnKeyMonitor.classify(key: .control, type: .keyDown, keyCode: 8, flags: .maskControl, time: 0) == .otherKeyDown(at: 0))
     }
 
     @Test func withControlHeldAModifierReleaseIsIgnored() {
