@@ -65,9 +65,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
     }
 
-    /// The onboarding opens at every launch until the checklist is complete.
+    /// The onboarding opens at every launch until dictation can work.
     var needsSetup: Bool {
-        !Self.isRunningTests && !model.setup.isComplete
+        !Self.isRunningTests && model.setup.needsOnboarding
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {

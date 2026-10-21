@@ -162,7 +162,8 @@ final class AppModel {
             microphone: Permissions.microphone,
             inputMonitoring: Permissions.inputMonitoring || hotkeyActive,
             accessibility: Permissions.accessibility,
-            fnKeyFree: !settings.pushToTalkKey.needsSystemKeyFreed || Permissions.fnKeyFree,
+            fnKeyFree: Permissions.fnKeyFree,
+            fnKeyNeeded: settings.pushToTalkKey.needsSystemKeyFreed,
             transcriptionModel: transcriptionModelReady,
             review: reviewerReady
         )

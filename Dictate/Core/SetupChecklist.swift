@@ -25,6 +25,8 @@ nonisolated struct SetupChecklist: Equatable, Sendable {
     var inputMonitoring = false
     var accessibility = false
     var fnKeyFree = false
+    /// The push-to-talk key is 🌐 fn, which macOS must leave alone; control needs nothing.
+    var fnKeyNeeded = true
     var transcriptionModel = false
     /// The chosen reviewer is ready (Apple Intelligence available, or the
     /// `claude` CLI found), or the user chose to dictate without one.
@@ -42,16 +44,23 @@ nonisolated struct SetupChecklist: Equatable, Sendable {
         }
     }
 
-    var pending: [SetupStep] { SetupStep.allCases.filter { !isDone($0) } }
+    /// The steps that apply to the chosen push-to-talk key, in order.
+    var steps: [SetupStep] { SetupStep.allCases.filter { $0 != .fnKey || fnKeyNeeded } }
+
+    var pending: [SetupStep] { steps.filter { !isDone($0) } }
 
     /// The step the onboarding should show: the first one still missing.
     var current: SetupStep? { pending.first }
 
     var isComplete: Bool { pending.isEmpty }
 
+    /// Dictation cannot work yet. The optional review is left out: at launch
+    /// it is still being checked, and the raw transcript works without it.
+    var needsOnboarding: Bool { pending.contains { !$0.isOptional } }
+
     /// The user went through at least the first page: only the onboarding
     /// confirms the language, whereas macOS may already have granted the rest.
     var hasStarted: Bool { language }
 
-    var completedCount: Int { SetupStep.allCases.count - pending.count }
+    var completedCount: Int { steps.count - pending.count }
 }

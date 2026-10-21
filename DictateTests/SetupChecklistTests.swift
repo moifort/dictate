@@ -43,4 +43,25 @@ struct SetupChecklistTests {
     @Test func onlyTheReviewIsOptional() {
         #expect(SetupStep.allCases.filter(\.isOptional) == [.review])
     }
+
+    /// control has nothing for macOS to give up: the 🌐 step is not listed at all.
+    @Test func theFnStepIsOnlyListedForTheFnKey() {
+        var checklist = ready
+        checklist.fnKeyFree = false
+        checklist.fnKeyNeeded = false
+        #expect(!checklist.steps.contains(.fnKey))
+        #expect(checklist.isComplete)
+        #expect(checklist.completedCount == checklist.steps.count)
+    }
+
+    /// The review is checked by a slow probe of the claude command, still
+    /// running when the launch decides whether to open the onboarding.
+    @Test func onlyAMissingRequiredStepNeedsTheOnboarding() {
+        var checklist = ready
+        checklist.review = false
+        #expect(!checklist.isComplete)
+        #expect(!checklist.needsOnboarding)
+        checklist.microphone = false
+        #expect(checklist.needsOnboarding)
+    }
 }

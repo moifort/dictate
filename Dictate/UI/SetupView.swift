@@ -168,7 +168,7 @@ private struct ChecklistPage: View {
                 .padding(.top, 8)
 
             VStack(spacing: 2) {
-                ForEach(SetupStep.allCases) { step in
+                ForEach(model.setup.steps) { step in
                     ChecklistRow(step: step, done: model.setup.isDone(step), unfolded: unfolded == step) {
                         unfolded = unfolded == step ? nil : step
                     } content: {
