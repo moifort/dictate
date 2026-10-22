@@ -137,8 +137,11 @@ final class DictationController {
             phase = .starting
             pendingGesture = nil
             starting = Task {
+                let clock = ContinuousClock()
+                let start = clock.now
                 do {
                     try await recorder.start()
+                    Log.dictation.info("microphone opened in \(Self.milliseconds(clock.now - start)) ms")
                 } catch {
                     Log.dictation.error("microphone could not start: \(error.localizedDescription, privacy: .public)")
                     ErrorReporter.capture(error, "microphone could not start", category: "recorder")

@@ -17,6 +17,8 @@ final class RecordingIndicator {
     @Observable
     final class State {
         var flash: Flash?
+        /// Set once the microphone has taken longer than `startingDelay` to open.
+        var isStartingSlowly = false
     }
 
     private let controller: DictationController
@@ -28,11 +30,15 @@ final class RecordingIndicator {
     private var flashTask: Task<Void, Never>?
     private var hideTask: Task<Void, Never>?
     private var visibilityTask: Task<Void, Never>?
+    private var startingTask: Task<Void, Never>?
 
     /// Wide enough for the loading and error messages; the panel is transparent around the pill.
     private static let size = CGSize(width: 260, height: 56)
     /// Long enough for the fade-out in `IndicatorView` to finish.
     private static let hideDelay: Duration = .milliseconds(450)
+    /// The microphone usually opens in 10 to 40 ms: the spinner shows only when
+    /// it takes longer, so a normal press goes straight to the waves.
+    static let startingDelay: Duration = .milliseconds(300)
 
     init(controller: DictationController, recorder: AudioRecorder) {
         self.controller = controller
@@ -67,23 +73,45 @@ final class RecordingIndicator {
     }
 
     private var shouldBeVisible: Bool {
-        controller.phase != .idle || state.flash != nil
+        switch controller.phase {
+        case .idle: state.flash != nil
+        case .starting: state.isStartingSlowly
+        case .recording, .transcribing, .enhancing: true
+        }
     }
 
     /// A single long-lived subscription: a `withObservationTracking` chain that
     /// re-registers itself after each change can drop a link and leave the pill
     /// hidden for the rest of the session.
     private func observeVisibility() {
-        let changes = Observations { [controller, state] in (controller.phase, state.flash) }
+        let changes = Observations { [controller, state] in
+            (controller.phase, state.flash, state.isStartingSlowly)
+        }
         visibilityTask = Task { [weak self] in
-            for await (phase, _) in changes {
+            for await (phase, _, _) in changes {
                 guard let self else { return }
                 if phase == .starting || phase == .recording, state.flash != nil {
                     flashTask?.cancel()
                     state.flash = nil
                 }
+                updateStartingDelay(phase: phase)
                 updateVisibility()
             }
+        }
+    }
+
+    private func updateStartingDelay(phase: DictationPhase) {
+        guard phase == .starting else {
+            startingTask?.cancel()
+            startingTask = nil
+            if state.isStartingSlowly { state.isStartingSlowly = false }
+            return
+        }
+        guard startingTask == nil, !state.isStartingSlowly else { return }
+        startingTask = Task {
+            try? await Task.sleep(for: Self.startingDelay)
+            guard !Task.isCancelled, controller.phase == .starting else { return }
+            state.isStartingSlowly = true
         }
     }
 
@@ -189,7 +217,8 @@ private struct IndicatorView: View {
     private var mode: Mode {
         switch controller.phase {
         case .recording: .recording
-        case .starting, .transcribing, .enhancing: .processing
+        case .starting: state.isStartingSlowly ? .processing : .hidden
+        case .transcribing, .enhancing: .processing
         case .idle: state.flash.map(Mode.flash) ?? .hidden
         }
     }
