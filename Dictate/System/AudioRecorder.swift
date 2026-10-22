@@ -19,8 +19,16 @@ final class AudioRecorder: AudioRecording {
 
     enum RecorderError: LocalizedError {
         case noInputDevice
+        /// Core Audio's `kAudioHardwareNotRunningError` ('stop'): the device
+        /// refused to start, often after a sleep or when another app grabbed it.
+        case deviceNotRunning
 
-        var errorDescription: String? { String(localized: "Aucun micro disponible.") }
+        var errorDescription: String? {
+            switch self {
+            case .noInputDevice: String(localized: "Aucun micro disponible.")
+            case .deviceNotRunning: String(localized: "il ne démarre pas. Rebranchez-le ou choisissez-en un autre dans les réglages.")
+            }
+        }
     }
 
     init() {
@@ -60,6 +68,7 @@ final class AudioRecorder: AudioRecording {
         } catch {
             input.removeTap(onBus: 0)
             tap = nil
+            if (error as NSError).code == Int(kAudioHardwareNotRunningError) { throw RecorderError.deviceNotRunning }
             throw error
         }
         isRecording = true

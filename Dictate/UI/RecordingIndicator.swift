@@ -8,7 +8,8 @@ final class RecordingIndicator {
     enum Flash: Equatable {
         /// No field had focus: the text waits in the pasteboard.
         case copied
-        case failed
+        /// Why the dictation failed, so a press that does nothing explains itself.
+        case failed(String)
         /// `fn` pressed before the engine's model is in memory.
         case loading(TranscriptionEngine)
     }
@@ -28,8 +29,8 @@ final class RecordingIndicator {
     private var hideTask: Task<Void, Never>?
     private var visibilityTask: Task<Void, Never>?
 
-    /// Wide enough for the loading message; the panel is transparent around the pill.
-    private static let size = CGSize(width: 260, height: 56)
+    /// Wide and tall enough for a two-line error; the panel is transparent around the pill.
+    private static let size = CGSize(width: 380, height: 76)
     /// Long enough for the fade-out in `IndicatorView` to finish.
     private static let hideDelay: Duration = .milliseconds(450)
 
@@ -45,7 +46,7 @@ final class RecordingIndicator {
     func show(_ outcome: DictationOutcome) {
         let flash: Flash? = switch outcome {
         case .copied: .copied
-        case .failed: .failed
+        case .failed(let message): .failed(message)
         case .modelLoading(let engine): .loading(engine)
         case .pasted, .discarded: nil
         }
@@ -54,7 +55,12 @@ final class RecordingIndicator {
         guard flash != nil else { return }
         flashTask = Task {
             // A sentence takes longer to read than a symbol.
-            try? await Task.sleep(for: .seconds(flash == .copied || flash == .failed ? 1.6 : 2.5))
+            let duration: Duration = switch flash {
+            case .copied: .seconds(1.6)
+            case .loading: .seconds(2.5)
+            case .failed, nil: .seconds(5)
+            }
+            try? await Task.sleep(for: duration)
             guard !Task.isCancelled else { return }
             state.flash = nil
         }
@@ -188,14 +194,19 @@ private struct IndicatorView: View {
         }
     }
 
+    private var isFailure: Bool {
+        if case .flash(.failed) = mode { true } else { false }
+    }
+
     var body: some View {
         let hidden = mode == .hidden
         ZStack {
             content
                 .transition(.blurReplace.combined(with: .scale(0.7)))
         }
-        .frame(height: 32)
+        .frame(minHeight: 32)
         .padding(.horizontal, 16)
+        .padding(.vertical, isFailure ? 6 : 0)
         .foregroundStyle(.primary)
         .glassEffect(.regular, in: .capsule)
         .opacity(hidden ? 0 : 1)
@@ -219,9 +230,17 @@ private struct IndicatorView: View {
         case .flash(.copied):
             BouncingSymbol(name: "doc.on.clipboard", color: .white)
                 .id("copied")
-        case .flash(.failed):
-            BouncingSymbol(name: "exclamationmark.triangle.fill", color: .orange)
-                .id("failed")
+        case .flash(.failed(let message)):
+            HStack(spacing: 8) {
+                BouncingSymbol(name: "exclamationmark.triangle.fill", color: .orange)
+                Text(message)
+                    .font(.callout)
+                    .lineLimit(2)
+                    .truncationMode(.tail)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: 320)
+            .id("failed")
         case .flash(.loading(let engine)):
             HStack(spacing: 8) {
                 Spinner()
