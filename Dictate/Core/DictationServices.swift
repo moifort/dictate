@@ -2,7 +2,7 @@ import Foundation
 
 /// Captures microphone audio as 16 kHz mono samples.
 protocol AudioRecording: AnyObject {
-    func start() throws
+    func start() async throws
     /// Stops recording and returns everything captured since `start()`.
     func stop() -> [Float]
 }

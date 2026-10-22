@@ -3,6 +3,8 @@ import Observation
 
 enum DictationPhase: Equatable {
     case idle
+    /// `fn` is held but the microphone is not open yet.
+    case starting
     case recording
     /// The engine is turning the audio into text.
     case transcribing
@@ -56,6 +58,9 @@ final class DictationController {
     @ObservationIgnored private var context = DictationContext()
     @ObservationIgnored private var bundleID: String?
     @ObservationIgnored private var processing: Task<Void, Never>?
+    @ObservationIgnored private var starting: Task<Void, Never>?
+    /// A release or cancel that came while the microphone was still starting.
+    @ObservationIgnored private var pendingGesture: FnKeyGestureOutput?
 
     /// Called once per finished dictation, after `phase` returns to idle.
     @ObservationIgnored var onOutcome: ((DictationOutcome) -> Void)?
@@ -128,20 +133,32 @@ final class DictationController {
                 category: AppCategory(bundleID: bundleID),
                 appName: focus.frontmostAppName()
             )
-            do {
-                try recorder.start()
+            // Shown at once: opening the microphone can take seconds.
+            phase = .starting
+            pendingGesture = nil
+            starting = Task {
+                do {
+                    try await recorder.start()
+                } catch {
+                    Log.dictation.error("microphone could not start: \(error.localizedDescription, privacy: .public)")
+                    ErrorReporter.capture(error, "microphone could not start", category: "recorder")
+                    return finish(.failed(Self.microphoneFailure(error)))
+                }
                 phase = .recording
-            } catch {
-                ErrorReporter.capture(error, "microphone could not start", category: "recorder")
-                finish(.failed(String(localized: "Micro indisponible : \(error.localizedDescription)")))
+                if let gesture = pendingGesture {
+                    pendingGesture = nil
+                    handle(gesture)
+                }
             }
 
         case .cancelled:
+            if phase == .starting { pendingGesture = .cancelled; return }
             guard phase == .recording else { return }
             _ = recorder.stop()
             phase = .idle
 
         case .released:
+            if phase == .starting { pendingGesture = .released; return }
             guard phase == .recording else { return }
             // Read on release rather than press: Electron apps only build their
             // accessibility tree once asked, which happens on press. The read
@@ -164,6 +181,17 @@ final class DictationController {
                 await process(samples, fieldContext: fieldContext)
             }
         }
+    }
+
+    /// Waits for the microphone to open, or to fail, after a press.
+    func waitUntilStarted() async {
+        await starting?.value
+    }
+
+    /// Short enough for the pill; the details go to the log and Sentry.
+    private static func microphoneFailure(_ error: Error) -> String {
+        if let error = error as? AudioRecorder.RecorderError { return error.localizedDescription }
+        return String(localized: "Micro indisponible")
     }
 
     /// Waits for the in-flight dictation, if any, to complete.
@@ -192,8 +220,9 @@ final class DictationController {
             let doubtful = transcript.words.count { $0.confidence < DoubtfulWords.threshold }
             Log.dictation.info("transcribed \(audio, format: .fixed(precision: 1)) s of audio in \(Self.milliseconds(transcription)) ms, \(doubtful) doubtful words")
         } catch {
+            Log.dictation.error("transcription failed: \(error.localizedDescription, privacy: .public)")
             ErrorReporter.capture(error, "transcription with \(engine.rawValue) failed", category: "transcriber")
-            return finish(.failed(String(localized: "Transcription impossible : \(error.localizedDescription)")))
+            return finish(.failed(String(localized: "Transcription impossible")))
         }
         guard !transcript.text.isEmpty else { return finish(.discarded) }
 

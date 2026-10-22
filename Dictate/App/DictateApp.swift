@@ -44,7 +44,7 @@ struct DictateApp: App {
     private var menuBarSymbol: String {
         switch appDelegate.model.controller.phase {
         case .idle: "mic"
-        case .recording: "mic.fill"
+        case .starting, .recording: "mic.fill"
         case .transcribing: "waveform"
         case .enhancing: "sparkles"
         }

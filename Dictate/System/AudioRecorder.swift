@@ -25,8 +25,8 @@ final class AudioRecorder: AudioRecording {
 
         var errorDescription: String? {
             switch self {
-            case .noInputDevice: String(localized: "Aucun micro disponible.")
-            case .deviceNotRunning: String(localized: "il ne démarre pas. Rebranchez-le ou choisissez-en un autre dans les réglages.")
+            case .noInputDevice: String(localized: "Aucun micro disponible")
+            case .deviceNotRunning: String(localized: "Le micro ne répond pas")
             }
         }
     }
@@ -38,27 +38,61 @@ final class AudioRecorder: AudioRecording {
         inputDeviceChanged(deviceChanged: false)
     }
 
-    func start() throws {
-        if Self.isInputInUseElsewhere() {
+    /// Opens the microphone off the main thread: a wedged device can block
+    /// `AVAudioEngine.start()` for ten seconds before it fails, and the pill
+    /// must keep showing that something is happening meanwhile.
+    func start() async throws {
+        // Our own capture marks the device as running: `inputDeviceChanged`
+        // must not take it for another app while the engine starts.
+        isRecording = true
+        let warmed = voiceEngine
+        let onSpectrum: @Sendable (VoiceSpectrum) -> Void = { [weak self] spectrum in
+            Task { @MainActor in self?.spectrum = spectrum }
+        }
+        let started: StartedEngine
+        do {
+            started = try await Task.detached(priority: .userInitiated) {
+                try Self.startEngine(warmedVoiceEngine: warmed, onSpectrum: onSpectrum)
+            }.value
+        } catch {
+            isRecording = false
+            throw error
+        }
+        engine = started.engine
+        tap = started.tap
+        if started.usesVoiceProcessing { voiceEngine = started.engine }
+    }
+
+    nonisolated private struct StartedEngine: @unchecked Sendable {
+        let engine: AVAudioEngine
+        let tap: TapProcessor
+        let usesVoiceProcessing: Bool
+    }
+
+    nonisolated private static func startEngine(
+        warmedVoiceEngine: AVAudioEngine?,
+        onSpectrum: @escaping @Sendable (VoiceSpectrum) -> Void
+    ) throws -> StartedEngine {
+        let engine: AVAudioEngine
+        let usesVoiceProcessing = isInputInUseElsewhere()
+        if usesVoiceProcessing {
             // An app holding the mic with voice processing (Safari WebRTC, FaceTime…)
             // mutes it for everyone else; only a voice-processed stream still hears the user.
-            if voiceEngine == nil {
+            if let warmedVoiceEngine {
+                engine = warmedVoiceEngine
+            } else {
                 Log.dictation.info("voice-processing engine not ready: configuring it now")
-                voiceEngine = try Self.makeVoiceEngine()
+                engine = try makeVoiceEngine()
             }
-            engine = voiceEngine!
         } else {
             engine = AVAudioEngine()
-            Self.bindInput(of: engine)
+            bindInput(of: engine)
         }
         let input = engine.inputNode
         let format = input.outputFormat(forBus: 0)
         guard format.sampleRate > 0, format.channelCount > 0 else { throw RecorderError.noInputDevice }
 
-        let processor = try TapProcessor(inputFormat: format) { [weak self] spectrum in
-            Task { @MainActor in self?.spectrum = spectrum }
-        }
-        tap = processor
+        let processor = try TapProcessor(inputFormat: format, onSpectrum: onSpectrum)
         // About 21 ms at 48 kHz, so the waves follow syllables; the hardware may
         // still deliver larger buffers, which the analyzer handles.
         input.installTap(onBus: 0, bufferSize: 1_024, format: format, block: processor.makeBlock())
@@ -67,11 +101,10 @@ final class AudioRecorder: AudioRecording {
             try engine.start()
         } catch {
             input.removeTap(onBus: 0)
-            tap = nil
             if (error as NSError).code == Int(kAudioHardwareNotRunningError) { throw RecorderError.deviceNotRunning }
             throw error
         }
-        isRecording = true
+        return StartedEngine(engine: engine, tap: processor, usesVoiceProcessing: usesVoiceProcessing)
     }
 
     func stop() -> [Float] {
@@ -149,7 +182,7 @@ final class AudioRecorder: AudioRecording {
 
     /// Whether another process is capturing audio input. Asked per process: the
     /// device-wide running flag counts our own capture, and lags for a moment after it stops.
-    private static func isInputInUseElsewhere() -> Bool {
+    nonisolated private static func isInputInUseElsewhere() -> Bool {
         let system = AudioObjectID(kAudioObjectSystemObject)
         var address = InputDeviceMonitor.address(kAudioHardwarePropertyProcessObjectList)
         var size = UInt32(0)

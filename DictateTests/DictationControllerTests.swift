@@ -55,20 +55,53 @@ struct DictationControllerTests {
 
     private func dictate(_ controller: DictationController) async {
         controller.handle(.pressed)
+        await controller.waitUntilStarted()
         controller.handle(.released)
         await controller.waitUntilIdle()
     }
 
-    @Test func pressStartsRecording() {
+    @Test func pressStartsRecording() async {
         let (controller, fakes) = makeController()
         controller.handle(.pressed)
+        await controller.waitUntilStarted()
         #expect(controller.phase == .recording)
         #expect(fakes.recorder.isRecording)
     }
 
-    @Test func pressWhileModelLoadsReportsItWithoutRecording() {
+    @Test func pressShowsStartingUntilTheMicrophoneOpens() async {
+        let (controller, fakes) = makeController()
+        controller.handle(.pressed)
+        #expect(controller.phase == .starting)
+        await controller.waitUntilStarted()
+        #expect(controller.phase == .recording)
+        #expect(fakes.recorder.isRecording)
+    }
+
+    @Test func releaseWhileStartingIsAppliedOnceTheMicrophoneOpens() async {
+        let (controller, fakes) = makeController()
+        controller.handle(.pressed)
+        controller.handle(.released)
+        #expect(controller.phase == .starting)
+        await controller.waitUntilStarted()
+        await controller.waitUntilIdle()
+        #expect(controller.phase == .idle)
+        #expect(!fakes.recorder.isRecording)
+    }
+
+    @Test func cancelWhileStartingClosesTheMicrophone() async {
+        let (controller, fakes) = makeController()
+        controller.handle(.pressed)
+        controller.handle(.cancelled)
+        await controller.waitUntilStarted()
+        #expect(controller.phase == .idle)
+        #expect(!fakes.recorder.isRecording)
+        #expect(fakes.transcriber.callCount == 0)
+    }
+
+    @Test func pressWhileModelLoadsReportsItWithoutRecording() async {
         let (controller, fakes) = makeController(loadingEngine: .parakeet)
         controller.handle(.pressed)
+        await controller.waitUntilStarted()
         #expect(controller.phase == .idle)
         #expect(!fakes.recorder.isRecording)
         #expect(controller.lastOutcome == .modelLoading(.parakeet))
@@ -230,9 +263,10 @@ struct DictationControllerTests {
         #expect(controller.lastOutcome == .pasted(raw: false))
     }
 
-    @Test func cancelledPressDiscardsRecording() {
+    @Test func cancelledPressDiscardsRecording() async {
         let (controller, fakes) = makeController()
         controller.handle(.pressed)
+        await controller.waitUntilStarted()
         controller.handle(.cancelled)
         #expect(controller.phase == .idle)
         #expect(!fakes.recorder.isRecording)
@@ -266,6 +300,7 @@ struct DictationControllerTests {
     @Test func pressWhileProcessingIsIgnored() async {
         let (controller, fakes) = makeController(enhancerDelay: .milliseconds(100))
         controller.handle(.pressed)
+        await controller.waitUntilStarted()
         controller.handle(.released)
         controller.handle(.pressed)
         #expect(controller.phase == .transcribing)
@@ -276,6 +311,7 @@ struct DictationControllerTests {
     @Test func phaseIsEnhancingWhileClaudeCorrects() async throws {
         let (controller, _) = makeController(enhancerDelay: .milliseconds(150))
         controller.handle(.pressed)
+        await controller.waitUntilStarted()
         controller.handle(.released)
         #expect(controller.phase == .transcribing)
         try await Task.sleep(for: .milliseconds(50))
@@ -500,6 +536,7 @@ struct DictationControllerTests {
     @Test func phaseLeavesRecordingAsSoonAsTheKeyIsReleased() async {
         let (controller, fakes) = makeController(tail: { _ in try? await Task.sleep(for: .milliseconds(50)) })
         controller.handle(.pressed)
+        await controller.waitUntilStarted()
         controller.handle(.released)
         #expect(controller.phase == .transcribing)
         // Still capturing the tail.
@@ -519,6 +556,7 @@ struct DictationControllerTests {
     @Test func pressDuringTheTailIsIgnoredAndTheDictationCompletes() async {
         let (controller, fakes) = makeController(tail: { _ in try? await Task.sleep(for: .milliseconds(50)) })
         controller.handle(.pressed)
+        await controller.waitUntilStarted()
         controller.handle(.released)
         controller.handle(.pressed)
         #expect(controller.phase == .transcribing)
@@ -549,10 +587,11 @@ struct DictationControllerTests {
         #expect(controller.lastOutcome == .discarded)
     }
 
-    @Test func recorderFailureReportsFailure() {
+    @Test func recorderFailureReportsFailure() async {
         let (controller, fakes) = makeController()
         fakes.recorder.startError = FakeError()
         controller.handle(.pressed)
+        await controller.waitUntilStarted()
         #expect(controller.phase == .idle)
         if case .failed = controller.lastOutcome {} else {
             Issue.record("expected failure")
@@ -596,7 +635,7 @@ private final class FakeRecorder: AudioRecording {
         self.events = events
     }
 
-    func start() throws {
+    func start() async throws {
         if let startError { throw startError }
         startCount += 1
         isRecording = true

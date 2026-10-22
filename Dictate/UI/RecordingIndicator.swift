@@ -29,8 +29,8 @@ final class RecordingIndicator {
     private var hideTask: Task<Void, Never>?
     private var visibilityTask: Task<Void, Never>?
 
-    /// Wide and tall enough for a two-line error; the panel is transparent around the pill.
-    private static let size = CGSize(width: 380, height: 76)
+    /// Wide enough for the loading and error messages; the panel is transparent around the pill.
+    private static let size = CGSize(width: 260, height: 56)
     /// Long enough for the fade-out in `IndicatorView` to finish.
     private static let hideDelay: Duration = .milliseconds(450)
 
@@ -58,7 +58,7 @@ final class RecordingIndicator {
             let duration: Duration = switch flash {
             case .copied: .seconds(1.6)
             case .loading: .seconds(2.5)
-            case .failed, nil: .seconds(5)
+            case .failed, nil: .seconds(3)
             }
             try? await Task.sleep(for: duration)
             guard !Task.isCancelled else { return }
@@ -78,7 +78,7 @@ final class RecordingIndicator {
         visibilityTask = Task { [weak self] in
             for await (phase, _) in changes {
                 guard let self else { return }
-                if phase == .recording, state.flash != nil {
+                if phase == .starting || phase == .recording, state.flash != nil {
                     flashTask?.cancel()
                     state.flash = nil
                 }
@@ -189,13 +189,9 @@ private struct IndicatorView: View {
     private var mode: Mode {
         switch controller.phase {
         case .recording: .recording
-        case .transcribing, .enhancing: .processing
+        case .starting, .transcribing, .enhancing: .processing
         case .idle: state.flash.map(Mode.flash) ?? .hidden
         }
-    }
-
-    private var isFailure: Bool {
-        if case .flash(.failed) = mode { true } else { false }
     }
 
     var body: some View {
@@ -204,9 +200,8 @@ private struct IndicatorView: View {
             content
                 .transition(.blurReplace.combined(with: .scale(0.7)))
         }
-        .frame(minHeight: 32)
+        .frame(height: 32)
         .padding(.horizontal, 16)
-        .padding(.vertical, isFailure ? 6 : 0)
         .foregroundStyle(.primary)
         .glassEffect(.regular, in: .capsule)
         .opacity(hidden ? 0 : 1)
@@ -235,11 +230,8 @@ private struct IndicatorView: View {
                 BouncingSymbol(name: "exclamationmark.triangle.fill", color: .orange)
                 Text(message)
                     .font(.callout)
-                    .lineLimit(2)
-                    .truncationMode(.tail)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .lineLimit(1)
             }
-            .frame(maxWidth: 320)
             .id("failed")
         case .flash(.loading(let engine)):
             HStack(spacing: 8) {

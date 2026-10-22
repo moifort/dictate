@@ -529,18 +529,34 @@
         }
       }
     },
-    "Aucun micro disponible.": {
+    "Aucun micro disponible": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No microphone available."
+            "value": "No microphone available"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Aucun micro disponible."
+            "value": "Aucun micro disponible"
+          }
+        }
+      }
+    },
+    "Le micro ne répond pas": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The microphone is not responding"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le micro ne répond pas"
           }
         }
       }
@@ -2057,18 +2073,18 @@
         }
       }
     },
-    "Micro indisponible : %@": {
+    "Micro indisponible": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Microphone unavailable: %@"
+            "value": "Microphone unavailable"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Micro indisponible : %@"
+            "value": "Micro indisponible"
           }
         }
       }
@@ -3225,18 +3241,18 @@
         }
       }
     },
-    "Transcription impossible : %@": {
+    "Transcription impossible": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Transcription failed: %@"
+            "value": "Transcription failed"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Transcription impossible : %@"
+            "value": "Transcription impossible"
           }
         }
       }

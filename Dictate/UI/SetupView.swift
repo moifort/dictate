@@ -664,7 +664,7 @@ private struct TryItPage: View {
 
     private var statusKey: String {
         switch model.controller.phase {
-        case .recording: "recording"
+        case .starting, .recording: "recording"
         case .transcribing: "transcribing"
         case .enhancing: "enhancing"
         case .idle:
