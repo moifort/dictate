@@ -16,6 +16,18 @@ nonisolated enum ClaudeCLIError: LocalizedError, Equatable {
             String(localized: "Claude Code s'est arrêté sans réponse. \(details)")
         }
     }
+
+    /// Claude declining because the subscription's session, weekly or spend
+    /// limit is spent. The CLI says so in its `result` text ("You've hit your
+    /// session limit · resets 3:20pm", "Usage limit reached"…); nothing in
+    /// Dictate caused it and the raw transcript goes in. Any other wording
+    /// stays a failure to look into.
+    var isUsageLimit: Bool {
+        guard case .failed(let message) = self else { return false }
+        let text = message.lowercased()
+        if text.contains("usage limit") { return true }
+        return text.contains("limit") && (text.contains("hit your") || text.contains("reached your"))
+    }
 }
 
 /// One `claude -p` process in stream-json mode, started ahead of time and

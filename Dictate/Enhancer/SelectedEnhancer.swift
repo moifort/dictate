@@ -103,8 +103,14 @@ final class SelectedEnhancer: Enhancer {
             } catch is CancellationError {
                 throw CancellationError()
             } catch where appleAvailable() {
-                Log.dictation.error("claude failed, Apple Intelligence reviews instead: \(error.localizedDescription, privacy: .public)")
-                ErrorReporter.capture(error, "claude failed, falling back to Apple Intelligence", category: "enhancer", level: .warning)
+                if let error = error as? ClaudeCLIError, error.isUsageLimit {
+                    // The subscription's limit is spent until it resets: not a failure to look into.
+                    Log.dictation.notice("claude usage limit reached, Apple Intelligence reviews instead")
+                    ErrorReporter.breadcrumb("claude usage limit reached, falling back to Apple Intelligence", category: "enhancer")
+                } else {
+                    Log.dictation.error("claude failed, Apple Intelligence reviews instead: \(error.localizedDescription, privacy: .public)")
+                    ErrorReporter.capture(error, "claude failed, falling back to Apple Intelligence", category: "enhancer", level: .warning)
+                }
                 lastUsed = .apple
                 return try await apple.enhance(transcription, context: context)
             }
