@@ -81,6 +81,10 @@ struct PromptBuilderTests {
             == PromptBuilder.userMessage(transcript: "ça marche", context: context))
     }
 
+    @Test func systemPromptWarnsOfATruncatedStart() {
+        #expect(PromptBuilder.systemPrompt(vocabulary: [], language: "fr").contains("premières syllabes"))
+    }
+
     @Test func systemPromptExplainsPrecedingText() {
         #expect(PromptBuilder.systemPrompt(vocabulary: [], language: "fr").contains("<preceding_text>"))
     }
