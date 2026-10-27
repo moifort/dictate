@@ -81,6 +81,24 @@ struct PromptBuilderTests {
             == PromptBuilder.userMessage(transcript: "ça marche", context: context))
     }
 
+    @Test func cleanedTextDropsTheModelsAsides() {
+        let reply = """
+            <cleaned>Lance le build actif, la night build.</cleaned>
+
+            Hmm, je reprends proprement :
+
+            <cleaned>Lance la night build.</cleaned>
+            """
+        #expect(PromptBuilder.cleanedText(from: reply) == "Lance la night build.")
+        #expect(PromptBuilder.cleanedText(from: "Voici le texte corrigé :\n<cleaned>\nÇa marche.\n</cleaned>") == "Ça marche.")
+    }
+
+    @Test func cleanedTextSurvivesAMissingTag() {
+        #expect(PromptBuilder.cleanedText(from: " Ça marche. ") == "Ça marche.")
+        #expect(PromptBuilder.cleanedText(from: "<cleaned>Ça marche.") == "Ça marche.")
+        #expect(PromptBuilder.cleanedText(from: "Ça marche.</cleaned>") == "Ça marche.")
+    }
+
     @Test func systemPromptWarnsOfATruncatedStart() {
         #expect(PromptBuilder.systemPrompt(vocabulary: [], language: "fr").contains("premières syllabes"))
     }

@@ -115,7 +115,7 @@ final class AppleIntelligenceEnhancer: Enhancer {
         do {
             let response = try await session.respond(to: message, options: GenerationOptions(temperature: 0))
             try Task.checkCancellation()
-            return DoubtfulWords.strip(response.content)
+            return DoubtfulWords.strip(PromptBuilder.cleanedText(from: response.content))
         } catch let error as LanguageModelSession.GenerationError {
             switch error {
             case .guardrailViolation, .refusal: throw AppleIntelligenceError.refused

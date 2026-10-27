@@ -85,7 +85,7 @@ final class ClaudeCLIEnhancer: Enhancer {
         defer { prewarm() }
         let reply = try await process.send(PromptBuilder.userMessage(transcription: transcription, context: context))
         // The prompt forbids them, but a marker left in would end up in the user's text.
-        return DoubtfulWords.strip(reply)
+        return DoubtfulWords.strip(PromptBuilder.cleanedText(from: reply))
     }
 
     private func spawn() throws -> ClaudeCLIProcess {
