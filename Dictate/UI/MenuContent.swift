@@ -43,22 +43,42 @@ struct MenuContent: View {
             .keyboardShortcut("q")
     }
 
-    /// The first line: the update to install, or a way to look for one. The App Store
+    /// The version, then the update to install or a way to look for one. The App Store
     /// installs its own updates, so there it only names the version.
     @ViewBuilder private var updateItem: some View {
-        if Distribution.isAppStore {
-            Text("Dictate \(model.updater.currentVersion)")
-        } else if let release = model.updater.available {
-            Button("Installer la mise à jour \(release.version)…") { open { openWindow(id: "update") } }
-        } else if model.updater.state == .checking {
-            Text("Recherche d'une mise à jour…")
-        } else {
-            // The update window shows the search, then the result: up to date or what is new.
-            Button("Rechercher une mise à jour…") {
-                open { openWindow(id: "update") }
-                Task { await model.updater.check() }
+        let updater = model.updater
+        Text("Dictate \(updater.currentVersion)")
+        if !Distribution.isAppStore {
+            switch updater.state {
+            case .checking:
+                Text("Recherche d'une mise à jour…")
+            case .downloading(let fraction):
+                Text("Téléchargement de la mise à jour… \(fraction.formatted(.percent.precision(.fractionLength(0))))")
+            case .installing:
+                Text("Installation de la mise à jour…")
+            case .idle, .available, .failed:
+                if let release = updater.available {
+                    Button("Redémarrer pour installer la mise à jour \(release.version)") {
+                        // A failure, or a copy that cannot replace itself, is explained in the window.
+                        if updater.canInstall, !isFailed(updater.state) {
+                            updater.install()
+                        } else {
+                            open { openWindow(id: "update") }
+                        }
+                    }
+                } else {
+                    // The update window shows the search, then the result: up to date or what is new.
+                    Button("Rechercher une mise à jour…") {
+                        open { openWindow(id: "update") }
+                        Task { await updater.check() }
+                    }
+                }
             }
         }
+    }
+
+    private func isFailed(_ state: Updater.State) -> Bool {
+        if case .failed = state { true } else { false }
     }
 
     /// Nothing to say while everything works: only problems and progress show.

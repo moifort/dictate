@@ -545,18 +545,18 @@
         }
       }
     },
-    "Installer la mise à jour %@…": {
+    "Installation de la mise à jour…": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Install Update %@…"
+            "value": "Installing Update…"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Installer la mise à jour %@…"
+            "value": "Installation de la mise à jour…"
           }
         }
       }
@@ -2633,6 +2633,22 @@
         }
       }
     },
+    "Redémarrer pour installer la mise à jour %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restart to Install Update %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redémarrer pour installer la mise à jour %@"
+          }
+        }
+      }
+    },
     "Relecture": {
       "localizations": {
         "en": {
@@ -3349,6 +3365,22 @@
           "stringUnit": {
             "state": "new",
             "value": "Téléchargement de %1$@… %2$@. Dictate est indisponible en attendant."
+          }
+        }
+      }
+    },
+    "Téléchargement de la mise à jour… %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Downloading Update… %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Téléchargement de la mise à jour… %@"
           }
         }
       }
