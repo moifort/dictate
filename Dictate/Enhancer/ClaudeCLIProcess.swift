@@ -49,7 +49,8 @@ nonisolated final class ClaudeCLIProcess: @unchecked Sendable {
         // a cold Haiku request was measured at 4.6 s instead of 1.5 s. CLI
         // 2.1.293 with Haiku 5.5 thinks anyway (~250 tokens, ~1 s): neither
         // this, CLAUDE_CODE_DISABLE_THINKING, alwaysThinkingEnabled nor
-        // --effort low turned it off on 2026-10-11.
+        // --effort low turned it off on 2026-10-11, hence Haiku 4.5, which
+        // does not think (ClaudeCLIEnhancer.defaultModel).
         var environment = ProcessInfo.processInfo.environment
         environment["MAX_THINKING_TOKENS"] = "0"
         process.environment = environment

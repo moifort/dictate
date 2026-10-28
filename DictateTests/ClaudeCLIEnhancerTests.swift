@@ -140,13 +140,18 @@ struct ClaudeCLIEnhancerTests {
         enhancer.shutdown()
     }
 
+    /// The `haiku` alias follows the newest Haiku, and Haiku 5.5 thinks before answering.
+    @Test func defaultModelIsPinnedToHaiku45() {
+        #expect(ClaudeCLIEnhancer.defaultModel == "claude-haiku-4-5")
+    }
+
     @Test func argumentsDisableToolsAndUseStreamJSON() {
-        let args = ClaudeCLIEnhancer.arguments(model: "haiku", systemPrompt: "P")
+        let args = ClaudeCLIEnhancer.arguments(model: ClaudeCLIEnhancer.defaultModel, systemPrompt: "P")
         #expect(args.starts(with: ["-p"]))
         for flag in ["--strict-mcp-config", "--no-session-persistence", "--disable-slash-commands"] {
             #expect(args.contains(flag))
         }
-        #expect(args.containsSequence(["--model", "haiku"]))
+        #expect(args.containsSequence(["--model", "claude-haiku-4-5"]))
         #expect(args.containsSequence(["--tools", ""]))
         #expect(args.containsSequence(["--setting-sources", ""]))
         #expect(args.containsSequence(["--input-format", "stream-json"]))

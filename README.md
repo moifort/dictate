@@ -30,8 +30,8 @@ ready-to-send text.
   more polished in a mail, direct in a chat, raw and technical in a code editor
   or a terminal.
 - **Private by design.** Speech is transcribed on your Mac with Parakeet; the
-  audio never leaves it. The cleanup is done by Claude through your own Claude
-  subscription when Claude Code is installed and signed in, or else by Apple Intelligence's
+  audio never leaves it. The cleanup is done by Claude Haiku 4.5 through your own
+  Claude subscription (it answers without a thinking pass, in about a second) when Claude Code is installed and signed in, or else by Apple Intelligence's
   on-device model, so nothing leaves the Mac. Pick either in Settings, or turn
   the cleanup off entirely. Crashes and errors are reported to Sentry without
   any of your text.

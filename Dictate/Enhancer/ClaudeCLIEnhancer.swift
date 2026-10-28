@@ -16,10 +16,16 @@ final class ClaudeCLIEnhancer: Enhancer {
     private var warm: ClaudeCLIProcess?
     private var recycleTask: Task<Void, Never>?
 
+    /// Haiku 4.5, pinned: the `haiku` alias now means Haiku 5.5, which thinks
+    /// before answering whatever the CLI is told. On 60 real dictations
+    /// (2026-10-28) 4.5 answered in 1.1 s median against 1.7 s, 1.5 s at p90
+    /// against 3.0 s, and a blind review rated both equally.
+    static let defaultModel = "claude-haiku-4-5"
+
     init(
         locate: @escaping () -> URL?,
         systemPrompt: @escaping () -> String,
-        model: String = "haiku",
+        model: String = ClaudeCLIEnhancer.defaultModel,
         recycleAfter: Duration = .seconds(15 * 60)
     ) {
         self.locate = locate

@@ -143,7 +143,7 @@ The last page has a scratch field to try a dictation end to end.
 | Microphone → 16 kHz mono | `AudioRecorder` |
 | Local transcription | `SwitchableTranscriber`, routing to `ParakeetTranscriber` (Parakeet TDT Ultra through FluidAudio, 25 European languages, no vocabulary prompt), the only engine. Only the active engine's model stays in memory. |
 | Vocabulary boosting (experimental, off by default) | `VocabularyBooster`: FluidAudio's CTC keyword spotting with Parakeet CTC 110M (~100 MB, in `Models/parakeet-ctc-110m-coreml`) rescores Parakeet's transcript against the vocabulary before Claude. Never waits for the model, falls back to the plain transcript on any failure. |
-| Cleanup | `ClaudeCLIEnhancer`: one pre-warmed `claude -p --model haiku` process per dictation |
+| Cleanup | `ClaudeCLIEnhancer`: one pre-warmed `claude -p --model claude-haiku-4-5` process per dictation (pinned: Haiku 5.5 thinks) |
 | Insertion | `FocusInspector` + `TextInserter` (paste then restore the pasteboard, or pasteboard only when no field has focus) |
 | Orchestration | `DictationController` |
 | Bottom-centre pill | `RecordingIndicator` |
