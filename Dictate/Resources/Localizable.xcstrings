@@ -545,6 +545,22 @@
         }
       }
     },
+    "Installer la mise à jour %@…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Install Update %@…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installer la mise à jour %@…"
+          }
+        }
+      }
+    },
     "Le micro ne répond pas": {
       "localizations": {
         "en": {
@@ -2041,22 +2057,6 @@
         }
       }
     },
-    "Mettre à jour vers %@…": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Update to %@…"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mettre à jour vers %@…"
-          }
-        }
-      }
-    },
     "Micro": {
       "localizations": {
         "en": {
@@ -2553,6 +2553,22 @@
         }
       }
     },
+    "Recherche d'une mise à jour…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking for Updates…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recherche d'une mise à jour…"
+          }
+        }
+      }
+    },
     "Recherche de mises à jour…": {
       "localizations": {
         "en": {
@@ -2597,6 +2613,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rechercher"
+          }
+        }
+      }
+    },
+    "Rechercher une mise à jour…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Check for Updates…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rechercher une mise à jour…"
           }
         }
       }

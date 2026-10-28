@@ -6,7 +6,7 @@ struct MenuContent: View {
     @Environment(\.openSettings) private var openSettings
 
     var body: some View {
-        Text("Dictate \(model.updater.currentVersion)")
+        updateItem
         if let statusLine {
             Text(statusLine)
         }
@@ -15,9 +15,6 @@ struct MenuContent: View {
         }
         if !model.setup.isComplete {
             Button("Terminer la configuration…") { open { openWindow(id: "setup") } }
-        }
-        if let release = model.updater.available {
-            Button("Mettre à jour vers \(release.version)…") { open { openWindow(id: "update") } }
         }
         Divider()
         Button("Statistiques…") { open { openWindow(id: "stats") } }
@@ -44,6 +41,24 @@ struct MenuContent: View {
         Divider()
         Button("Quitter Dictate") { NSApplication.shared.terminate(nil) }
             .keyboardShortcut("q")
+    }
+
+    /// The first line: the update to install, or a way to look for one. The App Store
+    /// installs its own updates, so there it only names the version.
+    @ViewBuilder private var updateItem: some View {
+        if Distribution.isAppStore {
+            Text("Dictate \(model.updater.currentVersion)")
+        } else if let release = model.updater.available {
+            Button("Installer la mise à jour \(release.version)…") { open { openWindow(id: "update") } }
+        } else if model.updater.state == .checking {
+            Text("Recherche d'une mise à jour…")
+        } else {
+            // The update window shows the search, then the result: up to date or what is new.
+            Button("Rechercher une mise à jour…") {
+                open { openWindow(id: "update") }
+                Task { await model.updater.check() }
+            }
+        }
     }
 
     /// Nothing to say while everything works: only problems and progress show.
