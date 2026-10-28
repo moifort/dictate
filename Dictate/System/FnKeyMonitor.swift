@@ -97,7 +97,8 @@ nonisolated private func fnKeyTapCallback(
     event: CGEvent,
     userInfo: UnsafeMutableRawPointer?
 ) -> Unmanaged<CGEvent>? {
-    if let userInfo {
+    // Our own Cmd+V: not the user's keyboard.
+    if let userInfo, event.getIntegerValueField(.eventSourceUserData) != TextInserter.eventMarker {
         let monitor = Unmanaged<FnKeyMonitor>.fromOpaque(userInfo).takeUnretainedValue()
         let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
         let flags = event.flags

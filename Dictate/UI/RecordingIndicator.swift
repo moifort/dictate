@@ -49,6 +49,7 @@ final class RecordingIndicator {
     }
 
     /// Briefly shows how a finished dictation ended, when it needs attention.
+    /// A dictation that went well leaves an earlier one's flash in place.
     func show(_ outcome: DictationOutcome) {
         let flash: Flash? = switch outcome {
         case .copied: .copied
@@ -56,15 +57,15 @@ final class RecordingIndicator {
         case .modelLoading(let engine): .loading(engine)
         case .pasted, .discarded: nil
         }
+        guard let flash else { return }
         flashTask?.cancel()
         state.flash = flash
-        guard flash != nil else { return }
         flashTask = Task {
             // A sentence takes longer to read than a symbol.
             let duration: Duration = switch flash {
             case .copied: .seconds(1.6)
             case .loading: .seconds(2.5)
-            case .failed, nil: .seconds(3)
+            case .failed: .seconds(3)
             }
             try? await Task.sleep(for: duration)
             guard !Task.isCancelled else { return }
@@ -75,7 +76,7 @@ final class RecordingIndicator {
     private var shouldBeVisible: Bool {
         switch controller.phase {
         case .idle: state.flash != nil
-        case .starting: state.isStartingSlowly
+        case .starting: state.isStartingSlowly || !controller.pending.isEmpty || state.flash != nil
         case .recording, .transcribing, .enhancing: true
         }
     }
@@ -85,15 +86,19 @@ final class RecordingIndicator {
     /// hidden for the rest of the session.
     private func observeVisibility() {
         let changes = Observations { [controller, state] in
-            (controller.phase, state.flash, state.isStartingSlowly)
+            (controller.phase, controller.pending.isEmpty, state.flash, state.isStartingSlowly)
         }
         visibilityTask = Task { [weak self] in
-            for await (phase, _, _) in changes {
+            var previous = DictationPhase.idle
+            for await (phase, _, _, _) in changes {
                 guard let self else { return }
-                if phase == .starting || phase == .recording, state.flash != nil {
+                // A new press clears what is left of an earlier flash; one
+                // that comes during the recording stays beside the waves.
+                if phase == .starting, previous != .starting, state.flash != nil {
                     flashTask?.cancel()
                     state.flash = nil
                 }
+                previous = phase
                 updateStartingDelay(phase: phase)
                 updateVisibility()
             }
@@ -209,25 +214,31 @@ private struct IndicatorView: View {
     let recorder: AudioRecorder
     let state: RecordingIndicator.State
 
-    private enum Mode: Equatable {
-        case hidden, recording, processing
-        case flash(RecordingIndicator.Flash)
+    private struct Mode: Equatable {
+        enum Main: Equatable { case none, recording, processing }
+        var main: Main
+        /// Earlier dictations still processed while this one records.
+        var processingBehind = false
+        var flash: RecordingIndicator.Flash?
+
+        var isHidden: Bool { main == .none && flash == nil }
     }
 
     private var mode: Mode {
-        switch controller.phase {
+        let processing = !controller.pending.isEmpty
+        let main: Mode.Main = switch controller.phase {
         case .recording: .recording
-        case .starting: state.isStartingSlowly ? .processing : .hidden
+        case .starting: state.isStartingSlowly || processing ? .processing : .none
         case .transcribing, .enhancing: .processing
-        case .idle: state.flash.map(Mode.flash) ?? .hidden
+        case .idle: .none
         }
+        return Mode(main: main, processingBehind: main == .recording && processing, flash: state.flash)
     }
 
     var body: some View {
-        let hidden = mode == .hidden
-        ZStack {
+        let hidden = mode.isHidden
+        HStack(spacing: 10) {
             content
-                .transition(.blurReplace.combined(with: .scale(0.7)))
         }
         .frame(height: 32)
         .padding(.horizontal, 16)
@@ -243,26 +254,45 @@ private struct IndicatorView: View {
 
     @ViewBuilder
     private var content: some View {
-        switch mode {
-        case .hidden:
-            Color.clear.frame(width: 30)
+        switch mode.main {
+        case .none:
+            if mode.flash == nil { Color.clear.frame(width: 30) }
         case .recording:
             LevelWaves(spectrum: recorder.spectrum)
                 .id("recording")
+                .transition(.blurReplace.combined(with: .scale(0.7)))
         case .processing:
             Spinner().id("processing")
-        case .flash(.copied):
+                .transition(.blurReplace.combined(with: .scale(0.7)))
+        }
+        if mode.processingBehind {
+            Spinner().id("behind")
+                .transition(.blurReplace.combined(with: .scale(0.7)))
+        }
+        if let flash = mode.flash {
+            // Beside the waves there is only room for the symbol.
+            flashView(flash, compact: mode.main == .recording)
+                .transition(.blurReplace.combined(with: .scale(0.7)))
+        }
+    }
+
+    @ViewBuilder
+    private func flashView(_ flash: RecordingIndicator.Flash, compact: Bool) -> some View {
+        switch flash {
+        case .copied:
             BouncingSymbol(name: "doc.on.clipboard", color: .white)
                 .id("copied")
-        case .flash(.failed(let message)):
+        case .failed(let message):
             HStack(spacing: 8) {
                 BouncingSymbol(name: "exclamationmark.triangle.fill", color: .orange)
-                Text(message)
-                    .font(.callout)
-                    .lineLimit(1)
+                if !compact {
+                    Text(message)
+                        .font(.callout)
+                        .lineLimit(1)
+                }
             }
             .id("failed")
-        case .flash(.loading(let engine)):
+        case .loading(let engine):
             HStack(spacing: 8) {
                 Spinner()
                 Text("Chargement de \(engine.displayName)…")

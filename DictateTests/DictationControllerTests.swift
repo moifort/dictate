@@ -297,15 +297,64 @@ struct DictationControllerTests {
         }
     }
 
-    @Test func pressWhileProcessingIsIgnored() async {
+    @Test func pressWhileProcessingRecordsTheNextDictation() async {
         let (controller, fakes) = makeController(enhancerDelay: .milliseconds(100))
         controller.handle(.pressed)
         await controller.waitUntilStarted()
         controller.handle(.released)
         controller.handle(.pressed)
-        #expect(controller.phase == .transcribing)
+        await controller.waitUntilStarted()
+        #expect(controller.phase == .recording)
+        #expect(controller.pending.count == 1)
+        controller.handle(.released)
+        #expect(controller.pending.count == 2)
         await controller.waitUntilIdle()
-        #expect(fakes.recorder.startCount == 1)
+        #expect(fakes.recorder.startCount == 2)
+        #expect(fakes.inserter.pasted.count == 2)
+        #expect(controller.pending.isEmpty)
+        #expect(controller.phase == .idle)
+    }
+
+    @Test func dictationsAreEnhancedTogetherAndPastedInReleaseOrder() async {
+        let (controller, fakes) = makeController(enhancerDelay: .milliseconds(150))
+        // The first cleanup is the slow one: the second must still wait for it.
+        fakes.enhancer.replies = [("Première.", .milliseconds(150)), ("Seconde.", .milliseconds(10))]
+        controller.handle(.pressed)
+        await controller.waitUntilStarted()
+        controller.handle(.released)
+        controller.handle(.pressed)
+        await controller.waitUntilStarted()
+        controller.handle(.released)
+        await controller.waitUntilIdle()
+        #expect(fakes.inserter.pasted == ["Première.", "Seconde."])
+        #expect(fakes.enhancer.maxConcurrent == 2)
+    }
+
+    @Test func transcriptionsRunOneAfterTheOther() async {
+        let (controller, fakes) = makeController(transcriberDelay: .milliseconds(50))
+        controller.handle(.pressed)
+        await controller.waitUntilStarted()
+        controller.handle(.released)
+        controller.handle(.pressed)
+        await controller.waitUntilStarted()
+        controller.handle(.released)
+        await controller.waitUntilIdle()
+        let transcription = fakes.events.entries.filter { $0.hasPrefix("transcription") }
+        #expect(transcription == ["transcription started", "transcription ended", "transcription started", "transcription ended"])
+    }
+
+    @Test func aFailedDictationDoesNotHoldBackTheNextOne() async {
+        let (controller, fakes) = makeController()
+        var outcomes: [DictationOutcome] = []
+        controller.onOutcome = { outcomes.append($0) }
+        fakes.recorder.samples = [Float](repeating: 0, count: 16_000)
+        controller.handle(.pressed)
+        await controller.waitUntilStarted()
+        controller.handle(.released)
+        await controller.waitUntilIdle()
+        fakes.recorder.samples = speech
+        await dictate(controller)
+        #expect(outcomes == [.discarded, .pasted(raw: false)])
     }
 
     @Test func phaseIsEnhancingWhileClaudeCorrects() async throws {
@@ -553,19 +602,23 @@ struct DictationControllerTests {
         #expect(events.firstIndex(of: "read started")! < events.firstIndex(of: "tail ended")!)
     }
 
-    @Test func pressDuringTheTailIsIgnoredAndTheDictationCompletes() async {
+    @Test func pressDuringTheTailCutsItShortAndStartsTheNextDictation() async {
         let (controller, fakes) = makeController(tail: { _ in try? await Task.sleep(for: .milliseconds(50)) })
         controller.handle(.pressed)
         await controller.waitUntilStarted()
         controller.handle(.released)
         controller.handle(.pressed)
-        #expect(controller.phase == .transcribing)
+        // The first dictation's audio was taken when the tail was cut.
+        #expect(fakes.events.entries.last == "recording stopped")
+        await controller.waitUntilStarted()
+        #expect(controller.phase == .recording)
+        #expect(fakes.recorder.isRecording)
         controller.handle(.cancelled)
-        controller.handle(.released)
-        #expect(controller.phase == .transcribing)
+        #expect(!fakes.recorder.isRecording)
         await controller.waitUntilIdle()
-        #expect(fakes.recorder.startCount == 1)
+        #expect(fakes.recorder.startCount == 2)
         #expect(fakes.transcriber.callCount == 1)
+        #expect(fakes.transcriber.receivedSamples == speech)
         #expect(fakes.inserter.pasted == ["Fais un push."])
     }
 
@@ -684,7 +737,11 @@ private final class FakeTranscriber: Transcriber {
 private final class FakeEnhancer: Enhancer {
     let result: Result<String, Error>
     let delay: Duration
+    /// One reply and delay per call, in order, instead of `result` and `delay`.
+    var replies: [(text: String, delay: Duration)] = []
     var received: [(transcription: Transcription, context: DictationContext)] = []
+    private var running = 0
+    private(set) var maxConcurrent = 0
 
     init(result: Result<String, Error>, delay: Duration) {
         self.result = result
@@ -692,7 +749,15 @@ private final class FakeEnhancer: Enhancer {
     }
 
     func enhance(_ transcription: Transcription, context: DictationContext) async throws -> String {
+        let call = received.count
         received.append((transcription, context))
+        running += 1
+        maxConcurrent = max(maxConcurrent, running)
+        defer { running -= 1 }
+        if call < replies.count {
+            try await Task.sleep(for: replies[call].delay)
+            return replies[call].text
+        }
         try await Task.sleep(for: delay)
         return try result.get()
     }
