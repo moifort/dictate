@@ -19,6 +19,8 @@ ready-to-send text.
 
 - **Push-to-talk on `control`** (or `fn`, in Settings). Hold the key while you
   speak, release it when you are done. No window to open, no button to click.
+  No waiting either: hold the key again while the last sentence is still being
+  cleaned up and keep talking. Sentences land in the order you said them.
 - **Text lands at the cursor.** The sentence is typed into whatever field has
   focus. If none does, it waits in the clipboard, ready to paste.
 - **Clean text, not a raw transcript.** Hesitations ("euh", "um"), repetitions
@@ -40,7 +42,8 @@ ready-to-send text.
   the dictation language starts as your Mac's even when the interface falls
   back to English.
 - **Discreet.** A small pill at the bottom of the screen shows that Dictate is
-  listening, then working, and disappears.
+  listening, then working, and disappears. While you speak, a spinner beside
+  the waves tells that earlier sentences are still on their way.
 - **Your numbers.** A statistics window charts words, dictations, speaking
   pace and the delay before the text appears, by day, week or year. The
   delay chart tells which model did the cleanup, so a day offline shows Apple

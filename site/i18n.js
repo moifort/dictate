@@ -59,7 +59,7 @@
     "feat.title": "At your fingertips.",
     "feat.lead": "No window to open, no button to click, no raw transcript to fix.",
     "ptt.hint": "hold · speak · release",
-    "ptt.text": "One key, <kbd><span class=\"kbd-glyph\">⌃</span>control</kbd> or <kbd><span class=\"kbd-glyph\">🌐︎</span>fn</kbd>, your choice. Hold it while you speak, let go, and it's written. Nothing to turn on, nothing to close.",
+    "ptt.text": "One key, <kbd><span class=\"kbd-glyph\">⌃</span>control</kbd> or <kbd><span class=\"kbd-glyph\">🌐︎</span>fn</kbd>, your choice. Hold it while you speak, let go, and it's written. No need to wait: hold it again while the last sentence is reviewed and keep talking, sentences land in order.",
     "clean.raw": "um so actually I I wanted to tell you that the the meeting moved to Tuesday",
     "clean.clean": "I wanted to tell you that the meeting moved to Tuesday.",
     "clean.title": "Reviewed by AI",
