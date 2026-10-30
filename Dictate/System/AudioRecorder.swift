@@ -17,6 +17,10 @@ final class AudioRecorder: AudioRecording {
     @ObservationIgnored private var isWarmingVoiceEngine = false
     @ObservationIgnored private var inputMonitor: InputDeviceMonitor?
 
+    /// Longer than voice processing takes to configure, shorter than the ten
+    /// seconds a wedged device takes to fail: the key is held all that time.
+    private static let openingTimeout: Duration = .seconds(5)
+
     enum RecorderError: LocalizedError {
         case noInputDevice
         /// Core Audio's `kAudioHardwareNotRunningError` ('stop'): the device
@@ -40,7 +44,10 @@ final class AudioRecorder: AudioRecording {
 
     /// Opens the microphone off the main thread: a wedged device can block
     /// `AVAudioEngine.start()` for ten seconds before it fails, and the pill
-    /// must keep showing that something is happening meanwhile.
+    /// must keep showing that something is happening meanwhile. Past
+    /// `openingTimeout` it gives up: `AVAudioEngine.inputNode` can also spin
+    /// forever on a device that vanished while the engine started, which
+    /// nothing can interrupt, and the app must not stay stuck behind it.
     func start() async throws {
         // Our own capture marks the device as running: `inputDeviceChanged`
         // must not take it for another app while the engine starts.
@@ -50,10 +57,20 @@ final class AudioRecorder: AudioRecording {
             Task { @MainActor in self?.spectrum = spectrum }
         }
         let started: StartedEngine
+        let opening = Task.detached(priority: .userInitiated) {
+            try Self.startEngine(warmedVoiceEngine: warmed, onSpectrum: onSpectrum)
+        }
         do {
-            started = try await Task.detached(priority: .userInitiated) {
-                try Self.startEngine(warmedVoiceEngine: warmed, onSpectrum: onSpectrum)
-            }.value
+            started = try await value(of: opening, within: Self.openingTimeout) { late in
+                Log.dictation.notice("microphone opened after the timeout: closing it")
+                late.engine.inputNode.removeTap(onBus: 0)
+                late.engine.stop()
+            }
+        } catch is DeadlineExceeded {
+            isRecording = false
+            // Held by the abandoned attempt: the next press needs its own engine.
+            voiceEngine = nil
+            throw RecorderError.deviceNotRunning
         } catch {
             isRecording = false
             throw error
