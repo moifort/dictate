@@ -6,6 +6,9 @@ enum ActiveWindow {
     /// The frontmost app's focused window, in AppKit coordinates (origin at the
     /// bottom left of the primary screen), or nil if the app does not expose it.
     @MainActor static func frame() -> CGRect? {
+        #if APP_STORE
+        nil
+        #else
         guard let app = NSWorkspace.shared.frontmostApplication,
               let primary = NSScreen.screens.first else { return nil }
         let appElement = AXUIElementCreateApplication(app.processIdentifier)
@@ -17,6 +20,7 @@ enum ActiveWindow {
         guard let position = point(copyValue(element, kAXPositionAttribute)),
               let size = size(copyValue(element, kAXSizeAttribute)) else { return nil }
         return appKitFrame(axOrigin: position, size: size, primaryHeight: primary.frame.height)
+        #endif
     }
 
     /// Accessibility measures from the top left of the primary screen, AppKit from its bottom left.
@@ -38,6 +42,7 @@ enum ActiveWindow {
         return screens.firstIndex { $0.contains(mouse) }
     }
 
+    #if !APP_STORE
     private static func copyValue(_ element: AXUIElement, _ attribute: String) -> CFTypeRef? {
         var value: CFTypeRef?
         guard AXUIElementCopyAttributeValue(element, attribute as CFString, &value) == .success else { return nil }
@@ -55,4 +60,5 @@ enum ActiveWindow {
         var size = CGSize.zero
         return AXValueGetValue(value as! AXValue, .cgSize, &size) ? size : nil
     }
+    #endif
 }

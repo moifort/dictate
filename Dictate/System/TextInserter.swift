@@ -26,7 +26,9 @@ final class TextInserter: TextInserting {
         pasteboard.setData(Data(), forType: Self.transientType)
         let ourChange = pasteboard.changeCount
 
+        #if !APP_STORE
         postCommandV()
+        #endif
         // The dictation is over for the user once Cmd+V is posted. The target
         // app needs a moment to read the pasteboard, so it is restored later,
         // off the critical path.
@@ -48,6 +50,7 @@ final class TextInserter: TextInserting {
         pasteboard.setString(text, forType: .string)
     }
 
+    #if !APP_STORE
     private func postCommandV() {
         let source = CGEventSource(stateID: .combinedSessionState)
         let keyCode = CGKeyCode(kVK_ANSI_V)
@@ -58,6 +61,7 @@ final class TextInserter: TextInserting {
             event?.post(tap: .cghidEventTap)
         }
     }
+    #endif
 
     private func snapshot() -> [[NSPasteboard.PasteboardType: Data]] {
         (pasteboard.pasteboardItems ?? []).map { item in

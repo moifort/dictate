@@ -18,11 +18,11 @@ LISTING = {
     name: "Dictate: Speech to Text",
     subtitle: "Push-to-talk dictation",
     keywords: "dictation,voice,speech,transcribe,voice typing,talk,push to talk,offline,notes,writing",
-    promotional: "Hold Control, speak, release: clean text appears wherever you type. Free, private, works offline.",
+    promotional: "Hold Option + Space, speak, release: clean text on your clipboard, ready to paste anywhere. Free, private, works offline.",
     description: <<~TEXT
-      Hold Control, speak, release: your words appear wherever you are typing, clean and ready to send.
+      Hold Option + Space, speak, release: your words land on the clipboard, clean and ready to paste with Command-V.
 
-      Dictate is push-to-talk dictation for the Mac. It works in every app: Mail, Messages, Notes, Slack, your code editor, the Terminal.
+      Dictate is push-to-talk dictation for the Mac. Paste the text into any app: Mail, Messages, Notes, Slack, your code editor, the Terminal.
 
       CLEAN TEXT, NOT A RAW TRANSCRIPT
       Hesitations, repetitions and false starts are removed, punctuation and capitals are fixed, misheard terms are corrected. Your words and meaning stay as you said them.
@@ -49,11 +49,11 @@ LISTING = {
     name: "Dictate : dictée vocale",
     subtitle: "Maintenez, parlez, c'est écrit",
     keywords: "dictée,voix,vocale,transcription,parole,saisie vocale,hors ligne,notes,clavier,écrire",
-    promotional: "Maintenez Control, parlez, relâchez : un texte propre apparaît là où vous écrivez. Gratuit, privé, hors ligne.",
+    promotional: "Maintenez Option + Espace, parlez, relâchez : un texte propre dans le presse-papiers, prêt à coller. Gratuit, privé, hors ligne.",
     description: <<~TEXT
-      Maintenez Control, parlez, relâchez : vos mots apparaissent là où vous écrivez, propres et prêts à envoyer.
+      Maintenez Option + Espace, parlez, relâchez : vos mots arrivent dans le presse-papiers, propres et prêts à coller avec Commande-V.
 
-      Dictate est une dictée vocale à la demande pour Mac. Elle fonctionne dans toutes les apps : Mail, Messages, Notes, Slack, votre éditeur de code, le Terminal.
+      Dictate est une dictée vocale à la demande pour Mac. Collez le texte dans n'importe quelle app : Mail, Messages, Notes, Slack, votre éditeur de code, le Terminal.
 
       UN TEXTE PROPRE, PAS UNE TRANSCRIPTION BRUTE
       Les hésitations, répétitions et faux départs disparaissent, la ponctuation et les majuscules sont corrigées, les termes mal entendus aussi. Vos mots et votre sens restent les vôtres.

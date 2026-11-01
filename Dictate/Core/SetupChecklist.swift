@@ -27,6 +27,8 @@ nonisolated struct SetupChecklist: Equatable, Sendable {
     var fnKeyFree = false
     /// The push-to-talk key is 🌐 fn, which macOS must leave alone; control needs nothing.
     var fnKeyNeeded = true
+    /// The App Store build asks for neither Input Monitoring nor Accessibility.
+    var permissionsNeeded = true
     var transcriptionModel = false
     /// The chosen reviewer is ready (Apple Intelligence available, or the
     /// `claude` CLI found), or the user chose to dictate without one.
@@ -45,7 +47,15 @@ nonisolated struct SetupChecklist: Equatable, Sendable {
     }
 
     /// The steps that apply to the chosen push-to-talk key, in order.
-    var steps: [SetupStep] { SetupStep.allCases.filter { $0 != .fnKey || fnKeyNeeded } }
+    var steps: [SetupStep] {
+        SetupStep.allCases.filter { step in
+            switch step {
+            case .fnKey: fnKeyNeeded
+            case .inputMonitoring, .accessibility: permissionsNeeded
+            default: true
+            }
+        }
+    }
 
     var pending: [SetupStep] { steps.filter { !isDone($0) } }
 

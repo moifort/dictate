@@ -280,8 +280,19 @@ private struct IndicatorView: View {
     private func flashView(_ flash: RecordingIndicator.Flash, compact: Bool) -> some View {
         switch flash {
         case .copied:
-            BouncingSymbol(name: "doc.on.clipboard", color: .white)
+            if Distribution.isAppStore && !compact {
+                // No paste here: tell how the text gets to the field.
+                HStack(spacing: 8) {
+                    BouncingSymbol(name: "doc.on.clipboard", color: .white)
+                    Text("Copié, collez avec ⌘V")
+                        .font(.callout)
+                        .lineLimit(1)
+                }
                 .id("copied")
+            } else {
+                BouncingSymbol(name: "doc.on.clipboard", color: .white)
+                    .id("copied")
+            }
         case .failed(let message):
             HStack(spacing: 8) {
                 BouncingSymbol(name: "exclamationmark.triangle.fill", color: .orange)

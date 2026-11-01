@@ -8,11 +8,18 @@ enum Permissions {
         AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
     }
 
+    #if APP_STORE
+    /// The hot key needs no permission.
+    static let inputMonitoring = true
+    /// Dictations stay in the pasteboard: nothing to read or post.
+    static let accessibility = true
+    #else
     /// Needed by the listen-only event tap watching `fn`.
     static var inputMonitoring: Bool { CGPreflightListenEventAccess() }
 
     /// Needed to read the focused field and to post `Cmd+V`.
     static var accessibility: Bool { AXIsProcessTrusted() }
+    #endif
 
     /// The 🌐 key must do nothing, otherwise macOS opens emoji or dictation.
     static var fnKeyFree: Bool {
@@ -29,6 +36,7 @@ enum Permissions {
         }
     }
 
+    #if !APP_STORE
     static func requestInputMonitoring() {
         CGRequestListenEventAccess()
     }
@@ -36,9 +44,8 @@ enum Permissions {
     static func requestAccessibility() {
         let options = ["AXTrustedCheckOptionPrompt": true] as CFDictionary
         AXIsProcessTrustedWithOptions(options)
-        // The sandbox denies the system prompt: show the list to switch Dictate on in.
-        if Distribution.isAppStore { openPrivacySettings("Privacy_Accessibility") }
     }
+    #endif
 
     static func openKeyboardSettings() {
         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.Keyboard-Settings.extension")!)

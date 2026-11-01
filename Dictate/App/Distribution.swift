@@ -17,3 +17,13 @@ nonisolated enum Distribution {
     static let isAppStore = false
     #endif
 }
+
+// App Review refuses Input Monitoring and Accessibility here (guideline 2.4.5):
+// the App Store build links neither the event tap nor the Accessibility API.
+#if APP_STORE
+typealias PushToTalkMonitor = HotKeyMonitor
+typealias FieldInspector = FrontmostApp
+#else
+typealias PushToTalkMonitor = FnKeyMonitor
+typealias FieldInspector = FocusInspector
+#endif

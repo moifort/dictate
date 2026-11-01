@@ -1,3 +1,4 @@
+#if !APP_STORE
 import AppKit
 import CoreGraphics
 
@@ -108,3 +109,4 @@ nonisolated private func fnKeyTapCallback(
     }
     return Unmanaged.passUnretained(event)
 }
+#endif

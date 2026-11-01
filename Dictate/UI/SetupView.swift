@@ -277,10 +277,14 @@ private struct StepActions: View {
 
         case .microphone:
             Actions {
-                Button("Autoriser le micro") { Task { await Permissions.requestMicrophone() } }
+                // App Review: the button before the system prompt must not ask for the grant.
+                Button(Distribution.isAppStore ? LocalizedStringKey("Continuer") : "Autoriser le micro") {
+                    Task { await Permissions.requestMicrophone() }
+                }
                     .buttonStyle(.glassProminent)
             }
 
+        #if !APP_STORE
         case .inputMonitoring:
             Instructions([
                 "Ouvrez les Réglages et activez Dictate dans la liste.",
@@ -305,6 +309,10 @@ private struct StepActions: View {
                 Button("Ouvrir les Réglages") { Permissions.openPrivacySettings("Privacy_Accessibility") }
                     .buttonStyle(.glass)
             }
+        #else
+        case .inputMonitoring, .accessibility:
+            EmptyView()
+        #endif
 
         case .fnKey:
             Instructions([
@@ -564,7 +572,9 @@ private struct WelcomePage: View {
     var body: some View {
         PageLayout(
             title: "Bienvenue dans Dictate",
-            explanation: "Maintenez control, parlez, relâchez : le texte apparaît dans le champ actif, dans n'importe quelle app."
+            explanation: Distribution.isAppStore
+                ? "Maintenez option + espace, parlez, relâchez : le texte est dans le presse-papiers, prêt à coller dans n'importe quelle app."
+                : "Maintenez control, parlez, relâchez : le texte apparaît dans le champ actif, dans n'importe quelle app."
         ) {
             AppTile()
         } content: {
@@ -573,8 +583,13 @@ private struct WelcomePage: View {
                            detail: "Le modèle tourne en local. Votre voix ne quitte pas l'ordinateur.")
                 FeatureRow(symbol: "sparkles", title: "Texte relu par l'IA",
                            detail: "Hésitations, ponctuation et jargon corrigés, par Apple Intelligence sur ce Mac ou par Claude.")
-                FeatureRow(symbol: "keyboard", title: "Une seule touche",
-                           detail: "control suffit, même par-dessus une app en plein écran. fn au choix dans les Réglages.")
+                if Distribution.isAppStore {
+                    FeatureRow(symbol: "keyboard", title: "Un seul raccourci",
+                               detail: "option + espace suffit, même par-dessus une app en plein écran.")
+                } else {
+                    FeatureRow(symbol: "keyboard", title: "Une seule touche",
+                               detail: "control suffit, même par-dessus une app en plein écran. fn au choix dans les Réglages.")
+                }
             }
             .frame(maxWidth: 400)
         }
@@ -629,7 +644,9 @@ private struct TryItPage: View {
     var body: some View {
         PageLayout(
             title: model.setup.isComplete ? "Tout est prêt" : "Essayer",
-            explanation: "Cliquez dans le champ, maintenez \(model.settings.pushToTalkKey.displayName), parlez, relâchez."
+            explanation: Distribution.isAppStore
+                ? "Cliquez dans le champ, maintenez \(model.settings.pushToTalkKey.displayName), parlez, relâchez, puis collez avec ⌘V."
+                : "Cliquez dans le champ, maintenez \(model.settings.pushToTalkKey.displayName), parlez, relâchez."
         ) {
             Image(systemName: model.setup.isComplete ? "checkmark.seal.fill" : "waveform")
                 .font(.system(size: 60, weight: .medium))
@@ -670,7 +687,7 @@ private struct TryItPage: View {
         case .idle:
             if case .failed = model.transcriber.state { "failed" }
             else if model.transcriber.state != .ready { "preparing" }
-            else if !text.isEmpty, case .pasted = model.controller.lastOutcome { "success" }
+            else if !text.isEmpty, model.controller.lastOutcome != nil { "success" }
             else { "ready" }
         }
     }

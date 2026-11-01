@@ -1,20 +1,20 @@
 # Sets the App Review information of the editable macOS version: the contact
-# is copied from another app of the account (Shiori), the notes explain the
-# permissions Dictate asks for.
+# is copied from another app of the account (Shiori), the notes explain how
+# Dictate works without Accessibility and Input Monitoring.
 #
 #   ASC_KEY_ID=… ASC_ISSUER_ID=… ruby scripts/app-store/review.rb
 require_relative "asc"
 
 NOTES = <<~TEXT.strip
-  Dictate is push-to-talk dictation. Hold Control, speak, release: the text appears in the focused field of the frontmost app.
+  Dictate is push-to-talk dictation. Hold Option + Space, speak, release: the text is placed on the clipboard, and the user pastes it with Command-V.
 
-  Input Monitoring: to see the dictation key being held (listen-only event tap, no event is modified or blocked).
-  Accessibility: to paste the transcribed text into the focused field of the frontmost app, and to read that field's surrounding text so the on-device model keeps the user's names and tone. Password fields are never read.
-  Microphone: recorded only while the key is held.
+  This build answers the review of October 25, 2026. It no longer requests Accessibility or Input Monitoring and does not link those APIs. The shortcut is a Carbon global hot key (RegisterEventHotKey), which reports this one shortcut only, and nothing is pasted or read in other apps.
+  The microphone button before the system prompt now says "Continue".
+  Microphone: recorded only while the shortcut is held. It is the only permission requested.
 
   Audio and text never leave the Mac: transcription runs locally (Parakeet, downloaded once from Hugging Face on first launch, about 600 MB) and the cleanup uses Apple Intelligence on device. No account, no login.
 
-  To test: open Dictate, grant the three permissions in the setup window, focus any text field (TextEdit), hold Control, speak a sentence, release.
+  To test: open Dictate, press Continue on the Microphone step, wait for the model, focus any text field (TextEdit), hold Option + Space, speak a sentence, release, press Command-V.
 TEXT
 
 app = ASC.get("/v1/apps?filter[bundleId]=com.polyforms.dictate")["data"].first or abort("No Dictate app")

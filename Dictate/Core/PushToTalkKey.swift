@@ -6,13 +6,22 @@ nonisolated enum PushToTalkKey: String, CaseIterable, Identifiable, Sendable {
     case control
     /// 🌐 fn: macOS must be told to leave it alone.
     case fn
+    /// ⌥Space, the App Store build's only key: a global hot key needs no
+    /// permission, but a modifier alone cannot be one.
+    case optionSpace
 
     var id: String { rawValue }
+
+    /// What this build can listen to, the default first.
+    static var available: [PushToTalkKey] {
+        Distribution.isAppStore ? [.optionSpace] : [.control, .fn]
+    }
 
     var displayName: String {
         switch self {
         case .fn: "fn"
         case .control: "control"
+        case .optionSpace: String(localized: "option + espace")
         }
     }
 
@@ -20,6 +29,7 @@ nonisolated enum PushToTalkKey: String, CaseIterable, Identifiable, Sendable {
         switch self {
         case .fn: "globe"
         case .control: "control"
+        case .optionSpace: "option"
         }
     }
 
@@ -28,6 +38,7 @@ nonisolated enum PushToTalkKey: String, CaseIterable, Identifiable, Sendable {
         switch self {
         case .fn: [63]
         case .control: [59, 62]
+        case .optionSpace: [49]
         }
     }
 
@@ -36,6 +47,7 @@ nonisolated enum PushToTalkKey: String, CaseIterable, Identifiable, Sendable {
         switch self {
         case .fn: .maskSecondaryFn
         case .control: .maskControl
+        case .optionSpace: .maskAlternate
         }
     }
 

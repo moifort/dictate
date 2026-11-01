@@ -4016,6 +4016,118 @@
           }
         }
       }
+    },
+    "option + espace": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "option + space"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "option + espace"
+          }
+        }
+      }
+    },
+    "Maintenez option + espace, parlez, relâchez : le texte est dans le presse-papiers, prêt à coller dans n'importe quelle app.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold option + space, speak, release: the text is on the clipboard, ready to paste into any app."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maintenez option + espace, parlez, relâchez : le texte est dans le presse-papiers, prêt à coller dans n'importe quelle app."
+          }
+        }
+      }
+    },
+    "Un seul raccourci": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A single shortcut"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un seul raccourci"
+          }
+        }
+      }
+    },
+    "option + espace suffit, même par-dessus une app en plein écran.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "option + space is all it takes, even over a full-screen app."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "option + espace suffit, même par-dessus une app en plein écran."
+          }
+        }
+      }
+    },
+    "Cliquez dans le champ, maintenez %@, parlez, relâchez, puis collez avec ⌘V.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Click in the field, hold %@, speak, release, then paste with ⌘V."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cliquez dans le champ, maintenez %@, parlez, relâchez, puis collez avec ⌘V."
+          }
+        }
+      }
+    },
+    "Maintenez option + espace pour dicter, puis collez le texte avec ⌘V.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold option + space to dictate, then paste the text with ⌘V."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maintenez option + espace pour dicter, puis collez le texte avec ⌘V."
+          }
+        }
+      }
+    },
+    "Copié, collez avec ⌘V": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied, paste with ⌘V"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copié, collez avec ⌘V"
+          }
+        }
+      }
     }
   },
   "version": "1.0"

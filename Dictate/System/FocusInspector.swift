@@ -1,3 +1,4 @@
+#if !APP_STORE
 import AppKit
 import ApplicationServices
 
@@ -253,3 +254,4 @@ private final class AccessibilityField: ReadableField {
         return FieldSnapshot(text: text, selection: NSRange(location: selection.location, length: selection.length))
     }
 }
+#endif

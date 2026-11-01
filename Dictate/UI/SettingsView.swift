@@ -34,15 +34,19 @@ private struct DictationSettings: View {
         Form {
             LabeledContent("Touche :") {
                 VStack(alignment: .leading, spacing: 6) {
-                    Picker("Touche", selection: Bindable(model.settings).pushToTalkKey) {
-                        ForEach(PushToTalkKey.allCases) { key in
-                            Text(key.displayName).tag(key)
+                    if PushToTalkKey.available.count > 1 {
+                        Picker("Touche", selection: Bindable(model.settings).pushToTalkKey) {
+                            ForEach(PushToTalkKey.available) { key in
+                                Text(key.displayName).tag(key)
+                            }
                         }
+                        .labelsHidden()
+                        .pickerStyle(.segmented)
+                        .fixedSize()
+                        .onChange(of: model.settings.pushToTalkKey) { model.pushToTalkKeyChanged() }
+                    } else {
+                        Text(model.settings.pushToTalkKey.displayName)
                     }
-                    .labelsHidden()
-                    .pickerStyle(.segmented)
-                    .fixedSize()
-                    .onChange(of: model.settings.pushToTalkKey) { model.pushToTalkKeyChanged() }
                     Hint(keyHint)
                 }
             }
@@ -58,18 +62,21 @@ private struct DictationSettings: View {
                 }
             }
 
-            LabeledContent("Évaluation :") {
-                VStack(alignment: .leading, spacing: 6) {
-                    Toggle("Garder les dictées pour mesurer la précision", isOn: Bindable(model.settings).keepEvaluationCorpus)
-                    Hint("""
-                        Conserve sur ce Mac l'audio, la transcription, le texte inséré et le contenu du champ \
-                        \(PostInsertionObserver.defaultDelay.components.seconds) s plus tard, vos corrections comprises. \
-                        Rien n'est envoyé.
-                        """)
-                    if !model.corpus.entries.isEmpty {
-                        HStack {
-                            Text("\(model.corpus.entries.count) dictées gardées")
-                            Button("Supprimer…") { model.confirmAndDeleteCorpus() }
+            // The corpus reads the field back, which the App Store build cannot do.
+            if !Distribution.isAppStore {
+                LabeledContent("Évaluation :") {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Toggle("Garder les dictées pour mesurer la précision", isOn: Bindable(model.settings).keepEvaluationCorpus)
+                        Hint("""
+                            Conserve sur ce Mac l'audio, la transcription, le texte inséré et le contenu du champ \
+                            \(PostInsertionObserver.defaultDelay.components.seconds) s plus tard, vos corrections comprises. \
+                            Rien n'est envoyé.
+                            """)
+                        if !model.corpus.entries.isEmpty {
+                            HStack {
+                                Text("\(model.corpus.entries.count) dictées gardées")
+                                Button("Supprimer…") { model.confirmAndDeleteCorpus() }
+                            }
                         }
                     }
                 }
@@ -85,6 +92,8 @@ private struct DictationSettings: View {
             String(localized: "Maintenez 🌐 fn pour dicter. macOS doit la laisser libre : Clavier → « Appuyer sur la touche 🌐 pour » → « Ne rien faire ».")
         case .control:
             String(localized: "Maintenez l'une des touches control pour dicter. Un raccourci comme control-C n'enregistre rien.")
+        case .optionSpace:
+            String(localized: "Maintenez option + espace pour dicter, puis collez le texte avec ⌘V.")
         }
     }
 }
@@ -236,15 +245,18 @@ private struct LexiconSettings: View {
                 }
             }
 
-            LabeledContent("Suggestions :") {
-                VStack(alignment: .leading, spacing: 6) {
-                    Toggle("Suggérer des mots pour le vocabulaire", isOn: Bindable(model.settings).suggestVocabulary)
-                    Hint("""
-                        Relit le champ \(PostInsertionObserver.defaultDelay.components.seconds) s après chaque dictée \
-                        pour repérer les noms que vous corrigez, et compte ceux qui reviennent dans le texte déjà écrit \
-                        (avec « Lire le texte autour du curseur »). Tout reste sur ce Mac.
-                        """)
-                    VocabularySuggestionList(model: model)
+            // Suggestions come from reading the field back, as for the corpus.
+            if !Distribution.isAppStore {
+                LabeledContent("Suggestions :") {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Toggle("Suggérer des mots pour le vocabulaire", isOn: Bindable(model.settings).suggestVocabulary)
+                        Hint("""
+                            Relit le champ \(PostInsertionObserver.defaultDelay.components.seconds) s après chaque dictée \
+                            pour repérer les noms que vous corrigez, et compte ceux qui reviennent dans le texte déjà écrit \
+                            (avec « Lire le texte autour du curseur »). Tout reste sur ce Mac.
+                            """)
+                        VocabularySuggestionList(model: model)
+                    }
                 }
             }
         }
@@ -414,14 +426,16 @@ private struct ReviewSettings: View {
             // Greyed out rather than removed under "Aucun", so that the window
             // keeps its height: it is sized to its content.
             Group {
-                LabeledContent("Contexte :") {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Toggle("Lire le texte autour du curseur", isOn: Bindable(model.settings).shareFieldContext)
-                        Hint("Texte du champ, titre de la fenêtre et domaine du site, pour reprendre vos noms et votre ton. Jamais un mot de passe.")
+                if !Distribution.isAppStore {
+                    LabeledContent("Contexte :") {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Toggle("Lire le texte autour du curseur", isOn: Bindable(model.settings).shareFieldContext)
+                            Hint("Texte du champ, titre de la fenêtre et domaine du site, pour reprendre vos noms et votre ton. Jamais un mot de passe.")
+                        }
                     }
-                }
 
-                Divider()
+                    Divider()
+                }
 
                 if model.settings.reviewer == .apple || Distribution.isAppStore {
                     appleStatus

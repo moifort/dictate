@@ -12,13 +12,17 @@ The `AppStore` configuration sets the `APP_STORE` flag and the
   CLI cannot be found, and a child process would inherit the sandbox and could
   not read Claude Code's credentials. Apple Intelligence reviews, or nothing;
 - **the updater**: the App Store installs the updates;
-- **the uninstaller**: deleting the app removes its sandbox container.
+- **the uninstaller**: deleting the app removes its sandbox container;
+- **Accessibility and Input Monitoring**: App Review refused both on 2026-10-25
+  (guideline 2.4.5), for an app that is not an accessibility tool. The event
+  tap, `FocusInspector` and the posted `Cmd+V` are compiled out. Dictation runs
+  on a Carbon global hot key, held ⌥Space (`HotKeyMonitor`, no permission), and
+  the text stays in the pasteboard for the user to paste. With no field to read
+  go the field context, the vocabulary suggestions and the evaluation corpus;
+  the frontmost app still sets the tone of the cleanup.
 
-Checked in a sandboxed build on 2026-10-17: the app starts, the listen-only
-event tap is created, the Parakeet download and Apple Intelligence work. The
-sandbox only denies the Accessibility system prompt, so the setup opens the
-Accessibility pane instead. Input Monitoring (`CGRequestListenEventAccess`) and
-posting `Cmd+V` are the sandbox-compatible APIs Apple added in macOS 10.15.
+The microphone button says "Continuer" here: guideline 5.1.1(iv) refuses a
+button that asks for the grant before the system prompt.
 
 ## Building and uploading
 
@@ -82,16 +86,11 @@ Left to do by hand, once (no public API):
    (`-ScreenshotTab general|dictation|lexicon|review`,
    `-ApplePersistenceIgnoreState YES -AppleLanguages "(en)"`).
 4. **App Review information**: done by `scripts/app-store/review.rb`, which
-   copies the contact from Shiori and sets these notes
-   (Accessibility is the usual rejection reason, explain it):
-   > Dictate is push-to-talk dictation. It needs Input Monitoring to see the
-   > dictation key being held (listen-only event tap, nothing is modified),
-   > and Accessibility to paste the transcribed text into the focused field
-   > of the frontmost app and read that field's surrounding text so the
-   > on-device model keeps the user's names and tone. Audio and text never
-   > leave the Mac: transcription runs locally (Parakeet) and the cleanup
-   > uses Apple Intelligence on device. To test: grant the permissions in
-   > the setup window, focus any text field, hold Control, speak, release.
+   copies the contact from Shiori and sets notes along these lines:
+   > Dictate is push-to-talk dictation. Hold Option + Space, speak, release:
+   > the text is placed on the clipboard, and the user pastes it with
+   > Command-V. It requests the microphone only, no longer Accessibility or
+   > Input Monitoring.
 5. **Push a tag**: the release uploads the build, then
    `scripts/app-store/submit.rb <version> <build>` attaches it and submits it
    for review, released automatically on approval.

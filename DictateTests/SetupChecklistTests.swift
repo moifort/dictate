@@ -2,6 +2,13 @@ import Testing
 @testable import Dictate
 
 struct SetupChecklistTests {
+    @Test func theAppStoreBuildAsksForNeitherAccessibilityNorInputMonitoring() {
+        let checklist = SetupChecklist(fnKeyNeeded: false, permissionsNeeded: false)
+        #expect(!checklist.steps.contains(.inputMonitoring))
+        #expect(!checklist.steps.contains(.accessibility))
+        #expect(checklist.steps.contains(.microphone))
+    }
+
     private let ready = SetupChecklist(
         language: true, microphone: true, inputMonitoring: true, accessibility: true,
         fnKeyFree: true, transcriptionModel: true, review: true

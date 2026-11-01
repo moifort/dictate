@@ -34,7 +34,7 @@ final class AppModel {
     @ObservationIgnored private let enhancer: SelectedEnhancer
     /// Claude needs the network; without it the on-device model steps in.
     @ObservationIgnored private let network = NetworkMonitor()
-    @ObservationIgnored private let fnMonitor = FnKeyMonitor()
+    @ObservationIgnored private let fnMonitor = PushToTalkMonitor()
     @ObservationIgnored private let locator = ClaudeCLILocator()
     @ObservationIgnored private var hotkeyRetry: Timer?
     @ObservationIgnored private var setupPoll: Timer?
@@ -50,7 +50,7 @@ final class AppModel {
         let transcriber = SwitchableTranscriber(engine: settings.transcriptionEngine, parakeet: parakeet)
         self.transcriber = transcriber
         let locator = locator
-        let focus = FocusInspector()
+        let focus = FieldInspector()
         let systemPrompt = { PromptBuilder.systemPrompt(vocabulary: settings.vocabulary, language: settings.language) }
         let network = network
         let enhancer = SelectedEnhancer(
@@ -164,6 +164,7 @@ final class AppModel {
             accessibility: Permissions.accessibility,
             fnKeyFree: Permissions.fnKeyFree,
             fnKeyNeeded: settings.pushToTalkKey.needsSystemKeyFreed,
+            permissionsNeeded: !Distribution.isAppStore,
             transcriptionModel: transcriptionModelReady,
             review: reviewerReady
         )
