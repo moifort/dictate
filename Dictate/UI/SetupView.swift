@@ -687,8 +687,17 @@ private struct TryItPage: View {
         case .idle:
             if case .failed = model.transcriber.state { "failed" }
             else if model.transcriber.state != .ready { "preparing" }
-            else if !text.isEmpty, model.controller.lastOutcome != nil { "success" }
+            else if !text.isEmpty, dictationLanded { "success" }
             else { "ready" }
+        }
+    }
+
+    /// The App Store build never pastes: the text stops at the pasteboard.
+    private var dictationLanded: Bool {
+        switch model.controller.lastOutcome {
+        case .pasted: true
+        case .copied: Distribution.isAppStore
+        default: false
         }
     }
 
