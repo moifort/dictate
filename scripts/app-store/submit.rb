@@ -25,8 +25,8 @@ ASC.request(:patch, "/v1/appStoreVersions/#{version['id']}", { data: { type: "ap
   relationships: { build: { data: { type: "builds", id: build["id"] } } } } })
 puts "Build #{build_number} attached to #{marketing}"
 
-# Reuse a submission left open by an earlier, refused attempt.
-open_submission = ASC.get("/v1/reviewSubmissions?filter[app]=#{app['id']}&filter[platform]=MAC_OS&filter[state]=READY_FOR_REVIEW")["data"].first
+# Reuse a submission left open by an earlier attempt, or rejected by App Review.
+open_submission = ASC.get("/v1/reviewSubmissions?filter[app]=#{app['id']}&filter[platform]=MAC_OS&filter[state]=READY_FOR_REVIEW,UNRESOLVED_ISSUES")["data"].first
 if open_submission
   submission_id = open_submission["id"]
 else

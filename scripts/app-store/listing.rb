@@ -104,7 +104,8 @@ none = %w[alcoholTobaccoOrDrugUseOrReferences contests gamblingSimulated horrorO
 attributes = none.to_h { |k| [k, "NONE"] }.merge(
   "gambling" => false, "lootBox" => false, "unrestrictedWebAccess" => false,
   "messagingAndChat" => false, "userGeneratedContent" => false, "advertising" => false,
-  "ageAssurance" => false, "healthOrWellnessTopics" => false, "parentalControls" => false
+  "ageAssurance" => false, "healthOrWellnessTopics" => false, "parentalControls" => false,
+  "socialMedia" => false
 )
 # The declaration grows new questions every year: send only those this one knows.
 attributes.select! { |k, _| rating["attributes"].key?(k) }
