@@ -33,7 +33,7 @@ settings:
 packages:
   FluidAudio:
     url: https://github.com/FluidInference/FluidAudio
-    from: 0.17.7
+    from: 0.18.2
   Sentry:
     url: https://github.com/getsentry/sentry-cocoa
     from: 9.30.1

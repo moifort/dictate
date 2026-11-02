@@ -114,7 +114,7 @@ actor ParakeetEngine {
         }
         let models = try await AsrModels.load(from: folder, version: version)
         let manager = AsrManager()
-        try await manager.loadModels(models)
+        try await manager.loadModels(Self.keepingUnknownTokens(models))
         self.manager = manager
     }
 
@@ -131,9 +131,27 @@ actor ParakeetEngine {
         var decoderState = TdtDecoderState.make(decoderLayers: await manager.decoderLayerCount)
         // The language only filters out tokens from another alphabet.
         let result = try await manager.transcribe(samples, decoderState: &decoderState, language: Language(rawValue: language))
-        let (text, timings) = Self.quotingUnknownTokens(text: result.text, timings: result.tokenTimings ?? [])
+        let (text, timings) = Self.quotingUnknownTokens(
+            text: UnknownTokens.restored(result.text),
+            timings: (result.tokenTimings ?? []).map(Self.restoringUnknownToken)
+        )
         let tokens = timings.map { (piece: $0.token, confidence: $0.confidence) }
         return (Transcription(text: text, words: Transcription.words(fromTokens: tokens)), timings)
+    }
+
+    private static func keepingUnknownTokens(_ models: AsrModels) -> AsrModels {
+        AsrModels(
+            encoder: models.encoder, preprocessor: models.preprocessor, decoder: models.decoder, joint: models.joint,
+            ctcHead: models.ctcHead, encoderLadder: models.encoderLadder, configuration: models.configuration,
+            vocabulary: UnknownTokens.keepingToken(in: models.vocabulary), version: models.version
+        )
+    }
+
+    private static func restoringUnknownToken(_ timing: TokenTiming) -> TokenTiming {
+        TokenTiming(
+            token: UnknownTokens.restored(timing.token), tokenId: timing.tokenId, startTime: timing.startTime,
+            endTime: timing.endTime, confidence: timing.confidence
+        )
     }
 
     /// Parakeet writes `<unk>` for the quotation marks its vocabulary lacks:

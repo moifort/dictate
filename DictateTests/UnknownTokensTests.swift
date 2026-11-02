@@ -73,4 +73,11 @@ struct UnknownTokensTests {
         #expect(!UnknownTokens.containsUnknown(pieces))
         #expect(UnknownTokens.containsUnknown(["▁", "<unk>"]))
     }
+
+    @Test func spellsTheTokenSoThatFluidAudioKeepsItThenRestoresIt() {
+        let vocabulary = UnknownTokens.keepingToken(in: [0: UnknownTokens.token, 1: "\u{2581}mot"])
+        #expect(vocabulary[1] == "\u{2581}mot")
+        #expect(vocabulary[0] != UnknownTokens.token)
+        #expect(UnknownTokens.restored("un \(vocabulary[0]!) mot") == "un <unk> mot")
+    }
 }

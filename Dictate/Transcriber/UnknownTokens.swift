@@ -14,7 +14,22 @@ import Foundation
 /// in, `resolved` drops them.
 nonisolated enum UnknownTokens {
     static let token = "<unk>"
+    /// FluidAudio drops every piece spelled `<unk>` from its results since
+    /// 0.18, with no option to keep them: the vocabulary Parakeet loads spells
+    /// it this way instead, and `restored` puts the real token back.
+    private static let loadedToken = "<unk_>"
     private static let boundary = "\u{2581}"
+
+    /// `vocabulary` with the token spelled so that FluidAudio keeps it.
+    static func keepingToken(in vocabulary: [Int: String]) -> [Int: String] {
+        vocabulary.mapValues { $0 == token ? loadedToken : $0 }
+    }
+
+    /// `text`, a transcript or a piece, as FluidAudio would have written it
+    /// from the original vocabulary.
+    static func restored(_ text: String) -> String {
+        text.replacingOccurrences(of: loadedToken, with: token)
+    }
 
     static func containsUnknown(_ pieces: [String]) -> Bool {
         pieces.contains(where: isUnknownPiece)
