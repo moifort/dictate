@@ -113,13 +113,17 @@ struct LatencyCard: View {
 
     private let engine = TranscriptionEngine.parakeet
     /// The model picked; nil until the user picks one.
-    @State private var focus: Reviewer?
+    @State private var focus = ScreenshotMode.reviewer
 
     var body: some View {
         let engineRecords = records.filter { $0.engine == engine }
         let whole = DictationSeries(records: engineRecords, period: period, now: now)
         let shown = Self.shownReviewer(focus, in: whole)
         let series = DictationSeries(records: Self.records(engineRecords, reviewedBy: shown), period: period, now: now)
+        // One scale for every model, so switching shows which one is slower.
+        let peak = (shown == nil ? [series] : whole.reviewers.map {
+            DictationSeries(records: Self.records(engineRecords, reviewedBy: $0), period: period, now: now)
+        }).map(Self.peak).max() ?? 0
         StatsCard(title: "Délai d'affichage", symbol: "timer", color: StatsPalette.latency) {
             if let shown {
                 Picker("Relecture", selection: Binding(get: { shown }, set: { focus = $0 }).animation(.snappy)) {
@@ -150,8 +154,9 @@ struct LatencyCard: View {
             }
             PeriodChart(
                 series: series,
-                peak: series.buckets.map { $0.transcription + $0.enhancement }.max() ?? 0,
+                peak: Self.peak(series),
                 floor: 1,
+                ceiling: peak,
                 value: { $0.dictations > 0 ? Self.label($0) : nil }
             ) { bucket, dimmed in
                 // Without a model, what is left of the cleanup time is the
@@ -184,6 +189,11 @@ struct LatencyCard: View {
             counts.merge(bucket.reviewers, uniquingKeysWith: +)
         }
         return series.reviewers.max { counts[$0, default: 0] < counts[$1, default: 0] }
+    }
+
+    /// The tallest column's wait.
+    static func peak(_ series: DictationSeries) -> TimeInterval {
+        series.buckets.map { $0.transcription + $0.enhancement }.max() ?? 0
     }
 
     /// The dictations `reviewer` cleaned up, or all of them without one.

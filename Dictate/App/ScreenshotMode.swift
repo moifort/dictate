@@ -7,16 +7,19 @@ import SwiftUI
 ///
 /// Windows: setup, stats, settings. Settings tabs: general, dictation,
 /// lexicon, review. `-ScreenshotFlash claudeDisconnected` (or
-/// `claudeDisconnectedRaw`) shows that indicator flash instead.
+/// `claudeDisconnectedRaw`) shows that indicator flash instead, and
+/// `-ScreenshotReviewer apple` opens the delay chart on that model.
 nonisolated enum ScreenshotMode {
     #if DEBUG
     static let window = UserDefaults.standard.string(forKey: "ScreenshotWindow")
     static let settingsTab = UserDefaults.standard.string(forKey: "ScreenshotTab")
     static let flash = UserDefaults.standard.string(forKey: "ScreenshotFlash")
+    static let reviewer = UserDefaults.standard.string(forKey: "ScreenshotReviewer").flatMap(Reviewer.init(rawValue:))
     #else
     static let window: String? = nil
     static let settingsTab: String? = nil
     static let flash: String? = nil
+    static let reviewer: Reviewer? = nil
     #endif
 }
 

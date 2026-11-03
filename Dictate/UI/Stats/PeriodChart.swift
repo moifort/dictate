@@ -14,6 +14,9 @@ struct PeriodChart<Marks: ChartContent>: View {
     let peak: Double
     /// The top of the value axis when the period is empty.
     let floor: Double
+    /// A value the axis must reach even when no column does, so that charts
+    /// swapped in the same place share one scale.
+    var ceiling: Double? = nil
     /// What the lollipop reads for a column; nil reads as no dictation.
     let value: (DictationSeries.Bucket) -> String?
     /// The marks of one column; `dimmed` while the pointer rests on another.
@@ -64,7 +67,9 @@ struct PeriodChart<Marks: ChartContent>: View {
         // Headroom for the lollipop above the tallest column: the annotation
         // may overflow the plot, and lands in this margin.
         .padding(.top, 40)
-        if peak > 0 {
+        if let ceiling, ceiling > 0 {
+            chart.chartYScale(domain: 0...StatsFormat.axisTop(ceiling))
+        } else if peak > 0 {
             chart.chartYScale(domain: .automatic(includesZero: true))
         } else {
             chart.chartYScale(domain: 0...floor)

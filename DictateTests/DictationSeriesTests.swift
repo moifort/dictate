@@ -182,6 +182,14 @@ struct DictationSeriesTests {
         #expect(LatencyCard.shownReviewer(.apple, in: claudeOnly) == nil)
     }
 
+    @Test func theSharedDelayScaleEndsOnARoundValue() {
+        #expect(StatsFormat.axisTop(6.1) == 10)
+        #expect(StatsFormat.axisTop(1.4) == 2)
+        #expect(StatsFormat.axisTop(4.5) == 5)
+        #expect(StatsFormat.axisTop(10) == 10)
+        #expect(StatsFormat.axisTop(0.3) == 0.5)
+    }
+
     @Test func theDelayLabelNamesTheModelBehindTheColumn() {
         let claude = series([record(daysAgo: 0, transcription: 2, enhancement: 1)], .week).buckets.last!
         #expect(LatencyCard.label(claude) == "\(StatsFormat.seconds(3)) s · Claude")

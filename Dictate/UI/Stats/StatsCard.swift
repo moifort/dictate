@@ -101,6 +101,13 @@ enum StatsPalette {
 }
 
 enum StatsFormat {
+    /// The next 1, 2 or 5 times a power of ten, where an automatic axis would end.
+    static func axisTop(_ value: Double) -> Double {
+        let magnitude = pow(10, log10(value).rounded(.down))
+        let step = [1.0, 2, 5, 10].first { $0 * magnitude >= value } ?? 10
+        return step * magnitude
+    }
+
     static func seconds(_ value: Double) -> String {
         value.formatted(.number.precision(.fractionLength(1)))
     }
