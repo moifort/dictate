@@ -140,6 +140,32 @@ struct SelectedEnhancerTests {
         #expect(AppleIntelligenceEnhancer.trimmed(DictationContext()).precedingText == nil)
     }
 
+    /// Apple Intelligence replies seen on 2026-11-03 for correct transcripts.
+    @Test(arguments: [
+        ("Comment te connectes-tu à Centrée ici ?", "/"),
+        ("Tu peux utiliser la clé qui se trouve dans Vinarium pour accéder à Ocentri.", "/ CI/CD"),
+        (
+            "Ce problème est géré visuellement.",
+            "Regarde le Sentry, il y a un bug qui vient de tomber. Dis-moi qui l'a généré, si c'est toi."
+        ),
+        ("Oui.", ""),
+    ])
+    func aReplyThatLeftTheDictationIsRejected(transcript: String, reply: String) {
+        #expect(AppleIntelligenceEnhancer.diverges(reply, from: transcript))
+    }
+
+    @Test(arguments: [
+        ("Un, deux, trois, j'irai au soleil.", "1. 2. 3. j'irai au soleil."),
+        ("Bonjour, j'aimerais que Milipchou m'écoute et ceit plus intelligent.", "Bonjour, j'aimerais que Milipchou m'écoute et soit plus intelligent."),
+        ("Moi je vais travailler uniquement sur la partie robot.", "Je vais travailler uniquement sur la partie robot."),
+        // Too short to judge: a single fixed word is most of it.
+        ("Votre raz.", "Votre projet."),
+        ("Jouez.", "Joué."),
+    ])
+    func aCleanedUpDictationIsKept(transcript: String, reply: String) {
+        #expect(!AppleIntelligenceEnhancer.diverges(reply, from: transcript))
+    }
+
     @Test func aShortFieldIsKeptWhole() {
         let context = DictationContext(precedingText: "Salut Guillaume, ", followingText: " merci.")
         #expect(AppleIntelligenceEnhancer.trimmed(context) == context)

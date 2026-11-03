@@ -41,12 +41,15 @@ nonisolated enum AppleIntelligenceError: LocalizedError, Equatable {
     /// The model declined the text: its own content filters.
     case refused
     case tooLong
+    /// The reply has little left of the dictation: see `diverges`.
+    case diverged
 
     var errorDescription: String? {
         switch self {
         case .unavailable(let status): status.explanation ?? String(localized: "Apple Intelligence est indisponible.")
         case .refused: String(localized: "Apple Intelligence a refusé ce texte.")
         case .tooLong: String(localized: "Dictée trop longue pour Apple Intelligence.")
+        case .diverged: String(localized: "Apple Intelligence s'est écarté de la dictée : texte brut inséré.")
         }
     }
 }
@@ -115,7 +118,9 @@ final class AppleIntelligenceEnhancer: Enhancer {
         do {
             let response = try await session.respond(to: message, options: GenerationOptions(temperature: 0))
             try Task.checkCancellation()
-            return DoubtfulWords.strip(PromptBuilder.cleanedText(from: response.content))
+            let text = DoubtfulWords.strip(PromptBuilder.cleanedText(from: response.content))
+            guard !Self.diverges(text, from: transcription.text) else { throw AppleIntelligenceError.diverged }
+            return text
         } catch let error as LanguageModelSession.GenerationError {
             switch error {
             case .guardrailViolation, .refusal: throw AppleIntelligenceError.refused
@@ -124,6 +129,26 @@ final class AppleIntelligenceEnhancer: Enhancer {
             default: throw error
             }
         }
+    }
+
+    /// Dictations shorter than this are not judged: fixing one misheard word
+    /// already changes half of a two-word one.
+    static let minimumJudgedWords = 3
+    /// Word error rate of the reply against the transcript beyond which the
+    /// reply is no longer a cleanup. On 1 512 corpus dictations (2026-11-03)
+    /// the on-device model's six bad replies ("/", "/ CI/CD", the field's text
+    /// instead of the dictation) were all at 1.0 or more, its good ones at 0.5
+    /// or less.
+    static let maximumWordErrorRate = 0.6
+
+    /// The small model sometimes answers the field's text, or a symbol from it,
+    /// instead of cleaning up the dictation: the raw transcript is better then.
+    static func diverges(_ reply: String, from transcript: String) -> Bool {
+        let transcriptWords = WordErrorRate.words(in: transcript)
+        if WordErrorRate.words(in: reply).isEmpty { return !transcriptWords.isEmpty }
+        guard transcriptWords.count >= minimumJudgedWords,
+              let rate = WordErrorRate.rate(reference: transcript, hypothesis: reply) else { return false }
+        return rate > maximumWordErrorRate
     }
 
     /// The context cut down to what the small window can take.

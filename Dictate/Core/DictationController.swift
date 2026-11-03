@@ -433,6 +433,11 @@ final class DictationController {
             Log.dictation.notice("claude signed out, raw transcript inserted: \(error.localizedDescription, privacy: .public)")
             ErrorReporter.breadcrumb("claude signed out", category: "enhancer")
             return nil
+        } catch AppleIntelligenceError.diverged {
+            // The guard doing its job on the small model's known misses.
+            Log.dictation.notice("apple intelligence reply left the dictation, raw transcript inserted")
+            ErrorReporter.breadcrumb("apple intelligence reply diverged", category: "enhancer")
+            return nil
         } catch {
             Log.dictation.error("enhancement failed: \(error.localizedDescription, privacy: .public)")
             ErrorReporter.capture(error, "enhancement failed, raw transcript inserted", category: "enhancer")
