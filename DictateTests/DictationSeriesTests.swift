@@ -157,6 +157,31 @@ struct DictationSeriesTests {
         #expect(series.reviewers == [.apple, .claude])
     }
 
+    @Test func theDelayCanBeNarrowedToOneModel() {
+        let records = [
+            record(daysAgo: 0, hour: 9, transcription: 1, enhancement: 1, reviewer: .claude),
+            record(daysAgo: 0, hour: 10, transcription: 1, enhancement: 3, reviewer: .apple),
+            record(daysAgo: 0, hour: 11, enhancement: nil, reviewer: nil),
+        ]
+        #expect(LatencyCard.records(records, reviewedBy: nil).count == 3)
+        let apple = series(LatencyCard.records(records, reviewedBy: .apple), .week)
+        #expect(apple.reviewers == [.apple])
+        #expect(apple.buckets.last!.enhancement == 3)
+    }
+
+    @Test func theDelayShowsTheMostUsedModelUntilAnotherIsPicked() {
+        let mixed = series([
+            record(daysAgo: 0, hour: 9, reviewer: .claude),
+            record(daysAgo: 0, hour: 10, reviewer: .claude),
+            record(daysAgo: 1, reviewer: .apple),
+        ], .week)
+        #expect(LatencyCard.shownReviewer(nil, in: mixed) == .claude)
+        #expect(LatencyCard.shownReviewer(.apple, in: mixed) == .apple)
+        let claudeOnly = series([record(daysAgo: 0, reviewer: .claude)], .week)
+        // One model needs no picker, and a pick it lacks is forgotten.
+        #expect(LatencyCard.shownReviewer(.apple, in: claudeOnly) == nil)
+    }
+
     @Test func theDelayLabelNamesTheModelBehindTheColumn() {
         let claude = series([record(daysAgo: 0, transcription: 2, enhancement: 1)], .week).buckets.last!
         #expect(LatencyCard.label(claude) == "\(StatsFormat.seconds(3)) s · Claude")

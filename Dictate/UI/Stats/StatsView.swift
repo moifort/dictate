@@ -23,13 +23,14 @@ struct StatsView: View {
                     let series = DictationSeries(records: history.records, period: period, now: context.date)
                     ScrollView {
                         VStack(spacing: 12) {
-                            // Across the whole window, above the others: it
-                            // is what all the other figures add up to.
+                            // First and across the whole window: the figure
+                            // looked at most, after each change of model.
+                            LatencyCard(records: history.records, period: period, now: context.date)
+                            // What all the other figures add up to.
                             TimeSavedCard(series: series, total: stats.timeSaved)
                             LazyVGrid(columns: [GridItem(.adaptive(minimum: 400), spacing: 12, alignment: .top)], spacing: 12) {
                                 WordsCard(series: series)
                                 DictationsCard(series: series)
-                                LatencyCard(records: history.records, period: period, now: context.date)
                                 PaceCard(series: series)
                             }
                             HighlightsCard(stats: stats)

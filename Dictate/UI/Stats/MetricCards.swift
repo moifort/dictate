@@ -103,16 +103,34 @@ struct DictationsCard: View {
 /// coloured by the model that did it: a day offline shows Apple Intelligence
 /// where Claude usually is. A column where both worked splits its cleanup
 /// time between them, in the proportion of the dictations each took.
+///
+/// When the period mixes models, the card shows one of them at a time, picked
+/// in its title row: the median and columns leave the others out.
 struct LatencyCard: View {
     let records: [DictationRecord]
     let period: StatsPeriod
     let now: Date
 
     private let engine = TranscriptionEngine.parakeet
+    /// The model picked; nil until the user picks one.
+    @State private var focus: Reviewer?
 
     var body: some View {
-        let series = DictationSeries(records: records.filter { $0.engine == engine }, period: period, now: now)
+        let engineRecords = records.filter { $0.engine == engine }
+        let whole = DictationSeries(records: engineRecords, period: period, now: now)
+        let shown = Self.shownReviewer(focus, in: whole)
+        let series = DictationSeries(records: Self.records(engineRecords, reviewedBy: shown), period: period, now: now)
         StatsCard(title: "Délai d'affichage", symbol: "timer", color: StatsPalette.latency) {
+            if let shown {
+                Picker("Relecture", selection: Binding(get: { shown }, set: { focus = $0 }).animation(.snappy)) {
+                    ForEach(whole.reviewers) { Text($0.displayName).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .controlSize(.small)
+                .fixedSize()
+            }
+        } content: {
             // The legend shares the headline's row: a row of its own would
             // make this card taller than its neighbours.
             HStack(alignment: .bottom) {
@@ -154,6 +172,24 @@ struct LatencyCard: View {
                 }
             }
         }
+    }
+
+    /// The one model the card shows when the period mixes several: the one
+    /// picked, else the one that did most of the cleanups. Nil when there is
+    /// a single model or none, which needs no picker.
+    static func shownReviewer(_ picked: Reviewer?, in series: DictationSeries) -> Reviewer? {
+        guard series.reviewers.count > 1 else { return nil }
+        if let picked, series.reviewers.contains(picked) { return picked }
+        let counts = series.buckets.reduce(into: [Reviewer: Int]()) { counts, bucket in
+            counts.merge(bucket.reviewers, uniquingKeysWith: +)
+        }
+        return series.reviewers.max { counts[$0, default: 0] < counts[$1, default: 0] }
+    }
+
+    /// The dictations `reviewer` cleaned up, or all of them without one.
+    static func records(_ records: [DictationRecord], reviewedBy reviewer: Reviewer?) -> [DictationRecord] {
+        guard let reviewer else { return records }
+        return records.filter { $0.reviewer == reviewer }
     }
 
     /// The column's wait, and the model behind it: named alone when it did

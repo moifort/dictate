@@ -46,10 +46,10 @@ ready-to-send text.
   the waves tells that earlier sentences are still on their way.
 - **Your numbers.** A statistics window charts words, dictations, speaking
   pace and the delay before the text appears, by day, week or year. The
-  delay chart tells which model did the cleanup, so a day offline shows Apple
-  Intelligence standing in for Claude. On top, the time you saved: what the
-  same words would have taken to type at 40 words per minute, less the time
-  spent speaking and waiting.
+  delay chart comes first; when Apple Intelligence stood in for Claude
+  during the period, it shows one model at a time, median included. Below
+  it, the time you saved: what the same words would have taken to type at
+  40 words per minute, less the time spent speaking and waiting.
 
 ## Get it
 
