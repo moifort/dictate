@@ -545,6 +545,54 @@
         }
       }
     },
+    "Claude déconnecté · relu par Apple": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude signed out · reviewed by Apple"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude déconnecté · relu par Apple"
+          }
+        }
+      }
+    },
+    "Claude déconnecté · texte brut": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude signed out · raw text"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude déconnecté · texte brut"
+          }
+        }
+      }
+    },
+    "Claude est déconnecté : lancez « claude auth login » dans un terminal.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude is signed out: run “claude auth login” in a terminal."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude est déconnecté : lancez « claude auth login » dans un terminal."
+          }
+        }
+      }
+    },
     "Installation de la mise à jour…": {
       "localizations": {
         "en": {

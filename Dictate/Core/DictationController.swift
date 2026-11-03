@@ -428,6 +428,11 @@ final class DictationController {
             Log.dictation.notice("claude usage limit reached, raw transcript inserted: \(error.localizedDescription, privacy: .public)")
             ErrorReporter.breadcrumb("claude usage limit reached", category: "enhancer")
             return nil
+        } catch let error as ClaudeCLIError where error.isDisconnected {
+            // Only the user can sign in again, and the indicator tells them.
+            Log.dictation.notice("claude signed out, raw transcript inserted: \(error.localizedDescription, privacy: .public)")
+            ErrorReporter.breadcrumb("claude signed out", category: "enhancer")
+            return nil
         } catch {
             Log.dictation.error("enhancement failed: \(error.localizedDescription, privacy: .public)")
             ErrorReporter.capture(error, "enhancement failed, raw transcript inserted", category: "enhancer")

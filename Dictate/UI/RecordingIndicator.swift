@@ -12,6 +12,9 @@ final class RecordingIndicator {
         case failed(String)
         /// `fn` pressed before the engine's model is in memory.
         case loading(TranscriptionEngine)
+        /// The `claude` CLI is signed out: Apple Intelligence reviewed the
+        /// text instead, or it went in raw.
+        case claudeDisconnected(raw: Bool)
     }
 
     @Observable
@@ -33,7 +36,7 @@ final class RecordingIndicator {
     private var startingTask: Task<Void, Never>?
 
     /// Wide enough for the loading and error messages; the panel is transparent around the pill.
-    private static let size = CGSize(width: 260, height: 56)
+    private static let size = CGSize(width: 340, height: 56)
     /// Long enough for the fade-out in `IndicatorView` to finish.
     private static let hideDelay: Duration = .milliseconds(450)
     /// The microphone usually opens in 10 to 40 ms: the spinner shows only when
@@ -50,8 +53,12 @@ final class RecordingIndicator {
 
     /// Briefly shows how a finished dictation ended, when it needs attention.
     /// A dictation that went well leaves an earlier one's flash in place.
-    func show(_ outcome: DictationOutcome) {
+    /// A signed-out Claude wins over the rest: it degrades every dictation
+    /// until the user signs in again.
+    func show(_ outcome: DictationOutcome, claudeDisconnected: Bool = false) {
         let flash: Flash? = switch outcome {
+        case .pasted(let raw) where claudeDisconnected, .copied(let raw) where claudeDisconnected:
+            .claudeDisconnected(raw: raw)
         case .copied: .copied
         case .failed(let message): .failed(message)
         case .modelLoading(let engine): .loading(engine)
@@ -66,6 +73,7 @@ final class RecordingIndicator {
             case .copied: .seconds(1.6)
             case .loading: .seconds(2.5)
             case .failed: .seconds(3)
+            case .claudeDisconnected: .seconds(4)
             }
             try? await Task.sleep(for: duration)
             guard !Task.isCancelled else { return }
@@ -303,6 +311,16 @@ private struct IndicatorView: View {
                 }
             }
             .id("failed")
+        case .claudeDisconnected(let raw):
+            HStack(spacing: 8) {
+                BouncingSymbol(name: "exclamationmark.triangle.fill", color: .orange)
+                if !compact {
+                    Text(raw ? "Claude déconnecté · texte brut" : "Claude déconnecté · relu par Apple")
+                        .font(.callout)
+                        .lineLimit(1)
+                }
+            }
+            .id("claudeDisconnected")
         case .loading(let engine):
             HStack(spacing: 8) {
                 Spinner()

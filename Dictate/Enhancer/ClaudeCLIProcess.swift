@@ -28,6 +28,15 @@ nonisolated enum ClaudeCLIError: LocalizedError, Equatable {
         if text.contains("usage limit") { return true }
         return text.contains("limit") && (text.contains("hit your") || text.contains("reached your"))
     }
+
+    /// The CLI is signed out or its OAuth session expired ("Failed to
+    /// authenticate: OAuth session expired…", "Please run /login"): every
+    /// cleanup fails until the user signs in again, so it must show.
+    var isDisconnected: Bool {
+        guard case .failed(let message) = self else { return false }
+        let text = message.lowercased()
+        return text.contains("/login") || text.contains("failed to authenticate") || text.contains("oauth")
+    }
 }
 
 /// One `claude -p` process in stream-json mode, started ahead of time and

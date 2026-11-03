@@ -31,6 +31,9 @@ final class SelectedEnhancer: Enhancer {
     /// The reviewer the last dictation actually went to, fallbacks included;
     /// nil before the first one. Read by the statistics after each cleanup.
     private(set) var lastUsed: Reviewer?
+    /// The last Claude cleanup failed because the CLI is signed out. Every
+    /// dictation then silently goes to the fallback: the indicator says so.
+    private(set) var isClaudeDisconnected = false
 
     init(
         reviewer: @escaping () -> Reviewer,
@@ -99,14 +102,22 @@ final class SelectedEnhancer: Enhancer {
             }
             lastUsed = .claude
             do {
-                return try await claude.enhance(transcription, context: context)
+                let text = try await claude.enhance(transcription, context: context)
+                isClaudeDisconnected = false
+                return text
             } catch is CancellationError {
                 throw CancellationError()
-            } catch where appleAvailable() {
+            } catch {
+                isClaudeDisconnected = (error as? ClaudeCLIError)?.isDisconnected == true
+                guard appleAvailable() else { throw error }
                 if let error = error as? ClaudeCLIError, error.isUsageLimit {
                     // The subscription's limit is spent until it resets: not a failure to look into.
                     Log.dictation.notice("claude usage limit reached, Apple Intelligence reviews instead")
                     ErrorReporter.breadcrumb("claude usage limit reached, falling back to Apple Intelligence", category: "enhancer")
+                } else if isClaudeDisconnected {
+                    // Only the user can sign in again: the indicator tells them.
+                    Log.dictation.notice("claude signed out, Apple Intelligence reviews instead")
+                    ErrorReporter.breadcrumb("claude signed out, falling back to Apple Intelligence", category: "enhancer")
                 } else {
                     Log.dictation.error("claude failed, Apple Intelligence reviews instead: \(error.localizedDescription, privacy: .public)")
                     ErrorReporter.capture(error, "claude failed, falling back to Apple Intelligence", category: "enhancer", level: .warning)

@@ -93,6 +93,27 @@ struct SelectedEnhancerTests {
         #expect(apple.calls == 0)
     }
 
+    @Test func aSignedOutClaudeIsRememberedUntilItAnswersAgain() async throws {
+        let signedOut = FakeEnhancer(.failure(ClaudeCLIError.failed("Failed to authenticate: OAuth session expired")))
+        let (enhancer, _, _) = make(reviewer: .claude, claude: signedOut)
+        #expect(!enhancer.isClaudeDisconnected)
+        #expect(try await enhancer.enhance(transcript: "x", context: DictationContext()) == "apple")
+        #expect(enhancer.isClaudeDisconnected)
+
+        let (other, _, _) = make(reviewer: .claude, claude: FakeEnhancer(.failure(FakeError())))
+        _ = try await other.enhance(transcript: "x", context: DictationContext())
+        #expect(!other.isClaudeDisconnected)
+    }
+
+    @Test func aSignedOutClaudeWithoutAppleIntelligenceIsRememberedToo() async {
+        let signedOut = FakeEnhancer(.failure(ClaudeCLIError.failed("Please run /login")))
+        let (enhancer, _, _) = make(reviewer: .claude, appleAvailable: false, claude: signedOut)
+        await #expect(throws: ClaudeCLIError.self) {
+            try await enhancer.enhance(transcript: "x", context: DictationContext())
+        }
+        #expect(enhancer.isClaudeDisconnected)
+    }
+
     @Test func aCancelledClaudeIsNotRetriedOnApple() async {
         let (enhancer, apple, _) = make(reviewer: .claude, claude: FakeEnhancer(.failure(CancellationError())))
         await #expect(throws: CancellationError.self) {

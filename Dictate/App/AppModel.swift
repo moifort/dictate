@@ -80,6 +80,9 @@ final class AppModel {
             }
         )
         indicator = RecordingIndicator(controller: controller, recorder: recorder)
+        if let flash = ScreenshotMode.flash, flash.hasPrefix("claudeDisconnected") {
+            indicator.show(.pasted(raw: flash.hasSuffix("Raw")), claudeDisconnected: true)
+        }
         controller.onOutcome = { [weak self] outcome in self?.handle(outcome) }
         controller.onRecord = { [history] record in history.append(record) }
         controller.insertionObserver = PostInsertionObserver(reader: focus)
@@ -422,6 +425,10 @@ final class AppModel {
         default:
             lastError = nil
         }
-        indicator.show(outcome)
+        let claudeDisconnected = settings.reviewer == .claude && enhancer.isClaudeDisconnected
+        if claudeDisconnected {
+            lastError = String(localized: "Claude est déconnecté : lancez « claude auth login » dans un terminal.")
+        }
+        indicator.show(outcome, claudeDisconnected: claudeDisconnected)
     }
 }

@@ -6,14 +6,17 @@ import SwiftUI
 ///     Dictate.app/Contents/MacOS/Dictate -ScreenshotWindow settings -ScreenshotTab review
 ///
 /// Windows: setup, stats, settings. Settings tabs: general, dictation,
-/// lexicon, review.
+/// lexicon, review. `-ScreenshotFlash claudeDisconnected` (or
+/// `claudeDisconnectedRaw`) shows that indicator flash instead.
 nonisolated enum ScreenshotMode {
     #if DEBUG
     static let window = UserDefaults.standard.string(forKey: "ScreenshotWindow")
     static let settingsTab = UserDefaults.standard.string(forKey: "ScreenshotTab")
+    static let flash = UserDefaults.standard.string(forKey: "ScreenshotFlash")
     #else
     static let window: String? = nil
     static let settingsTab: String? = nil
+    static let flash: String? = nil
     #endif
 }
 

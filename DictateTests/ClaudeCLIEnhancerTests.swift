@@ -213,4 +213,25 @@ struct ClaudeCLIErrorTests {
         #expect(!ClaudeCLIError.noResult(message).isUsageLimit)
         #expect(!ClaudeCLIError.notFound.isUsageLimit)
     }
+
+    @Test(arguments: [
+        "Failed to authenticate: OAuth session expired and could not be refreshed",
+        "Please run /login",
+        "Invalid API key · Please run /login",
+        "Not logged in · Please run /login",
+    ])
+    func disconnectionsAreRecognised(message: String) {
+        #expect(ClaudeCLIError.failed(message).isDisconnected)
+    }
+
+    @Test(arguments: [
+        "error_during_execution",
+        "You've hit your session limit · resets 3:20pm",
+        "Context limit reached",
+    ])
+    func otherFailuresAreNotDisconnections(message: String) {
+        #expect(!ClaudeCLIError.failed(message).isDisconnected)
+        #expect(!ClaudeCLIError.noResult(message).isDisconnected)
+        #expect(!ClaudeCLIError.notFound.isDisconnected)
+    }
 }
