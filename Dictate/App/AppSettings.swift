@@ -12,6 +12,7 @@ final class AppSettings {
     ]
 
     @ObservationIgnored private let defaults: UserDefaults
+    @ObservationIgnored private let apiKeyStore: SecretStore
 
     /// ISO 639-1 code of the dictated language, for Parakeet and the review
     /// prompt. Starts as the OS language.
@@ -78,6 +79,16 @@ final class AppSettings {
         didSet { defaults.set(suggestVocabulary, forKey: Keys.suggestVocabulary) }
     }
 
+    /// How Claude is reached: the subscription unless the user picks a key.
+    var claudeAccess: ClaudeAccess {
+        didSet { defaults.set(claudeAccess.rawValue, forKey: Keys.claudeAccess) }
+    }
+
+    /// The Anthropic API key, kept in the keychain. Empty when none is saved.
+    var anthropicAPIKey: String {
+        didSet { apiKeyStore.write(anthropicAPIKey) }
+    }
+
     var cliPathOverride: String {
         didSet { defaults.set(cliPathOverride, forKey: Keys.cliPathOverride) }
     }
@@ -123,8 +134,9 @@ final class AppSettings {
         }
     }
 
-    init(defaults: UserDefaults = .standard) {
+    init(defaults: UserDefaults = .standard, apiKeyStore: SecretStore = KeychainSecret()) {
         self.defaults = defaults
+        self.apiKeyStore = apiKeyStore
         if let saved = defaults.string(forKey: Keys.reviewer).flatMap(Reviewer.init(rawValue:)) {
             reviewerChoice = saved
         } else if defaults.object(forKey: Keys.enhancementEnabled) as? Bool == false {
@@ -148,6 +160,8 @@ final class AppSettings {
         autoUpdate = defaults.object(forKey: Keys.autoUpdate) as? Bool ?? true
         keepEvaluationCorpus = defaults.bool(forKey: Keys.keepEvaluationCorpus)
         suggestVocabulary = defaults.bool(forKey: Keys.suggestVocabulary)
+        claudeAccess = defaults.string(forKey: Keys.claudeAccess).flatMap(ClaudeAccess.init(rawValue:)) ?? .subscription
+        anthropicAPIKey = apiKeyStore.read() ?? ""
         cliPathOverride = defaults.string(forKey: Keys.cliPathOverride) ?? ""
         vocabularyText = defaults.string(forKey: Keys.vocabulary) ?? Self.defaultVocabulary.joined(separator: "\n")
         boostVocabulary = defaults.bool(forKey: Keys.boostVocabulary)
@@ -165,6 +179,7 @@ final class AppSettings {
         static let autoUpdate = "autoUpdate"
         static let keepEvaluationCorpus = "keepEvaluationCorpus"
         static let suggestVocabulary = "suggestVocabulary"
+        static let claudeAccess = "claudeAccess"
         static let cliPathOverride = "cliPathOverride"
         static let vocabulary = "vocabulary"
         static let boostVocabulary = "boostVocabulary"

@@ -31,7 +31,8 @@ final class SelectedEnhancer: Enhancer {
     /// The reviewer the last dictation actually went to, fallbacks included;
     /// nil before the first one. Read by the statistics after each cleanup.
     private(set) var lastUsed: Reviewer?
-    /// The last Claude cleanup failed because the CLI is signed out. Every
+    /// The last Claude cleanup failed because the CLI is signed out or the
+    /// API key was refused. Every
     /// dictation then silently goes to the fallback: the indicator says so.
     private(set) var isClaudeDisconnected = false
 
@@ -109,8 +110,9 @@ final class SelectedEnhancer: Enhancer {
                 throw CancellationError()
             } catch {
                 isClaudeDisconnected = (error as? ClaudeCLIError)?.isDisconnected == true
+                    || [.invalidKey, .missingKey].contains(error as? ClaudeAPIError)
                 guard appleAvailable() else { throw error }
-                if let error = error as? ClaudeCLIError, error.isUsageLimit {
+                if (error as? ClaudeCLIError)?.isUsageLimit == true || error as? ClaudeAPIError == .rateLimited {
                     // The subscription's limit is spent until it resets: not a failure to look into.
                     Log.dictation.notice("claude usage limit reached, Apple Intelligence reviews instead")
                     ErrorReporter.breadcrumb("claude usage limit reached, falling back to Apple Intelligence", category: "enhancer")

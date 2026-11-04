@@ -399,6 +399,8 @@ private enum ReviewerTile: String, CaseIterable, Identifiable {
 /// The pass that turns the raw transcription into clean text.
 private struct ReviewSettings: View {
     @Bindable var model: AppModel
+    /// The key field under a greyed Claude tile, opened on demand.
+    @State private var enteringAPIKey = false
 
     private var reviewer: Binding<ReviewerTile> {
         Binding(
@@ -440,7 +442,12 @@ private struct ReviewSettings: View {
                 if model.settings.reviewer == .apple || Distribution.isAppStore {
                     appleStatus
                 } else {
-                    claudeBinary
+                    claudeAccess
+                    if model.settings.claudeAccess == .apiKey {
+                        apiKeyStatus
+                    } else {
+                        claudeBinary
+                    }
                 }
             }
             .disabled(!model.settings.enhancementEnabled)
@@ -462,14 +469,77 @@ private struct ReviewSettings: View {
                 .foregroundStyle(.secondary)
                 Button("Choisir…", action: chooseClaudeCLI)
                 Button("Revérifier") { model.recheckClaude() }
+                Button("Clé API…") { enteringAPIKey.toggle() }
             }
             .buttonStyle(.link)
             if overrideIgnored {
                 Text("Fichier non exécutable : détection automatique utilisée.")
                     .foregroundStyle(.orange)
             }
+            if enteringAPIKey {
+                APIKeyField(model: model)
+                Text("Sans abonnement : Claude via votre clé API Anthropic, facturée à l'usage.")
+                    .foregroundStyle(.secondary)
+            }
         }
         .font(.caption)
+    }
+
+    /// The subscription by default; the API key for those without one.
+    private var claudeAccess: some View {
+        LabeledContent("Accès :") {
+            VStack(alignment: .leading, spacing: 6) {
+                Picker("Accès", selection: Binding(
+                    get: { model.settings.claudeAccess },
+                    set: { model.selectClaudeAccess($0) }
+                )) {
+                    ForEach(ClaudeAccess.allCases) { access in
+                        Text(access.displayName).tag(access)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .fixedSize()
+                switch model.settings.claudeAccess {
+                case .subscription:
+                    Hint("Par défaut : votre abonnement Claude, via la commande claude. Rien à payer en plus.")
+                case .apiKey:
+                    Hint("Votre clé API Anthropic, facturée à l'usage. Pour qui n'a pas d'abonnement Claude.")
+                }
+            }
+        }
+    }
+
+    private var apiKeyStatus: some View {
+        LabeledContent("Clé :") {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 8) {
+                    if model.hasAPIKey {
+                        Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+                        Text(verbatim: APIKeyField.masked(model.settings.anthropicAPIKey))
+                            .font(.callout.monospaced())
+                    } else {
+                        Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+                        Text("Aucune clé enregistrée")
+                    }
+                    Spacer()
+                    Button("Tester") { Task { await model.testReviewer() } }
+                        .disabled(!model.hasAPIKey)
+                }
+                APIKeyField(model: model)
+                HStack(spacing: 12) {
+                    Link("Créer une clé", destination: URL(string: "https://console.anthropic.com/settings/keys")!)
+                    if model.hasAPIKey {
+                        Button("Supprimer la clé") { model.saveAPIKey("") }
+                    }
+                }
+                .buttonStyle(.link)
+                .font(.caption)
+                if let result = model.reviewTestResult {
+                    Hint(result)
+                }
+            }
+        }
     }
 
     private var reviewerHint: String {
@@ -478,11 +548,13 @@ private struct ReviewSettings: View {
             String(localized: "Le texte transcrit est inséré tel quel, hésitations comprises.")
         case .apple:
             String(localized: "Le modèle d'Apple Intelligence, sur ce Mac. Rien ne sort de l'ordinateur, aucun compte nécessaire.")
+        case .claude where model.settings.claudeAccess == .apiKey:
+            String(localized: "Modèle Haiku, via votre clé API Anthropic. Un peu plus rapide et plus sûr sur le jargon.")
         case .claude:
-            String(localized: "Modèle Haiku, via votre compte Claude Code. Un peu plus rapide et plus sûr sur le jargon.")
+            String(localized: "Modèle Haiku, via votre abonnement Claude. Un peu plus rapide et plus sûr sur le jargon.")
         }
         guard !model.settings.reviewerIsChosen, !Distribution.isAppStore else { return hint }
-        return String(localized: "Choix automatique : Claude si sa commande est installée et connectée à un compte, sinon Apple Intelligence, sinon aucun.") + " " + hint
+        return String(localized: "Choix automatique : Claude si votre abonnement est détecté, sinon Apple Intelligence, sinon aucun.") + " " + hint
     }
 
     private var appleStatus: some View {
@@ -633,7 +705,7 @@ private struct ReviewerPicker: View {
     private func help(for reviewer: ReviewerTile) -> Text {
         if !reviewer.isAvailable { return Text("Bientôt") }
         if reviewer == .claude && !claudeReady {
-            return Text("Nécessite Claude Code ou l'app Claude, connecté à votre abonnement Claude.")
+            return Text("Nécessite Claude Code ou l'app Claude connecté à votre abonnement, ou une clé API.")
         }
         return Text(verbatim: "")
     }

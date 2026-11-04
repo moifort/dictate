@@ -105,6 +105,16 @@ struct SelectedEnhancerTests {
         #expect(!other.isClaudeDisconnected)
     }
 
+    @Test func aRefusedAPIKeyShowsLikeASignedOutClaude() async throws {
+        let (enhancer, _, _) = make(reviewer: .claude, claude: FakeEnhancer(.failure(ClaudeAPIError.invalidKey)))
+        #expect(try await enhancer.enhance(transcript: "x", context: DictationContext()) == "apple")
+        #expect(enhancer.isClaudeDisconnected)
+
+        let (limited, _, _) = make(reviewer: .claude, claude: FakeEnhancer(.failure(ClaudeAPIError.rateLimited)))
+        #expect(try await limited.enhance(transcript: "x", context: DictationContext()) == "apple")
+        #expect(!limited.isClaudeDisconnected)
+    }
+
     @Test func aSignedOutClaudeWithoutAppleIntelligenceIsRememberedToo() async {
         let signedOut = FakeEnhancer(.failure(ClaudeCLIError.failed("Please run /login")))
         let (enhancer, _, _) = make(reviewer: .claude, appleAvailable: false, claude: signedOut)

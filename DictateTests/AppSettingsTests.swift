@@ -125,6 +125,27 @@ struct AppSettingsTests {
         #expect(AppSettings(defaults: defaults).transcriptionEngine == .parakeet)
     }
 
+    @Test func claudeGoesThroughTheSubscriptionByDefault() {
+        let settings = AppSettings(defaults: UserDefaults(suiteName: "AppSettingsTests-\(UUID().uuidString)")!, apiKeyStore: InMemorySecret())
+        #expect(settings.claudeAccess == .subscription)
+        #expect(settings.anthropicAPIKey.isEmpty)
+    }
+
+    @Test func theAccessPersistsAndTheKeyStaysOutOfUserDefaults() {
+        let suite = "AppSettingsTests-\(UUID().uuidString)"
+        let store = InMemorySecret()
+        let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!, apiKeyStore: store)
+        settings.claudeAccess = .apiKey
+        settings.anthropicAPIKey = "sk-ant-test"
+        let reloaded = AppSettings(defaults: UserDefaults(suiteName: suite)!, apiKeyStore: store)
+        #expect(reloaded.claudeAccess == .apiKey)
+        #expect(reloaded.anthropicAPIKey == "sk-ant-test")
+        let stored = UserDefaults(suiteName: suite)!.dictionaryRepresentation().values.compactMap { $0 as? String }
+        #expect(!stored.contains("sk-ant-test"))
+        settings.anthropicAPIKey = ""
+        #expect(store.read() == nil)
+    }
+
     @Test func aLanguageOnlyWhisperUnderstoodIsAskedAgain() {
         let defaults = UserDefaults(suiteName: "AppSettingsTests-\(UUID().uuidString)")!
         defaults.set("ja", forKey: "language")

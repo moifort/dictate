@@ -6,7 +6,8 @@ nonisolated enum Reviewer: String, CaseIterable, Codable, Identifiable, Sendable
     case none
     /// Apple's on-device model, through Apple Intelligence.
     case apple
-    /// Claude Haiku 4.5, through the `claude` CLI and the user's subscription.
+    /// Claude Haiku 4.5, through the `claude` CLI and the user's subscription,
+    /// or through the API and the user's key (`ClaudeAccess`).
     case claude
 
     var id: String { rawValue }

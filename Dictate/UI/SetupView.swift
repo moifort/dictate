@@ -339,9 +339,11 @@ private struct StepActions: View {
 }
 
 /// The reviewer's own line of the checklist: which one is chosen, whether it
-/// is ready, and how to switch when it is not.
+/// is ready, and how to switch when it is not. Claude's subscription is
+/// detected and preferred; an API key is offered, never the default.
 private struct ReviewStep: View {
     let model: AppModel
+    @State private var enteringAPIKey = false
 
     var body: some View {
         switch model.settings.reviewer {
@@ -364,7 +366,9 @@ private struct ReviewStep: View {
                             Button("Revérifier") { model.recheckClaude() }
                                 .buttonStyle(.glass)
                         }
+                        apiKeyButton
                     }
+                    apiKeyEntry
                 }
             } else {
                 Actions {
@@ -382,14 +386,41 @@ private struct ReviewStep: View {
                     .foregroundStyle(.tertiary)
             }
 
+        case .claude where model.settings.claudeAccess == .apiKey:
+            if model.hasAPIKey {
+                Text("Claude relit vos dictées avec votre clé API \(APIKeyField.masked(model.settings.anthropicAPIKey)).")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            } else {
+                APIKeyField(model: model)
+                Text("Collez une clé API Anthropic, facturée à l'usage.")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+            if model.claudeSubscriptionReady {
+                Actions {
+                    Button("Utiliser l'abonnement") { model.selectClaudeAccess(.subscription) }
+                        .buttonStyle(.glass)
+                }
+            }
+
         case .claude:
             if let path = model.claudeCLIPath, model.claudeSignedIn {
+                detectedText
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
                 Text(path.path)
                     .font(.caption.monospaced())
                     .foregroundStyle(.tertiary)
                     .lineLimit(1)
                     .truncationMode(.middle)
                     .textSelection(.enabled)
+                if !model.settings.reviewerIsChosen && model.appleIntelligence.isAvailable {
+                    Actions {
+                        Button("Utiliser Apple Intelligence") { model.selectReviewer(.apple) }
+                            .buttonStyle(.glass)
+                    }
+                }
             } else {
                 Actions {
                     if model.claudeCLIPath == nil {
@@ -401,6 +432,7 @@ private struct ReviewStep: View {
                         Button("Revérifier") { model.recheckClaude() }
                             .buttonStyle(.glassProminent)
                     }
+                    apiKeyButton
                     if model.appleIntelligence.isAvailable {
                         Button("Utiliser Apple Intelligence") { model.selectReviewer(.apple) }
                             .buttonStyle(.glass)
@@ -408,11 +440,39 @@ private struct ReviewStep: View {
                     Button("Continuer sans relecture") { model.selectReviewer(.none) }
                         .buttonStyle(.glass)
                 }
+                apiKeyEntry
                 Text("Connectez-vous une fois dans Claude Code ou l'app Claude, puis revérifiez.")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
             }
         }
+    }
+
+    /// The alternative to the subscription, behind a button: never the default.
+    private var apiKeyButton: some View {
+        Button("Clé API…") { enteringAPIKey.toggle() }
+            .buttonStyle(.glass)
+    }
+
+    @ViewBuilder
+    private var apiKeyEntry: some View {
+        if enteringAPIKey {
+            APIKeyField(model: model)
+            Text("Sans abonnement : Claude via votre clé API Anthropic, facturée à l'usage.")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
+    }
+
+    /// What was detected and why Claude was picked: the subscription first.
+    private var detectedText: Text {
+        if model.settings.reviewerIsChosen {
+            return Text("Claude relit vos dictées avec votre abonnement.")
+        }
+        if model.appleIntelligence.isAvailable {
+            return Text("Abonnement Claude et Apple Intelligence détectés : Claude relit, plus sûr sur le jargon. Apple Intelligence prend le relais hors ligne.")
+        }
+        return Text("Abonnement Claude détecté : Claude relit vos dictées.")
     }
 
     /// Why the on-device model reviews: picked, or the automatic choice
@@ -458,7 +518,7 @@ private extension SetupStep {
         case .transcriptionModel:
             "Un modèle de transcription tourne sur ce Mac, sans réseau. Il se télécharge une seule fois, environ 630 Mo."
         case .review:
-            "Un modèle de langage retire les hésitations et corrige la ponctuation et votre jargon : Claude Haiku avec votre abonnement Claude, via la commande claude, ou à défaut Apple Intelligence sur ce Mac. Au choix dans les Réglages."
+            "Un modèle de langage retire les hésitations et corrige la ponctuation et votre jargon : Claude Haiku avec votre abonnement Claude, détecté automatiquement, ou une clé API ; à défaut Apple Intelligence sur ce Mac. Au choix dans les Réglages."
         }
     }
 

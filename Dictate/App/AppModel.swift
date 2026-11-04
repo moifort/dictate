@@ -57,9 +57,13 @@ final class AppModel {
             reviewer: { settings.reviewer },
             isOnline: { network.isOnline },
             apple: AppleIntelligenceEnhancer(systemPrompt: systemPrompt),
-            claude: ClaudeCLIEnhancer(
-                locate: { locator.locate(override: settings.cliPathOverride) },
-                systemPrompt: systemPrompt
+            claude: ClaudeEnhancer(
+                access: { settings.claudeAccess },
+                cli: ClaudeCLIEnhancer(
+                    locate: { locator.locate(override: settings.cliPathOverride) },
+                    systemPrompt: systemPrompt
+                ),
+                api: ClaudeAPIEnhancer(apiKey: { settings.anthropicAPIKey }, systemPrompt: systemPrompt)
             )
         )
         self.enhancer = enhancer
@@ -112,15 +116,46 @@ final class AppModel {
         refreshSetup()
     }
 
-    /// Until the user picks: Claude when its CLI is here and signed in, else
-    /// the on-device model when this Mac has it, else the raw transcript.
+    /// Until the user picks: Claude when it can answer (its CLI here and
+    /// signed in, or a key saved), else the on-device model when this Mac
+    /// has it, else the raw transcript.
     private var automaticReviewer: Reviewer {
         if claudeReady { return .claude }
         return appleIntelligence.isAvailable ? .apple : .none
     }
 
-    /// Claude can review: its CLI is here and an account is signed in.
-    var claudeReady: Bool { claudeCLIPath != nil && claudeSignedIn }
+    /// Claude can review, through the access the user picked.
+    var claudeReady: Bool {
+        switch settings.claudeAccess {
+        case .subscription: claudeSubscriptionReady
+        case .apiKey: hasAPIKey
+        }
+    }
+
+    /// The `claude` CLI is here and an account is signed in.
+    var claudeSubscriptionReady: Bool { claudeCLIPath != nil && claudeSignedIn }
+
+    var hasAPIKey: Bool { !settings.anthropicAPIKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+
+    /// Switches between the subscription and the API key: the waiting process
+    /// belongs to the previous one, and the automatic choice may move.
+    func selectClaudeAccess(_ access: ClaudeAccess) {
+        guard access != settings.claudeAccess else { return }
+        settings.claudeAccess = access
+        reviewTestResult = nil
+        enhancer.reset()
+        settingsChanged()
+    }
+
+    /// Saves the key and uses it: whoever types a key wants Claude through it.
+    func saveAPIKey(_ key: String) {
+        settings.anthropicAPIKey = key.trimmingCharacters(in: .whitespacesAndNewlines)
+        reviewTestResult = nil
+        settings.claudeAccess = hasAPIKey ? .apiKey : .subscription
+        if hasAPIKey { settings.reviewer = .claude }
+        enhancer.reset()
+        settingsChanged()
+    }
 
     func start() {
         Log.app.info("""
@@ -150,6 +185,7 @@ final class AppModel {
             "reviewer": settings.reviewer.rawValue,
             "vocabulary_boosting": settings.boostedVocabulary.isEmpty ? "off" : "on",
             "claude_cli": claudeCLIPath == nil ? "missing" : claudeSignedIn ? "signed_in" : "signed_out",
+            "claude_access": settings.claudeAccess.rawValue,
             "apple_intelligence": appleIntelligence.isAvailable ? "available" : "unavailable",
         ])
     }
@@ -416,6 +452,8 @@ final class AppModel {
             case .apple:
                 refreshSetup()
                 lastError = appleIntelligence.explanation ?? String(localized: "Apple Intelligence n'a pas répondu : texte brut inséré.")
+            case .claude where settings.claudeAccess == .apiKey:
+                lastError = String(localized: "L'API Claude n'a pas répondu : texte brut inséré.")
             case .claude:
                 refreshClaudeCLI()
                 lastError = claudeCLIPath == nil
@@ -427,7 +465,9 @@ final class AppModel {
         }
         let claudeDisconnected = settings.reviewer == .claude && enhancer.isClaudeDisconnected
         if claudeDisconnected {
-            lastError = String(localized: "Claude est déconnecté : lancez « claude auth login » dans un terminal.")
+            lastError = settings.claudeAccess == .apiKey
+                ? ClaudeAPIError.invalidKey.localizedDescription
+                : String(localized: "Claude est déconnecté : lancez « claude auth login » dans un terminal.")
         }
         indicator.show(outcome, claudeDisconnected: claudeDisconnected)
     }
