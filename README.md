@@ -32,8 +32,11 @@ ready-to-send text.
 - **Private by design.** Speech is transcribed on your Mac with Parakeet; the
   audio never leaves it. The cleanup is done by Claude Haiku 4.5 through your own
   Claude subscription (it answers without a thinking pass, in about a second) when Claude Code is installed and signed in, or else by Apple Intelligence's
-  on-device model, so nothing leaves the Mac. Pick either in Settings, or turn
-  the cleanup off entirely. If Claude gets signed out, the pill says so and
+  on-device model, so nothing leaves the Mac. No subscription? Paste an API key
+  for Claude, OpenAI (GPT-5.4 nano, no reasoning) or Gemini (3.5 Flash-Lite):
+  each runs its fastest model, and the key stays in the keychain. Until you
+  pick, Dictate takes the first it finds: Claude, OpenAI, Gemini, then Apple
+  Intelligence. Pick another in Settings, or turn the cleanup off entirely. If Claude gets signed out, the pill says so and
   Apple Intelligence steps in; a reply that strays from what you said is
   dropped for the raw transcript. Crashes and errors are reported to Sentry without
   any of your text.
