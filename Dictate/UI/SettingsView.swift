@@ -381,10 +381,24 @@ private enum ReviewerTile: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Stand-ins until each service ships a logo we may embed.
-    var symbol: String { reviewer.symbol }
-
     var isAvailable: Bool { reviewer.isAvailable }
+}
+
+/// A reviewer's logo, or its SF Symbol, at the size of the picker's icons.
+private struct ReviewerIcon: View {
+    let reviewer: Reviewer
+
+    var body: some View {
+        if let logo = reviewer.logo {
+            Image(logo)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 24, height: 24)
+        } else {
+            Image(systemName: reviewer.symbol)
+                .font(.system(size: 22))
+        }
+    }
 }
 
 /// The pass that turns the raw transcription into clean text.
@@ -683,8 +697,7 @@ private struct ReviewerPicker: View {
                     selection = reviewer
                 } label: {
                     VStack(spacing: 6) {
-                        Image(systemName: reviewer.symbol)
-                            .font(.system(size: 22))
+                        ReviewerIcon(reviewer: reviewer.reviewer)
                             .frame(width: 56, height: 40)
                             .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
                             .overlay {

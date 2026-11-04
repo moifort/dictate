@@ -48,6 +48,7 @@ nonisolated enum Reviewer: String, CaseIterable, Codable, Identifiable, Sendable
         }
     }
 
+    /// The SF Symbol, for the reviewers without a logo of their own.
     var symbol: String {
         switch self {
         case .none: "nosign"
@@ -55,6 +56,17 @@ nonisolated enum Reviewer: String, CaseIterable, Codable, Identifiable, Sendable
         case .claude: "sparkles"
         case .openAI: "bubble.left.and.text.bubble.right"
         case .gemini: "star.circle"
+        }
+    }
+
+    /// The service's own logo in the asset catalog, monochrome like the
+    /// symbols (Simple Icons, CC0); nil for those drawn with an SF Symbol.
+    var logo: String? {
+        switch self {
+        case .claude: "Claude"
+        case .openAI: "OpenAI"
+        case .gemini: "Gemini"
+        case .none, .apple: nil
         }
     }
 }
