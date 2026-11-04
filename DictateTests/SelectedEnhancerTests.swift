@@ -29,11 +29,12 @@ struct SelectedEnhancerTests {
     private func make(
         reviewer: Reviewer, online: Bool = true, appleAvailable: Bool = true,
         apple: FakeEnhancer = FakeEnhancer(.success("apple")),
-        claude: FakeEnhancer = FakeEnhancer(.success("claude"))
+        claude: FakeEnhancer = FakeEnhancer(.success("claude")),
+        others: [Reviewer: any Enhancer] = [.openAI: FakeEnhancer(.success("openai")), .gemini: FakeEnhancer(.success("gemini"))]
     ) -> (SelectedEnhancer, apple: FakeEnhancer, claude: FakeEnhancer) {
         let enhancer = SelectedEnhancer(
             reviewer: { reviewer }, isOnline: { online }, appleAvailable: { appleAvailable },
-            apple: apple, claude: claude
+            apple: apple, claude: claude, others: others
         )
         return (enhancer, apple, claude)
     }
@@ -106,13 +107,31 @@ struct SelectedEnhancerTests {
     }
 
     @Test func aRefusedAPIKeyShowsLikeASignedOutClaude() async throws {
-        let (enhancer, _, _) = make(reviewer: .claude, claude: FakeEnhancer(.failure(ClaudeAPIError.invalidKey)))
+        let (enhancer, _, _) = make(reviewer: .claude, claude: FakeEnhancer(.failure(APIReviewError.invalidKey(.anthropic))))
         #expect(try await enhancer.enhance(transcript: "x", context: DictationContext()) == "apple")
         #expect(enhancer.isClaudeDisconnected)
 
-        let (limited, _, _) = make(reviewer: .claude, claude: FakeEnhancer(.failure(ClaudeAPIError.rateLimited)))
+        let (limited, _, _) = make(reviewer: .claude, claude: FakeEnhancer(.failure(APIReviewError.rateLimited(.anthropic))))
         #expect(try await limited.enhance(transcript: "x", context: DictationContext()) == "apple")
         #expect(!limited.isClaudeDisconnected)
+    }
+
+    @Test func openAIAndGeminiAreAskedAndFallBackLikeClaude() async throws {
+        let (openAI, _, claude) = make(reviewer: .openAI)
+        #expect(try await openAI.enhance(transcript: "x", context: DictationContext()) == "openai")
+        #expect(claude.calls == 0)
+        let (gemini, _, _) = make(reviewer: .gemini)
+        #expect(try await gemini.enhance(transcript: "x", context: DictationContext()) == "gemini")
+
+        let (offline, _, _) = make(reviewer: .gemini, online: false)
+        #expect(offline.effectiveReviewer == .apple)
+        #expect(try await offline.enhance(transcript: "x", context: DictationContext()) == "apple")
+
+        let (refused, _, _) = make(reviewer: .openAI, others: [.openAI: FakeEnhancer(.failure(APIReviewError.invalidKey(.openAI)))])
+        #expect(try await refused.enhance(transcript: "x", context: DictationContext()) == "apple")
+        #expect(refused.lastUsed == .apple)
+        // The indicator's warning is about Claude's sign-in only.
+        #expect(!refused.isClaudeDisconnected)
     }
 
     @Test func aSignedOutClaudeWithoutAppleIntelligenceIsRememberedToo() async {

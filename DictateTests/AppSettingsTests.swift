@@ -126,24 +126,27 @@ struct AppSettingsTests {
     }
 
     @Test func claudeGoesThroughTheSubscriptionByDefault() {
-        let settings = AppSettings(defaults: UserDefaults(suiteName: "AppSettingsTests-\(UUID().uuidString)")!, apiKeyStore: InMemorySecret())
+        let settings = AppSettings(defaults: UserDefaults(suiteName: "AppSettingsTests-\(UUID().uuidString)")!, apiKeyStores: { _ in InMemorySecret() })
         #expect(settings.claudeAccess == .subscription)
-        #expect(settings.anthropicAPIKey.isEmpty)
+        #expect(APIProvider.allCases.allSatisfy { !settings.hasAPIKey($0) })
     }
 
-    @Test func theAccessPersistsAndTheKeyStaysOutOfUserDefaults() {
+    @Test func eachKeyPersistsApartAndStaysOutOfUserDefaults() {
         let suite = "AppSettingsTests-\(UUID().uuidString)"
-        let store = InMemorySecret()
-        let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!, apiKeyStore: store)
+        let stores = Dictionary(uniqueKeysWithValues: APIProvider.allCases.map { ($0, InMemorySecret()) })
+        let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!, apiKeyStores: { stores[$0]! })
         settings.claudeAccess = .apiKey
-        settings.anthropicAPIKey = "sk-ant-test"
-        let reloaded = AppSettings(defaults: UserDefaults(suiteName: suite)!, apiKeyStore: store)
+        settings.setAPIKey("sk-ant-test", for: .anthropic)
+        settings.setAPIKey("AIza-test", for: .gemini)
+        let reloaded = AppSettings(defaults: UserDefaults(suiteName: suite)!, apiKeyStores: { stores[$0]! })
         #expect(reloaded.claudeAccess == .apiKey)
-        #expect(reloaded.anthropicAPIKey == "sk-ant-test")
+        #expect(reloaded.apiKey(.anthropic) == "sk-ant-test")
+        #expect(reloaded.apiKey(.gemini) == "AIza-test")
+        #expect(!reloaded.hasAPIKey(.openAI))
         let stored = UserDefaults(suiteName: suite)!.dictionaryRepresentation().values.compactMap { $0 as? String }
         #expect(!stored.contains("sk-ant-test"))
-        settings.anthropicAPIKey = ""
-        #expect(store.read() == nil)
+        settings.setAPIKey("", for: .anthropic)
+        #expect(stores[.anthropic]!.read() == nil)
     }
 
     @Test func aLanguageOnlyWhisperUnderstoodIsAskedAgain() {

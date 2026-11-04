@@ -87,6 +87,8 @@ enum StatsPalette {
     static let latency = Color.cyan
     static let claude = Color.purple
     static let apple = Color.blue
+    static let openAI = Color.teal
+    static let gemini = Color.mint
     static let pace = Color.orange
     static let timeSaved = Color.indigo
 
@@ -95,6 +97,8 @@ enum StatsPalette {
         switch reviewer {
         case .claude: claude
         case .apple: apple
+        case .openAI: openAI
+        case .gemini: gemini
         case .none: latency
         }
     }

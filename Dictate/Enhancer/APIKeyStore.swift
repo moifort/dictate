@@ -11,7 +11,7 @@ nonisolated protocol SecretStore: Sendable {
 /// A generic password in the login keychain.
 nonisolated struct KeychainSecret: SecretStore {
     var service = (Bundle.main.bundleIdentifier ?? "com.polyforms.dictate") + ".anthropic"
-    var account = "api-key"
+    var account: String
 
     private var query: [String: Any] {
         [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service, kSecAttrAccount as String: account]

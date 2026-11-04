@@ -345,12 +345,9 @@ private struct GeneralSettings: View {
     }
 }
 
-/// Who reviews a dictation. Only Claude is wired today; the others show
-/// where this is going, and "Aucun" keeps the raw transcription.
-/// The tiles of the reviewer picker: the reviewers Dictate has, and the
-/// services it may get one day.
+/// Who reviews a dictation: one tile per reviewer, "Aucun" keeps the raw transcription.
 private enum ReviewerTile: String, CaseIterable, Identifiable {
-    case none, apple, claude, chatGPT, gemini
+    case none, apple, claude, openAI, gemini
 
     var id: String { rawValue }
 
@@ -359,16 +356,18 @@ private enum ReviewerTile: String, CaseIterable, Identifiable {
         case .none: self = .none
         case .apple: self = .apple
         case .claude: self = .claude
+        case .openAI: self = .openAI
+        case .gemini: self = .gemini
         }
     }
 
-    /// Nil for the services that are not available yet.
-    var reviewer: Reviewer? {
+    var reviewer: Reviewer {
         switch self {
         case .none: Reviewer.none
         case .apple: .apple
         case .claude: .claude
-        case .chatGPT, .gemini: nil
+        case .openAI: .openAI
+        case .gemini: .gemini
         }
     }
 
@@ -377,23 +376,15 @@ private enum ReviewerTile: String, CaseIterable, Identifiable {
         case .none: "Aucun"
         case .apple: "Apple"
         case .claude: "Claude"
-        case .chatGPT: "ChatGPT"
+        case .openAI: "OpenAI"
         case .gemini: "Gemini"
         }
     }
 
     /// Stand-ins until each service ships a logo we may embed.
-    var symbol: String {
-        switch self {
-        case .none: "nosign"
-        case .apple: "apple.intelligence"
-        case .claude: "sparkles"
-        case .chatGPT: "bubble.left.and.text.bubble.right"
-        case .gemini: "star.circle"
-        }
-    }
+    var symbol: String { reviewer.symbol }
 
-    var isAvailable: Bool { reviewer != nil }
+    var isAvailable: Bool { reviewer.isAvailable }
 }
 
 /// The pass that turns the raw transcription into clean text.
@@ -405,7 +396,7 @@ private struct ReviewSettings: View {
     private var reviewer: Binding<ReviewerTile> {
         Binding(
             get: { ReviewerTile(model.settings.reviewer) },
-            set: { if let reviewer = $0.reviewer { model.selectReviewer(reviewer) } }
+            set: { model.selectReviewer($0.reviewer) }
         )
     }
 
@@ -439,12 +430,17 @@ private struct ReviewSettings: View {
                     Divider()
                 }
 
-                if model.settings.reviewer == .apple || Distribution.isAppStore {
+                switch model.settings.reviewer {
+                case _ where Distribution.isAppStore, .apple:
                     appleStatus
-                } else {
+                case .openAI:
+                    apiKeyStatus(.openAI)
+                case .gemini:
+                    apiKeyStatus(.gemini)
+                case .claude, .none:
                     claudeAccess
                     if model.settings.claudeAccess == .apiKey {
-                        apiKeyStatus
+                        apiKeyStatus(.anthropic)
                     } else {
                         claudeBinary
                     }
@@ -477,7 +473,7 @@ private struct ReviewSettings: View {
                     .foregroundStyle(.orange)
             }
             if enteringAPIKey {
-                APIKeyField(model: model)
+                APIKeyField(model: model, provider: .anthropic)
                 Text("Sans abonnement : Claude via votre clé API Anthropic, facturée à l'usage.")
                     .foregroundStyle(.secondary)
             }
@@ -510,27 +506,28 @@ private struct ReviewSettings: View {
         }
     }
 
-    private var apiKeyStatus: some View {
-        LabeledContent("Clé :") {
+    private func apiKeyStatus(_ provider: APIProvider) -> some View {
+        let saved = model.settings.hasAPIKey(provider)
+        return LabeledContent("Clé :") {
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 8) {
-                    if model.hasAPIKey {
+                    if saved {
                         Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
-                        Text(verbatim: APIKeyField.masked(model.settings.anthropicAPIKey))
+                        Text(verbatim: APIKeyField.masked(model.settings.apiKey(provider)))
                             .font(.callout.monospaced())
                     } else {
                         Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
-                        Text("Aucune clé enregistrée")
+                        Text("Aucune clé \(provider.displayName) enregistrée")
                     }
                     Spacer()
                     Button("Tester") { Task { await model.testReviewer() } }
-                        .disabled(!model.hasAPIKey)
+                        .disabled(!saved)
                 }
-                APIKeyField(model: model)
+                APIKeyField(model: model, provider: provider)
                 HStack(spacing: 12) {
-                    Link("Créer une clé", destination: URL(string: "https://console.anthropic.com/settings/keys")!)
-                    if model.hasAPIKey {
-                        Button("Supprimer la clé") { model.saveAPIKey("") }
+                    Link("Créer une clé", destination: provider.keysPage)
+                    if saved {
+                        Button("Supprimer la clé") { model.saveAPIKey("", for: provider) }
                     }
                 }
                 .buttonStyle(.link)
@@ -552,9 +549,13 @@ private struct ReviewSettings: View {
             String(localized: "Modèle Haiku, via votre clé API Anthropic. Un peu plus rapide et plus sûr sur le jargon.")
         case .claude:
             String(localized: "Modèle Haiku, via votre abonnement Claude. Un peu plus rapide et plus sûr sur le jargon.")
+        case .openAI:
+            String(localized: "Modèle GPT-5.4 nano sans raisonnement, le plus rapide d'OpenAI, via votre clé API.")
+        case .gemini:
+            String(localized: "Modèle Gemini 3.5 Flash-Lite, le plus rapide de Google, via votre clé API.")
         }
         guard !model.settings.reviewerIsChosen, !Distribution.isAppStore else { return hint }
-        return String(localized: "Choix automatique : Claude si votre abonnement est détecté, sinon Apple Intelligence, sinon aucun.") + " " + hint
+        return String(localized: "Choix automatique : Claude, sinon OpenAI, sinon Gemini, sinon Apple Intelligence, selon ce qui est détecté.") + " " + hint
     }
 
     private var appleStatus: some View {
@@ -676,9 +677,8 @@ private struct ReviewerPicker: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            // The App Store build shows only the reviewers it has: no Claude, no
-            // service still to come.
-            ForEach(ReviewerTile.allCases.filter { !Distribution.isAppStore || ($0.isAvailable && $0 != .claude) }) { reviewer in
+            // The App Store build shows only the reviewers it has: no cloud service.
+            ForEach(ReviewerTile.allCases.filter(\.isAvailable)) { reviewer in
                 Button {
                     selection = reviewer
                 } label: {
@@ -696,18 +696,21 @@ private struct ReviewerPicker: View {
                     }
                 }
                 .buttonStyle(.plain)
-                .disabled(!reviewer.isAvailable || (reviewer == .claude && !claudeReady))
+                .disabled(reviewer == .claude && !claudeReady)
                 .help(help(for: reviewer))
             }
         }
     }
 
     private func help(for reviewer: ReviewerTile) -> Text {
-        if !reviewer.isAvailable { return Text("Bientôt") }
-        if reviewer == .claude && !claudeReady {
-            return Text("Nécessite Claude Code ou l'app Claude connecté à votre abonnement, ou une clé API.")
+        switch reviewer {
+        case .claude where !claudeReady:
+            Text("Nécessite Claude Code ou l'app Claude connecté à votre abonnement, ou une clé API.")
+        case .openAI, .gemini:
+            Text("Avec votre clé API, facturée à l'usage.")
+        default:
+            Text(verbatim: "")
         }
-        return Text(verbatim: "")
     }
 }
 

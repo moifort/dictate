@@ -340,10 +340,11 @@ private struct StepActions: View {
 
 /// The reviewer's own line of the checklist: which one is chosen, whether it
 /// is ready, and how to switch when it is not. Claude's subscription is
-/// detected and preferred; an API key is offered, never the default.
+/// detected and preferred; API keys are offered, never the default.
 private struct ReviewStep: View {
     let model: AppModel
     @State private var enteringAPIKey = false
+    @State private var keyProvider = APIProvider.anthropic
 
     var body: some View {
         switch model.settings.reviewer {
@@ -386,17 +387,13 @@ private struct ReviewStep: View {
                     .foregroundStyle(.tertiary)
             }
 
-        case .claude where model.settings.claudeAccess == .apiKey:
-            if model.hasAPIKey {
-                Text("Claude relit vos dictées avec votre clé API \(APIKeyField.masked(model.settings.anthropicAPIKey)).")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-            } else {
-                APIKeyField(model: model)
-                Text("Collez une clé API Anthropic, facturée à l'usage.")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
+        case .openAI, .gemini:
+            if let provider = model.settings.reviewer.apiProvider {
+                keyReviewer(provider)
             }
+
+        case .claude where model.settings.claudeAccess == .apiKey:
+            keyReviewer(.anthropic)
             if model.claudeSubscriptionReady {
                 Actions {
                     Button("Utiliser l'abonnement") { model.selectClaudeAccess(.subscription) }
@@ -448,6 +445,26 @@ private struct ReviewStep: View {
         }
     }
 
+    /// A reviewer reached with a key: the key in use, or the field to paste one.
+    @ViewBuilder
+    private func keyReviewer(_ provider: APIProvider) -> some View {
+        if model.settings.hasAPIKey(provider) {
+            Group {
+                Text("\(provider.displayName) relit vos dictées avec votre clé API \(APIKeyField.masked(model.settings.apiKey(provider))).")
+                if let detected = detectedSummary {
+                    Text(detected)
+                }
+            }
+            .font(.caption)
+            .foregroundStyle(.tertiary)
+        } else {
+            APIKeyField(model: model, provider: provider)
+            Text("Collez une clé API \(provider.displayName), facturée à l'usage.")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
+    }
+
     /// The alternative to the subscription, behind a button: never the default.
     private var apiKeyButton: some View {
         Button("Clé API…") { enteringAPIKey.toggle() }
@@ -457,8 +474,17 @@ private struct ReviewStep: View {
     @ViewBuilder
     private var apiKeyEntry: some View {
         if enteringAPIKey {
-            APIKeyField(model: model)
-            Text("Sans abonnement : Claude via votre clé API Anthropic, facturée à l'usage.")
+            Picker("Service", selection: $keyProvider) {
+                ForEach(APIProvider.allCases) { provider in
+                    Text(provider.displayName).tag(provider)
+                }
+            }
+            .pickerStyle(.segmented)
+            .labelsHidden()
+            .fixedSize()
+            APIKeyField(model: model, provider: keyProvider)
+                .id(keyProvider)
+            Text("Sans abonnement : votre clé API, facturée à l'usage.")
                 .font(.caption)
                 .foregroundStyle(.tertiary)
         }
@@ -469,10 +495,27 @@ private struct ReviewStep: View {
         if model.settings.reviewerIsChosen {
             return Text("Claude relit vos dictées avec votre abonnement.")
         }
-        if model.appleIntelligence.isAvailable {
-            return Text("Abonnement Claude et Apple Intelligence détectés : Claude relit, plus sûr sur le jargon. Apple Intelligence prend le relais hors ligne.")
+        if let detected = detectedSummary {
+            return Text("Abonnement Claude détecté.") + Text(verbatim: " ") + Text(detected)
         }
         return Text("Abonnement Claude détecté : Claude relit vos dictées.")
+    }
+
+    /// "Aussi détectés : clé OpenAI et Apple Intelligence. Claude passe en premier, …"
+    /// Nil when the user picked, or when nothing else was found.
+    private var detectedSummary: String? {
+        guard !model.settings.reviewerIsChosen else { return nil }
+        let chosen = model.settings.reviewer
+        let others = model.detectedReviewers.filter { $0 != chosen }
+        guard !others.isEmpty else { return nil }
+        let names = others.map { reviewer in
+            reviewer == .apple ? reviewer.displayName : String(localized: "clé \(reviewer.displayName)")
+        }
+        let list = names.formatted(.list(type: .and))
+        let fallback = others.contains(.apple)
+            ? String(localized: " Apple Intelligence prend le relais hors ligne.")
+            : ""
+        return String(localized: "Aussi détectés : \(list). \(chosen.displayName) passe en premier.") + fallback
     }
 
     /// Why the on-device model reviews: picked, or the automatic choice
@@ -518,7 +561,7 @@ private extension SetupStep {
         case .transcriptionModel:
             "Un modèle de transcription tourne sur ce Mac, sans réseau. Il se télécharge une seule fois, environ 630 Mo."
         case .review:
-            "Un modèle de langage retire les hésitations et corrige la ponctuation et votre jargon : Claude Haiku avec votre abonnement Claude, détecté automatiquement, ou une clé API ; à défaut Apple Intelligence sur ce Mac. Au choix dans les Réglages."
+            "Un modèle de langage retire les hésitations et corrige la ponctuation et votre jargon : Claude Haiku avec votre abonnement Claude, détecté automatiquement, ou une clé API Claude, OpenAI ou Gemini ; à défaut Apple Intelligence sur ce Mac. Au choix dans les Réglages."
         }
     }
 

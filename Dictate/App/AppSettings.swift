@@ -12,7 +12,7 @@ final class AppSettings {
     ]
 
     @ObservationIgnored private let defaults: UserDefaults
-    @ObservationIgnored private let apiKeyStore: SecretStore
+    @ObservationIgnored private let apiKeyStores: (APIProvider) -> SecretStore
 
     /// ISO 639-1 code of the dictated language, for Parakeet and the review
     /// prompt. Starts as the OS language.
@@ -41,7 +41,7 @@ final class AppSettings {
     }
 
     /// What to use until the user picks: the app sets it from what this Mac
-    /// has (Claude's CLI first, then Apple Intelligence, else nothing).
+    /// has (Claude, then OpenAI and Gemini keys, then Apple Intelligence, else nothing).
     @ObservationIgnored var defaultReviewer: () -> Reviewer = { .claude }
 
     /// The model that cleans up each transcript.
@@ -84,9 +84,25 @@ final class AppSettings {
         didSet { defaults.set(claudeAccess.rawValue, forKey: Keys.claudeAccess) }
     }
 
-    /// The Anthropic API key, kept in the keychain. Empty when none is saved.
-    var anthropicAPIKey: String {
-        didSet { apiKeyStore.write(anthropicAPIKey) }
+    /// Each provider's API key, kept in the keychain.
+    private(set) var apiKeys: [APIProvider: String] = [:]
+
+    /// Empty when none is saved.
+    func apiKey(_ provider: APIProvider) -> String { apiKeys[provider] ?? "" }
+
+    func hasAPIKey(_ provider: APIProvider) -> Bool {
+        !apiKey(provider).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    /// An empty key removes it.
+    func setAPIKey(_ key: String, for provider: APIProvider) {
+        apiKeys[provider] = key.isEmpty ? nil : key
+        apiKeyStores(provider).write(key)
+    }
+
+    /// Back to the automatic choice, e.g. once the chosen reviewer's key is removed.
+    func clearReviewerChoice() {
+        reviewerChoice = nil
     }
 
     var cliPathOverride: String {
@@ -134,9 +150,12 @@ final class AppSettings {
         }
     }
 
-    init(defaults: UserDefaults = .standard, apiKeyStore: SecretStore = KeychainSecret()) {
+    init(
+        defaults: UserDefaults = .standard,
+        apiKeyStores: @escaping (APIProvider) -> SecretStore = { KeychainSecret(account: $0.keychainAccount) }
+    ) {
         self.defaults = defaults
-        self.apiKeyStore = apiKeyStore
+        self.apiKeyStores = apiKeyStores
         if let saved = defaults.string(forKey: Keys.reviewer).flatMap(Reviewer.init(rawValue:)) {
             reviewerChoice = saved
         } else if defaults.object(forKey: Keys.enhancementEnabled) as? Bool == false {
@@ -161,7 +180,11 @@ final class AppSettings {
         keepEvaluationCorpus = defaults.bool(forKey: Keys.keepEvaluationCorpus)
         suggestVocabulary = defaults.bool(forKey: Keys.suggestVocabulary)
         claudeAccess = defaults.string(forKey: Keys.claudeAccess).flatMap(ClaudeAccess.init(rawValue:)) ?? .subscription
-        anthropicAPIKey = apiKeyStore.read() ?? ""
+        var keys: [APIProvider: String] = [:]
+        for provider in APIProvider.allCases {
+            if let key = apiKeyStores(provider).read(), !key.isEmpty { keys[provider] = key }
+        }
+        apiKeys = keys
         cliPathOverride = defaults.string(forKey: Keys.cliPathOverride) ?? ""
         vocabularyText = defaults.string(forKey: Keys.vocabulary) ?? Self.defaultVocabulary.joined(separator: "\n")
         boostVocabulary = defaults.bool(forKey: Keys.boostVocabulary)

@@ -63,8 +63,12 @@ final class AppModel {
                     locate: { locator.locate(override: settings.cliPathOverride) },
                     systemPrompt: systemPrompt
                 ),
-                api: ClaudeAPIEnhancer(apiKey: { settings.anthropicAPIKey }, systemPrompt: systemPrompt)
-            )
+                api: APIEnhancer(provider: .anthropic, apiKey: { settings.apiKey(.anthropic) }, systemPrompt: systemPrompt)
+            ),
+            others: [
+                .openAI: APIEnhancer(provider: .openAI, apiKey: { settings.apiKey(.openAI) }, systemPrompt: systemPrompt),
+                .gemini: APIEnhancer(provider: .gemini, apiKey: { settings.apiKey(.gemini) }, systemPrompt: systemPrompt),
+            ]
         )
         self.enhancer = enhancer
         controller = DictationController(
@@ -116,26 +120,37 @@ final class AppModel {
         refreshSetup()
     }
 
-    /// Until the user picks: Claude when it can answer (its CLI here and
-    /// signed in, or a key saved), else the on-device model when this Mac
-    /// has it, else the raw transcript.
-    private var automaticReviewer: Reviewer {
-        if claudeReady { return .claude }
-        return appleIntelligence.isAvailable ? .apple : .none
+    /// Until the user picks, the first that can answer: Claude (its CLI here
+    /// and signed in, or a key saved), then OpenAI, then Gemini with their
+    /// keys, then the on-device model, else the raw transcript.
+    private var automaticReviewer: Reviewer { detectedReviewers.first ?? .none }
+
+    /// Every reviewer that can answer now, in the order of preference.
+    var detectedReviewers: [Reviewer] {
+        [Reviewer.claude, .openAI, .gemini, .apple].filter { $0.isAvailable && isReady($0) }
+    }
+
+    /// Whether this reviewer can answer the next dictation.
+    func isReady(_ reviewer: Reviewer) -> Bool {
+        switch reviewer {
+        case .none: true
+        case .apple: appleIntelligence.isAvailable
+        case .claude: claudeReady
+        case .openAI: settings.hasAPIKey(.openAI)
+        case .gemini: settings.hasAPIKey(.gemini)
+        }
     }
 
     /// Claude can review, through the access the user picked.
     var claudeReady: Bool {
         switch settings.claudeAccess {
         case .subscription: claudeSubscriptionReady
-        case .apiKey: hasAPIKey
+        case .apiKey: settings.hasAPIKey(.anthropic)
         }
     }
 
     /// The `claude` CLI is here and an account is signed in.
     var claudeSubscriptionReady: Bool { claudeCLIPath != nil && claudeSignedIn }
-
-    var hasAPIKey: Bool { !settings.anthropicAPIKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
 
     /// Switches between the subscription and the API key: the waiting process
     /// belongs to the previous one, and the automatic choice may move.
@@ -147,12 +162,18 @@ final class AppModel {
         settingsChanged()
     }
 
-    /// Saves the key and uses it: whoever types a key wants Claude through it.
-    func saveAPIKey(_ key: String) {
-        settings.anthropicAPIKey = key.trimmingCharacters(in: .whitespacesAndNewlines)
+    /// Saves the key and uses it: whoever types a key wants that reviewer.
+    /// An empty key removes it, and its reviewer goes back to the automatic choice.
+    func saveAPIKey(_ key: String, for provider: APIProvider) {
+        settings.setAPIKey(key.trimmingCharacters(in: .whitespacesAndNewlines), for: provider)
         reviewTestResult = nil
-        settings.claudeAccess = hasAPIKey ? .apiKey : .subscription
-        if hasAPIKey { settings.reviewer = .claude }
+        let saved = settings.hasAPIKey(provider)
+        if provider == .anthropic { settings.claudeAccess = saved ? .apiKey : .subscription }
+        if saved {
+            settings.reviewer = provider.reviewer
+        } else if settings.reviewerIsChosen, settings.reviewer == provider.reviewer, provider != .anthropic {
+            settings.clearReviewerChoice()
+        }
         enhancer.reset()
         settingsChanged()
     }
@@ -211,13 +232,7 @@ final class AppModel {
     }
 
     /// Whether the chosen reviewer can answer the next dictation.
-    private var reviewerReady: Bool {
-        switch settings.reviewer {
-        case .none: true
-        case .apple: appleIntelligence.isAvailable
-        case .claude: claudeReady
-        }
-    }
+    private var reviewerReady: Bool { isReady(settings.reviewer) }
 
     /// Ready, or on disk and still being compiled: launch must not wait for that.
     private var transcriptionModelReady: Bool {
@@ -452,8 +467,9 @@ final class AppModel {
             case .apple:
                 refreshSetup()
                 lastError = appleIntelligence.explanation ?? String(localized: "Apple Intelligence n'a pas répondu : texte brut inséré.")
-            case .claude where settings.claudeAccess == .apiKey:
-                lastError = String(localized: "L'API Claude n'a pas répondu : texte brut inséré.")
+            case .claude where settings.claudeAccess == .apiKey, .openAI, .gemini:
+                let name = settings.reviewer.displayName
+                lastError = String(localized: "L'API \(name) n'a pas répondu : texte brut inséré.")
             case .claude:
                 refreshClaudeCLI()
                 lastError = claudeCLIPath == nil
@@ -466,7 +482,7 @@ final class AppModel {
         let claudeDisconnected = settings.reviewer == .claude && enhancer.isClaudeDisconnected
         if claudeDisconnected {
             lastError = settings.claudeAccess == .apiKey
-                ? ClaudeAPIError.invalidKey.localizedDescription
+                ? APIReviewError.invalidKey(.anthropic).localizedDescription
                 : String(localized: "Claude est déconnecté : lancez « claude auth login » dans un terminal.")
         }
         indicator.show(outcome, claudeDisconnected: claudeDisconnected)
