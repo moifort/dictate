@@ -11,7 +11,9 @@ struct APIKeyField: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            SecureField(provider.keyPlaceholder, text: $draft)
+            // A form in columns would show the title as a label: the placeholder goes in the prompt.
+            SecureField("Clé API \(provider.displayName)", text: $draft, prompt: Text(verbatim: provider.keyPlaceholder))
+                .labelsHidden()
                 .textFieldStyle(.roundedBorder)
                 .frame(maxWidth: 260)
                 .onSubmit(save)
