@@ -27,15 +27,26 @@ final class FocusInspector: FocusInspecting, FieldReading {
         guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier,
               let focused = ax.focusedElement(pid: pid) else { return false }
 
-        if let role = ax.copyString(focused, kAXRoleAttribute), Self.textRoles.contains(role) {
+        let role = ax.copyString(focused, kAXRoleAttribute)
+        if let role, Self.textRoles.contains(role) {
             return true
         }
         // Rich editors and web `contenteditable` expose a selection and a settable value.
         var settable: DarwinBoolean = false
-        let hasSelection = ax.copyValue(focused, kAXSelectedTextRangeAttribute) != nil
         AXUIElementIsAttributeSettable(focused, kAXValueAttribute as CFString, &settable)
-        return hasSelection && settable.boolValue
+        let hasSelection = ax.copyValue(focused, kAXSelectedTextRangeAttribute) != nil
+            // A page edited as a whole (Mail's message body) is focused as its web
+            // area, which only exposes text markers; its value is settable when editable.
+            || (role == Self.webAreaRole && ax.copyValue(focused, Self.selectedTextMarkerRange) != nil)
+        let editable = hasSelection && settable.boolValue
+        if !editable {
+            Log.dictation.notice("no editable focus: role \(role ?? "none", privacy: .public), selection \(hasSelection), settable \(settable.boolValue)")
+        }
+        return editable
     }
+
+    private static let webAreaRole = "AXWebArea"
+    private static let selectedTextMarkerRange = "AXSelectedTextMarkerRange"
 
     func fieldContext(maxLength: Int) async -> FieldContext {
         guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier else { return FieldContext() }
