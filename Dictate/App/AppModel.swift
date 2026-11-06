@@ -220,7 +220,9 @@ final class AppModel {
         let checklist = SetupChecklist(
             language: settings.languageConfirmed,
             microphone: Permissions.microphone,
-            inputMonitoring: Permissions.inputMonitoring || hotkeyActive,
+            // Not `hotkeyActive`: a tap can exist without the grant, and then
+            // the step would be skipped and the permission never requested.
+            inputMonitoring: Permissions.inputMonitoring,
             accessibility: Permissions.accessibility,
             fnKeyFree: Permissions.fnKeyFree,
             fnKeyNeeded: settings.pushToTalkKey.needsSystemKeyFreed,
@@ -284,14 +286,17 @@ final class AppModel {
     }
 
     /// The event tap only works once Input Monitoring is granted: keep retrying.
+    ///
+    /// Without the grant macOS still creates the tap, but only delivers the
+    /// keys typed in Dictate's own windows: wait for the grant before creating it.
     func startHotkey() {
-        hotkeyActive = fnMonitor.start()
+        hotkeyActive = Permissions.inputMonitoring && fnMonitor.start()
         Log.hotkey.info("event tap active: \(self.hotkeyActive)")
         guard !hotkeyActive, hotkeyRetry == nil else { return }
         hotkeyRetry = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated {
                 guard let self else { return }
-                self.hotkeyActive = self.fnMonitor.start()
+                self.hotkeyActive = Permissions.inputMonitoring && self.fnMonitor.start()
                 if self.hotkeyActive {
                     Log.hotkey.info("event tap active after retry")
                     self.hotkeyRetry?.invalidate()
