@@ -145,9 +145,18 @@ final class AppSettings {
             do {
                 try newValue ? SMAppService.mainApp.register() : SMAppService.mainApp.unregister()
             } catch {
+                // Turned off by the user in System Settings: only they can turn it
+                // back on there, which the toggle tells them. Not an error.
+                guard !launchAtLoginNeedsApproval else { return }
                 ErrorReporter.capture(error, "launch at login could not be \(newValue ? "enabled" : "disabled")", category: "settings")
             }
         }
+    }
+
+    /// The login item is registered but macOS waits for the user to allow it
+    /// in System Settings > General > Login Items.
+    var launchAtLoginNeedsApproval: Bool {
+        SMAppService.mainApp.status == .requiresApproval
     }
 
     init(

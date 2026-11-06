@@ -4192,6 +4192,38 @@
           }
         }
       }
+    },
+    "macOS attend votre accord dans Réglages Système.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS is waiting for your approval in System Settings."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS attend votre accord dans Réglages Système."
+          }
+        }
+      }
+    },
+    "Ouvrir les éléments de connexion…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Login Items…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir les éléments de connexion…"
+          }
+        }
+      }
     }
   },
   "version": "1.0"
