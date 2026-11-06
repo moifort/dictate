@@ -111,8 +111,11 @@ final class AudioRecorder: AudioRecording {
 
         let processor = try TapProcessor(inputFormat: format, onSpectrum: onSpectrum)
         // About 21 ms at 48 kHz, so the waves follow syllables; the hardware may
-        // still deliver larger buffers, which the analyzer handles.
-        input.installTap(onBus: 0, bufferSize: 1_024, format: format, block: processor.makeBlock())
+        // still deliver larger buffers, which the analyzer handles. No format:
+        // the tap takes the bus's own. One passed in raises an Objective-C
+        // exception, a crash, when the device changed rate since it was read,
+        // as a Bluetooth headset does when it switches to its 24 kHz call profile.
+        input.installTap(onBus: 0, bufferSize: 1_024, format: nil, block: processor.makeBlock())
         engine.prepare()
         do {
             try engine.start()
@@ -337,19 +340,28 @@ nonisolated final class AudioResampler: @unchecked Sendable {
         interleaved: false
     )!
 
-    private let converter: AVAudioConverter
+    /// Rebuilt when a buffer arrives in another format: a device can change
+    /// rate while the tap runs, and a converter set for the old one fails.
+    private var converter: AVAudioConverter
 
     init(inputFormat: AVAudioFormat) throws {
-        guard let converter = AVAudioConverter(from: inputFormat, to: Self.outputFormat) else {
-            throw ResamplerError.unsupportedFormat
-        }
-        // Discrete multichannel input (voice processing) maps to no output channel
-        // by default, which yields silence: take the first channel explicitly.
-        if inputFormat.channelCount > 1 { converter.channelMap = [0] }
+        guard let converter = Self.converter(from: inputFormat) else { throw ResamplerError.unsupportedFormat }
         self.converter = converter
     }
 
+    private static func converter(from inputFormat: AVAudioFormat) -> AVAudioConverter? {
+        guard let converter = AVAudioConverter(from: inputFormat, to: outputFormat) else { return nil }
+        // Discrete multichannel input (voice processing) maps to no output channel
+        // by default, which yields silence: take the first channel explicitly.
+        if inputFormat.channelCount > 1 { converter.channelMap = [0] }
+        return converter
+    }
+
     func convert(_ buffer: AVAudioPCMBuffer) -> [Float] {
+        if buffer.format != converter.inputFormat {
+            guard let converter = Self.converter(from: buffer.format) else { return [] }
+            self.converter = converter
+        }
         let ratio = Self.outputFormat.sampleRate / buffer.format.sampleRate
         let capacity = AVAudioFrameCount((Double(buffer.frameLength) * ratio).rounded(.up)) + 1
         guard let output = AVAudioPCMBuffer(pcmFormat: Self.outputFormat, frameCapacity: capacity) else { return [] }

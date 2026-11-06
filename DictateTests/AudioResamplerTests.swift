@@ -20,4 +20,21 @@ struct AudioResamplerTests {
         #expect(samples.count == 1_600)
         #expect(samples.allSatisfy { abs($0 - 0.5) < 0.001 })
     }
+
+    /// A Bluetooth headset switching to its call profile drops the microphone
+    /// to 24 kHz while the tap runs: the buffers that follow are converted at
+    /// their own rate, not at the one the recording started with.
+    @Test func bufferAtAnotherRateIsConvertedAtItsOwnRate() throws {
+        let started = try #require(AVAudioFormat(standardFormatWithSampleRate: 48_000, channels: 1))
+        let switched = try #require(AVAudioFormat(standardFormatWithSampleRate: 24_000, channels: 1))
+        let buffer = try #require(AVAudioPCMBuffer(pcmFormat: switched, frameCapacity: 2_400))
+        buffer.frameLength = 2_400
+        let channel = try #require(buffer.floatChannelData)[0]
+        for frame in 0..<2_400 { channel[frame] = 0.5 }
+
+        let samples = try AudioResampler(inputFormat: started).convert(buffer)
+
+        #expect(abs(samples.count - 1_600) <= 32)
+        #expect(samples.dropFirst(64).dropLast(64).allSatisfy { abs($0 - 0.5) < 0.01 })
+    }
 }
