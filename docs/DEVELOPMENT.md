@@ -152,7 +152,10 @@ The last page has a scratch field to try a dictation end to end.
 `Packages/DictateKit` holds the hearing and transcription code, kept apart so
 other apps can reuse it: `AudioRecorder` and its queue capture, `AudioAnalysis`,
 the spectrum, `ParakeetEngine`, `Transcription` and `UnknownTokens`.
-`swift test --package-path Packages/DictateKit` runs its tests.
+`swift test --package-path Packages/DictateKit` runs its tests. Other apps add it with
+`.package(url: "https://github.com/moifort/dictate", branch: "main")`: the
+root `Package.swift` offers the same target. Never run `swift build` at the
+root, which would rewrite the app's `Package.resolved`.
 
 Every inserted dictation appends one JSON line — date, word count, audio
 length, transcription, Claude and insertion times, never the text — to

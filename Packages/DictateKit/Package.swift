@@ -3,6 +3,8 @@ import PackageDescription
 
 // Dictate's hearing and transcription, reusable by other apps: the microphone,
 // the audio analysis and Parakeet.
+// The root Package.swift offers the same target to other apps through GitHub:
+// keep the two in step.
 let package = Package(
     name: "DictateKit",
     defaultLocalization: "fr",

@@ -58,6 +58,16 @@ jobs:
       - name: Run the DictateKit tests
         run: swift test --package-path Packages/DictateKit
 
+      # Builds the root manifest the way an app depending on this repository does,
+      # in a copy so that the app's Package.resolved stays as it is.
+      - name: Build DictateKit as other apps get it
+        run: |
+          set -euo pipefail
+          copy=$(mktemp -d)
+          git archive HEAD | tar -x -C "$copy"
+          rm "$copy/Package.resolved"
+          swift build --package-path "$copy"
+
       - name: Save the Debug build
         if: steps.derived-data.outputs.hit != 'true' && github.ref == 'refs/heads/main'
         uses: actions/cache/save@v6
