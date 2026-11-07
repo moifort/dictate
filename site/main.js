@@ -685,6 +685,27 @@
     })();
   }
 
+  // The smiley card: the words are typed as they are said, then make way for
+  // the emoji they describe.
+  const emojiTyped = document.querySelector("[data-emoji-typed]");
+  const emojiResult = document.querySelector("[data-emoji-result]");
+  if (emojiTyped && emojiResult) {
+    const words = english ? "smiley thumbs up" : "smiley pouce en l'air";
+    (async () => {
+      for (;;) {
+        emojiResult.classList.remove("shown");
+        for (let i = 1; i <= words.length; i++) {
+          emojiTyped.textContent = words.slice(0, i);
+          await sleep(reducedMotion ? 5 : 55);
+        }
+        await sleep(700);
+        emojiTyped.textContent = "";
+        emojiResult.classList.add("shown");
+        await sleep(2600);
+      }
+    })();
+  }
+
   // The auto-send card: in each app switched on, the sentence is typed, Return
   // goes down and the message joins the thread. In Notes, switched off, the
   // text stays in the field.
