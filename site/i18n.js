@@ -84,7 +84,7 @@
     "offline.title": "Works offline",
     "offline.text": "Transcription runs on your Mac with Parakeet, a model that needs no network, and so does the review, with Apple Intelligence. On a plane or a train with no signal, Dictate still writes.",
     "pill.title": "Discreet",
-    "pill.text": "A small pill at the bottom of the screen shows that Dictate is listening, then working, then fades away. If it heard nothing, a crossed-out speaker tells you.",
+    "pill.text": "A small pill at the bottom of the screen shows that Dictate is listening, then working, then fades away. If it heard nothing, a crossed-out speaker tells you. With AirPods, it waits for their microphone to answer before it shows listening, so you know when to speak.",
     "faq.title": "Frequently asked questions",
     "faq.q1": "Why is it free?",
     "faq.a1": "Because Dictate costs nothing to run: no server, no account. Transcription happens on your Mac, and the review goes through the Claude subscription you already have, or through Apple Intelligence on your Mac. There's nothing to pay us, so nothing to bill you. No pro version, no limited trial.",

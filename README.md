@@ -50,7 +50,9 @@ ready-to-send text.
   listening, then working, and disappears. While you speak, a spinner beside
   the waves tells that earlier sentences are still on their way. When it
   heard nothing, a crossed-out speaker says so; a press of under a second
-  passes silently. It records from the microphone selected in macOS.
+  passes silently. It records from the microphone selected in macOS; AirPods
+  and other Bluetooth headsets take a couple of seconds to switch to their
+  call profile, and the pill only turns to listening once they can hear you.
 - **Your numbers.** A statistics window charts words, dictations, speaking
   pace and the delay before the text appears, by day, week or year. The
   delay chart comes first; when Apple Intelligence stood in for Claude
