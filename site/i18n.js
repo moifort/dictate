@@ -69,7 +69,7 @@
     "context.title": "Adapts to the context",
     "context.text": "The tone follows the app you're writing in: a bit more polished in Mail, direct in Slack, technical in Claude Code, raw in Terminal.",
     "cursor.title": "Wherever you type",
-    "cursor.text": "Mail, Messages, Slack, Notes, Cursor, Terminal, ChatGPT or Claude: the sentence is typed into the field that has focus. If there is none, it waits on the clipboard.",
+    "cursor.text": "Mail, Messages, Slack, Notes, Cursor, Terminal, ChatGPT or Claude: the sentence is typed into the field that has focus. In the Claude app, it is sent straight into the conversation. If there is no field, it waits on the clipboard.",
     "saved.typing": "Typing",
     "saved.caption": "Time saved since the start",
     "saved.title": "Time saved, counted",
