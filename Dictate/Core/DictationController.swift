@@ -98,8 +98,8 @@ final class DictationController {
     @ObservationIgnored var onOutcome: ((DictationOutcome) -> Void)?
     /// Called once per dictation that inserted text, with its timings.
     @ObservationIgnored var onRecord: ((DictationRecord) -> Void)?
-    /// Whether to press Return after pasting into an `AutoSend` app.
-    @ObservationIgnored var autoSend: () -> Bool = { false }
+    /// The bundle IDs of the apps where Return is pressed after the paste.
+    @ObservationIgnored var autoSendApps: () -> Set<String> = { [] }
     /// Whether to hand each pasted dictation, audio included, to `onSample`.
     @ObservationIgnored var keepSamples: () -> Bool = { false }
     /// Called once per pasted dictation while `keepSamples` is true, for the evaluation corpus.
@@ -366,7 +366,7 @@ final class DictationController {
             // Read before the paste: Cmd+V lands some time after it is posted.
             let watch = observer?.watchFocusedField()
             // The app in front now, not at the press: the text lands here.
-            let submit = autoSend() && AutoSend.applies(to: focus.frontmostBundleID())
+            let submit = AutoSend.applies(to: focus.frontmostBundleID(), in: autoSendApps())
             await inserter.paste(text, submit: submit)
             outcome = .pasted(raw: raw)
             // A single read later on, shared by every consumer.

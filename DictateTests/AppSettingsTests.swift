@@ -33,12 +33,32 @@ struct AppSettingsTests {
         #expect(AppSettings(defaults: UserDefaults(suiteName: suite)!).keepEvaluationCorpus)
     }
 
-    @Test func autoSendInClaudeIsOnByDefaultAndPersists() {
+    @Test func autoSendIsOnInClaudeByDefaultAndPersists() {
         let suite = "AppSettingsTests-\(UUID().uuidString)"
         let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!)
-        #expect(settings.autoSendInClaude)
-        settings.autoSendInClaude = false
-        #expect(!AppSettings(defaults: UserDefaults(suiteName: suite)!).autoSendInClaude)
+        #expect(settings.autoSendApps == ["com.anthropic.claudefordesktop"])
+        settings.autoSendEnabled = false
+        let reloaded = AppSettings(defaults: UserDefaults(suiteName: suite)!)
+        #expect(!reloaded.autoSendEnabled)
+        #expect(reloaded.autoSendApps.isEmpty)
+    }
+
+    @Test func autoSendAppsAreAddedOnceRemovedAndPersist() {
+        let suite = "AppSettingsTests-\(UUID().uuidString)"
+        let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!)
+        settings.addAutoSendApp("com.tinyspeck.slackmacgap")
+        settings.addAutoSendApp("com.tinyspeck.slackmacgap")
+        settings.removeAutoSendApp("com.anthropic.claudefordesktop")
+        #expect(settings.autoSendBundleIDs == ["com.tinyspeck.slackmacgap"])
+        #expect(AppSettings(defaults: UserDefaults(suiteName: suite)!).autoSendBundleIDs == ["com.tinyspeck.slackmacgap"])
+    }
+
+    @Test func autoSendKeepsTheSwitchSavedBeforeTheAppList() {
+        let suite = "AppSettingsTests-\(UUID().uuidString)"
+        UserDefaults(suiteName: suite)!.set(false, forKey: "autoSendInClaude")
+        let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!)
+        #expect(!settings.autoSendEnabled)
+        #expect(settings.autoSendBundleIDs == ["com.anthropic.claudefordesktop"])
     }
 
     @Test func vocabularySuggestionsAreOffByDefaultAndPersist() {

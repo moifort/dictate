@@ -96,7 +96,7 @@ final class AppModel {
         controller.onOutcome = { [weak self] outcome in self?.handle(outcome) }
         controller.onRecord = { [history] record in history.append(record) }
         controller.insertionObserver = PostInsertionObserver(reader: focus)
-        controller.autoSend = { settings.autoSendInClaude }
+        controller.autoSendApps = { settings.autoSendApps }
         controller.keepSamples = { settings.keepEvaluationCorpus }
         controller.onSample = { [corpus] sample in
             Task { await corpus.record(sample) }

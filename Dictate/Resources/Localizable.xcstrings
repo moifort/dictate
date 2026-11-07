@@ -529,22 +529,6 @@
         }
       }
     },
-    "Appuie sur Entrée une fois le texte collé dans l'app Claude.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Presses Return once the text is pasted into the Claude app."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Appuie sur Entrée une fois le texte collé dans l'app Claude."
-          }
-        }
-      }
-    },
     "Aucun": {
       "localizations": {
         "en": {
@@ -637,22 +621,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Envoi :"
-          }
-        }
-      }
-    },
-    "Envoyer le message dans Claude": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Send the message in Claude"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Envoyer le message dans Claude"
           }
         }
       }
@@ -4285,6 +4253,118 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ouvrir les éléments de connexion…"
+          }
+        }
+      }
+    },
+    "Appuyer sur Entrée après la dictée": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Press Return after dictating"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appuyer sur Entrée après la dictée"
+          }
+        }
+      }
+    },
+    "Envoie le message une fois le texte collé, seulement dans ces apps :": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sends the message once the text is pasted, only in these apps:"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoie le message une fois le texte collé, seulement dans ces apps :"
+          }
+        }
+      }
+    },
+    "Aucune app : Entrée n'est jamais pressée.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No app: Return is never pressed."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune app : Entrée n'est jamais pressée."
+          }
+        }
+      }
+    },
+    "Retirer %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retirer %@"
+          }
+        }
+      }
+    },
+    "Ajouter une app": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add an app"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter une app"
+          }
+        }
+      }
+    },
+    "Autre…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Autre…"
+          }
+        }
+      }
+    },
+    "Choisissez une app où appuyer sur Entrée après la dictée": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose an app where Return is pressed after dictating"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez une app où appuyer sur Entrée après la dictée"
           }
         }
       }

@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// Classic macOS preferences: icon tabs in the toolbar, labels in the left
 /// column. The app itself, then the stages of a dictation: transcription,
@@ -66,8 +67,10 @@ private struct DictationSettings: View {
             if !Distribution.isAppStore {
                 LabeledContent("Envoi :") {
                     VStack(alignment: .leading, spacing: 6) {
-                        Toggle("Envoyer le message dans Claude", isOn: Bindable(model.settings).autoSendInClaude)
-                        Hint("Appuie sur Entrée une fois le texte collé dans l'app Claude.")
+                        Toggle("Appuyer sur Entrée après la dictée", isOn: Bindable(model.settings).autoSendEnabled)
+                        Hint("Envoie le message une fois le texte collé, seulement dans ces apps :")
+                        AutoSendAppList(settings: model.settings)
+                            .disabled(!model.settings.autoSendEnabled)
                     }
                 }
             }
@@ -105,6 +108,112 @@ private struct DictationSettings: View {
         case .optionSpace:
             String(localized: "Maintenez option + espace pour dicter, puis collez le texte avec ⌘V.")
         }
+    }
+}
+
+/// The apps where Return follows the paste: each with its icon and a way
+/// out, then a menu of the apps open right now, or any app on disk.
+private struct AutoSendAppList: View {
+    let settings: AppSettings
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            if settings.autoSendBundleIDs.isEmpty {
+                Hint("Aucune app : Entrée n'est jamais pressée.")
+            }
+            ForEach(settings.autoSendBundleIDs, id: \.self) { bundleID in
+                let app = AppInfo(bundleID: bundleID)
+                HStack(spacing: 6) {
+                    AppIcon(image: app.icon)
+                    Text(verbatim: app.name)
+                    Spacer()
+                    Button {
+                        settings.removeAutoSendApp(bundleID)
+                    } label: {
+                        Image(systemName: "minus.circle.fill")
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.borderless)
+                    .help("Retirer \(app.name)")
+                }
+                .frame(maxWidth: 260)
+            }
+            Menu("Ajouter une app") {
+                ForEach(runningApps, id: \.bundleID) { app in
+                    Button {
+                        settings.addAutoSendApp(app.bundleID)
+                    } label: {
+                        Label { Text(verbatim: app.name) } icon: { Image(nsImage: app.icon ?? NSImage()) }
+                    }
+                }
+                if !runningApps.isEmpty { Divider() }
+                Button("Autre…") { chooseApp() }
+            }
+            .fixedSize()
+        }
+    }
+
+    /// The apps with a window open, minus Dictate and those already listed.
+    private var runningApps: [AppInfo] {
+        let listed = Set(settings.autoSendBundleIDs)
+        let ids = NSWorkspace.shared.runningApplications
+            .filter { $0.activationPolicy == .regular }
+            .compactMap(\.bundleIdentifier)
+            .filter { $0 != Bundle.main.bundleIdentifier && !listed.contains($0) }
+        return Set(ids).map(AppInfo.init(bundleID:))
+            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+    }
+
+    private func chooseApp() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowsMultipleSelection = false
+        panel.allowedContentTypes = [.applicationBundle]
+        panel.directoryURL = URL(filePath: "/Applications")
+        panel.message = String(localized: "Choisissez une app où appuyer sur Entrée après la dictée")
+        panel.prompt = String(localized: "Ajouter")
+        NSApp.activate()
+        guard panel.runModal() == .OK, let url = panel.url,
+              let bundleID = Bundle(url: url)?.bundleIdentifier else { return }
+        settings.addAutoSendApp(bundleID)
+    }
+}
+
+/// An app's name and icon from its bundle ID, or the ID alone once uninstalled.
+private struct AppInfo {
+    let bundleID: String
+    let name: String
+    let icon: NSImage?
+
+    init(bundleID: String) {
+        self.bundleID = bundleID
+        guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) else {
+            name = bundleID
+            icon = nil
+            return
+        }
+        let displayName = FileManager.default.displayName(atPath: url.path)
+        name = displayName.hasSuffix(".app") ? String(displayName.dropLast(4)) : displayName
+        let image = NSWorkspace.shared.icon(forFile: url.path)
+        image.size = NSSize(width: 16, height: 16)
+        icon = image
+    }
+}
+
+private struct AppIcon: View {
+    let image: NSImage?
+
+    var body: some View {
+        Group {
+            if let image {
+                Image(nsImage: image)
+            } else {
+                Image(systemName: "app.dashed")
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .frame(width: 16, height: 16)
     }
 }
 

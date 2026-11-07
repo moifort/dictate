@@ -62,9 +62,29 @@ final class AppSettings {
         didSet { defaults.set(shareFieldContext, forKey: Keys.shareFieldContext) }
     }
 
-    /// Press Return after pasting into Claude, so the dictation is sent.
-    var autoSendInClaude: Bool {
-        didSet { defaults.set(autoSendInClaude, forKey: Keys.autoSendInClaude) }
+    /// Press Return after pasting into one of `autoSendBundleIDs`, so the
+    /// dictation is sent.
+    var autoSendEnabled: Bool {
+        didSet { defaults.set(autoSendEnabled, forKey: Keys.autoSendEnabled) }
+    }
+
+    /// The apps where Return is pressed after the paste, Claude by default.
+    var autoSendBundleIDs: [String] {
+        didSet { defaults.set(autoSendBundleIDs, forKey: Keys.autoSendBundleIDs) }
+    }
+
+    /// The apps Return is pressed in right now: none while it is off.
+    var autoSendApps: Set<String> {
+        autoSendEnabled ? Set(autoSendBundleIDs) : []
+    }
+
+    func addAutoSendApp(_ bundleID: String) {
+        guard !autoSendBundleIDs.contains(bundleID) else { return }
+        autoSendBundleIDs.append(bundleID)
+    }
+
+    func removeAutoSendApp(_ bundleID: String) {
+        autoSendBundleIDs.removeAll { $0 == bundleID }
     }
 
     /// Install new releases as soon as they are found, without asking.
@@ -190,7 +210,8 @@ final class AppSettings {
         pushToTalkKey = defaults.string(forKey: Keys.pushToTalkKey).flatMap(PushToTalkKey.init(rawValue:))
             .flatMap { PushToTalkKey.available.contains($0) ? $0 : nil } ?? PushToTalkKey.available[0]
         shareFieldContext = defaults.object(forKey: Keys.shareFieldContext) as? Bool ?? true
-        autoSendInClaude = defaults.object(forKey: Keys.autoSendInClaude) as? Bool ?? true
+        autoSendEnabled = defaults.object(forKey: Keys.autoSendEnabled) as? Bool ?? true
+        autoSendBundleIDs = defaults.stringArray(forKey: Keys.autoSendBundleIDs) ?? AutoSend.defaultBundleIDs
         autoUpdate = defaults.object(forKey: Keys.autoUpdate) as? Bool ?? true
         keepEvaluationCorpus = defaults.bool(forKey: Keys.keepEvaluationCorpus)
         suggestVocabulary = defaults.bool(forKey: Keys.suggestVocabulary)
@@ -214,7 +235,9 @@ final class AppSettings {
         /// Older versions' on/off switch, read once for the migration.
         static let enhancementEnabled = "enhancementEnabled"
         static let shareFieldContext = "shareFieldContext"
-        static let autoSendInClaude = "autoSendInClaude"
+        /// Named when only Claude could be picked: kept, so "off" stays off.
+        static let autoSendEnabled = "autoSendInClaude"
+        static let autoSendBundleIDs = "autoSendBundleIDs"
         static let autoUpdate = "autoUpdate"
         static let keepEvaluationCorpus = "keepEvaluationCorpus"
         static let suggestVocabulary = "suggestVocabulary"

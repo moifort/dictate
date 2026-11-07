@@ -137,7 +137,7 @@ struct DictationControllerTests {
     @Test func pasteIntoClaudeIsSentWhenAutoSendIsOn() async {
         let (controller, fakes) = makeController()
         fakes.focus.bundleID = "com.anthropic.claudefordesktop"
-        controller.autoSend = { true }
+        controller.autoSendApps = { ["com.anthropic.claudefordesktop"] }
         await dictate(controller)
         #expect(fakes.inserter.submitted == [true])
     }
@@ -145,14 +145,21 @@ struct DictationControllerTests {
     @Test func pasteIntoClaudeStaysUnsentWhenAutoSendIsOff() async {
         let (controller, fakes) = makeController()
         fakes.focus.bundleID = "com.anthropic.claudefordesktop"
-        controller.autoSend = { false }
+        controller.autoSendApps = { [] }
         await dictate(controller)
         #expect(fakes.inserter.submitted == [false])
     }
 
+    @Test func pasteIntoAnAddedAppIsSent() async {
+        let (controller, fakes) = makeController()
+        controller.autoSendApps = { ["com.apple.Terminal", "com.anthropic.claudefordesktop"] }
+        await dictate(controller)
+        #expect(fakes.inserter.submitted == [true])
+    }
+
     @Test func pasteIntoAnotherAppIsNeverSent() async {
         let (controller, fakes) = makeController()
-        controller.autoSend = { true }
+        controller.autoSendApps = { ["com.anthropic.claudefordesktop"] }
         await dictate(controller)
         #expect(fakes.inserter.submitted == [false])
     }
@@ -162,7 +169,7 @@ struct DictationControllerTests {
         let (controller, fakes) = makeController(tail: { fakes in
             fakes.focus.bundleID = "com.anthropic.claudefordesktop"
         })
-        controller.autoSend = { true }
+        controller.autoSendApps = { ["com.anthropic.claudefordesktop"] }
         await dictate(controller)
         #expect(fakes.inserter.submitted == [true])
     }
