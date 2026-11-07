@@ -685,6 +685,62 @@
     })();
   }
 
+  // The auto-send card: in each app switched on, the sentence is typed, Return
+  // goes down and the message joins the thread. In Notes, switched off, the
+  // text stays in the field.
+  const sendTyped = document.querySelector("[data-send-typed]");
+  if (sendTyped) {
+    const sendApp = document.querySelector("[data-send-app]");
+    const sendKey = document.querySelector("[data-send-key]");
+    const sendThread = document.querySelector("[data-send-thread]");
+    const rows = [...document.querySelectorAll("[data-send-row]")];
+    const sendsFr = [
+      { app: "Claude", text: "Résume cette PR en trois points." },
+      { app: "Messages", text: "J'arrive dans dix minutes !" },
+      { app: "Slack", text: "Je relis la spec et je te dis." },
+      { app: "Notes", text: "Acheter du pain et des œufs." },
+    ];
+    const sendsEn = [
+      { app: "Claude", text: "Sum up this PR in three points." },
+      { app: "Messages", text: "Be there in ten minutes!" },
+      { app: "Slack", text: "Reading the spec, I'll get back to you." },
+      { app: "Notes", text: "Buy bread and eggs." },
+    ];
+    const sends = english ? sendsEn : sendsFr;
+    (async () => {
+      let p = 0;
+      for (;;) {
+        const send = sends[p];
+        const row = rows.find((r) => r.dataset.sendRow === send.app);
+        const on = row?.querySelector(".send-toggle.on") != null;
+        sendApp.textContent = send.app;
+        sendThread.replaceChildren();
+        rows.forEach((r) => r.classList.toggle("lit", r === row));
+        for (let i = 1; i <= send.text.length; i++) {
+          sendTyped.textContent = send.text.slice(0, i);
+          await sleep(reducedMotion ? 5 : 32);
+        }
+        await sleep(450);
+        if (on) {
+          sendKey.classList.add("pressed");
+          await sleep(160);
+          sendKey.classList.remove("pressed");
+          const bubble = document.createElement("span");
+          bubble.className = "send-bubble";
+          bubble.textContent = send.text;
+          sendThread.append(bubble);
+          sendTyped.textContent = "";
+          await sleep(2000);
+        } else {
+          await sleep(2600);
+          sendTyped.textContent = "";
+          await sleep(400);
+        }
+        p = (p + 1) % sends.length;
+      }
+    })();
+  }
+
   // The time-saved card races the same 150-word message typed at 40 words per
   // minute against Dictate: spoken at 150, plus the display delay. Both clocks
   // run at the same scale, and the gap joins the total since the start.
