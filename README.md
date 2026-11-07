@@ -28,6 +28,9 @@ ready-to-send text.
 - **Clean text, not a raw transcript.** Hesitations ("euh", "um"), repetitions
   and false starts are removed, punctuation and capitals are fixed, misheard
   technical terms are corrected. Your words and meaning stay as you said them.
+- **Emojis by voice.** Say "emoji rocket" or "smiley crying with laughter" and
+  🚀 or 😂 lands in the text. Just mentioning one ("send me a smiley") stays
+  words. Turn it off in Settings → Review.
 - **Adapts to where you are.** The tone of the cleanup follows the app: a bit
   more polished in a mail, direct in a chat, raw and technical in a code editor
   or a terminal.
