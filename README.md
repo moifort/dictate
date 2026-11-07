@@ -55,6 +55,9 @@ ready-to-send text.
   passes silently. It records from the microphone selected in macOS; AirPods
   and other Bluetooth headsets take a couple of seconds to switch to their
   call profile, and the pill only turns to listening once they can hear you.
+  Only the microphone is opened, so headphones used just for listening are
+  left alone; during a FaceTime or Meet call, macOS keeps the microphone for
+  the call and Dictate hears nothing.
 - **Your numbers.** A statistics window charts words, dictations, speaking
   pace and the delay before the text appears, by day, week or year. The
   delay chart comes first; when Apple Intelligence stood in for Claude
