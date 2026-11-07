@@ -19,6 +19,11 @@ struct PromptBuilderTests {
         #expect(PromptBuilder.systemPrompt(vocabulary: [], language: "en").contains("surtout en anglais"))
     }
 
+    @Test func systemPromptTurnsDictatedEmojisIntoCharactersOnlyWhenAsked() {
+        #expect(PromptBuilder.systemPrompt(vocabulary: [], language: "fr", emojis: true).contains("Émojis dictés"))
+        #expect(!PromptBuilder.systemPrompt(vocabulary: [], language: "fr", emojis: false).contains("Émojis dictés"))
+    }
+
     @Test func userMessageWrapsTranscriptAndCarriesCategory() {
         let message = PromptBuilder.userMessage(transcript: "fais un push", context: DictationContext(category: .code))
         #expect(message.contains("<dictation>\nfais un push\n</dictation>"))

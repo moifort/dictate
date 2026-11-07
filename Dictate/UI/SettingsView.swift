@@ -560,9 +560,17 @@ private struct ReviewSettings: View {
                             Hint("Texte du champ, titre de la fenêtre et domaine du site, pour reprendre vos noms et votre ton. Jamais un mot de passe.")
                         }
                     }
-
-                    Divider()
                 }
+
+                LabeledContent("Émojis :") {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Toggle("Insérer les émojis dictés", isOn: Bindable(model.settings).dictatedEmojis)
+                            .onChange(of: model.settings.dictatedEmojis) { model.settingsChanged() }
+                        Hint("Dites « émoji fusée » ou « smiley qui pleure de rire » : 🚀, 😂.")
+                    }
+                }
+
+                Divider()
 
                 switch model.settings.reviewer {
                 case _ where Distribution.isAppStore, .apple:

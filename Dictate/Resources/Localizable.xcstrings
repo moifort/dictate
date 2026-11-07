@@ -4336,6 +4336,54 @@
           }
         }
       }
+    },
+    "Émojis :": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emojis:"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Émojis :"
+          }
+        }
+      }
+    },
+    "Insérer les émojis dictés": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insert dictated emojis"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insérer les émojis dictés"
+          }
+        }
+      }
+    },
+    "Dites « émoji fusée » ou « smiley qui pleure de rire » : 🚀, 😂.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Say “emoji rocket” or “smiley crying with laughter”: 🚀, 😂."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dites « émoji fusée » ou « smiley qui pleure de rire » : 🚀, 😂."
+          }
+        }
+      }
     }
   },
   "version": "1.0"

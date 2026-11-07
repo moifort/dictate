@@ -62,6 +62,11 @@ final class AppSettings {
         didSet { defaults.set(shareFieldContext, forKey: Keys.shareFieldContext) }
     }
 
+    /// Turn "émoji fusée" into 🚀. On by default.
+    var dictatedEmojis: Bool {
+        didSet { defaults.set(dictatedEmojis, forKey: Keys.dictatedEmojis) }
+    }
+
     /// Press Return after pasting into one of `autoSendBundleIDs`, so the
     /// dictation is sent.
     var autoSendEnabled: Bool {
@@ -210,6 +215,7 @@ final class AppSettings {
         pushToTalkKey = defaults.string(forKey: Keys.pushToTalkKey).flatMap(PushToTalkKey.init(rawValue:))
             .flatMap { PushToTalkKey.available.contains($0) ? $0 : nil } ?? PushToTalkKey.available[0]
         shareFieldContext = defaults.object(forKey: Keys.shareFieldContext) as? Bool ?? true
+        dictatedEmojis = defaults.object(forKey: Keys.dictatedEmojis) as? Bool ?? true
         autoSendEnabled = defaults.object(forKey: Keys.autoSendEnabled) as? Bool ?? true
         autoSendBundleIDs = defaults.stringArray(forKey: Keys.autoSendBundleIDs) ?? AutoSend.defaultBundleIDs
         autoUpdate = defaults.object(forKey: Keys.autoUpdate) as? Bool ?? true
@@ -235,6 +241,7 @@ final class AppSettings {
         /// Older versions' on/off switch, read once for the migration.
         static let enhancementEnabled = "enhancementEnabled"
         static let shareFieldContext = "shareFieldContext"
+        static let dictatedEmojis = "dictatedEmojis"
         /// Named when only Claude could be picked: kept, so "off" stays off.
         static let autoSendEnabled = "autoSendInClaude"
         static let autoSendBundleIDs = "autoSendBundleIDs"

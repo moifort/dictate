@@ -146,11 +146,19 @@ final class AppleIntelligenceEnhancer: Enhancer {
     /// instead of cleaning up the dictation: the raw transcript is better then.
     static func diverges(_ reply: String, from transcript: String) -> Bool {
         let transcriptWords = WordErrorRate.words(in: transcript)
-        if WordErrorRate.words(in: reply).isEmpty { return !transcriptWords.isEmpty }
-        guard transcriptWords.count >= minimumJudgedWords,
-              let rate = WordErrorRate.rate(reference: transcript, hypothesis: reply) else { return false }
-        return rate > maximumWordErrorRate
+        // A dictated emoji takes the place of its words, which the error rate
+        // would count as deleted: they are forgiven, the trigger included.
+        let emojis = DictatedEmoji.isRequested(in: transcript) ? DictatedEmoji.count(in: reply) : 0
+        if WordErrorRate.words(in: reply).isEmpty { return !transcriptWords.isEmpty && emojis == 0 }
+        guard transcriptWords.count >= minimumJudgedWords else { return false }
+        let count = WordErrorRate.count(reference: transcript, hypothesis: reply)
+        let errors = max(0, count.errors - emojis * wordsPerEmoji)
+        return Double(errors) / Double(count.referenceWords) > maximumWordErrorRate
     }
+
+    /// The words a dictated emoji may replace: its trigger and a description
+    /// such as "qui pleure de rire".
+    static let wordsPerEmoji = 5
 
     /// The context cut down to what the small window can take.
     static func trimmed(_ context: DictationContext) -> DictationContext {

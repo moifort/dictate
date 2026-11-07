@@ -179,6 +179,8 @@ struct SelectedEnhancerTests {
             "Regarde le Sentry, il y a un bug qui vient de tomber. Dis-moi qui l'a généré, si c'est toi."
         ),
         ("Oui.", ""),
+        // An emoji nobody dictated forgives nothing.
+        ("Tu peux relancer le build de la branche main ?", "🚀"),
     ])
     func aReplyThatLeftTheDictationIsRejected(transcript: String, reply: String) {
         #expect(AppleIntelligenceEnhancer.diverges(reply, from: transcript))
@@ -191,6 +193,10 @@ struct SelectedEnhancerTests {
         // Too short to judge: a single fixed word is most of it.
         ("Votre raz.", "Votre projet."),
         ("Jouez.", "Joué."),
+        // Dictated emojis replace their words.
+        ("Smiley qui pleure de rire.", "😂"),
+        ("Super, émoji pouce levé.", "Super 👍"),
+        ("C'est en prod, émoji fusée, merci à tous.", "C'est en prod 🚀, merci à tous."),
     ])
     func aCleanedUpDictationIsKept(transcript: String, reply: String) {
         #expect(!AppleIntelligenceEnhancer.diverges(reply, from: transcript))

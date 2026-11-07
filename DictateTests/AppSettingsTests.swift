@@ -15,6 +15,14 @@ struct AppSettingsTests {
         #expect(!settings.languageConfirmed)
     }
 
+    @Test func dictatedEmojisAreOnByDefaultAndPersistWhenTurnedOff() {
+        let suite = "AppSettingsTests-\(UUID().uuidString)"
+        let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!)
+        #expect(settings.dictatedEmojis)
+        settings.dictatedEmojis = false
+        #expect(!AppSettings(defaults: UserDefaults(suiteName: suite)!).dictatedEmojis)
+    }
+
     @Test func languageAndConfirmationPersist() {
         let suite = "AppSettingsTests-\(UUID().uuidString)"
         let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!)

@@ -52,7 +52,11 @@ final class AppModel {
         self.transcriber = transcriber
         let locator = locator
         let focus = FieldInspector()
-        let systemPrompt = { PromptBuilder.systemPrompt(vocabulary: settings.vocabulary, language: settings.language) }
+        let systemPrompt = {
+            PromptBuilder.systemPrompt(
+                vocabulary: settings.vocabulary, language: settings.language, emojis: settings.dictatedEmojis
+            )
+        }
         let network = network
         let enhancer = SelectedEnhancer(
             reviewer: { settings.reviewer },
@@ -209,6 +213,7 @@ final class AppModel {
             "language": settings.language,
             "reviewer": settings.reviewer.rawValue,
             "vocabulary_boosting": settings.boostedVocabulary.isEmpty ? "off" : "on",
+            "dictated_emojis": settings.dictatedEmojis ? "on" : "off",
             "claude_cli": claudeCLIPath == nil ? "missing" : claudeSignedIn ? "signed_in" : "signed_out",
             "claude_access": settings.claudeAccess.rawValue,
             "apple_intelligence": appleIntelligence.isAvailable ? "available" : "unavailable",
@@ -359,7 +364,7 @@ final class AppModel {
         }
     }
 
-    /// Called when the vocabulary or CLI path changes: the waiting process has a stale prompt.
+    /// Called when the vocabulary, the emojis or the CLI path change: the waiting process has a stale prompt.
     func settingsChanged() {
         refreshClaudeCLI()
         refreshSetup()

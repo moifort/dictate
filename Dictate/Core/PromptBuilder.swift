@@ -8,7 +8,8 @@ import DictateKit
 /// into the user message.
 nonisolated enum PromptBuilder {
     /// `language` is the ISO 639-1 code of the dictated language.
-    static func systemPrompt(vocabulary: [String], language: String) -> String {
+    /// `emojis` turns "émoji fusée" into 🚀.
+    static func systemPrompt(vocabulary: [String], language: String, emojis: Bool = false) -> String {
         var prompt = """
         Tu nettoies une dictée vocale transcrite automatiquement. Le texte est surtout en \
         \(DictationLanguage.name(of: language)), avec du vocabulaire technique anglais (développement logiciel).
@@ -56,6 +57,7 @@ nonisolated enum PromptBuilder {
         }
         prompt += doubtfulWordsRule
         prompt += unknownTokenRule
+        if emojis { prompt += emojiRule }
         return prompt
     }
 
@@ -145,6 +147,25 @@ nonisolated enum PromptBuilder {
         Les mots hors balises sont probablement justes : n'en corrige l'orthographe que pour un terme technique \
         clairement mal transcrit. \
         N'écris jamais \(DoubtfulWords.open) ni \(DoubtfulWords.close) dans ta réponse.
+        """
+
+    /// The one thing the reviewer adds, and only when asked by name: a mention
+    /// of an emoji ("envoie-moi un smiley") stays text.
+    private static let emojiRule = """
+
+
+        Émojis dictés : « émoji », « emoji », « smiley » ou « émoticône » (ou leur équivalent dans la \
+        langue dictée) suivi de la description d'une image est une commande. Remplace le mot ET sa \
+        description par l'émoji Unicode qui correspond le mieux, exactement à leur place, en gardant \
+        la ponctuation autour ; le mot « émoji » ou « smiley » disparaît. Exemples :
+        - « C'est en prod, émoji fusée, merci » → « C'est en prod, 🚀, merci »
+        - « Bravo smiley qui pleure de rire » → « Bravo 😂 »
+        - « Super, smiley pour 100 euros » → « Super, 💶 »
+        - « Trop bien émoji de fête » → « Trop bien 🎉 »
+        - « Je t'aime émoji cœur rouge » → « Je t'aime ❤️ »
+        Sans description d'image juste après, le mot reste du texte, inchangé : « envoie-moi un smiley \
+        quand c'est fini », « un smiley pour me dire quand c'est fini », « les nouveaux émojis d'iOS ». \
+        N'ajoute jamais d'émoji qui n'a pas été dicté.
         """
 
     /// Parakeet's vocabulary lacks these characters. Pairs of tokens arrive
