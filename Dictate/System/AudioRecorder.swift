@@ -3,6 +3,9 @@ import CoreAudio
 import Observation
 
 /// Records the default microphone into memory as 16 kHz mono samples.
+///
+/// Always the input selected in macOS, Bluetooth headsets included: the user
+/// picks the microphone there, and the app never second-guesses that choice.
 @Observable
 final class AudioRecorder: AudioRecording {
     /// Recent input level and its spread across frequency bands, for the recording indicator.
@@ -103,7 +106,6 @@ final class AudioRecorder: AudioRecording {
             }
         } else {
             engine = AVAudioEngine()
-            bindInput(of: engine)
         }
         let input = engine.inputNode
         let format = input.outputFormat(forBus: 0)
@@ -174,30 +176,10 @@ final class AudioRecorder: AudioRecording {
 
     nonisolated private static func makeVoiceEngine() throws -> AVAudioEngine {
         let engine = AVAudioEngine()
-        bindInput(of: engine)
         engine.inputNode.voiceProcessingOtherAudioDuckingConfiguration =
             .init(enableAdvancedDucking: false, duckingLevel: .min)
         try engine.inputNode.setVoiceProcessingEnabled(true)
         return engine
-    }
-
-    /// Captures from the microphone the picker chose when it is not the default
-    /// one. Must run before anything else touches the input node: a voice-processing
-    /// unit bound afterwards captures nothing or fails to initialise.
-    nonisolated private static func bindInput(of engine: AVAudioEngine) {
-        guard let device = InputDevicePicker.pick(from: InputDevicePicker.candidates()), !device.isDefault,
-              let unit = engine.inputNode.audioUnit else { return }
-        var id = device.id
-        let status = AudioUnitSetProperty(
-            unit, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0,
-            &id, UInt32(MemoryLayout<AudioDeviceID>.size)
-        )
-        if status == noErr {
-            Log.dictation.info("default microphone is wireless: capturing from \(device.name, privacy: .public) instead")
-        } else {
-            Log.dictation.error("could not capture from \(device.name, privacy: .public): \(status)")
-            ErrorReporter.capture(message: "could not bind the input device, status \(status)", category: "recorder")
-        }
     }
 
     /// Whether another process is capturing audio input. Asked per process: the

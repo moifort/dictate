@@ -90,6 +90,8 @@ final class AppModel {
         indicator = RecordingIndicator(controller: controller, recorder: recorder)
         if let flash = ScreenshotMode.flash, flash.hasPrefix("claudeDisconnected") {
             indicator.show(.pasted(raw: flash.hasSuffix("Raw")), claudeDisconnected: true)
+        } else if ScreenshotMode.flash == "unheard" {
+            indicator.show(.discarded)
         }
         controller.onOutcome = { [weak self] outcome in self?.handle(outcome) }
         controller.onRecord = { [history] record in history.append(record) }

@@ -4193,6 +4193,22 @@
         }
       }
     },
+    "Rien entendu": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing heard"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien entendu"
+          }
+        }
+      }
+    },
     "macOS attend votre accord dans Réglages Système.": {
       "localizations": {
         "en": {

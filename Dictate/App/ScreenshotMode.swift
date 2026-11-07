@@ -7,7 +7,7 @@ import SwiftUI
 ///
 /// Windows: setup, stats, settings. Settings tabs: general, dictation,
 /// lexicon, review. `-ScreenshotFlash claudeDisconnected` (or
-/// `claudeDisconnectedRaw`) shows that indicator flash instead, and
+/// `claudeDisconnectedRaw`, `unheard`) shows that indicator flash instead, and
 /// `-ScreenshotReviewer apple` opens the delay chart on that model.
 nonisolated enum ScreenshotMode {
     #if DEBUG

@@ -8,6 +8,8 @@ final class RecordingIndicator {
     enum Flash: Equatable {
         /// No field had focus: the text waits in the pasteboard.
         case copied
+        /// Nothing was heard: silence, or speech too faint to transcribe.
+        case unheard
         /// Why the dictation failed, so a press that does nothing explains itself.
         case failed(String)
         /// `fn` pressed before the engine's model is in memory.
@@ -60,9 +62,10 @@ final class RecordingIndicator {
         case .pasted(let raw) where claudeDisconnected, .copied(let raw) where claudeDisconnected:
             .claudeDisconnected(raw: raw)
         case .copied: .copied
+        case .discarded: .unheard
         case .failed(let message): .failed(message)
         case .modelLoading(let engine): .loading(engine)
-        case .pasted, .discarded: nil
+        case .pasted: nil
         }
         guard let flash else { return }
         flashTask?.cancel()
@@ -70,7 +73,7 @@ final class RecordingIndicator {
         flashTask = Task {
             // A sentence takes longer to read than a symbol.
             let duration: Duration = switch flash {
-            case .copied: .seconds(1.6)
+            case .copied, .unheard: .seconds(1.6)
             case .loading: .seconds(2.5)
             case .failed: .seconds(3)
             case .claudeDisconnected: .seconds(4)
@@ -301,6 +304,10 @@ private struct IndicatorView: View {
                 BouncingSymbol(name: "doc.on.clipboard", color: .white)
                     .id("copied")
             }
+        case .unheard:
+            BouncingSymbol(name: "speaker.slash.fill", color: .white)
+                .accessibilityLabel(Text("Rien entendu"))
+                .id("unheard")
         case .failed(let message):
             HStack(spacing: 8) {
                 BouncingSymbol(name: "exclamationmark.triangle.fill", color: .orange)
