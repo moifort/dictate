@@ -1,12 +1,12 @@
 import os
 
 /// The work was still running when the time was up.
-nonisolated struct DeadlineExceeded: Error {}
+public nonisolated struct DeadlineExceeded: Error {}
 
 /// Waits for `work` for at most `limit`. For work stuck in a blocking call,
 /// which cancellation cannot reach: it is abandoned, not stopped, and a result
 /// it still comes up with goes to `late` so that it can be released.
-nonisolated func value<T: Sendable>(
+public nonisolated func value<T: Sendable>(
     of work: Task<T, Error>,
     within limit: Duration,
     late: @escaping @Sendable (T) -> Void

@@ -1,4 +1,5 @@
 import Foundation
+import DictateKit
 
 nonisolated enum SelectedEnhancerError: LocalizedError {
     case noReviewer

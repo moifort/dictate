@@ -2,6 +2,7 @@ import FluidAudio
 import Foundation
 import Testing
 @testable import Dictate
+import DictateKit
 
 @MainActor
 struct VocabularyBoosterTests {

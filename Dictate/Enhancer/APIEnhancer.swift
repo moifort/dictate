@@ -1,4 +1,5 @@
 import Foundation
+import DictateKit
 
 /// A service reached with the user's own API key. Each one runs its
 /// fastest model that does not reason first: a cleanup is a light task,

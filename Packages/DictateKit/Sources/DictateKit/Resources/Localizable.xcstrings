@@ -1,0 +1,38 @@
+{
+  "sourceLanguage": "fr",
+  "strings": {
+    "Aucun micro disponible": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No microphone available"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucun micro disponible"
+          }
+        }
+      }
+    },
+    "Le micro ne répond pas": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The microphone is not responding"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le micro ne répond pas"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

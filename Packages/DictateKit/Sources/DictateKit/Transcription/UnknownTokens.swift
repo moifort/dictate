@@ -12,8 +12,8 @@ import Foundation
 /// sentence. The tokens left over, alone or inside a word, go to Claude, which
 /// picks the symbol from the context. Without Claude, or when it leaves one
 /// in, `resolved` drops them.
-nonisolated enum UnknownTokens {
-    static let token = "<unk>"
+public nonisolated enum UnknownTokens {
+    public static let token = "<unk>"
     /// FluidAudio drops every piece spelled `<unk>` from its results since
     /// 0.18, with no option to keep them: the vocabulary Parakeet loads spells
     /// it this way instead, and `restored` puts the real token back.
@@ -21,24 +21,24 @@ nonisolated enum UnknownTokens {
     private static let boundary = "\u{2581}"
 
     /// `vocabulary` with the token spelled so that FluidAudio keeps it.
-    static func keepingToken(in vocabulary: [Int: String]) -> [Int: String] {
+    public static func keepingToken(in vocabulary: [Int: String]) -> [Int: String] {
         vocabulary.mapValues { $0 == token ? loadedToken : $0 }
     }
 
     /// `text`, a transcript or a piece, as FluidAudio would have written it
     /// from the original vocabulary.
-    static func restored(_ text: String) -> String {
+    public static func restored(_ text: String) -> String {
         text.replacingOccurrences(of: loadedToken, with: token)
     }
 
-    static func containsUnknown(_ pieces: [String]) -> Bool {
+    public static func containsUnknown(_ pieces: [String]) -> Bool {
         pieces.contains(where: isUnknownPiece)
     }
 
     /// One piece for each of `pieces`, so token timings stay aligned: paired
     /// tokens become guillemets of their own, `▁«` and `▁»`; the others are
     /// left for Claude.
-    static func quoted(_ pieces: [String]) -> [String] {
+    public static func quoted(_ pieces: [String]) -> [String] {
         let unknowns = pieces.indices.filter { isUnknownPiece(pieces[$0]) }
         let quotes = unknowns.filter { !isInsideWord(at: $0, in: pieces) }
         let paired = quotes.prefix(quotes.count / 2 * 2)
@@ -57,13 +57,13 @@ nonisolated enum UnknownTokens {
 
     /// The transcript the pieces spell, as FluidAudio builds it, with the
     /// double spaces the quoted pieces can leave collapsed.
-    static func text(fromPieces pieces: [String]) -> String {
+    public static func text(fromPieces pieces: [String]) -> String {
         collapsed(pieces.joined().replacingOccurrences(of: boundary, with: " "))
     }
 
     /// `text` with no token left, for insertion: pairs become guillemets, the
     /// others are dropped.
-    static func resolved(_ text: String) -> String {
+    public static func resolved(_ text: String) -> String {
         let ranges = text.ranges(of: token)
         guard !ranges.isEmpty else { return text }
         let quotes = ranges.filter { !isInsideWord($0, in: text) }

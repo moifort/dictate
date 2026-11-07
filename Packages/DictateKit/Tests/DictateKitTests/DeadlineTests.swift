@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import Dictate
+@testable import DictateKit
 
 struct DeadlineTests {
     @Test func aPromptResultIsReturned() async throws {

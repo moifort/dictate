@@ -1,4 +1,5 @@
 import SwiftUI
+import DictateKit
 
 /// Onboarding in the manner of Apple's setup assistants: a welcome page, a
 /// checklist of everything Dictate needs, ticked one line at a time as macOS

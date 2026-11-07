@@ -140,7 +140,7 @@ The last page has a scratch field to try a dictation end to end.
 | Step | Component |
 |---|---|
 | `fn` or `control` held / released | `FnKeyMonitor` → `FnKeyGesture` |
-| Microphone → 16 kHz mono | `AudioRecorder` |
+| Microphone → 16 kHz mono | `AudioRecorder`, in the DictateKit package |
 | Local transcription | `SwitchableTranscriber`, routing to `ParakeetTranscriber` (Parakeet TDT Ultra through FluidAudio, 25 European languages, no vocabulary prompt), the only engine. Only the active engine's model stays in memory. |
 | Vocabulary boosting (experimental, off by default) | `VocabularyBooster`: FluidAudio's CTC keyword spotting with Parakeet CTC 110M (~100 MB, in `Models/parakeet-ctc-110m-coreml`) rescores Parakeet's transcript against the vocabulary before Claude. Never waits for the model, falls back to the plain transcript on any failure. |
 | Cleanup | `ClaudeCLIEnhancer`: one pre-warmed `claude -p --model claude-haiku-4-5` process per dictation (pinned: Haiku 5.5 thinks) |
@@ -148,6 +148,11 @@ The last page has a scratch field to try a dictation end to end.
 | Orchestration | `DictationController` |
 | Bottom-centre pill | `RecordingIndicator` |
 | Statistics (menu → Statistiques…) | `DictationHistory` → `DictationSeries` (one column per hour, day, week or month of the picked period) and `DictationStats` (the week against the four before) → `StatsView`, laid out like a Health app measure |
+
+`Packages/DictateKit` holds the hearing and transcription code, kept apart so
+other apps can reuse it: `AudioRecorder` and its queue capture, `AudioAnalysis`,
+the spectrum, `ParakeetEngine`, `Transcription` and `UnknownTokens`.
+`swift test --package-path Packages/DictateKit` runs its tests.
 
 Every inserted dictation appends one JSON line — date, word count, audio
 length, transcription, Claude and insertion times, never the text — to

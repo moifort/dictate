@@ -1,6 +1,6 @@
 import AVFoundation
 import Testing
-@testable import Dictate
+@testable import DictateKit
 
 struct TapProcessorTests {
     private let format = AVAudioFormat(standardFormatWithSampleRate: 48_000, channels: 1)!

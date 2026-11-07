@@ -1,6 +1,7 @@
 import Foundation
 import Testing
 @testable import Dictate
+import DictateKit
 
 /// Routing only: the on-device model needs Apple Intelligence, which CI
 /// does not have, so the Apple side is exercised through fakes and its

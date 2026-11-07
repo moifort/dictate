@@ -1,5 +1,6 @@
 import Foundation
 import FoundationModels
+import DictateKit
 
 /// Why the on-device model cannot be used right now, in the user's words.
 nonisolated enum AppleIntelligenceStatus: Equatable, Sendable {

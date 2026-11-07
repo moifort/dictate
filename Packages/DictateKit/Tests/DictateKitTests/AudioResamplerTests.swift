@@ -1,6 +1,6 @@
 import AVFoundation
 import Testing
-@testable import Dictate
+@testable import DictateKit
 
 struct AudioResamplerTests {
     /// A discrete nine-channel input keeps its first channel rather than going silent.

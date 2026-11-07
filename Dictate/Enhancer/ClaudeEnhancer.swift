@@ -1,4 +1,5 @@
 import Foundation
+import DictateKit
 
 /// Routes Claude's cleanups to the CLI or the API, by the access picked in the settings.
 final class ClaudeEnhancer: WarmableEnhancer {

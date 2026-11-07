@@ -545,22 +545,6 @@
         }
       }
     },
-    "Aucun micro disponible": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No microphone available"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aucun micro disponible"
-          }
-        }
-      }
-    },
     "Claude déconnecté · relu par Apple": {
       "localizations": {
         "en": {
@@ -637,22 +621,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Installation de la mise à jour…"
-          }
-        }
-      }
-    },
-    "Le micro ne répond pas": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The microphone is not responding"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Le micro ne répond pas"
           }
         }
       }

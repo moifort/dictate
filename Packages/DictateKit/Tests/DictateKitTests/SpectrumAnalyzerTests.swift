@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import Dictate
+@testable import DictateKit
 
 struct SpectrumAnalyzerTests {
     /// About 21 ms at 16 kHz, what a 1 024-frame tap delivers at 48 kHz.

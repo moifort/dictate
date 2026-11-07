@@ -1,5 +1,6 @@
 import AppKit
 import Observation
+import DictateKit
 
 /// Wires the dictation pipeline together and exposes its state to the UI.
 @Observable

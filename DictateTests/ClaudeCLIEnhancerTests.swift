@@ -1,6 +1,7 @@
 import Foundation
 import Testing
 @testable import Dictate
+import DictateKit
 
 /// Runs the enhancer against fake `claude` shell scripts.
 @MainActor

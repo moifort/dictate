@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import DictateKit
 
 enum DictationPhase: Equatable {
     case idle

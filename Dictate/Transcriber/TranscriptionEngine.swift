@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import DictateKit
 
 /// The speech-to-text model run on this Mac.
 nonisolated enum TranscriptionEngine: String, CaseIterable, Codable, Identifiable, Sendable {

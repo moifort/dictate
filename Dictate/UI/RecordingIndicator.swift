@@ -1,6 +1,7 @@
 import AppKit
 import Observation
 import SwiftUI
+import DictateKit
 
 /// Small pill at the bottom centre of the active window's screen, visible only while `fn` is
 /// held and while the dictation is processed.

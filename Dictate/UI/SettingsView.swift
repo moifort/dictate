@@ -1,5 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import DictateKit
 
 /// Classic macOS preferences: icon tabs in the toolbar, labels in the left
 /// column. The app itself, then the stages of a dictation: transcription,

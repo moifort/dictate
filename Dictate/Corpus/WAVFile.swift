@@ -1,4 +1,5 @@
 import Foundation
+import DictateKit
 
 /// 16-bit PCM WAV, mono: what every audio tool and speech model reads.
 nonisolated enum WAVFile {

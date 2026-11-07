@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import DictateKit
 
 /// Real dictations kept on this Mac to measure the engines' word error rate:
 /// a WAV file each, and one JSON line per dictation in `entries.jsonl`.

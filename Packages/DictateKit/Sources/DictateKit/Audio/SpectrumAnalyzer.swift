@@ -2,17 +2,17 @@ import Accelerate
 
 /// What the recording indicator draws: how loud the voice is and how it spreads
 /// across lows, mids and highs.
-nonisolated struct VoiceSpectrum: Equatable, Sendable {
+public nonisolated struct VoiceSpectrum: Equatable, Sendable {
     /// Overall input level in 0...1, see `AudioAnalysis.meterLevel`.
-    var level: Float
+    public var level: Float
     /// Each band in 0...1, gated by the overall level so silence stays flat.
-    var low: Float
-    var mid: Float
-    var high: Float
+    public var low: Float
+    public var mid: Float
+    public var high: Float
     /// -1 when the voice sits in the lows, 1 on sibilants.
-    var tilt: Float
+    public var tilt: Float
 
-    static let silent = VoiceSpectrum(level: 0, low: 0, mid: 0, high: 0, tilt: 0)
+    public static let silent = VoiceSpectrum(level: 0, low: 0, mid: 0, high: 0, tilt: 0)
 }
 
 /// Runs on the audio thread: splits the 16 kHz stream into three bands with an

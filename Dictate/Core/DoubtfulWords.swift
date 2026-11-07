@@ -1,4 +1,5 @@
 import Foundation
+import DictateKit
 
 /// Marks the words the transcriber was unsure of, so Claude knows where a
 /// correction may be due and where to leave the text alone.

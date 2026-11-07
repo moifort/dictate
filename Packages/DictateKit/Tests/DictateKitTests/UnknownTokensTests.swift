@@ -1,5 +1,5 @@
 import Testing
-@testable import Dictate
+@testable import DictateKit
 
 /// Parakeet has no quotation marks in its vocabulary: it writes `<unk>` where
 /// it hears one. Claude picks the right character from the context; this is

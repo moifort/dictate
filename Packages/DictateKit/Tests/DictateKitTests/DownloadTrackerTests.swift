@@ -2,7 +2,7 @@ import FluidAudio
 import Foundation
 import Synchronization
 import Testing
-@testable import Dictate
+@testable import DictateKit
 
 struct DownloadTrackerTests {
     /// The sequence FluidAudio 0.17.7 reported while downloading Parakeet Ultra.

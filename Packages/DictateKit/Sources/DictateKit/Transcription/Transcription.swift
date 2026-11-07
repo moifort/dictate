@@ -2,30 +2,35 @@ import Foundation
 
 /// What a transcriber heard: the text, and how sure it was of each word when
 /// the engine reports it.
-nonisolated struct Transcription: Equatable, Sendable {
+public nonisolated struct Transcription: Equatable, Sendable {
     /// One space-delimited word of the transcript, with any punctuation the
     /// model attached to it, e.g. `"push,"`.
-    struct Word: Equatable, Sendable {
-        var text: String
+    public struct Word: Equatable, Sendable {
+        public var text: String
         /// Probability, from 0 to 1, the model gave its least certain sub-word token.
-        var confidence: Float
+        public var confidence: Float
+
+        public init(text: String, confidence: Float) {
+            self.text = text
+            self.confidence = confidence
+        }
     }
 
-    var text: String
+    public var text: String
     /// In transcript order; empty when the engine reports no confidence.
-    var words: [Word]
+    public var words: [Word]
     /// The custom vocabulary was searched for in the audio and the transcript
     /// rescored against it, whether or not a word changed.
-    var vocabularyBoosted: Bool
+    public var vocabularyBoosted: Bool
 
-    init(text: String, words: [Word] = [], vocabularyBoosted: Bool = false) {
+    public init(text: String, words: [Word] = [], vocabularyBoosted: Bool = false) {
         self.text = text
         self.words = words
         self.vocabularyBoosted = vocabularyBoosted
     }
 
     /// The least certain word, nil when the engine reports no confidence.
-    var lowestConfidence: Float? { words.map(\.confidence).min() }
+    public var lowestConfidence: Float? { words.map(\.confidence).min() }
 
     /// Groups SentencePiece sub-word tokens into words: a piece starting with a
     /// space or `▁` opens a new word, the others extend the current one.
@@ -33,7 +38,7 @@ nonisolated struct Transcription: Equatable, Sendable {
     /// A word is only as reliable as its weakest piece, so it takes their
     /// minimum. Punctuation pieces are left out of it when the word has
     /// letters: a hesitant comma says nothing about the spelling of the word.
-    static func words(fromTokens tokens: [(piece: String, confidence: Float)]) -> [Word] {
+    public static func words(fromTokens tokens: [(piece: String, confidence: Float)]) -> [Word] {
         var words: [Word] = []
         var text = ""
         var confidences: [(Float, spelled: Bool)] = []

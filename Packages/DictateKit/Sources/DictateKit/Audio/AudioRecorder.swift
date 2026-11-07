@@ -11,9 +11,9 @@ import Observation
 /// Safari), macOS mutes it for every other app: Dictate then hears nothing,
 /// the price of capturing the input alone, which keeps AirPods out of it.
 @Observable
-final class AudioRecorder: AudioRecording {
+public final class AudioRecorder {
     /// Recent input level and its spread across frequency bands, for the recording indicator.
-    private(set) var spectrum = VoiceSpectrum.silent
+    public private(set) var spectrum = VoiceSpectrum.silent
 
     @ObservationIgnored private var capture: QueueCapture?
     @ObservationIgnored private var tap: TapProcessor?
@@ -26,16 +26,16 @@ final class AudioRecorder: AudioRecording {
     /// closed) never delivers sound: past this, the recording starts anyway.
     private static let signalTimeout: Duration = .seconds(4)
 
-    enum RecorderError: LocalizedError {
+    public enum RecorderError: LocalizedError {
         case noInputDevice
         /// Core Audio's `kAudioHardwareNotRunningError` ('stop'): the device
         /// refused to start, often after a sleep or when another app grabbed it.
         case deviceNotRunning
 
-        var errorDescription: String? {
+        public var errorDescription: String? {
             switch self {
-            case .noInputDevice: String(localized: "Aucun micro disponible")
-            case .deviceNotRunning: String(localized: "Le micro ne répond pas")
+            case .noInputDevice: String(localized: "Aucun micro disponible", bundle: .module)
+            case .deviceNotRunning: String(localized: "Le micro ne répond pas", bundle: .module)
             }
         }
     }
@@ -44,7 +44,11 @@ final class AudioRecorder: AudioRecording {
     /// the start for ten seconds before it fails, and the pill must keep
     /// showing that something is happening meanwhile. Past `openingTimeout`
     /// it gives up, and a start that still succeeds later is closed.
-    func start() async throws {
+    public init() {}
+
+    /// Returns once the microphone delivers sound, or gives up waiting for
+    /// it. Cancelling the calling task cuts that wait short.
+    public func start() async throws {
         let onSpectrum: @Sendable (VoiceSpectrum) -> Void = { [weak self] spectrum in
             Task { @MainActor in self?.spectrum = spectrum }
         }
@@ -94,7 +98,8 @@ final class AudioRecorder: AudioRecording {
         }
     }
 
-    func stop() -> [Float] {
+    /// Stops recording and returns everything captured since `start()`.
+    public func stop() -> [Float] {
         capture?.stop()
         capture = nil
         spectrum = .silent
@@ -266,10 +271,10 @@ nonisolated final class TapProcessor: @unchecked Sendable {
 }
 
 /// Converts PCM buffers of any format to 16 kHz mono Float32.
-nonisolated final class AudioResampler: @unchecked Sendable {
-    enum ResamplerError: Error { case unsupportedFormat }
+public nonisolated final class AudioResampler: @unchecked Sendable {
+    public enum ResamplerError: Error { case unsupportedFormat }
 
-    static let outputFormat = AVAudioFormat(
+    public static let outputFormat = AVAudioFormat(
         commonFormat: .pcmFormatFloat32,
         sampleRate: Double(AudioAnalysis.sampleRate),
         channels: 1,
@@ -280,7 +285,7 @@ nonisolated final class AudioResampler: @unchecked Sendable {
     /// rate while the tap runs, and a converter set for the old one fails.
     private var converter: AVAudioConverter
 
-    init(inputFormat: AVAudioFormat) throws {
+    public init(inputFormat: AVAudioFormat) throws {
         guard let converter = Self.converter(from: inputFormat) else { throw ResamplerError.unsupportedFormat }
         self.converter = converter
     }
@@ -293,7 +298,7 @@ nonisolated final class AudioResampler: @unchecked Sendable {
         return converter
     }
 
-    func convert(_ buffer: AVAudioPCMBuffer) -> [Float] {
+    public func convert(_ buffer: AVAudioPCMBuffer) -> [Float] {
         if buffer.format != converter.inputFormat {
             guard let converter = Self.converter(from: buffer.format) else { return [] }
             self.converter = converter
@@ -318,7 +323,7 @@ nonisolated final class AudioResampler: @unchecked Sendable {
     }
 
     /// Reads a whole audio file as 16 kHz mono samples.
-    static func samples(fromFile url: URL) throws -> [Float] {
+    public static func samples(fromFile url: URL) throws -> [Float] {
         let file = try AVAudioFile(forReading: url)
         guard let buffer = AVAudioPCMBuffer(pcmFormat: file.processingFormat, frameCapacity: AVAudioFrameCount(file.length)) else {
             return []

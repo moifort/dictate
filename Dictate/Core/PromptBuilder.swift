@@ -1,4 +1,5 @@
 import Foundation
+import DictateKit
 
 /// Builds the prompts sent to the enhancement model.
 ///

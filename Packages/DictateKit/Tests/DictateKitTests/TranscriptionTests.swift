@@ -1,5 +1,5 @@
 import Testing
-@testable import Dictate
+@testable import DictateKit
 
 struct TranscriptionTests {
     @Test func subWordTokensFormWordsAtTheirWeakestPiece() {

@@ -1,4 +1,5 @@
 import Foundation
+import DictateKit
 
 /// Word error rates over the corpus, against what the user left in the field.
 ///

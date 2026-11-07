@@ -1,5 +1,6 @@
 import Testing
 @testable import Dictate
+import DictateKit
 
 struct PromptBuilderTests {
     @Test func systemPromptListsVocabulary() {

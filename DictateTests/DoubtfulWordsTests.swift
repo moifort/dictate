@@ -1,5 +1,6 @@
 import Testing
 @testable import Dictate
+import DictateKit
 
 struct DoubtfulWordsTests {
     private func transcription(_ text: String, _ confidences: [Float]) -> Transcription {

@@ -1,6 +1,7 @@
 import FluidAudio
 import Foundation
 import Observation
+import DictateKit
 
 /// Searches the audio for the custom vocabulary and rewrites the words
 /// Parakeet mangled, before Claude sees the transcript.

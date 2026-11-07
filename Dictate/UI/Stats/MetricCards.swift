@@ -1,5 +1,6 @@
 import Charts
 import SwiftUI
+import DictateKit
 
 /// The time dictating saved over typing the same words, over the period and
 /// since the first dictation.
