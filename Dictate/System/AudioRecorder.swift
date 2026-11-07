@@ -23,6 +23,10 @@ final class AudioRecorder: AudioRecording {
     /// Longer than voice processing takes to configure, shorter than the ten
     /// seconds a wedged device takes to fail: the key is held all that time.
     private static let openingTimeout: Duration = .seconds(5)
+    /// AirPods measured 1.8 to 2.6 s of digital silence while they switch to
+    /// their call profile. A muted microphone (the built-in one with the lid
+    /// closed) never delivers sound: past this, the recording starts anyway.
+    private static let signalTimeout: Duration = .seconds(4)
 
     enum RecorderError: LocalizedError {
         case noInputDevice
@@ -81,6 +85,17 @@ final class AudioRecorder: AudioRecording {
         engine = started.engine
         tap = started.tap
         if started.usesVoiceProcessing { voiceEngine = started.engine }
+        // The pill says "listening" only once the user can be heard.
+        let clock = ContinuousClock()
+        let opened = clock.now
+        let heard = await started.tap.waitForSignal(within: Self.signalTimeout)
+        let waited = (clock.now - opened).components
+        let milliseconds = waited.seconds * 1_000 + waited.attoseconds / 1_000_000_000_000_000
+        if heard {
+            Log.dictation.info("microphone delivered sound \(milliseconds) ms after opening")
+        } else {
+            Log.dictation.notice("no sound from the microphone after \(milliseconds) ms: recording anyway")
+        }
     }
 
     nonisolated private struct StartedEngine: @unchecked Sendable {
@@ -283,6 +298,11 @@ nonisolated final class TapProcessor: @unchecked Sendable {
     private let analyzer = SpectrumAnalyzer()
     private let lock = NSLock()
     private var samples: [Float] = []
+    /// Set by the first buffer holding anything but digital silence.
+    private var hasSignal = false
+    private var signalWaiter: CheckedContinuation<Bool, Never>?
+    /// Timed out or cancelled: one wait per recording, so it never resets.
+    private var waitEnded = false
 
     init(inputFormat: AVAudioFormat, onSpectrum: @escaping @Sendable (VoiceSpectrum) -> Void) throws {
         resampler = try AudioResampler(inputFormat: inputFormat)
@@ -298,8 +318,53 @@ nonisolated final class TapProcessor: @unchecked Sendable {
         guard !chunk.isEmpty else { return }
         lock.lock()
         samples.append(contentsOf: chunk)
+        var heardNow: CheckedContinuation<Bool, Never>?
+        // Exact zeros: a real microphone always picks up some room noise.
+        if !hasSignal, chunk.contains(where: { $0 != 0 }) {
+            hasSignal = true
+            heardNow = signalWaiter
+            signalWaiter = nil
+        }
         lock.unlock()
+        heardNow?.resume(returning: true)
         onSpectrum(analyzer.process(chunk))
+    }
+
+    /// Waits for the microphone to deliver actual sound, at most `limit`.
+    /// AirPods and other Bluetooth headsets need seconds to switch to their
+    /// call profile, and hand over digital silence until then: whatever is
+    /// said meanwhile is lost. False on timeout or cancellation.
+    func waitForSignal(within limit: Duration) async -> Bool {
+        let timer = Task { [self] in
+            try? await Task.sleep(for: limit)
+            endWait()
+        }
+        defer { timer.cancel() }
+        return await withTaskCancellationHandler {
+            await withCheckedContinuation { continuation in
+                lock.lock()
+                // The timer or a cancellation may have come before the waiter.
+                if hasSignal || waitEnded {
+                    let heard = hasSignal
+                    lock.unlock()
+                    continuation.resume(returning: heard)
+                    return
+                }
+                signalWaiter = continuation
+                lock.unlock()
+            }
+        } onCancel: {
+            endWait()
+        }
+    }
+
+    private func endWait() {
+        lock.lock()
+        waitEnded = true
+        let waiter = signalWaiter
+        signalWaiter = nil
+        lock.unlock()
+        waiter?.resume(returning: false)
     }
 
     func drain() -> [Float] {

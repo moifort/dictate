@@ -193,13 +193,15 @@ final class DictationController {
             }
 
         case .cancelled:
-            if capture == .starting { pendingGesture = .cancelled; return }
+            if capture == .starting { pendingGesture = .cancelled; starting?.cancel(); return }
             guard capture == .recording else { return }
             _ = recorder.stop()
             capture = .idle
 
         case .released:
-            if capture == .starting { pendingGesture = .released; return }
+            // Cuts short the wait for a headset still switching to its call
+            // profile: what was said meanwhile could not be heard anyway.
+            if capture == .starting { pendingGesture = .released; starting?.cancel(); return }
             guard capture == .recording else { return }
             // Read on release rather than press: Electron apps only build their
             // accessibility tree once asked, which happens on press. The read

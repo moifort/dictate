@@ -88,6 +88,20 @@ struct DictationControllerTests {
         #expect(!fakes.recorder.isRecording)
     }
 
+    /// AirPods switching to their call profile: a release then ends the wait
+    /// for sound at once rather than keeping the pill on "starting".
+    @Test(.timeLimit(.minutes(1)))
+    func releaseWhileWaitingForSoundEndsTheWait() async {
+        let (controller, fakes) = makeController()
+        fakes.recorder.waitsForSound = true
+        controller.handle(.pressed)
+        controller.handle(.released)
+        await controller.waitUntilStarted()
+        await controller.waitUntilIdle()
+        #expect(controller.phase == .idle)
+        #expect(!fakes.recorder.isRecording)
+    }
+
     @Test func cancelWhileStartingClosesTheMicrophone() async {
         let (controller, fakes) = makeController()
         controller.handle(.pressed)
@@ -705,6 +719,8 @@ private final class FakeRecorder: AudioRecording {
     var isRecording = false
     var startCount = 0
     var startError: Error?
+    /// Waits, like a headset that is still silent, until the start is cancelled.
+    var waitsForSound = false
 
     init(samples: [Float], events: EventLog) {
         self.samples = samples
@@ -715,6 +731,9 @@ private final class FakeRecorder: AudioRecording {
         if let startError { throw startError }
         startCount += 1
         isRecording = true
+        if waitsForSound {
+            while !Task.isCancelled { try? await Task.sleep(for: .milliseconds(5)) }
+        }
     }
 
     func stop() -> [Float] {
