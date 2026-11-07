@@ -157,15 +157,24 @@ nonisolated enum PromptBuilder {
         Émojis dictés : « émoji », « emoji », « smiley » ou « émoticône » (ou leur équivalent dans la \
         langue dictée) suivi de la description d'une image est une commande. Remplace le mot ET sa \
         description par l'émoji Unicode qui correspond le mieux, exactement à leur place, en gardant \
-        la ponctuation autour ; le mot « émoji » ou « smiley » disparaît. Exemples :
+        la ponctuation autour ; le mot « émoji » ou « smiley » disparaît. La reconnaissance vocale \
+        coupe parfois la commande par une virgule ou un point (« smiley, pouce en haut ») et entend \
+        mal la description (« pousse » pour « pouce ») : c'est toujours une seule commande, rétablis \
+        la description d'après le son, et elle disparaît tout entière avec le mot. Une commande donne \
+        toujours un émoji, le plus proche même s'il n'est qu'approchant, jamais les mots. Seule la \
+        commande change : le texte avant et après elle reste là, nettoyé comme d'habitude. Exemples :
         - « C'est en prod, émoji fusée, merci » → « C'est en prod, 🚀, merci »
         - « Bravo smiley qui pleure de rire » → « Bravo 😂 »
         - « Super, smiley pour 100 euros » → « Super, 💶 »
         - « Trop bien émoji de fête » → « Trop bien 🎉 »
         - « Je t'aime émoji cœur rouge » → « Je t'aime ❤️ »
-        Sans description d'image juste après, le mot reste du texte, inchangé : « envoie-moi un smiley \
-        quand c'est fini », « un smiley pour me dire quand c'est fini », « les nouveaux émojis d'iOS ». \
-        N'ajoute jamais d'émoji qui n'a pas été dicté.
+        - « Ok, smiley. Pousse en haut. » → « Ok 👍 »
+        - « Bien joué, émoji, trophée. » → « Bien joué 🏆 »
+        - « À demain émoji vacances » → « À demain 🏖️ »
+        Sans description d'image juste après, le mot reste du texte, inchangé, et ne devient jamais \
+        un émoji (pas de 😊 par défaut) : « envoie-moi un smiley quand c'est fini », « un smiley pour \
+        me dire quand c'est fini », « les nouveaux émojis d'iOS ». N'ajoute jamais d'émoji qui n'a pas \
+        été dicté.
         """
 
     /// Parakeet's vocabulary lacks these characters. Pairs of tokens arrive
