@@ -3,7 +3,7 @@ import Testing
 @testable import Dictate
 
 struct AudioResamplerTests {
-    /// Voice processing hands over nine channels; only the first carries the processed voice.
+    /// A discrete nine-channel input keeps its first channel rather than going silent.
     @Test func multichannelInputKeepsOnlyTheFirstChannel() throws {
         let layout = try #require(AVAudioChannelLayout(layoutTag: kAudioChannelLayoutTag_DiscreteInOrder | 9))
         let format = AVAudioFormat(standardFormatWithSampleRate: 16_000, channelLayout: layout)

@@ -1,4 +1,5 @@
 @preconcurrency import AVFoundation
+import AudioToolbox
 import CoreAudio
 import Observation
 
@@ -6,24 +7,21 @@ import Observation
 ///
 /// Always the input selected in macOS, Bluetooth headsets included: the user
 /// picks the microphone there, and the app never second-guesses that choice.
+/// While a call holds the microphone with voice processing (FaceTime, Meet in
+/// Safari), macOS mutes it for every other app: Dictate then hears nothing,
+/// the price of capturing the input alone, which keeps AirPods out of it.
 @Observable
 final class AudioRecorder: AudioRecording {
     /// Recent input level and its spread across frequency bands, for the recording indicator.
     private(set) var spectrum = VoiceSpectrum.silent
 
-    @ObservationIgnored private var engine = AVAudioEngine()
+    @ObservationIgnored private var capture: QueueCapture?
     @ObservationIgnored private var tap: TapProcessor?
-    @ObservationIgnored private var isRecording = false
-    /// Configured ahead of time while another app holds the mic: enabling voice
-    /// processing takes most of a second, which would cut the first words.
-    @ObservationIgnored private var voiceEngine: AVAudioEngine?
-    @ObservationIgnored private var isWarmingVoiceEngine = false
-    @ObservationIgnored private var inputMonitor: InputDeviceMonitor?
 
-    /// Longer than voice processing takes to configure, shorter than the ten
-    /// seconds a wedged device takes to fail: the key is held all that time.
+    /// Shorter than the ten seconds a wedged device takes to fail: the key is
+    /// held all that time.
     private static let openingTimeout: Duration = .seconds(5)
-    /// AirPods measured 1.8 to 2.6 s of digital silence while they switch to
+    /// AirPods measured 1.3 to 2.8 s of digital silence while they switch to
     /// their call profile. A muted microphone (the built-in one with the lid
     /// closed) never delivers sound: past this, the recording starts anyway.
     private static let signalTimeout: Duration = .seconds(4)
@@ -42,49 +40,28 @@ final class AudioRecorder: AudioRecording {
         }
     }
 
-    init() {
-        inputMonitor = InputDeviceMonitor { [weak self] deviceChanged in
-            self?.inputDeviceChanged(deviceChanged: deviceChanged)
-        }
-        inputDeviceChanged(deviceChanged: false)
-    }
-
     /// Opens the microphone off the main thread: a wedged device can block
-    /// `AVAudioEngine.start()` for ten seconds before it fails, and the pill
-    /// must keep showing that something is happening meanwhile. Past
-    /// `openingTimeout` it gives up: `AVAudioEngine.inputNode` can also spin
-    /// forever on a device that vanished while the engine started, which
-    /// nothing can interrupt, and the app must not stay stuck behind it.
+    /// the start for ten seconds before it fails, and the pill must keep
+    /// showing that something is happening meanwhile. Past `openingTimeout`
+    /// it gives up, and a start that still succeeds later is closed.
     func start() async throws {
-        // Our own capture marks the device as running: `inputDeviceChanged`
-        // must not take it for another app while the engine starts.
-        isRecording = true
-        let warmed = voiceEngine
         let onSpectrum: @Sendable (VoiceSpectrum) -> Void = { [weak self] spectrum in
             Task { @MainActor in self?.spectrum = spectrum }
         }
-        let started: StartedEngine
         let opening = Task.detached(priority: .userInitiated) {
-            try Self.startEngine(warmedVoiceEngine: warmed, onSpectrum: onSpectrum)
+            try Self.startCapture(onSpectrum: onSpectrum)
         }
+        let started: StartedCapture
         do {
             started = try await value(of: opening, within: Self.openingTimeout) { late in
                 Log.dictation.notice("microphone opened after the timeout: closing it")
-                late.engine.inputNode.removeTap(onBus: 0)
-                late.engine.stop()
+                late.capture.stop()
             }
         } catch is DeadlineExceeded {
-            isRecording = false
-            // Held by the abandoned attempt: the next press needs its own engine.
-            voiceEngine = nil
             throw RecorderError.deviceNotRunning
-        } catch {
-            isRecording = false
-            throw error
         }
-        engine = started.engine
+        capture = started.capture
         tap = started.tap
-        if started.usesVoiceProcessing { voiceEngine = started.engine }
         // The pill says "listening" only once the user can be heard.
         let clock = ContinuousClock()
         let opened = clock.now
@@ -98,196 +75,112 @@ final class AudioRecorder: AudioRecording {
         }
     }
 
-    nonisolated private struct StartedEngine: @unchecked Sendable {
-        let engine: AVAudioEngine
+    nonisolated private struct StartedCapture: Sendable {
+        let capture: QueueCapture
         let tap: TapProcessor
-        let usesVoiceProcessing: Bool
     }
 
-    nonisolated private static func startEngine(
-        warmedVoiceEngine: AVAudioEngine?,
+    nonisolated private static func startCapture(
         onSpectrum: @escaping @Sendable (VoiceSpectrum) -> Void
-    ) throws -> StartedEngine {
-        let engine: AVAudioEngine
-        let usesVoiceProcessing = isInputInUseElsewhere()
-        if usesVoiceProcessing {
-            // An app holding the mic with voice processing (Safari WebRTC, FaceTime…)
-            // mutes it for everyone else; only a voice-processed stream still hears the user.
-            if let warmedVoiceEngine {
-                engine = warmedVoiceEngine
-            } else {
-                Log.dictation.info("voice-processing engine not ready: configuring it now")
-                engine = try makeVoiceEngine()
-            }
-        } else {
-            engine = AVAudioEngine()
-        }
-        let input = engine.inputNode
-        let format = input.outputFormat(forBus: 0)
-        guard format.sampleRate > 0, format.channelCount > 0 else { throw RecorderError.noInputDevice }
-
-        let processor = try TapProcessor(inputFormat: format, onSpectrum: onSpectrum)
-        // About 21 ms at 48 kHz, so the waves follow syllables; the hardware may
-        // still deliver larger buffers, which the analyzer handles. No format:
-        // the tap takes the bus's own. One passed in raises an Objective-C
-        // exception, a crash, when the device changed rate since it was read,
-        // as a Bluetooth headset does when it switches to its 24 kHz call profile.
-        input.installTap(onBus: 0, bufferSize: 1_024, format: nil, block: processor.makeBlock())
-        engine.prepare()
+    ) throws -> StartedCapture {
+        guard defaultInputDevice() != nil else { throw RecorderError.noInputDevice }
+        let processor = try TapProcessor(inputFormat: QueueCapture.format, onSpectrum: onSpectrum)
         do {
-            try engine.start()
+            let capture = try QueueCapture { buffer in processor.consume(buffer) }
+            return StartedCapture(capture: capture, tap: processor)
         } catch {
-            input.removeTap(onBus: 0)
             if (error as NSError).code == Int(kAudioHardwareNotRunningError) { throw RecorderError.deviceNotRunning }
             throw error
         }
-        return StartedEngine(engine: engine, tap: processor, usesVoiceProcessing: usesVoiceProcessing)
     }
 
     func stop() -> [Float] {
-        engine.inputNode.removeTap(onBus: 0)
-        engine.stop()
-        isRecording = false
+        capture?.stop()
+        capture = nil
         spectrum = .silent
-        defer {
-            tap = nil
-            inputDeviceChanged(deviceChanged: false)
-        }
+        defer { tap = nil }
         return tap?.drain() ?? []
     }
 
-    private func inputDeviceChanged(deviceChanged: Bool) {
-        // A voice-processing engine stays bound to the device it was configured on.
-        if deviceChanged { voiceEngine = nil }
-        // Our own capture marks the device as running: decide again once it stops.
-        guard !isRecording else { return }
-        if Self.isInputInUseElsewhere() {
-            warmVoiceEngine()
-        } else if voiceEngine != nil {
-            Log.dictation.info("microphone released by the other app: dropping the voice-processing engine")
-            voiceEngine = nil
-        }
-    }
-
-    private func warmVoiceEngine() {
-        guard voiceEngine == nil, !isWarmingVoiceEngine else { return }
-        isWarmingVoiceEngine = true
-        Log.dictation.info("microphone in use by another app: preparing a voice-processing engine")
-        Task {
-            let engine = await Task.detached(priority: .userInitiated) { () -> AVAudioEngine? in
-                do {
-                    return try Self.makeVoiceEngine()
-                } catch {
-                    Log.dictation.error("voice-processing engine failed: \(error.localizedDescription, privacy: .public)")
-                    ErrorReporter.capture(error, "voice-processing engine could not be prepared", category: "recorder")
-                    return nil
-                }
-            }.value
-            isWarmingVoiceEngine = false
-            if voiceEngine == nil { voiceEngine = engine }
-            inputDeviceChanged(deviceChanged: false)
-        }
-    }
-
-    nonisolated private static func makeVoiceEngine() throws -> AVAudioEngine {
-        let engine = AVAudioEngine()
-        engine.inputNode.voiceProcessingOtherAudioDuckingConfiguration =
-            .init(enableAdvancedDucking: false, duckingLevel: .min)
-        try engine.inputNode.setVoiceProcessingEnabled(true)
-        return engine
-    }
-
-    /// Whether another process is capturing audio input. Asked per process: the
-    /// device-wide running flag counts our own capture, and lags for a moment after it stops.
-    nonisolated private static func isInputInUseElsewhere() -> Bool {
-        let system = AudioObjectID(kAudioObjectSystemObject)
-        var address = InputDeviceMonitor.address(kAudioHardwarePropertyProcessObjectList)
-        var size = UInt32(0)
-        guard AudioObjectGetPropertyDataSize(system, &address, 0, nil, &size) == noErr else { return false }
-        var processes = [AudioObjectID](repeating: 0, count: Int(size) / MemoryLayout<AudioObjectID>.size)
-        guard AudioObjectGetPropertyData(system, &address, 0, nil, &size, &processes) == noErr else { return false }
-
-        let ownPID = getpid()
-        return processes.contains { process in
-            var pid = pid_t(0)
-            var pidSize = UInt32(MemoryLayout<pid_t>.size)
-            var pidAddress = InputDeviceMonitor.address(kAudioProcessPropertyPID)
-            guard AudioObjectGetPropertyData(process, &pidAddress, 0, nil, &pidSize, &pid) == noErr, pid != ownPID else {
-                return false
-            }
-            var running = UInt32(0)
-            var runningSize = UInt32(MemoryLayout<UInt32>.size)
-            var runningAddress = InputDeviceMonitor.address(kAudioProcessPropertyIsRunningInput)
-            return AudioObjectGetPropertyData(process, &runningAddress, 0, nil, &runningSize, &running) == noErr && running != 0
-        }
-    }
-}
-
-/// Reports, on the main queue, when the default input device changes or another
-/// process starts or stops using it.
-final class InputDeviceMonitor {
-    private let onChange: (_ deviceChanged: Bool) -> Void
-    private var device: AudioDeviceID?
-    private var defaultDeviceListener: AudioObjectPropertyListenerBlock?
-    private var runningListener: AudioObjectPropertyListenerBlock?
-
-    init(onChange: @escaping (_ deviceChanged: Bool) -> Void) {
-        self.onChange = onChange
-        var address = Self.address(kAudioHardwarePropertyDefaultInputDevice)
-        let listener: AudioObjectPropertyListenerBlock = { [weak self] _, _ in
-            MainActor.assumeIsolated {
-                self?.watchDefaultDevice()
-                self?.onChange(true)
-            }
-        }
-        AudioObjectAddPropertyListenerBlock(AudioObjectID(kAudioObjectSystemObject), &address, .main, listener)
-        defaultDeviceListener = listener
-        watchDefaultDevice()
-    }
-
-    isolated deinit {
-        if let defaultDeviceListener {
-            var address = Self.address(kAudioHardwarePropertyDefaultInputDevice)
-            AudioObjectRemovePropertyListenerBlock(AudioObjectID(kAudioObjectSystemObject), &address, .main, defaultDeviceListener)
-        }
-        unwatchDevice()
-    }
-
-    private func watchDefaultDevice() {
-        unwatchDevice()
-        guard let device = Self.defaultInputDevice() else { return }
-        var address = Self.address(kAudioDevicePropertyDeviceIsRunningSomewhere)
-        let listener: AudioObjectPropertyListenerBlock = { [weak self] _, _ in
-            MainActor.assumeIsolated { self?.onChange(false) }
-        }
-        AudioObjectAddPropertyListenerBlock(device, &address, .main, listener)
-        self.device = device
-        runningListener = listener
-    }
-
-    private func unwatchDevice() {
-        guard let device, let runningListener else { return }
-        var address = Self.address(kAudioDevicePropertyDeviceIsRunningSomewhere)
-        AudioObjectRemovePropertyListenerBlock(device, &address, .main, runningListener)
-        self.device = nil
-        self.runningListener = nil
-    }
-
-    nonisolated static func defaultInputDevice() -> AudioDeviceID? {
+    nonisolated private static func defaultInputDevice() -> AudioDeviceID? {
         var device = AudioDeviceID(0)
         var size = UInt32(MemoryLayout<AudioDeviceID>.size)
-        var address = address(kAudioHardwarePropertyDefaultInputDevice)
+        var address = AudioObjectPropertyAddress(
+            mSelector: kAudioHardwarePropertyDefaultInputDevice,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
         guard AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &size, &device) == noErr,
               device != kAudioObjectUnknown else { return nil }
         return device
     }
+}
 
-    nonisolated static func address(_ selector: AudioObjectPropertySelector) -> AudioObjectPropertyAddress {
-        AudioObjectPropertyAddress(
-            mSelector: selector,
-            mScope: kAudioObjectPropertyScopeGlobal,
-            mElement: kAudioObjectPropertyElementMain
+/// Opens the default input and nothing else. `AVAudioEngine` also started the
+/// default output, and waking AirPods there held the microphone back by up
+/// to 1.4 s, a USB webcam's included, against 0.17 s for this queue.
+nonisolated final class QueueCapture: @unchecked Sendable {
+    /// What the queue hands over whatever the device: it converts the rate
+    /// and mixes the channels down itself.
+    static let format = AVAudioFormat(
+        commonFormat: .pcmFormatFloat32,
+        sampleRate: 48_000,
+        channels: 1,
+        interleaved: false
+    )!
+    /// About 21 ms, so the waves follow syllables.
+    private static let framesPerBuffer: UInt32 = 1_024
+    private static let bufferCount = 4
+
+    private var queue: AudioQueueRef?
+    private let callbacks = DispatchQueue(label: "com.thibautmottet.dictate.microphone", qos: .userInteractive)
+
+    init(onBuffer: @escaping @Sendable (AVAudioPCMBuffer) -> Void) throws {
+        var description = AudioStreamBasicDescription(
+            mSampleRate: Self.format.sampleRate,
+            mFormatID: kAudioFormatLinearPCM,
+            mFormatFlags: kAudioFormatFlagIsFloat | kAudioFormatFlagIsPacked,
+            mBytesPerPacket: 4,
+            mFramesPerPacket: 1,
+            mBytesPerFrame: 4,
+            mChannelsPerFrame: 1,
+            mBitsPerChannel: 32,
+            mReserved: 0
         )
+        let format = Self.format
+        var created: AudioQueueRef?
+        let status = AudioQueueNewInputWithDispatchQueue(&created, &description, 0, callbacks) { queue, buffer, _, _, _ in
+            let bytes = buffer.pointee.mAudioDataByteSize
+            let frames = bytes / 4
+            if frames > 0, let pcm = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frames), let channel = pcm.floatChannelData {
+                pcm.frameLength = frames
+                memcpy(channel[0], buffer.pointee.mAudioData, Int(bytes))
+                onBuffer(pcm)
+            }
+            AudioQueueEnqueueBuffer(queue, buffer, 0, nil)
+        }
+        guard status == noErr, let created else { throw Self.error(status) }
+        queue = created
+        for _ in 0..<Self.bufferCount {
+            var buffer: AudioQueueBufferRef?
+            let allocated = AudioQueueAllocateBuffer(created, Self.framesPerBuffer * 4, &buffer)
+            guard allocated == noErr, let buffer else { stop(); throw Self.error(allocated) }
+            AudioQueueEnqueueBuffer(created, buffer, 0, nil)
+        }
+        let started = AudioQueueStart(created, nil)
+        guard started == noErr else { stop(); throw Self.error(started) }
+    }
+
+    /// Synchronous: no buffer arrives once it returns.
+    func stop() {
+        guard let queue else { return }
+        self.queue = nil
+        AudioQueueStop(queue, true)
+        AudioQueueDispose(queue, true)
+    }
+
+    private static func error(_ status: OSStatus) -> NSError {
+        NSError(domain: NSOSStatusErrorDomain, code: Int(status))
     }
 }
 
@@ -309,11 +202,7 @@ nonisolated final class TapProcessor: @unchecked Sendable {
         self.onSpectrum = onSpectrum
     }
 
-    func makeBlock() -> AVAudioNodeTapBlock {
-        { [self] buffer, _ in process(buffer) }
-    }
-
-    private func process(_ buffer: AVAudioPCMBuffer) {
+    func consume(_ buffer: AVAudioPCMBuffer) {
         let chunk = resampler.convert(buffer)
         guard !chunk.isEmpty else { return }
         lock.lock()
@@ -398,8 +287,8 @@ nonisolated final class AudioResampler: @unchecked Sendable {
 
     private static func converter(from inputFormat: AVAudioFormat) -> AVAudioConverter? {
         guard let converter = AVAudioConverter(from: inputFormat, to: outputFormat) else { return nil }
-        // Discrete multichannel input (voice processing) maps to no output channel
-        // by default, which yields silence: take the first channel explicitly.
+        // Discrete multichannel input maps to no output channel by default,
+        // which yields silence: take the first channel explicitly.
         if inputFormat.channelCount > 1 { converter.channelMap = [0] }
         return converter
     }

@@ -13,16 +13,16 @@ struct TapProcessorTests {
         return buffer
     }
 
-    private func makeProcessor() throws -> (TapProcessor, AVAudioNodeTapBlock) {
+    private func makeProcessor() throws -> (TapProcessor, (AVAudioPCMBuffer) -> Void) {
         let processor = try TapProcessor(inputFormat: format, onSpectrum: { _ in })
-        return (processor, processor.makeBlock())
+        return (processor, processor.consume)
     }
 
     /// A Bluetooth headset switching to its call profile hands over digital
     /// silence for seconds: it is not the microphone hearing the room yet.
     @Test func digitalSilenceIsNotASignal() async throws {
         let (processor, block) = try makeProcessor()
-        block(try buffer(0), AVAudioTime(hostTime: 0))
+        block(try buffer(0))
 
         let heard = await processor.waitForSignal(within: .milliseconds(50))
 
@@ -31,19 +31,19 @@ struct TapProcessorTests {
 
     @Test func theFirstBufferWithSoundEndsTheWait() async throws {
         let (processor, block) = try makeProcessor()
-        block(try buffer(0), AVAudioTime(hostTime: 0))
+        block(try buffer(0))
         let sound = try buffer(0.001)
 
         let waiting = Task { await processor.waitForSignal(within: .seconds(10)) }
         try await Task.sleep(for: .milliseconds(20))
-        block(sound, AVAudioTime(hostTime: 0))
+        block(sound)
 
         #expect(await waiting.value)
     }
 
     @Test func soundHeardBeforeTheWaitReturnsAtOnce() async throws {
         let (processor, block) = try makeProcessor()
-        block(try buffer(0.001), AVAudioTime(hostTime: 0))
+        block(try buffer(0.001))
 
         #expect(await processor.waitForSignal(within: .seconds(10)))
     }
