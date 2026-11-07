@@ -48,7 +48,8 @@ protocol FocusInspecting: AnyObject {
 
 protocol TextInserting: AnyObject {
     /// Pastes into the focused field, then restores the previous pasteboard.
-    func paste(_ text: String) async
+    /// With `submit`, presses Return once the text is in, to send it.
+    func paste(_ text: String, submit: Bool) async
     /// Leaves the text in the pasteboard for the user to paste.
     func copyToPasteboard(_ text: String)
 }

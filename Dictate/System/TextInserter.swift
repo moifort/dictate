@@ -7,7 +7,11 @@ final class TextInserter: TextInserting {
     /// Marks our temporary content so clipboard managers ignore it.
     private static let transientType = NSPasteboard.PasteboardType("org.nspasteboard.TransientType")
 
-    /// Set on the `Cmd+V` events we post, so the push-to-talk monitor ignores
+    /// Between the paste and Return: Electron apps read the pasteboard on
+    /// `Cmd+V`, and a Return handled first would send the field without it.
+    private static let submitDelay: Duration = .milliseconds(150)
+
+    /// Set on the `Cmd+V` and Return events we post, so the push-to-talk monitor ignores
     /// them: a paste landing early in the next dictation's press must not
     /// read as a shortcut and cancel it.
     nonisolated static let eventMarker: Int64 = 0x4449_4354
@@ -16,7 +20,7 @@ final class TextInserter: TextInserting {
     /// The user's content while one of our pastes waits to be undone.
     private var pendingRestore: (saved: [[NSPasteboard.PasteboardType: Data]], task: Task<Void, Never>)?
 
-    func paste(_ text: String) async {
+    func paste(_ text: String, submit: Bool) async {
         // Back-to-back dictations: the pasteboard still holds the previous
         // text, so the user's content saved for it is the one to put back.
         let saved = pendingRestore?.saved ?? snapshot()
@@ -27,7 +31,13 @@ final class TextInserter: TextInserting {
         let ourChange = pasteboard.changeCount
 
         #if !APP_STORE
-        postCommandV()
+        postKey(kVK_ANSI_V, flags: .maskCommand)
+        if submit {
+            try? await Task.sleep(for: Self.submitDelay)
+            // No flags: Shift or Command held with Return mean a new line or
+            // something else in most composers.
+            postKey(kVK_Return, flags: [])
+        }
         #endif
         // The dictation is over for the user once Cmd+V is posted. The target
         // app needs a moment to read the pasteboard, so it is restored later,
@@ -51,12 +61,12 @@ final class TextInserter: TextInserting {
     }
 
     #if !APP_STORE
-    private func postCommandV() {
+    private func postKey(_ key: Int, flags: CGEventFlags) {
         let source = CGEventSource(stateID: .combinedSessionState)
-        let keyCode = CGKeyCode(kVK_ANSI_V)
+        let keyCode = CGKeyCode(key)
         for keyDown in [true, false] {
             let event = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: keyDown)
-            event?.flags = .maskCommand
+            event?.flags = flags
             event?.setIntegerValueField(.eventSourceUserData, value: Self.eventMarker)
             event?.post(tap: .cghidEventTap)
         }

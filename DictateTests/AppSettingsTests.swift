@@ -33,6 +33,14 @@ struct AppSettingsTests {
         #expect(AppSettings(defaults: UserDefaults(suiteName: suite)!).keepEvaluationCorpus)
     }
 
+    @Test func autoSendInClaudeIsOnByDefaultAndPersists() {
+        let suite = "AppSettingsTests-\(UUID().uuidString)"
+        let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!)
+        #expect(settings.autoSendInClaude)
+        settings.autoSendInClaude = false
+        #expect(!AppSettings(defaults: UserDefaults(suiteName: suite)!).autoSendInClaude)
+    }
+
     @Test func vocabularySuggestionsAreOffByDefaultAndPersist() {
         let suite = "AppSettingsTests-\(UUID().uuidString)"
         let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!)

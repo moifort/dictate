@@ -529,6 +529,22 @@
         }
       }
     },
+    "Appuie sur Entrée une fois le texte collé dans l'app Claude.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Presses Return once the text is pasted into the Claude app."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appuie sur Entrée une fois le texte collé dans l'app Claude."
+          }
+        }
+      }
+    },
     "Aucun": {
       "localizations": {
         "en": {
@@ -605,6 +621,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Claude est déconnecté : lancez « claude auth login » dans un terminal."
+          }
+        }
+      }
+    },
+    "Envoi :": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sending:"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoi :"
+          }
+        }
+      }
+    },
+    "Envoyer le message dans Claude": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send the message in Claude"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoyer le message dans Claude"
           }
         }
       }

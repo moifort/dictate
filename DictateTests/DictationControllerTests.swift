@@ -134,6 +134,39 @@ struct DictationControllerTests {
         #expect(controller.phase == .idle)
     }
 
+    @Test func pasteIntoClaudeIsSentWhenAutoSendIsOn() async {
+        let (controller, fakes) = makeController()
+        fakes.focus.bundleID = "com.anthropic.claudefordesktop"
+        controller.autoSend = { true }
+        await dictate(controller)
+        #expect(fakes.inserter.submitted == [true])
+    }
+
+    @Test func pasteIntoClaudeStaysUnsentWhenAutoSendIsOff() async {
+        let (controller, fakes) = makeController()
+        fakes.focus.bundleID = "com.anthropic.claudefordesktop"
+        controller.autoSend = { false }
+        await dictate(controller)
+        #expect(fakes.inserter.submitted == [false])
+    }
+
+    @Test func pasteIntoAnotherAppIsNeverSent() async {
+        let (controller, fakes) = makeController()
+        controller.autoSend = { true }
+        await dictate(controller)
+        #expect(fakes.inserter.submitted == [false])
+    }
+
+    @Test func autoSendFollowsTheAppInFrontAtThePaste() async {
+        // Pressed in Terminal, then switched to Claude before the text landed.
+        let (controller, fakes) = makeController(tail: { fakes in
+            fakes.focus.bundleID = "com.anthropic.claudefordesktop"
+        })
+        controller.autoSend = { true }
+        await dictate(controller)
+        #expect(fakes.inserter.submitted == [true])
+    }
+
     @Test func noEditableFieldCopiesToPasteboard() async {
         let (controller, fakes) = makeController(editableFocus: false)
         await dictate(controller)
@@ -856,8 +889,12 @@ private final class FakeFieldReader: FieldReading, ReadableField {
 @MainActor
 private final class FakeInserter: TextInserting {
     var pasted: [String] = []
+    var submitted: [Bool] = []
     var copied: [String] = []
 
-    func paste(_ text: String) async { pasted.append(text) }
+    func paste(_ text: String, submit: Bool) async {
+        pasted.append(text)
+        submitted.append(submit)
+    }
     func copyToPasteboard(_ text: String) { copied.append(text) }
 }

@@ -62,6 +62,11 @@ final class AppSettings {
         didSet { defaults.set(shareFieldContext, forKey: Keys.shareFieldContext) }
     }
 
+    /// Press Return after pasting into Claude, so the dictation is sent.
+    var autoSendInClaude: Bool {
+        didSet { defaults.set(autoSendInClaude, forKey: Keys.autoSendInClaude) }
+    }
+
     /// Install new releases as soon as they are found, without asking.
     var autoUpdate: Bool {
         didSet { defaults.set(autoUpdate, forKey: Keys.autoUpdate) }
@@ -185,6 +190,7 @@ final class AppSettings {
         pushToTalkKey = defaults.string(forKey: Keys.pushToTalkKey).flatMap(PushToTalkKey.init(rawValue:))
             .flatMap { PushToTalkKey.available.contains($0) ? $0 : nil } ?? PushToTalkKey.available[0]
         shareFieldContext = defaults.object(forKey: Keys.shareFieldContext) as? Bool ?? true
+        autoSendInClaude = defaults.object(forKey: Keys.autoSendInClaude) as? Bool ?? true
         autoUpdate = defaults.object(forKey: Keys.autoUpdate) as? Bool ?? true
         keepEvaluationCorpus = defaults.bool(forKey: Keys.keepEvaluationCorpus)
         suggestVocabulary = defaults.bool(forKey: Keys.suggestVocabulary)
@@ -208,6 +214,7 @@ final class AppSettings {
         /// Older versions' on/off switch, read once for the migration.
         static let enhancementEnabled = "enhancementEnabled"
         static let shareFieldContext = "shareFieldContext"
+        static let autoSendInClaude = "autoSendInClaude"
         static let autoUpdate = "autoUpdate"
         static let keepEvaluationCorpus = "keepEvaluationCorpus"
         static let suggestVocabulary = "suggestVocabulary"

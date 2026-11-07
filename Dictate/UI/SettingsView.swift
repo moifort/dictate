@@ -62,6 +62,16 @@ private struct DictationSettings: View {
                 }
             }
 
+            // The App Store build never pastes, so it has nothing to send.
+            if !Distribution.isAppStore {
+                LabeledContent("Envoi :") {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Toggle("Envoyer le message dans Claude", isOn: Bindable(model.settings).autoSendInClaude)
+                        Hint("Appuie sur Entrée une fois le texte collé dans l'app Claude.")
+                    }
+                }
+            }
+
             // The corpus reads the field back, which the App Store build cannot do.
             if !Distribution.isAppStore {
                 LabeledContent("Évaluation :") {
