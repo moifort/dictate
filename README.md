@@ -23,8 +23,8 @@ ready-to-send text.
   cleaned up and keep talking. Sentences land in the order you said them.
 - **Text lands at the cursor.** The sentence is typed into whatever field has
   focus. If none does, it waits in the clipboard, ready to paste. In the
-  Claude app, Return is pressed for you and the message is sent (Settings →
-  Dictation to turn it off).
+  Claude app, Return is pressed for you and the message is sent. Pick the apps
+  where that happens, or turn it off, in Settings → Dictation.
 - **Clean text, not a raw transcript.** Hesitations ("euh", "um"), repetitions
   and false starts are removed, punctuation and capitals are fixed, misheard
   technical terms are corrected. Your words and meaning stay as you said them.
