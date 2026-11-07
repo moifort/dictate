@@ -288,6 +288,28 @@ struct DictationControllerTests {
         #expect(controller.lastOutcome == .discarded)
     }
 
+    @Test func silenceHeldForOverASecondIsUnheard() async {
+        let (controller, fakes) = makeController(samples: [Float](repeating: 0, count: 24_000))
+        await dictate(controller)
+        #expect(fakes.transcriber.callCount == 0)
+        #expect(controller.lastOutcome == .unheard)
+    }
+
+    @Test func emptyTranscriptAfterALongPressIsUnheard() async {
+        let (controller, _) = makeController(
+            samples: [Float](repeating: 0.2, count: 24_000), transcript: .success("   ")
+        )
+        await dictate(controller)
+        #expect(controller.lastOutcome == .unheard)
+    }
+
+    @Test func aShortSilentPressPassesSilently() async {
+        // 1 s of audio is 0.75 s of holding once the release tail is taken off.
+        let (controller, _) = makeController(samples: [Float](repeating: 0, count: 16_000))
+        await dictate(controller)
+        #expect(controller.lastOutcome == .discarded)
+    }
+
     @Test func transcriberErrorReportsFailure() async {
         let (controller, fakes) = makeController(transcript: .failure(FakeError()))
         await dictate(controller)
@@ -637,7 +659,8 @@ struct DictationControllerTests {
         )
         await dictate(controller)
         #expect(fakes.transcriber.callCount == 0)
-        #expect(controller.lastOutcome == .discarded)
+        // A second of holding once the tail is taken off: meant, so unheard.
+        #expect(controller.lastOutcome == .unheard)
     }
 
     @Test func recorderFailureReportsFailure() async {

@@ -62,10 +62,10 @@ final class RecordingIndicator {
         case .pasted(let raw) where claudeDisconnected, .copied(let raw) where claudeDisconnected:
             .claudeDisconnected(raw: raw)
         case .copied: .copied
-        case .discarded: .unheard
+        case .unheard: .unheard
         case .failed(let message): .failed(message)
         case .modelLoading(let engine): .loading(engine)
-        case .pasted: nil
+        case .pasted, .discarded: nil
         }
         guard let flash else { return }
         flashTask?.cancel()

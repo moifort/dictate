@@ -91,7 +91,7 @@ final class AppModel {
         if let flash = ScreenshotMode.flash, flash.hasPrefix("claudeDisconnected") {
             indicator.show(.pasted(raw: flash.hasSuffix("Raw")), claudeDisconnected: true)
         } else if ScreenshotMode.flash == "unheard" {
-            indicator.show(.discarded)
+            indicator.show(.unheard)
         }
         controller.onOutcome = { [weak self] outcome in self?.handle(outcome) }
         controller.onRecord = { [history] record in history.append(record) }

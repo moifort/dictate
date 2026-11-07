@@ -19,8 +19,10 @@ enum DictationOutcome: Equatable {
     case pasted(raw: Bool)
     /// No editable field: text left in the pasteboard.
     case copied(raw: Bool)
-    /// Nothing worth inserting (silence, empty transcript).
+    /// Nothing worth inserting after a press too short to be meant: no flash.
     case discarded
+    /// The key was held on purpose but nothing was heard (silence, empty transcript).
+    case unheard
     /// `fn` pressed while the engine's model is still downloading or loading.
     case modelLoading(TranscriptionEngine)
     case failed(String)
@@ -111,6 +113,9 @@ final class DictationController {
     @ObservationIgnored var onFieldContext: ((DictationContext) -> Void)?
 
     private static let minimumSampleCount = AudioAnalysis.sampleRate * 3 / 10
+    /// Below a second of holding, an empty dictation is taken for a slip of
+    /// the finger and passes silently rather than flashing "nothing heard".
+    static let intentionalPress: Duration = .seconds(1)
     /// Enough for the names and tone of the current message, small enough to stay fast.
     private static let precedingTextLength = 500
     /// People let go of the key while still finishing the last syllable, and the
@@ -294,7 +299,7 @@ final class DictationController {
             let audio = Double(samples.count) / Double(AudioAnalysis.sampleRate)
             let peak = AudioAnalysis.peakRMS(samples)
             Log.dictation.info("discarded \(audio, format: .fixed(precision: 1)) s of audio, peak RMS \(peak, format: .fixed(precision: 4)) (threshold \(AudioAnalysis.silenceThreshold, format: .fixed(precision: 4)))")
-            return complete(id, .discarded)
+            return complete(id, emptyOutcome(samples))
         }
 
         let clock = ContinuousClock()
@@ -312,7 +317,7 @@ final class DictationController {
             ErrorReporter.capture(error, "transcription with \(engine.rawValue) failed", category: "transcriber")
             return complete(id, .failed(String(localized: "Transcription impossible")))
         }
-        guard !transcript.text.isEmpty else { return complete(id, .discarded) }
+        guard !transcript.text.isEmpty else { return complete(id, emptyOutcome(samples)) }
 
         if let fieldContext {
             context.include(await fieldContext.value)
@@ -451,6 +456,14 @@ final class DictationController {
     }
 
     /// Ends a released dictation.
+    /// `.unheard` only when the key was held long enough to be meant. The
+    /// audio stands in for the hold: it runs from the microphone opening to
+    /// the end of the release tail, which is taken off.
+    private func emptyOutcome(_ samples: [Float]) -> DictationOutcome {
+        let held = Double(samples.count) / Double(AudioAnalysis.sampleRate) - releaseTail / .seconds(1)
+        return held >= Self.intentionalPress / .seconds(1) ? .unheard : .discarded
+    }
+
     private func complete(_ id: Int, _ outcome: DictationOutcome) {
         pending.removeAll { $0.id == id }
         processing[id] = nil
