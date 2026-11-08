@@ -140,10 +140,11 @@ final class Updater {
             state = self.releases.isEmpty ? .idle : .available
             Log.app.info("update check: \(self.releases.count) newer release(s)")
         } catch {
-            if Self.isOffline(error) {
-                // No network is the ordinary way a background check fails: the
-                // next one runs a few hours later, nobody needs to hear about it.
-                Log.app.info("update check skipped, offline: \(error.localizedDescription, privacy: .public)")
+            if Self.isTransient(error) {
+                // No network, or GitHub down for a moment, is the ordinary way a
+                // background check fails: the next one runs a few hours later,
+                // nobody needs to hear about it.
+                Log.app.info("update check skipped, GitHub unreachable: \(error.localizedDescription, privacy: .public)")
             } else {
                 Log.app.error("update check failed: \(error.localizedDescription, privacy: .public)")
                 ErrorReporter.capture(error, "update check failed", category: "updater", level: .warning)
@@ -151,6 +152,22 @@ final class Updater {
             releases = []
             state = .idle
         }
+    }
+
+    /// GitHub answered outside 2xx. The status tells a failure on GitHub's side, which
+    /// passes, from a request GitHub refuses, which does not.
+    nonisolated struct ServerError: LocalizedError {
+        let statusCode: Int
+        var errorDescription: String? { "GitHub answered \(statusCode)" }
+    }
+
+    /// Whether `error` is a passing failure, on the way to GitHub or on its side: no
+    /// network, or a 5xx answer such as the 504 its releases API returns now and then.
+    /// Neither is anything the app could fix, so neither is reported to Sentry.
+    nonisolated static func isTransient(_ error: Error) -> Bool {
+        if isOffline(error) { return true }
+        guard let status = (error as? ServerError)?.statusCode else { return false }
+        return 500..<600 ~= status
     }
 
     /// Whether `error` says the Mac cannot reach GitHub right now, as opposed to GitHub
@@ -196,7 +213,7 @@ final class Updater {
                 state = .idle
                 finish(current)
             } catch {
-                if Self.isOffline(error) {
+                if Self.isTransient(error) {
                     // A download the network cut short is shown to the user, who
                     // can retry: like a skipped check, nothing Sentry could fix.
                     Log.app.notice("update to \(release.version, privacy: .public) interrupted, offline: \(error.localizedDescription, privacy: .public)")
@@ -234,9 +251,8 @@ final class Updater {
         var request = URLRequest(url: url)
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
         let (data, response) = try await URLSession.shared.data(for: request)
-        guard (response as? HTTPURLResponse).map({ 200..<300 ~= $0.statusCode }) ?? false else {
-            throw URLError(.badServerResponse)
-        }
+        guard let status = (response as? HTTPURLResponse)?.statusCode else { throw URLError(.badServerResponse) }
+        guard 200..<300 ~= status else { throw ServerError(statusCode: status) }
         return data
     }
 

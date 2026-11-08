@@ -275,6 +275,36 @@ struct UpdaterOfflineTests {
         #expect(!Updater.isOffline(NSError(domain: "test", code: 1)))
     }
 
+    /// GitHub failing on its side (a 504 on the releases API) passes like no network:
+    /// the next check runs later, nothing in the app to fix.
+    @Test func aServerSideFailureIsTransient() {
+        #expect(Updater.isTransient(Updater.ServerError(statusCode: 504)))
+        #expect(Updater.isTransient(Updater.ServerError(statusCode: 500)))
+        #expect(Updater.isTransient(URLError(.timedOut)))
+    }
+
+    /// A 4xx says the request itself is wrong, or the account blocked: worth hearing about.
+    @Test func anUnexpectedAnswerIsNotTransient() {
+        #expect(!Updater.isTransient(Updater.ServerError(statusCode: 404)))
+        #expect(!Updater.isTransient(Updater.ServerError(statusCode: 403)))
+        #expect(!Updater.isTransient(NSError(domain: "test", code: 1)))
+    }
+
+    @Test func serverSideFailureEndsIdleWithNothingToInstall() async {
+        let updater = Updater(
+            currentVersion: "0.1.0",
+            bundleURL: FileManager.default.temporaryDirectory.appending(path: "Dictate.app"),
+            expectation: .init(bundleIdentifier: "test.fake", teamIdentifier: nil),
+            fetch: { _ in throw Updater.ServerError(statusCode: 504) },
+            download: { url, _ in url },
+            finish: { _ in }
+        )
+        await updater.check()
+        #expect(updater.state == .idle)
+        #expect(updater.releases.isEmpty)
+        #expect(updater.lastCheck != nil)
+    }
+
     @Test func offlineCheckEndsIdleWithNothingToInstall() async {
         let updater = Updater(
             currentVersion: "0.1.0",

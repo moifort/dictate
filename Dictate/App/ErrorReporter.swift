@@ -33,6 +33,10 @@ nonisolated enum ErrorReporter {
             options.attachStacktrace = true
             options.enableAutoSessionTracking = true
             options.tracesSampleRate = 0
+            // A 5xx from GitHub or anyone else is already told apart and reported,
+            // with its context, by the code that made the request: the SDK's own
+            // event for the same answer only said "504", twice.
+            options.enableCaptureFailedRequests = false
         }
     }
 
