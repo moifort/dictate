@@ -196,8 +196,14 @@ final class Updater {
                 state = .idle
                 finish(current)
             } catch {
-                Log.app.error("update failed: \(error.localizedDescription, privacy: .public)")
-                ErrorReporter.capture(error, "update to \(release.version) failed", category: "updater")
+                if Self.isOffline(error) {
+                    // A download the network cut short is shown to the user, who
+                    // can retry: like a skipped check, nothing Sentry could fix.
+                    Log.app.notice("update to \(release.version, privacy: .public) interrupted, offline: \(error.localizedDescription, privacy: .public)")
+                } else {
+                    Log.app.error("update failed: \(error.localizedDescription, privacy: .public)")
+                    ErrorReporter.capture(error, "update to \(release.version) failed", category: "updater")
+                }
                 state = .failed(error.localizedDescription)
             }
         }
