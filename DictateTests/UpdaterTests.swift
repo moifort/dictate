@@ -26,6 +26,22 @@ struct ReleaseTests {
         #expect(newer.last?.notes == "Third")
     }
 
+    /// The API URL of the same asset is kept as a second way to download it.
+    @Test func keepsTheAPIURLAsAFallback() throws {
+        let json = """
+        [{"tag_name": "v1.0.0", "draft": false, "prerelease": false, "body": "",
+          "assets": [{"name": "Dictate-1.0.0.zip", "browser_download_url": "https://x/1.0.0.zip",
+                      "url": "https://api.github.com/repos/o/r/releases/assets/7"}]}]
+        """
+        let release = try #require(try Release.newer(than: "0.1.0", in: Data(json.utf8)).first)
+        #expect(release.downloadURLs == [
+            URL(string: "https://x/1.0.0.zip")!,
+            URL(string: "https://api.github.com/repos/o/r/releases/assets/7")!,
+        ])
+        let withoutAPI = try #require(try Release.newer(than: "0.1.0", in: Data(feed.utf8)).last)
+        #expect(withoutAPI.downloadURLs == [URL(string: "https://x/0.3.0.zip")!])
+    }
+
     @Test func nothingWhenUpToDate() throws {
         #expect(try Release.newer(than: "0.3.0", in: Data(feed.utf8)).isEmpty)
         #expect(try Release.newer(than: "1.0", in: Data(feed.utf8)).isEmpty)
@@ -288,6 +304,54 @@ struct UpdaterOfflineTests {
         #expect(!Updater.isTransient(Updater.ServerError(statusCode: 404)))
         #expect(!Updater.isTransient(Updater.ServerError(statusCode: 403)))
         #expect(!Updater.isTransient(NSError(domain: "test", code: 1)))
+    }
+
+    /// github.com answering 504 to the download moves on to the API URL of the same zip.
+    @Test func aDownloadGitHubFailsIsRetriedThroughTheAPI() async throws {
+        let attempts = try await installAttempts(firstFailure: Updater.ServerError(statusCode: 504))
+        #expect(attempts == ["https://x/9.9.9.zip", "https://api.github.com/assets/9"])
+    }
+
+    /// A refused request would be refused through the API as well: no second try.
+    @Test func aRefusedDownloadIsNotRetried() async throws {
+        let attempts = try await installAttempts(firstFailure: Updater.ServerError(statusCode: 404))
+        #expect(attempts == ["https://x/9.9.9.zip"])
+    }
+
+    /// Runs an install whose every download fails, the first with `firstFailure`; returns the URLs tried.
+    private func installAttempts(firstFailure: Error) async throws -> [String] {
+        let feed = """
+        [{"tag_name": "v9.9.9", "draft": false, "prerelease": false, "body": "",
+          "assets": [{"name": "Dictate-9.9.9.zip", "browser_download_url": "https://x/9.9.9.zip",
+                      "url": "https://api.github.com/assets/9"}]}]
+        """
+        let attempts = Attempts()
+        let updater = Updater(
+            currentVersion: "0.1.0",
+            bundleURL: FileManager.default.temporaryDirectory.appending(path: "Dictate.app"),
+            expectation: .init(bundleIdentifier: "test.fake", teamIdentifier: nil),
+            fetch: { _ in Data(feed.utf8) },
+            download: { url, _ in
+                let count = attempts.record(url.absoluteString)
+                throw count == 1 ? firstFailure : URLError(.cannotConnectToHost)
+            },
+            finish: { _ in }
+        )
+        await updater.check()
+        updater.install()
+        for _ in 0..<50 {
+            if case .failed = updater.state { break }
+            try await Task.sleep(for: .milliseconds(50))
+        }
+        guard case .failed = updater.state else { Issue.record("\(updater.state)"); return [] }
+        return attempts.urls
+    }
+
+    private nonisolated final class Attempts: @unchecked Sendable {
+        private let lock = NSLock()
+        private var recorded: [String] = []
+        var urls: [String] { lock.withLock { recorded } }
+        func record(_ url: String) -> Int { lock.withLock { recorded.append(url); return recorded.count } }
     }
 
     @Test func serverSideFailureEndsIdleWithNothingToInstall() async {

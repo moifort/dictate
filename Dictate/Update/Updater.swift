@@ -6,6 +6,13 @@ nonisolated struct Release: Equatable, Sendable {
     var version: String
     var notes: String
     var downloadURL: URL
+    /// The same zip through the GitHub API, tried when `downloadURL` fails: on
+    /// 2026-11-08 github.com answered 504 to every release download for hours
+    /// while the API served the assets fine.
+    var fallbackURL: URL?
+
+    /// The URLs to try for the zip, in order.
+    var downloadURLs: [URL] { [downloadURL] + (fallbackURL.map { [$0] } ?? []) }
 
     /// Releases newer than `current`, oldest first, from GitHub's `/releases` JSON.
     static func newer(than current: String, in json: Data) throws -> [Release] {
@@ -25,6 +32,7 @@ nonisolated struct Release: Equatable, Sendable {
         version = tag.hasPrefix("v") ? String(tag.dropFirst()) : tag
         notes = (entry["body"] as? String ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         downloadURL = download
+        fallbackURL = (zip["url"] as? String).flatMap(URL.init(string:))
     }
 }
 
@@ -158,7 +166,9 @@ final class Updater {
     /// passes, from a request GitHub refuses, which does not.
     nonisolated struct ServerError: LocalizedError {
         let statusCode: Int
-        var errorDescription: String? { "GitHub answered \(statusCode)" }
+        var errorDescription: String? {
+            String(localized: "GitHub ne répond pas pour le moment (erreur \(statusCode)). Réessayez plus tard.")
+        }
     }
 
     /// Whether `error` is a passing failure, on the way to GitHub or on its side: no
@@ -197,11 +207,7 @@ final class Updater {
             let scratch = FileManager.default.temporaryDirectory.appending(path: "Dictate-update-\(UUID().uuidString)")
             defer { try? FileManager.default.removeItem(at: scratch) }
             do {
-                let archive = try await download(release.downloadURL) { [weak self] fraction in
-                    Task { @MainActor in
-                        if case .downloading = self?.state { self?.state = .downloading(fraction) }
-                    }
-                }
+                let archive = try await downloadArchive(of: release)
                 state = .installing
                 let (installer, expectation, current) = (installer, expectation, bundleURL)
                 try await Task.detached {
@@ -224,6 +230,25 @@ final class Updater {
                 state = .failed(error.localizedDescription)
             }
         }
+    }
+
+    /// Downloads the release's zip from the first of its URLs that answers. Only a
+    /// passing failure moves on to the next URL: a bad archive would be as bad there.
+    private func downloadArchive(of release: Release) async throws -> URL {
+        let urls = release.downloadURLs
+        for (index, url) in urls.enumerated() {
+            state = .downloading(0)
+            do {
+                return try await download(url) { [weak self] fraction in
+                    Task { @MainActor in
+                        if case .downloading = self?.state { self?.state = .downloading(fraction) }
+                    }
+                }
+            } catch where index < urls.count - 1 && Self.isTransient(error) {
+                Log.app.notice("update download from \(url.host() ?? "?", privacy: .public) failed, trying the next URL: \(error.localizedDescription, privacy: .public)")
+            }
+        }
+        throw URLError(.badURL)
     }
 
     /// The identifiers Dictate ships under, old and new (Polyforms).
@@ -259,7 +284,15 @@ final class Updater {
     @Sendable nonisolated static func downloadWithProgress(
         _ url: URL, progress: @escaping @Sendable (Double) -> Void
     ) async throws -> URL {
-        let (bytes, response) = try await URLSession.shared.bytes(from: url)
+        var request = URLRequest(url: url)
+        // The API serves the asset itself, rather than its JSON, only when asked to.
+        if url.host() == "api.github.com" {
+            request.setValue("application/octet-stream", forHTTPHeaderField: "Accept")
+        }
+        let (bytes, response) = try await URLSession.shared.bytes(for: request)
+        // A 504 page saved as the zip used to fail later as "the archive could not be extracted".
+        guard let status = (response as? HTTPURLResponse)?.statusCode else { throw URLError(.badServerResponse) }
+        guard 200..<300 ~= status else { throw ServerError(statusCode: status) }
         let total = response.expectedContentLength
         let destination = FileManager.default.temporaryDirectory.appending(path: "\(UUID().uuidString).zip")
         FileManager.default.createFile(atPath: destination.path, contents: nil)
@@ -278,6 +311,12 @@ final class Updater {
             }
         }
         try handle.write(contentsOf: buffer)
+        received += Int64(buffer.count)
+        // A connection that ends early leaves a truncated zip: say so, rather than fail extracting it.
+        guard total <= 0 || received == total else {
+            try? FileManager.default.removeItem(at: destination)
+            throw URLError(.networkConnectionLost)
+        }
         progress(1)
         return destination
     }

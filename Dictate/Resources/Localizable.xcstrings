@@ -1553,6 +1553,22 @@
         }
       }
     },
+    "GitHub ne répond pas pour le moment (erreur %lld). Réessayez plus tard.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub is not responding right now (error %lld). Try again later."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub ne répond pas pour le moment (erreur %lld). Réessayez plus tard."
+          }
+        }
+      }
+    },
     "Général": {
       "localizations": {
         "en": {
