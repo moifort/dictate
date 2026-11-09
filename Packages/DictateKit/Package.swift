@@ -13,7 +13,7 @@ let package = Package(
         .library(name: "DictateKit", targets: ["DictateKit"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/FluidInference/FluidAudio", from: "0.18.2"),
+        .package(url: "https://github.com/FluidInference/FluidAudio", from: "0.18.3"),
     ],
     targets: [
         .target(
