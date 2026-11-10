@@ -278,9 +278,14 @@ private final class AccessibilityField: ReadableField {
     }
 
     private nonisolated static func snapshot(_ element: AXUIElement, _ ax: AXReader) -> FieldSnapshot? {
-        guard !ax.isSecure(element),
+        guard !ax.isSecure(element) else { return nil }
+        // The length first: a document's whole text (Xcode, Notes) is not
+        // worth copying, and the field is read twice per dictation.
+        let count = ax.copyValue(element, kAXNumberOfCharactersAttribute) as? Int
+        guard count.map({ $0 <= maxLength }) ?? true,
               let text = ax.copyString(element, kAXValueAttribute) else { return nil }
         let length = (text as NSString).length
+        // Not every app reports the length: the copy is checked too.
         guard length <= maxLength else { return nil }
         // Without a selection, assume the caret sits at the end, where a paste usually lands.
         var selection = CFRange(location: length, length: 0)
