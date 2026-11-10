@@ -117,6 +117,7 @@
     "dl.meta": "<span data-version>Latest version</span> · macOS 27 · Apple Silicon",
     "footer.privacy": "Privacy",
     "dl.brew": "Or with Homebrew: <code>brew install --cask moifort/tap/dictate</code>",
+    "dl.storeNote": "On the Mac App Store: hold option + space to dictate, then paste with ⌘V. The cleanup there is done by Apple Intelligence.",
     "footer.credit": "Dictate is an open-source project by <a href=\"https://github.com/moifort\" rel=\"noopener\">Polyforms</a>.\n     Transcription by Parakeet (NVIDIA) via FluidAudio. Review by Claude (Anthropic) or Apple Intelligence.",
     "footer.releases": "All releases",
     "footer.issues": "Report an issue",
