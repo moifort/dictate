@@ -73,18 +73,26 @@ final class AppModel {
         )
         self.enhancer = enhancer
         controller = DictationController(
-            recorder: recorder,
-            transcriber: transcriber,
-            enhancer: enhancer,
-            focus: focus,
-            inserter: TextInserter(),
-            language: { settings.language },
-            enhancementEnabled: { settings.enhancementEnabled },
-            shareFieldContext: { settings.shareFieldContext },
-            loadingEngine: { [transcriber] in
-                // A failed load is retried by the dictation itself.
-                transcriber.state.isBusy || transcriber.state == .notLoaded ? transcriber.engine : nil
-            }
+            .init(
+                recorder: recorder,
+                transcriber: transcriber,
+                enhancer: enhancer,
+                focus: focus,
+                inserter: TextInserter(),
+                insertionObserver: PostInsertionObserver(reader: focus)
+            ),
+            settings: .init(
+                language: { settings.language },
+                enhancementEnabled: { settings.enhancementEnabled },
+                shareFieldContext: { settings.shareFieldContext },
+                loadingEngine: { [transcriber] in
+                    // A failed load is retried by the dictation itself.
+                    transcriber.state.isBusy || transcriber.state == .notLoaded ? transcriber.engine : nil
+                },
+                autoSendApps: { settings.autoSendApps },
+                keepSamples: { settings.keepEvaluationCorpus },
+                followInsertions: { settings.suggestVocabulary }
+            )
         )
         indicator = RecordingIndicator(controller: controller, recorder: recorder)
         if let flash = ScreenshotMode.flash, flash.hasPrefix("claudeDisconnected") {
@@ -92,25 +100,21 @@ final class AppModel {
         } else if ScreenshotMode.flash == "unheard" {
             indicator.show(.unheard)
         }
-        controller.onOutcome = { [weak self] outcome in self?.handle(outcome) }
-        controller.onRecord = { [history] record in history.append(record) }
-        controller.insertionObserver = PostInsertionObserver(reader: focus)
-        controller.autoSendApps = { settings.autoSendApps }
-        controller.keepSamples = { settings.keepEvaluationCorpus }
-        controller.onSample = { [corpus] sample in
-            Task { await corpus.record(sample) }
-        }
         let suggestions = vocabularySuggestions
-        controller.followInsertions = { settings.suggestVocabulary }
-        controller.onFollowUp = { followUp in
-            // The setting may have been turned off during the wait.
-            guard settings.suggestVocabulary else { return }
-            suggestions.consider(followUp, vocabulary: settings.vocabulary)
-        }
-        controller.onFieldContext = { context in
-            guard settings.suggestVocabulary, let text = context.precedingText else { return }
-            suggestions.consider(precedingText: text, vocabulary: settings.vocabulary)
-        }
+        controller.events = .init(
+            onOutcome: { [weak self] outcome in self?.handle(outcome) },
+            onRecord: { [history] record in history.append(record) },
+            onSample: { [corpus] sample in Task { await corpus.record(sample) } },
+            onFollowUp: { followUp in
+                // The setting may have been turned off during the wait.
+                guard settings.suggestVocabulary else { return }
+                suggestions.consider(followUp, vocabulary: settings.vocabulary)
+            },
+            onFieldContext: { context in
+                guard settings.suggestVocabulary, let text = context.precedingText else { return }
+                suggestions.consider(precedingText: text, vocabulary: settings.vocabulary)
+            }
+        )
         fnMonitor.onGesture = { [weak self] gesture in
             guard let self else { return }
             Log.hotkey.info("gesture \(String(describing: gesture), privacy: .public) in phase \(String(describing: self.controller.phase), privacy: .public)")

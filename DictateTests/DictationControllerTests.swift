@@ -36,24 +36,30 @@ struct DictationControllerTests {
         )
         let diverges: (String, String) -> Bool = if guardReplies { ReviewGuard.diverges(_:from:) } else { { _, _ in false } }
         let controller = DictationController(
-            recorder: fakes.recorder,
-            transcriber: fakes.transcriber,
-            enhancer: fakes.enhancer,
-            focus: fakes.focus,
-            inserter: fakes.inserter,
-            language: { "fr" },
-            enhancementEnabled: { enhancementEnabled },
-            shareFieldContext: { shareFieldContext },
-            loadingEngine: { loadingEngine },
-            enhancementTimeout: .milliseconds(200),
-            diverges: diverges,
-            transcriptionTimeout: transcriptionTimeout,
-            maximumRecording: maximumRecording,
-            sleep: { duration in
-                fakes.events.append("tail of \(duration) started")
-                await tail?(fakes)
-                fakes.events.append("tail ended")
-            }
+            .init(
+                recorder: fakes.recorder,
+                transcriber: fakes.transcriber,
+                enhancer: fakes.enhancer,
+                focus: fakes.focus,
+                inserter: fakes.inserter
+            ),
+            settings: .init(
+                language: { "fr" },
+                enhancementEnabled: { enhancementEnabled },
+                shareFieldContext: { shareFieldContext },
+                loadingEngine: { loadingEngine },
+                diverges: diverges
+            ),
+            timing: .init(
+                enhancement: .milliseconds(200),
+                transcription: transcriptionTimeout,
+                maximumRecording: maximumRecording,
+                sleep: { duration in
+                    fakes.events.append("tail of \(duration) started")
+                    await tail?(fakes)
+                    fakes.events.append("tail ended")
+                }
+            )
         )
         return (controller, fakes)
     }
@@ -142,7 +148,7 @@ struct DictationControllerTests {
     @Test func pasteIntoClaudeIsSentWhenAutoSendIsOn() async {
         let (controller, fakes) = makeController()
         fakes.focus.bundleID = "com.anthropic.claudefordesktop"
-        controller.autoSendApps = { ["com.anthropic.claudefordesktop"] }
+        controller.settings.autoSendApps = { ["com.anthropic.claudefordesktop"] }
         await dictate(controller)
         #expect(fakes.inserter.submitted == [true])
     }
@@ -155,7 +161,7 @@ struct DictationControllerTests {
             guardReplies: true
         )
         fakes.focus.bundleID = "com.anthropic.claudefordesktop"
-        controller.autoSendApps = { ["com.anthropic.claudefordesktop"] }
+        controller.settings.autoSendApps = { ["com.anthropic.claudefordesktop"] }
         await dictate(controller)
         #expect(fakes.inserter.pasted == ["dis-lui que je serai en retard ce soir"])
         #expect(fakes.inserter.submitted == [false])
@@ -166,7 +172,7 @@ struct DictationControllerTests {
     @Test func aRawTextIsNeverSent() async {
         let (controller, fakes) = makeController(enhanced: .failure(FakeError()))
         fakes.focus.bundleID = "com.anthropic.claudefordesktop"
-        controller.autoSendApps = { ["com.anthropic.claudefordesktop"] }
+        controller.settings.autoSendApps = { ["com.anthropic.claudefordesktop"] }
         await dictate(controller)
         #expect(fakes.inserter.submitted == [false])
     }
@@ -180,21 +186,21 @@ struct DictationControllerTests {
     @Test func pasteIntoClaudeStaysUnsentWhenAutoSendIsOff() async {
         let (controller, fakes) = makeController()
         fakes.focus.bundleID = "com.anthropic.claudefordesktop"
-        controller.autoSendApps = { [] }
+        controller.settings.autoSendApps = { [] }
         await dictate(controller)
         #expect(fakes.inserter.submitted == [false])
     }
 
     @Test func pasteIntoAnAddedAppIsSent() async {
         let (controller, fakes) = makeController()
-        controller.autoSendApps = { ["com.apple.Terminal", "com.anthropic.claudefordesktop"] }
+        controller.settings.autoSendApps = { ["com.apple.Terminal", "com.anthropic.claudefordesktop"] }
         await dictate(controller)
         #expect(fakes.inserter.submitted == [true])
     }
 
     @Test func pasteIntoAnotherAppIsNeverSent() async {
         let (controller, fakes) = makeController()
-        controller.autoSendApps = { ["com.anthropic.claudefordesktop"] }
+        controller.settings.autoSendApps = { ["com.anthropic.claudefordesktop"] }
         await dictate(controller)
         #expect(fakes.inserter.submitted == [false])
     }
@@ -204,7 +210,7 @@ struct DictationControllerTests {
         let (controller, fakes) = makeController(tail: { fakes in
             fakes.focus.bundleID = "com.anthropic.claudefordesktop"
         })
-        controller.autoSendApps = { ["com.anthropic.claudefordesktop"] }
+        controller.settings.autoSendApps = { ["com.anthropic.claudefordesktop"] }
         await dictate(controller)
         #expect(fakes.inserter.submitted == [true])
     }
@@ -448,7 +454,7 @@ struct DictationControllerTests {
         fakes.enhancer.replies = [("Première.", .milliseconds(150)), ("Seconde.", .milliseconds(10))]
         fakes.enhancer.replyReviewers = [.apple, .claude]
         var records: [DictationRecord] = []
-        controller.onRecord = { records.append($0) }
+        controller.events.onRecord = { records.append($0) }
         controller.handle(.pressed)
         await controller.waitUntilStarted()
         controller.handle(.released)
@@ -475,7 +481,7 @@ struct DictationControllerTests {
     @Test func aFailedDictationDoesNotHoldBackTheNextOne() async {
         let (controller, fakes) = makeController()
         var outcomes: [DictationOutcome] = []
-        controller.onOutcome = { outcomes.append($0) }
+        controller.events.onOutcome = { outcomes.append($0) }
         fakes.recorder.samples = [Float](repeating: 0, count: 16_000)
         controller.handle(.pressed)
         await controller.waitUntilStarted()
@@ -501,7 +507,7 @@ struct DictationControllerTests {
     @Test func insertedDictationIsRecordedWithItsTimings() async {
         let (controller, _) = makeController()
         var records: [DictationRecord] = []
-        controller.onRecord = { records.append($0) }
+        controller.events.onRecord = { records.append($0) }
         await dictate(controller)
         #expect(records.count == 1)
         #expect(records.first?.words == 3)
@@ -512,7 +518,7 @@ struct DictationControllerTests {
     @Test func dictationIsRecordedWithItsEngine() async {
         let (controller, _) = makeController()
         var records: [DictationRecord] = []
-        controller.onRecord = { records.append($0) }
+        controller.events.onRecord = { records.append($0) }
         await dictate(controller)
         #expect(records.first?.engine == .parakeet)
     }
@@ -520,7 +526,7 @@ struct DictationControllerTests {
     @Test func dictationWithoutClaudeIsRecordedWithoutEnhancement() async {
         let (controller, _) = makeController(editableFocus: false, enhancementEnabled: false)
         var records: [DictationRecord] = []
-        controller.onRecord = { records.append($0) }
+        controller.events.onRecord = { records.append($0) }
         await dictate(controller)
         #expect(records.first?.words == 4)
         #expect(records.first?.enhancement == nil)
@@ -530,7 +536,7 @@ struct DictationControllerTests {
     @Test func dictationIsRecordedWithTheModelThatCleanedItUp() async {
         let (controller, _) = makeController(reviewer: .apple)
         var records: [DictationRecord] = []
-        controller.onRecord = { records.append($0) }
+        controller.events.onRecord = { records.append($0) }
         await dictate(controller)
         #expect(records.first?.reviewer == .apple)
     }
@@ -538,7 +544,7 @@ struct DictationControllerTests {
     @Test func discardedDictationIsNotRecorded() async {
         let (controller, _) = makeController(transcript: .success("   "))
         var records: [DictationRecord] = []
-        controller.onRecord = { records.append($0) }
+        controller.events.onRecord = { records.append($0) }
         await dictate(controller)
         #expect(records.isEmpty)
     }
@@ -546,7 +552,7 @@ struct DictationControllerTests {
     @Test func samplesAreOnlyHandedOverWhenAsked() async {
         let (controller, _) = makeController()
         var samples: [DictationSample] = []
-        controller.onSample = { samples.append($0) }
+        controller.events.onSample = { samples.append($0) }
         await dictate(controller)
         #expect(samples.isEmpty)
     }
@@ -555,9 +561,9 @@ struct DictationControllerTests {
         let (controller, _) = makeController()
         let reader = FakeFieldReader(text: "Salut, ")
         controller.insertionObserver = PostInsertionObserver(reader: reader, delay: .milliseconds(10))
-        controller.keepSamples = { true }
+        controller.settings.keepSamples = { true }
         var samples: [DictationSample] = []
-        controller.onSample = { samples.append($0) }
+        controller.events.onSample = { samples.append($0) }
         await dictate(controller)
         let sample = samples.first
         let before = await sample?.followUp?.value?.before.text
@@ -575,9 +581,9 @@ struct DictationControllerTests {
 
     @Test func rawInsertionIsKeptAsNotEnhanced() async {
         let (controller, _) = makeController(enhanced: .failure(FakeError()))
-        controller.keepSamples = { true }
+        controller.settings.keepSamples = { true }
         var samples: [DictationSample] = []
-        controller.onSample = { samples.append($0) }
+        controller.events.onSample = { samples.append($0) }
         await dictate(controller)
         #expect(samples.first?.enhanced == false)
         #expect(samples.first?.inserted == "euh fais un pouche")
@@ -586,9 +592,9 @@ struct DictationControllerTests {
 
     @Test func copiedDictationIsNotKept() async {
         let (controller, _) = makeController(editableFocus: false)
-        controller.keepSamples = { true }
+        controller.settings.keepSamples = { true }
         var samples: [DictationSample] = []
-        controller.onSample = { samples.append($0) }
+        controller.events.onSample = { samples.append($0) }
         await dictate(controller)
         #expect(samples.isEmpty)
     }
@@ -597,9 +603,9 @@ struct DictationControllerTests {
         let (controller, _) = makeController()
         let reader = FakeFieldReader(text: "Salut, ")
         controller.insertionObserver = PostInsertionObserver(reader: reader, delay: .milliseconds(50))
-        controller.followInsertions = { true }
+        controller.settings.followInsertions = { true }
         var followUps: [InsertionFollowUp] = []
-        controller.onFollowUp = { followUps.append($0) }
+        controller.events.onFollowUp = { followUps.append($0) }
         await dictate(controller)
         reader.text = "Salut, Fais un push sur Main."
         try await eventually { !followUps.isEmpty }
@@ -611,12 +617,12 @@ struct DictationControllerTests {
         let (controller, _) = makeController()
         let reader = FakeFieldReader(text: "Salut, ")
         controller.insertionObserver = PostInsertionObserver(reader: reader, delay: .milliseconds(10))
-        controller.keepSamples = { true }
-        controller.followInsertions = { true }
+        controller.settings.keepSamples = { true }
+        controller.settings.followInsertions = { true }
         var samples: [DictationSample] = []
         var followUps: [InsertionFollowUp] = []
-        controller.onSample = { samples.append($0) }
-        controller.onFollowUp = { followUps.append($0) }
+        controller.events.onSample = { samples.append($0) }
+        controller.events.onFollowUp = { followUps.append($0) }
         await dictate(controller)
         try await eventually { !followUps.isEmpty }
         let sampled = await samples.first?.followUp?.value
@@ -633,9 +639,9 @@ struct DictationControllerTests {
             .appending(path: "ControllerSuggestions-\(UUID().uuidString).json")
         let suggestions = VocabularySuggestions(file: file)
         controller.insertionObserver = PostInsertionObserver(reader: reader, delay: .milliseconds(30))
-        controller.followInsertions = { true }
-        controller.onFollowUp = { suggestions.consider($0, vocabulary: []) }
-        controller.onFieldContext = { suggestions.consider(precedingText: $0.precedingText ?? "", vocabulary: []) }
+        controller.settings.followInsertions = { true }
+        controller.events.onFollowUp = { suggestions.consider($0, vocabulary: []) }
+        controller.events.onFieldContext = { suggestions.consider(precedingText: $0.precedingText ?? "", vocabulary: []) }
         await dictate(controller)
         reader.text = "Salut, On en parle avec Claude."
         try await eventually { !suggestions.state.pending.isEmpty }
@@ -648,7 +654,7 @@ struct DictationControllerTests {
         let reader = FakeFieldReader(text: "Salut, ")
         controller.insertionObserver = PostInsertionObserver(reader: reader, delay: .milliseconds(10))
         var followUps: [InsertionFollowUp] = []
-        controller.onFollowUp = { followUps.append($0) }
+        controller.events.onFollowUp = { followUps.append($0) }
         await dictate(controller)
         try await Task.sleep(for: .milliseconds(50))
         #expect(followUps.isEmpty)
@@ -659,8 +665,8 @@ struct DictationControllerTests {
         let (controller, _) = makeController(editableFocus: false)
         let reader = FakeFieldReader(text: "Salut, ")
         controller.insertionObserver = PostInsertionObserver(reader: reader, delay: .milliseconds(10))
-        controller.followInsertions = { true }
-        controller.onFollowUp = { _ in Issue.record("no follow-up expected") }
+        controller.settings.followInsertions = { true }
+        controller.events.onFollowUp = { _ in Issue.record("no follow-up expected") }
         await dictate(controller)
         try await Task.sleep(for: .milliseconds(50))
         #expect(reader.focusedFieldCalls == 0)
@@ -669,7 +675,7 @@ struct DictationControllerTests {
     @Test func fieldContextIsHandedOver() async {
         let (controller, _) = makeController()
         var contexts: [DictationContext] = []
-        controller.onFieldContext = { contexts.append($0) }
+        controller.events.onFieldContext = { contexts.append($0) }
         await dictate(controller)
         #expect(contexts.map(\.precedingText) == ["Salut Guillaume,"])
     }
@@ -677,7 +683,7 @@ struct DictationControllerTests {
     @Test func unreadFieldContextIsNotHandedOver() async {
         let (controller, _) = makeController(shareFieldContext: false)
         var contexts: [DictationContext] = []
-        controller.onFieldContext = { contexts.append($0) }
+        controller.events.onFieldContext = { contexts.append($0) }
         await dictate(controller)
         #expect(contexts.isEmpty)
     }

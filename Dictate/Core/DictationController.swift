@@ -54,29 +54,76 @@ final class DictationController {
         capture != .idle ? capture : pending.last?.phase ?? .idle
     }
 
+    /// What the controller works with.
+    struct Services {
+        var recorder: AudioRecording
+        var transcriber: Transcriber
+        var enhancer: Enhancer
+        var focus: FocusInspecting
+        var inserter: TextInserting
+        /// Catches the field before each followed or kept paste, to read it
+        /// again later. One read serves both `onSample` and `onFollowUp`.
+        var insertionObserver: PostInsertionObserver?
+    }
+
+    /// What the controller reads of the user's settings, at each dictation.
+    struct Settings {
+        /// ISO 639-1 code of the language being dictated.
+        var language: () -> String = { "fr" }
+        var enhancementEnabled: () -> Bool = { true }
+        /// Whether the text around the cursor may be sent to the reviewer.
+        var shareFieldContext: () -> Bool = { true }
+        /// The engine whose model is not in memory yet, nil once dictation can start.
+        var loadingEngine: () -> TranscriptionEngine? = { nil }
+        /// The bundle IDs of the apps where Return is pressed after the paste.
+        var autoSendApps: () -> Set<String> = { [] }
+        /// Whether to hand each pasted dictation, audio included, to `onSample`.
+        var keepSamples: () -> Bool = { false }
+        /// Whether to hand each pasted dictation's field, read again a few seconds later, to `onFollowUp`.
+        var followInsertions: () -> Bool = { false }
+        /// Whether a reply left the dictation: `ReviewGuard.diverges`,
+        /// replaced by tests that use replies of any shape.
+        var diverges: (_ reply: String, _ transcript: String) -> Bool = ReviewGuard.diverges
+    }
+
+    /// How long each step may take.
+    struct Timing {
+        var enhancement: Duration = .seconds(8)
+        /// On top of half the audio's length: a stuck engine call must not
+        /// hold every later dictation.
+        var transcription: Duration = .seconds(30)
+        /// How long the microphone keeps capturing once the key is released.
+        var releaseTail: Duration = DictationController.defaultReleaseTail
+        /// Longest recording before it is released on its own: a key-up nobody
+        /// received must not leave the microphone open and the audio growing.
+        var maximumRecording: Duration = DictationController.defaultMaximumRecording
+        /// Waits out `releaseTail`; replaced by tests to control when the tail ends.
+        var sleep: (Duration) async -> Void = { try? await Task.sleep(for: $0) }
+    }
+
+    /// What the controller tells the app.
+    struct Events {
+        /// Once per finished dictation, after it left `pending`.
+        var onOutcome: ((DictationOutcome) -> Void)?
+        /// Once per dictation that inserted text, with its timings.
+        var onRecord: ((DictationRecord) -> Void)?
+        /// Once per pasted dictation while `keepSamples` is true, for the evaluation corpus.
+        var onSample: ((DictationSample) -> Void)?
+        /// Once per pasted dictation while `followInsertions` is true, once the field was read again.
+        var onFollowUp: ((InsertionFollowUp) -> Void)?
+        /// Once per dictation whose field context was read, before the reviewer sees it.
+        var onFieldContext: ((DictationContext) -> Void)?
+    }
+
     @ObservationIgnored let recorder: AudioRecording
     @ObservationIgnored private let transcriber: Transcriber
     @ObservationIgnored private let enhancer: Enhancer
     @ObservationIgnored private let focus: FocusInspecting
     @ObservationIgnored private let inserter: TextInserting
-    /// ISO 639-1 code of the language being dictated.
-    @ObservationIgnored private let language: () -> String
-    @ObservationIgnored private let enhancementEnabled: () -> Bool
-    /// Whether the text before the cursor may be sent to Claude.
-    @ObservationIgnored private let shareFieldContext: () -> Bool
-    /// The engine whose model is not in memory yet, nil once dictation can start.
-    @ObservationIgnored private let loadingEngine: () -> TranscriptionEngine?
-    @ObservationIgnored private let enhancementTimeout: Duration
-    /// Whether a reply left the dictation: `ReviewGuard.diverges`, injected so
-    /// tests can use replies of any shape.
-    @ObservationIgnored private let diverges: (_ reply: String, _ transcript: String) -> Bool
-    /// How long a transcription may take, on top of half the audio's length:
-    /// a stuck engine call must not hold every later dictation.
-    @ObservationIgnored private let transcriptionTimeout: Duration
-    /// How long the microphone keeps capturing once the key is released.
-    @ObservationIgnored private let releaseTail: Duration
-    /// Waits out `releaseTail`; injected so tests control when the tail ends.
-    @ObservationIgnored private let sleep: (Duration) async -> Void
+    @ObservationIgnored var insertionObserver: PostInsertionObserver?
+    @ObservationIgnored var settings: Settings
+    @ObservationIgnored private let timing: Timing
+    @ObservationIgnored var events = Events()
     /// The app being dictated into, read on press for the recording in progress.
     @ObservationIgnored private var context = DictationContext()
     @ObservationIgnored private var bundleID: String?
@@ -95,33 +142,10 @@ final class DictationController {
     /// The previous dictations' fields being read again, which must be over
     /// before the next paste changes them.
     @ObservationIgnored private var settling: Task<Void, Never>?
-    /// Releases the recording once it reaches `maximumRecording`.
+    /// Releases the recording once it reaches `timing.maximumRecording`.
     @ObservationIgnored private var recordingLimit: Task<Void, Never>?
-    /// Longest recording before it is released on its own: a key-up nobody
-    /// received must not leave the microphone open and the audio growing.
-    @ObservationIgnored private let maximumRecording: Duration
     /// A release or cancel that came while the microphone was still starting.
     @ObservationIgnored private var pendingGesture: FnKeyGestureOutput?
-
-    /// Called once per finished dictation, after it left `pending`.
-    @ObservationIgnored var onOutcome: ((DictationOutcome) -> Void)?
-    /// Called once per dictation that inserted text, with its timings.
-    @ObservationIgnored var onRecord: ((DictationRecord) -> Void)?
-    /// The bundle IDs of the apps where Return is pressed after the paste.
-    @ObservationIgnored var autoSendApps: () -> Set<String> = { [] }
-    /// Whether to hand each pasted dictation, audio included, to `onSample`.
-    @ObservationIgnored var keepSamples: () -> Bool = { false }
-    /// Called once per pasted dictation while `keepSamples` is true, for the evaluation corpus.
-    @ObservationIgnored var onSample: ((DictationSample) -> Void)?
-    /// Whether to hand each pasted dictation's field, read again a few seconds later, to `onFollowUp`.
-    @ObservationIgnored var followInsertions: () -> Bool = { false }
-    /// Called once per pasted dictation while `followInsertions` is true, once the field was read again.
-    @ObservationIgnored var onFollowUp: ((InsertionFollowUp) -> Void)?
-    /// Catches the field before each followed or kept paste, to read it again later.
-    /// One read serves both `onSample` and `onFollowUp`.
-    @ObservationIgnored var insertionObserver: PostInsertionObserver?
-    /// Called once per dictation whose field context was read, before Claude sees it.
-    @ObservationIgnored var onFieldContext: ((DictationContext) -> Void)?
 
     private static let minimumSampleCount = AudioAnalysis.sampleRate * 3 / 10
     /// Below a second of holding, an empty dictation is taken for a slip of
@@ -136,38 +160,15 @@ final class DictationController {
     /// Far longer than anyone dictates in one go: about 38 MB of audio.
     static let defaultMaximumRecording: Duration = .seconds(10 * 60)
 
-    init(
-        recorder: AudioRecording,
-        transcriber: Transcriber,
-        enhancer: Enhancer,
-        focus: FocusInspecting,
-        inserter: TextInserting,
-        language: @escaping () -> String,
-        enhancementEnabled: @escaping () -> Bool,
-        shareFieldContext: @escaping () -> Bool,
-        loadingEngine: @escaping () -> TranscriptionEngine? = { nil },
-        enhancementTimeout: Duration = .seconds(8),
-        diverges: @escaping (_ reply: String, _ transcript: String) -> Bool = ReviewGuard.diverges,
-        transcriptionTimeout: Duration = .seconds(30),
-        releaseTail: Duration = defaultReleaseTail,
-        maximumRecording: Duration = defaultMaximumRecording,
-        sleep: @escaping (Duration) async -> Void = { try? await Task.sleep(for: $0) }
-    ) {
-        self.recorder = recorder
-        self.transcriber = transcriber
-        self.enhancer = enhancer
-        self.focus = focus
-        self.inserter = inserter
-        self.language = language
-        self.enhancementEnabled = enhancementEnabled
-        self.shareFieldContext = shareFieldContext
-        self.loadingEngine = loadingEngine
-        self.enhancementTimeout = enhancementTimeout
-        self.diverges = diverges
-        self.transcriptionTimeout = transcriptionTimeout
-        self.releaseTail = releaseTail
-        self.maximumRecording = maximumRecording
-        self.sleep = sleep
+    init(_ services: Services, settings: Settings = Settings(), timing: Timing = Timing()) {
+        recorder = services.recorder
+        transcriber = services.transcriber
+        enhancer = services.enhancer
+        focus = services.focus
+        inserter = services.inserter
+        insertionObserver = services.insertionObserver
+        self.settings = settings
+        self.timing = timing
     }
 
     func handle(_ gesture: FnKeyGestureOutput) {
@@ -176,7 +177,7 @@ final class DictationController {
             // Earlier dictations still being processed do not hold the microphone.
             guard capture == .idle else { return }
             // Recording now would only stall on transcription: say why instead.
-            if let engine = loadingEngine() { return finish(.modelLoading(engine)) }
+            if let engine = settings.loadingEngine() { return finish(.modelLoading(engine)) }
             cutTail()
             // The previous dictation's field is read now, before this one lands in it.
             if let observer = insertionObserver {
@@ -228,7 +229,7 @@ final class DictationController {
             // can take the whole AX messaging timeout, so it runs during the
             // release tail and while the audio is transcribed rather than before.
             var fieldContext: Task<FieldContext, Never>?
-            if enhancementEnabled(), shareFieldContext() {
+            if settings.enhancementEnabled(), settings.shareFieldContext() {
                 fieldContext = Task { [focus] in await focus.fieldContext(maxLength: Self.precedingTextLength) }
             }
             // The pill switches now: the tail is not felt as more recording.
@@ -244,7 +245,7 @@ final class DictationController {
             let previous = lastReleased
             let dictation = Dictation(context: context, bundleID: bundleID)
             let task = Task {
-                await sleep(releaseTail)
+                await timing.sleep(timing.releaseTail)
                 let samples = takeTail(of: id)
                 await process(id, samples, dictation, fieldContext: fieldContext, after: previous)
             }
@@ -257,7 +258,7 @@ final class DictationController {
     /// as if the key had come up: what was said is kept and inserted.
     private func limitRecording() {
         recordingLimit?.cancel()
-        recordingLimit = Task { [maximumRecording] in
+        recordingLimit = Task { [maximumRecording = timing.maximumRecording] in
             try? await Task.sleep(for: maximumRecording)
             guard !Task.isCancelled, capture == .recording else { return }
             Log.dictation.notice("recording reached \(maximumRecording) without a release: released")
@@ -285,7 +286,7 @@ final class DictationController {
     private func takeTail(of id: Int) -> [Float] {
         guard tailOwner == id else { return cutTails.removeValue(forKey: id) ?? [] }
         tailOwner = nil
-        Log.dictation.info("kept recording \(Self.milliseconds(self.releaseTail)) ms after release")
+        Log.dictation.info("kept recording \(Self.milliseconds(self.timing.releaseTail)) ms after release")
         return recorder.stop()
     }
 
@@ -313,8 +314,8 @@ final class DictationController {
     private func transcribeInTurn(_ samples: [Float]) async throws -> (Transcription, Duration) {
         let previous = transcribing
         let audio = Double(samples.count) / Double(AudioAnalysis.sampleRate)
-        let limit = transcriptionTimeout + .seconds(audio / 2)
-        let work = Task { [transcriber, language] in
+        let limit = timing.transcription + .seconds(audio / 2)
+        let work = Task { [transcriber, language = settings.language] in
             await previous?.value
             let clock = ContinuousClock()
             let start = clock.now
@@ -328,6 +329,8 @@ final class DictationController {
         return try await work.value
     }
 
+    /// One released dictation, step by step: transcribe, read the field,
+    /// review, insert, record. Each step that ends it completes it.
     private func process(
         _ id: Int,
         _ samples: [Float],
@@ -335,125 +338,154 @@ final class DictationController {
         fieldContext: Task<FieldContext, Never>?,
         after previous: Task<Void, Never>?
     ) async {
-        var context = dictation.context
-        let bundleID = dictation.bundleID
         guard samples.count >= Self.minimumSampleCount, !AudioAnalysis.isSilent(samples) else {
             let audio = Double(samples.count) / Double(AudioAnalysis.sampleRate)
             let peak = AudioAnalysis.peakRMS(samples)
             Log.dictation.info("discarded \(audio, format: .fixed(precision: 1)) s of audio, peak RMS \(peak, format: .fixed(precision: 4)) (threshold \(AudioAnalysis.silenceThreshold, format: .fixed(precision: 4)))")
             return complete(id, emptyOutcome(samples))
         }
-
-        let clock = ContinuousClock()
-        let audio = Double(samples.count) / Double(AudioAnalysis.sampleRate)
-        var transcript: Transcription
-        let transcription: Duration
-        // The only engine, recorded with each dictation for the statistics.
-        let engine = TranscriptionEngine.parakeet
-        do {
-            (transcript, transcription) = try await transcribeInTurn(samples)
-            transcript.text = transcript.text.trimmingCharacters(in: .whitespacesAndNewlines)
-            let doubtful = transcript.words.count { $0.confidence < DoubtfulWords.threshold }
-            Log.dictation.info("transcribed \(audio, format: .fixed(precision: 1)) s of audio in \(Self.milliseconds(transcription)) ms, \(doubtful) doubtful words")
-        } catch is DeadlineExceeded {
-            Log.dictation.error("transcription of \(audio, format: .fixed(precision: 1)) s of audio timed out")
-            ErrorReporter.capture(message: "transcription with \(engine.rawValue) timed out", category: "transcriber")
-            return complete(id, .failed(String(localized: "Transcription impossible")))
-        } catch {
-            Log.dictation.error("transcription failed: \(error.localizedDescription, privacy: .public)")
-            ErrorReporter.capture(error, "transcription with \(engine.rawValue) failed", category: "transcriber")
+        guard let (transcript, transcription) = await transcribe(samples) else {
             return complete(id, .failed(String(localized: "Transcription impossible")))
         }
         guard !transcript.text.isEmpty else { return complete(id, emptyOutcome(samples)) }
 
-        if let fieldContext {
-            context.include(await fieldContext.value)
-            // Sizes only: the text, title and host are the user's.
-            Log.dictation.info("""
-                field context: \(context.precedingText?.count ?? 0) characters before, \
-                \(context.followingText?.count ?? 0) after, label \(context.fieldLabel != nil), \
-                title \(context.windowTitle != nil), web \(context.webHost != nil), \
-                category \(context.category.rawValue, privacy: .public)
-                """)
-            onFieldContext?(context)
-        }
+        var context = dictation.context
+        if let fieldContext { context = await include(fieldContext, in: context) }
 
-        // Claude gets Parakeet's unknown tokens as is and picks the character
-        // they stand for; the fallback turns any it leaves into guillemets.
-        var text = UnknownTokens.resolved(transcript.text)
-        var raw = false
-        var enhancement: Duration?
-        var reviewer: Reviewer?
-        if enhancementEnabled() {
-            setPhase(.enhancing, of: id)
-            let start = clock.now
-            // Who was asked, for the statistics when no review comes back.
-            let planned = enhancer.plannedReviewer
-            let review = await enhanceWithTimeout(transcript, context: context)
-            if let review, !review.text.isEmpty {
-                text = UnknownTokens.resolved(review.text)
-            } else {
-                raw = true
-            }
-            let elapsed = clock.now - start
-            enhancement = elapsed
-            reviewer = review?.reviewer ?? planned
-            Log.dictation.info("enhanced in \(Self.milliseconds(elapsed)) ms by \(reviewer?.rawValue ?? "nobody", privacy: .public), raw: \(raw)")
-        }
+        let review = await review(id, transcript, context: context)
 
-        // Texts land in release order, even when Claude was faster on a later one.
+        // Texts land in release order, even when the reviewer was faster on a later one.
         await previous?.value
         await settling?.value
+        let clock = ContinuousClock()
         let start = clock.now
-        let outcome: DictationOutcome
-        if await focus.hasEditableFocus() {
-            let keep = keepSamples() && onSample != nil
-            let follow = followInsertions() && onFollowUp != nil
-            let observer = keep || follow ? insertionObserver : nil
-            // Read before the paste: Cmd+V lands some time after it is posted.
-            let watch = await observer?.watchFocusedField()
-            // The app in front now, not at the press: the text lands here. A
-            // raw text is never sent: its review failed or was rejected, and
-            // the user should read it first.
-            let submit = !raw && AutoSend.applies(to: focus.frontmostBundleID(), in: autoSendApps())
-            await inserter.paste(text, submit: submit)
-            outcome = .pasted(raw: raw)
-            // A single read later on, shared by every consumer.
-            let followUp: Task<InsertionFollowUp?, Never>? = if let observer, let watch {
-                Task { await observer.followUp(watch, inserted: text) }
-            } else {
-                nil
-            }
-            if follow, let followUp, let onFollowUp {
-                Task {
-                    if let result = await followUp.value { onFollowUp(result) }
-                }
-            }
-            if keep {
-                onSample?(DictationSample(
-                    date: .now, samples: samples, engine: engine, language: language(),
-                    bundleID: bundleID, category: context.category,
-                    transcript: transcript.text, inserted: text, enhanced: enhancement != nil && !raw,
-                    vocabularyBoosted: transcript.vocabularyBoosted, followUp: followUp
-                ))
-            }
-        } else {
-            inserter.copyToPasteboard(text)
-            outcome = .copied(raw: raw)
-        }
+        let outcome = await insert(review, of: transcript, samples: samples, dictation: dictation, context: context)
         let insertion = clock.now - start
         Log.dictation.info("inserted in \(Self.milliseconds(insertion)) ms")
-        onRecord?(DictationRecord(
+        events.onRecord?(DictationRecord(
             date: .now,
-            words: DictationRecord.wordCount(of: text),
-            audio: audio,
-            engine: engine,
+            words: DictationRecord.wordCount(of: review.text),
+            audio: Double(samples.count) / Double(AudioAnalysis.sampleRate),
+            engine: Self.engine,
             transcription: Self.seconds(transcription),
-            enhancement: enhancement.map(Self.seconds),
-            reviewer: reviewer,
+            enhancement: review.duration.map(Self.seconds),
+            reviewer: review.reviewer,
             insertion: Self.seconds(insertion)
         ))
         complete(id, outcome)
+    }
+
+    /// The only engine, recorded with each dictation for the statistics.
+    private static let engine = TranscriptionEngine.parakeet
+
+    /// The transcript, trimmed, and how long it took; nil when it failed.
+    private func transcribe(_ samples: [Float]) async -> (Transcription, Duration)? {
+        let audio = Double(samples.count) / Double(AudioAnalysis.sampleRate)
+        do {
+            var (transcript, elapsed) = try await transcribeInTurn(samples)
+            transcript.text = transcript.text.trimmingCharacters(in: .whitespacesAndNewlines)
+            let doubtful = transcript.words.count { $0.confidence < DoubtfulWords.threshold }
+            Log.dictation.info("transcribed \(audio, format: .fixed(precision: 1)) s of audio in \(Self.milliseconds(elapsed)) ms, \(doubtful) doubtful words")
+            return (transcript, elapsed)
+        } catch is DeadlineExceeded {
+            Log.dictation.error("transcription of \(audio, format: .fixed(precision: 1)) s of audio timed out")
+            ErrorReporter.capture(message: "transcription with \(Self.engine.rawValue) timed out", category: "transcriber")
+            return nil
+        } catch {
+            Log.dictation.error("transcription failed: \(error.localizedDescription, privacy: .public)")
+            ErrorReporter.capture(error, "transcription with \(Self.engine.rawValue) failed", category: "transcriber")
+            return nil
+        }
+    }
+
+    /// The press's context with what was read of the field.
+    private func include(_ fieldContext: Task<FieldContext, Never>, in context: DictationContext) async -> DictationContext {
+        var context = context
+        context.include(await fieldContext.value)
+        // Sizes only: the text, title and host are the user's.
+        Log.dictation.info("""
+            field context: \(context.precedingText?.count ?? 0) characters before, \
+            \(context.followingText?.count ?? 0) after, label \(context.fieldLabel != nil), \
+            title \(context.windowTitle != nil), web \(context.webHost != nil), \
+            category \(context.category.rawValue, privacy: .public)
+            """)
+        events.onFieldContext?(context)
+        return context
+    }
+
+    /// What the review step leaves to insert and to record.
+    private struct ReviewedText {
+        var text: String
+        /// The review failed or was rejected: the transcript went in as heard.
+        var raw = false
+        /// How long the review took; nil when there was none.
+        var duration: Duration?
+        var reviewer: Reviewer?
+    }
+
+    private func review(_ id: Int, _ transcript: Transcription, context: DictationContext) async -> ReviewedText {
+        // The reviewer gets Parakeet's unknown tokens as is and picks the
+        // character they stand for; the fallback turns any it leaves into guillemets.
+        var reviewed = ReviewedText(text: UnknownTokens.resolved(transcript.text))
+        guard settings.enhancementEnabled() else { return reviewed }
+        setPhase(.enhancing, of: id)
+        let clock = ContinuousClock()
+        let start = clock.now
+        // Who was asked, for the statistics when no review comes back.
+        let planned = enhancer.plannedReviewer
+        let review = await enhanceWithTimeout(transcript, context: context)
+        if let review, !review.text.isEmpty {
+            reviewed.text = UnknownTokens.resolved(review.text)
+        } else {
+            reviewed.raw = true
+        }
+        let elapsed = clock.now - start
+        reviewed.duration = elapsed
+        reviewed.reviewer = review?.reviewer ?? planned
+        Log.dictation.info("enhanced in \(Self.milliseconds(elapsed)) ms by \(reviewed.reviewer?.rawValue ?? "nobody", privacy: .public), raw: \(reviewed.raw)")
+        return reviewed
+    }
+
+    /// Pastes into the focused field, or leaves the text in the pasteboard,
+    /// and hands the pasted ones to the corpus and the vocabulary suggestions.
+    private func insert(
+        _ review: ReviewedText, of transcript: Transcription, samples: [Float],
+        dictation: Dictation, context: DictationContext
+    ) async -> DictationOutcome {
+        guard await focus.hasEditableFocus() else {
+            inserter.copyToPasteboard(review.text)
+            return .copied(raw: review.raw)
+        }
+        let keep = settings.keepSamples() && events.onSample != nil
+        let follow = settings.followInsertions() && events.onFollowUp != nil
+        let observer = keep || follow ? insertionObserver : nil
+        // Read before the paste: Cmd+V lands some time after it is posted.
+        let watch = await observer?.watchFocusedField()
+        // The app in front now, not at the press: the text lands here. A raw
+        // text is never sent: its review failed or was rejected, and the user
+        // should read it first.
+        let submit = !review.raw && AutoSend.applies(to: focus.frontmostBundleID(), in: settings.autoSendApps())
+        await inserter.paste(review.text, submit: submit)
+        // A single read later on, shared by every consumer.
+        let followUp: Task<InsertionFollowUp?, Never>? = if let observer, let watch {
+            Task { await observer.followUp(watch, inserted: review.text) }
+        } else {
+            nil
+        }
+        if follow, let followUp, let onFollowUp = events.onFollowUp {
+            Task {
+                if let result = await followUp.value { onFollowUp(result) }
+            }
+        }
+        if keep {
+            events.onSample?(DictationSample(
+                date: .now, samples: samples, engine: Self.engine, language: settings.language(),
+                bundleID: dictation.bundleID, category: context.category,
+                transcript: transcript.text, inserted: review.text, enhanced: review.duration != nil && !review.raw,
+                vocabularyBoosted: transcript.vocabularyBoosted, followUp: followUp
+            ))
+        }
+        return .pasted(raw: review.raw)
     }
 
     private static func milliseconds(_ elapsed: Duration) -> Int {
@@ -468,15 +500,15 @@ final class DictationController {
         let work = Task { [enhancer, context] in
             try await enhancer.review(transcript, context: context)
         }
-        let timer = Task { [enhancementTimeout] in
-            try await Task.sleep(for: enhancementTimeout)
+        let timer = Task { [timeout = timing.enhancement] in
+            try await Task.sleep(for: timeout)
             work.cancel()
         }
         defer { timer.cancel() }
         do {
             var review = try await work.value
             review.text = review.text.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !diverges(review.text, transcript.text) else {
+            guard !settings.diverges(review.text, transcript.text) else {
                 noteRawInsertion(.diverged, error: nil)
                 return nil
             }
@@ -494,8 +526,8 @@ final class DictationController {
         switch failure {
         case .timedOut:
             // The record keeps the time, which is where a slow reviewer shows.
-            Log.dictation.notice("enhancement timed out after \(self.enhancementTimeout), raw transcript inserted")
-            ErrorReporter.breadcrumb("enhancement timed out after \(enhancementTimeout)", category: "enhancer")
+            Log.dictation.notice("enhancement timed out after \(self.timing.enhancement), raw transcript inserted")
+            ErrorReporter.breadcrumb("enhancement timed out after \(timing.enhancement)", category: "enhancer")
         case .rateLimited:
             Log.dictation.notice("reviewer limit reached, raw transcript inserted: \(details, privacy: .public)")
             ErrorReporter.breadcrumb("reviewer limit reached", category: "enhancer")
@@ -523,7 +555,7 @@ final class DictationController {
     /// audio stands in for the hold: it runs from the microphone opening to
     /// the end of the release tail, which is taken off.
     private func emptyOutcome(_ samples: [Float]) -> DictationOutcome {
-        let held = Double(samples.count) / Double(AudioAnalysis.sampleRate) - releaseTail / .seconds(1)
+        let held = Double(samples.count) / Double(AudioAnalysis.sampleRate) - timing.releaseTail / .seconds(1)
         return held >= Self.intentionalPress / .seconds(1) ? .unheard : .discarded
     }
 
@@ -535,6 +567,6 @@ final class DictationController {
 
     private func finish(_ outcome: DictationOutcome) {
         lastOutcome = outcome
-        onOutcome?(outcome)
+        events.onOutcome?(outcome)
     }
 }
