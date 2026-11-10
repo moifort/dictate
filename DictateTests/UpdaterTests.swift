@@ -112,6 +112,34 @@ struct UpdateInstallerTests {
         #expect(!FileManager.default.fileExists(atPath: root.appending(path: "Applications/.Fake.app.previous").path))
     }
 
+    /// A move that fails halfway, say a copy across volumes, leaves part of
+    /// the new bundle behind: it is removed and the old bundle comes back.
+    @Test func aFailedSwapRestoresTheInstalledBundle() throws {
+        let installed = try makeApp(named: "Fake", identifier: "test.fake", version: "1.0", at: root.appending(path: "Applications"))
+        let fresh = try makeApp(named: "Fake", identifier: "test.fake", version: "2.0", at: root.appending(path: "scratch"))
+        var moves = 0
+        #expect(throws: CocoaError.self) {
+            try installer.replace(installed, with: fresh) { from, to in
+                moves += 1
+                if moves == 2 {
+                    try FileManager.default.createDirectory(at: to.appending(path: "Contents"), withIntermediateDirectories: true)
+                    throw CocoaError(.fileWriteOutOfSpace)
+                }
+                try FileManager.default.moveItem(at: from, to: to)
+            }
+        }
+        #expect(version(of: installed) == "1.0")
+        #expect(!FileManager.default.fileExists(atPath: root.appending(path: "Applications/.Fake.app.previous").path))
+    }
+
+    /// Next to the installed app, so the swap is a rename on the same volume.
+    @Test func extractsOnTheVolumeOfTheInstalledApp() throws {
+        let scratch = UpdateInstaller.scratchDirectory(nextTo: root.appending(path: "Any.app"))
+        defer { try? FileManager.default.removeItem(at: scratch) }
+        let volume = { (url: URL) in try url.resourceValues(forKeys: [.volumeIdentifierKey]).volumeIdentifier as? NSObject }
+        #expect(try volume(scratch) == volume(root))
+    }
+
     @Test func rejectsABundleWithAnotherIdentifier() throws {
         let other = try makeApp(named: "Fake", identifier: "test.other", version: "2.0", at: root)
         #expect(throws: UpdateError.self) {
@@ -195,6 +223,43 @@ struct UpdaterFlowTests {
         #expect(updater.state == .idle, "\(updater.state)")
         #expect(relaunched == installed)
         #expect(Bundle(url: installed)?.infoDictionary?["CFBundleShortVersionString"] as? String == "9.9.9")
+        try? FileManager.default.removeItem(at: root)
+    }
+
+    /// An update found mid-dictation waits for it to end before swapping and relaunching.
+    @Test func waitsForTheDictationToEndBeforeRelaunching() async throws {
+        let root = FileManager.default.temporaryDirectory.appending(path: "idle-\(UUID().uuidString)")
+        let applications = root.appending(path: "Applications")
+        try FileManager.default.createDirectory(at: applications, withIntermediateDirectories: true)
+        let installed = applications.appending(path: "Dictate.app")
+        try FileManager.default.copyItem(at: Bundle.main.bundleURL, to: installed)
+        let archive = root.appending(path: "Dictate.zip")
+        try shell("/usr/bin/ditto", ["-c", "-k", "--keepParent", Bundle.main.bundleURL.path, archive.path])
+        let feed = """
+        [{"tag_name": "v9.9.9", "draft": false, "prerelease": false, "body": "",
+          "assets": [{"name": "Dictate-9.9.9.zip", "browser_download_url": "\(archive.absoluteString)"}]}]
+        """
+        var relaunched: URL?
+        var dictating = true
+        let updater = Updater(
+            currentVersion: "0.1.0",
+            bundleURL: installed,
+            expectation: .init(bundleIdentifier: try #require(Bundle.main.bundleIdentifier), teamIdentifier: nil),
+            fetch: { _ in Data(feed.utf8) },
+            download: { url, _ in url },
+            finish: { relaunched = $0 }
+        )
+        updater.isIdle = { !dictating }
+        updater.idlePoll = .milliseconds(20)
+        await updater.check()
+        updater.install()
+        for _ in 0..<100 where updater.state != .installing { try await Task.sleep(for: .milliseconds(50)) }
+        try await Task.sleep(for: .milliseconds(500))
+        #expect(relaunched == nil)
+        #expect(!FileManager.default.fileExists(atPath: applications.appending(path: ".Dictate.app.previous").path))
+        dictating = false
+        for _ in 0..<100 where relaunched == nil { try await Task.sleep(for: .milliseconds(50)) }
+        #expect(relaunched == installed)
         try? FileManager.default.removeItem(at: root)
     }
 

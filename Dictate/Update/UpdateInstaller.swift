@@ -74,17 +74,37 @@ nonisolated struct UpdateInstaller: Sendable {
         }
     }
 
-    /// Puts `replacement` where `current` is. The old bundle is restored if the move fails.
-    func replace(_ current: URL, with replacement: URL) throws {
+    /// Where to extract an update so that it sits on the same volume as `bundle`:
+    /// moving it into place is then a rename, never a copy that can stop halfway.
+    /// The temporary folder when the volume offers no such directory.
+    /// A new, unique directory each time: remove it once done.
+    static func scratchDirectory(nextTo bundle: URL) -> URL {
+        (try? FileManager.default.url(
+            for: .itemReplacementDirectory, in: .userDomainMask, appropriateFor: bundle, create: true
+        )) ?? FileManager.default.temporaryDirectory.appending(
+            path: "Dictate-update-\(UUID().uuidString)", directoryHint: .isDirectory
+        )
+    }
+
+    /// Puts `replacement` where `current` is. The old bundle is restored if the
+    /// move fails, after removing whatever part of the new one reached `current`.
+    /// `move` is FileManager's, injected so tests can make it fail.
+    func replace(
+        _ current: URL,
+        with replacement: URL,
+        move: (URL, URL) throws -> Void = { try FileManager.default.moveItem(at: $0, to: $1) }
+    ) throws {
         let fileManager = FileManager.default
         let backup = current.deletingLastPathComponent().appending(path: ".\(current.lastPathComponent).previous")
         try? fileManager.removeItem(at: backup)
-        try fileManager.moveItem(at: current, to: backup)
+        try move(current, backup)
         do {
-            try fileManager.moveItem(at: replacement, to: current)
+            try move(replacement, current)
         } catch {
+            // A move across volumes copies: a partial bundle would block the restore.
+            if fileManager.fileExists(atPath: current.path) { try? fileManager.removeItem(at: current) }
             do {
-                try fileManager.moveItem(at: backup, to: current)
+                try move(backup, current)
             } catch let restore {
                 ErrorReporter.capture(restore, "previous bundle could not be restored after a failed update", category: "updater", level: .fatal)
             }

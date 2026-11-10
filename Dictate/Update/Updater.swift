@@ -89,6 +89,13 @@ final class Updater {
     @ObservationIgnored private var periodic: Task<Void, Never>?
     @ObservationIgnored private var installTask: Task<Void, Never>?
 
+    /// Whether the app may relaunch now: false while a dictation is being
+    /// recorded or is on its way to the field. An update found mid-dictation
+    /// waits for it rather than quitting under the user.
+    @ObservationIgnored var isIdle: () -> Bool = { true }
+    /// How often a verified update checks whether the dictation is over.
+    @ObservationIgnored var idlePoll: Duration = .seconds(1)
+
     init(
         currentVersion: String = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0",
         bundleURL: URL = Bundle.main.bundleURL,
@@ -204,17 +211,25 @@ final class Updater {
         installTask = Task {
             defer { installTask = nil }
             state = .downloading(0)
-            let scratch = FileManager.default.temporaryDirectory.appending(path: "Dictate-update-\(UUID().uuidString)")
+            let current = bundleURL
+            let scratch = UpdateInstaller.scratchDirectory(nextTo: current)
             defer { try? FileManager.default.removeItem(at: scratch) }
             do {
                 let archive = try await downloadArchive(of: release)
                 state = .installing
-                let (installer, expectation, current) = (installer, expectation, bundleURL)
-                try await Task.detached {
+                let (installer, expectation) = (installer, expectation)
+                let fresh = try await Task.detached {
                     let fresh = try installer.extract(archive, into: scratch)
                     try installer.verify(fresh, against: expectation)
-                    try installer.replace(current, with: fresh)
+                    return fresh
                 }.value
+                // Swapped and relaunched only between dictations: the relaunch
+                // would cut one short, and the swap must not precede it by long.
+                if !isIdle() {
+                    Log.app.info("update to \(release.version, privacy: .public) ready, waiting for the dictation to end")
+                    while !isIdle() { try? await Task.sleep(for: idlePoll) }
+                }
+                try await Task.detached { try installer.replace(current, with: fresh) }.value
                 Log.app.info("updated to \(release.version, privacy: .public), relaunching")
                 state = .idle
                 finish(current)

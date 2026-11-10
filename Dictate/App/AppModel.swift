@@ -200,6 +200,7 @@ final class AppModel {
         startHotkey()
         pollSetupUntilComplete()
         if !Distribution.isAppStore {
+            updater.isIdle = { [controller] in controller.capture == .idle && controller.pending.isEmpty }
             updater.startPeriodicChecks { [settings] in settings.autoUpdate }
         }
         reportSettings()
