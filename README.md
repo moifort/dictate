@@ -44,7 +44,7 @@ ready-to-send text.
   Intelligence. Pick another in Settings, or turn the cleanup off entirely. If Claude gets signed out, the pill says so and
   Apple Intelligence steps in; a reply that strays from what you said is
   dropped for the raw transcript. Crashes and errors are reported to Sentry without
-  any of your text.
+  any of your text, paths or keys; turn the reports off in Settings → General.
 - **Your language, your words.** Pick the dictation language among 25
   European languages and add your own
   vocabulary — names, jargon, product terms — so they come out spelled right.

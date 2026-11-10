@@ -97,6 +97,15 @@ final class AppSettings {
         didSet { defaults.set(autoUpdate, forKey: Keys.autoUpdate) }
     }
 
+    /// Send crashes and errors to Sentry, scrubbed of anything the user said
+    /// or wrote. On by default; `ErrorReporter` follows it at once.
+    var sendErrorReports: Bool {
+        didSet {
+            defaults.set(sendErrorReports, forKey: ErrorReporter.preferenceKey)
+            ErrorReporter.setAllowed(sendErrorReports)
+        }
+    }
+
     /// Keep each dictation's audio, texts and the field's content a few
     /// seconds later on this Mac, to measure the word error rate. Off by default.
     var keepEvaluationCorpus: Bool {
@@ -249,6 +258,7 @@ final class AppSettings {
         autoSendEnabled = defaults.object(forKey: Keys.autoSendEnabled) as? Bool ?? true
         autoSendBundleIDs = defaults.stringArray(forKey: Keys.autoSendBundleIDs) ?? AutoSend.defaultBundleIDs
         autoUpdate = defaults.object(forKey: Keys.autoUpdate) as? Bool ?? true
+        sendErrorReports = ErrorReporter.userAllows(defaults)
         keepEvaluationCorpus = defaults.bool(forKey: Keys.keepEvaluationCorpus)
         suggestVocabulary = defaults.bool(forKey: Keys.suggestVocabulary)
         claudeAccess = defaults.string(forKey: Keys.claudeAccess).flatMap(ClaudeAccess.init(rawValue:)) ?? .subscription

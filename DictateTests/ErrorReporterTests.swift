@@ -51,3 +51,16 @@ struct ErrorScrubbingTests {
         #expect(reported.userInfo.count == 1)
     }
 }
+
+/// Settings → Général → "Envoyer les rapports d'erreur".
+struct ErrorReportingChoiceTests {
+    @Test func reportsAreOnUntilTurnedOff() {
+        let defaults = UserDefaults(suiteName: "ErrorReportingChoiceTests-\(UUID().uuidString)")!
+        #expect(ErrorReporter.userAllows(defaults))
+        let settings = AppSettings(defaults: defaults, apiKeyStores: { _ in InMemorySecret() })
+        #expect(settings.sendErrorReports)
+        settings.sendErrorReports = false
+        #expect(!ErrorReporter.userAllows(defaults))
+        #expect(!AppSettings(defaults: defaults, apiKeyStores: { _ in InMemorySecret() }).sendErrorReports)
+    }
+}

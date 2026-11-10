@@ -107,8 +107,11 @@ and the settings that matter (engine, key, language, Claude on or off) are
 tags on every event.
 
 Nothing the user said or wrote is ever sent: no audio, no transcript, no
-field context. Debug builds and the test host never report anything, so a
-development session cannot pollute the project.
+field context. Error texts are scrubbed first (`ErrorReporter.scrubbed`:
+home paths, e-mail addresses and API keys masked, 300 characters at most).
+Settings → Général → "Envoyer les rapports d'erreur", on by default, turns
+reporting off at once. Debug builds and the test host never report anything,
+so a development session cannot pollute the project.
 
 Without the `SENTRY_AUTH_TOKEN` secret the release workflow skips the dSYM
 upload and crashes show addresses instead of function names.

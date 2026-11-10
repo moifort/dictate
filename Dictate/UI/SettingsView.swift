@@ -436,6 +436,13 @@ private struct GeneralSettings: View {
                     }
                 }
             }
+
+            LabeledContent("Confidentialité :") {
+                VStack(alignment: .leading, spacing: 6) {
+                    Toggle("Envoyer les rapports d'erreur", isOn: Bindable(model.settings).sendErrorReports)
+                    Hint("Les plantages et les erreurs partent vers Sentry pour être corrigés : l'erreur, les versions et les réglages utiles, jamais ce que vous dites ou écrivez.")
+                }
+            }
         }
         .formStyle(.columns)
         .padding(20)

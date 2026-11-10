@@ -1473,6 +1473,22 @@
         }
       }
     },
+    "Confidentialité :": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Privacy:"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Confidentialité :"
+          }
+        }
+      }
+    },
     "Configuration": {
       "localizations": {
         "en": {
@@ -2029,6 +2045,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Envoie le message une fois le texte collé, seulement dans ces apps :"
+          }
+        }
+      }
+    },
+    "Envoyer les rapports d'erreur": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send error reports"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoyer les rapports d'erreur"
           }
         }
       }
@@ -2613,6 +2645,22 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Les plantages et les erreurs partent vers Sentry pour être corrigés : l'erreur, les versions et les réglages utiles, jamais ce que vous dites ou écrivez.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crashes and errors go to Sentry to be fixed: the error, the versions and the settings that matter, never what you say or write."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Les plantages et les erreurs partent vers Sentry pour être corrigés : l'erreur, les versions et les réglages utiles, jamais ce que vous dites ou écrivez."
           }
         }
       }

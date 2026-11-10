@@ -12,7 +12,7 @@ nonisolated enum ErrorReporter {
     static let dsn = "https://62ee408852523f7fe415ffb8442943e5@o4510952263909376.ingest.de.sentry.io/4512244932673616"
 
     /// Debug builds and tests keep their errors in the console.
-    static var isEnabled: Bool {
+    static var isBuildReporting: Bool {
         #if DEBUG
         false
         #else
@@ -20,9 +20,29 @@ nonisolated enum ErrorReporter {
         #endif
     }
 
+    /// The user's choice in Settings → Général, on by default. Read from the
+    /// defaults rather than `AppSettings`: reporting starts before them.
+    static let preferenceKey = "sendErrorReports"
+
+    static func userAllows(_ defaults: UserDefaults = .standard) -> Bool {
+        defaults.object(forKey: preferenceKey) as? Bool ?? true
+    }
+
+    static var isEnabled: Bool { isBuildReporting && userAllows() }
+
+    /// Follows the setting at once: off closes the SDK, on starts it again.
+    static func setAllowed(_ allowed: Bool) {
+        guard isBuildReporting else { return }
+        if allowed {
+            start()
+        } else if SentrySDK.isEnabled {
+            SentrySDK.close()
+        }
+    }
+
     /// Call as early as possible, before anything that can fail or crash.
     static func start(bundle: Bundle = .main) {
-        guard isEnabled else { return }
+        guard isEnabled, !SentrySDK.isEnabled else { return }
         SentrySDK.start { options in
             options.dsn = dsn
             options.releaseName = release(
