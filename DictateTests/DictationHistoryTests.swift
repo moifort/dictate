@@ -30,6 +30,15 @@ struct DictationHistoryTests {
         #expect(DictationHistory(file: file).records == history.records)
     }
 
+    /// A file that cannot be opened for writing is left as it is, never replaced.
+    @Test func aFailedAppendNeverLosesTheHistory() throws {
+        DictationHistory(file: file).append(record(words: 3))
+        try FileManager.default.setAttributes([.posixPermissions: 0o444], ofItemAtPath: file.path)
+        defer { try? FileManager.default.setAttributes([.posixPermissions: 0o644], ofItemAtPath: file.path) }
+        DictationHistory(file: file).append(record(words: 5))
+        #expect(DictationHistory(file: file).records.map(\.words) == [3])
+    }
+
     @Test func theEngineSurvivesARelaunch() {
         let record = DictationRecord(
             date: Date(timeIntervalSince1970: 1_800_000_000), words: 4, audio: 3,

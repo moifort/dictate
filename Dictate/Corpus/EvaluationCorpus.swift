@@ -12,7 +12,7 @@ final class EvaluationCorpus {
     private(set) var entries: [CorpusEntry]
 
     @ObservationIgnored let folder: URL
-    private var entriesFile: URL { folder.appending(path: "entries.jsonl") }
+    private var entriesFile: JSONLinesFile<CorpusEntry> { JSONLinesFile(folder.appending(path: "entries.jsonl")) }
 
     /// One folder per bundle identifier, like the statistics: a Debug build
     /// must not mix its test dictations into the release's corpus.
@@ -24,7 +24,7 @@ final class EvaluationCorpus {
 
     init(folder: URL = EvaluationCorpus.defaultFolder) {
         self.folder = folder
-        entries = Self.load(folder.appending(path: "entries.jsonl"))
+        entries = JSONLinesFile<CorpusEntry>(folder.appending(path: "entries.jsonl")).load()
     }
 
     /// Waits for the user's fixes, then keeps the dictation.
@@ -53,15 +53,7 @@ final class EvaluationCorpus {
         do {
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
             try WAVFile.data(samples: sample.samples).write(to: audioURL(of: entry))
-            var line = try Self.encoder.encode(entry)
-            line.append(0x0A)
-            if let handle = try? FileHandle(forWritingTo: entriesFile) {
-                defer { try? handle.close() }
-                try handle.seekToEnd()
-                try handle.write(contentsOf: line)
-            } else {
-                try line.write(to: entriesFile)
-            }
+            try entriesFile.append(entry)
             entries.append(entry)
             Log.app.info("corpus: kept dictation \(self.entries.count), reference: \(reference != nil)")
         } catch {
@@ -86,24 +78,4 @@ final class EvaluationCorpus {
             ErrorReporter.capture(error, "evaluation corpus could not be deleted", category: "corpus")
         }
     }
-
-    /// A damaged line, say from a crash mid-write, is skipped rather than
-    /// costing the whole corpus.
-    private static func load(_ file: URL) -> [CorpusEntry] {
-        guard let data = try? Data(contentsOf: file) else { return [] }
-        return data.split(separator: 0x0A).compactMap { try? decoder.decode(CorpusEntry.self, from: $0) }
-    }
-
-    private static let encoder: JSONEncoder = {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
-        return encoder
-    }()
-
-    private static let decoder: JSONDecoder = {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-        return decoder
-    }()
 }
