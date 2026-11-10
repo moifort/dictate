@@ -34,19 +34,23 @@ final class HotKeyMonitor {
         var events = [kEventHotKeyPressed, kEventHotKeyReleased].map {
             EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32($0))
         }
-        guard InstallEventHandler(
-            GetEventDispatcherTarget(),
-            hotKeyCallback,
-            events.count,
-            &events,
-            Unmanaged.passUnretained(self).toOpaque(),
-            &handler
-        ) == noErr else { return false }
+        guard
+            InstallEventHandler(
+                GetEventDispatcherTarget(),
+                hotKeyCallback,
+                events.count,
+                &events,
+                Unmanaged.passUnretained(self).toOpaque(),
+                &handler
+            ) == noErr
+        else { return false }
 
         let id = EventHotKeyID(signature: 0x4449_4354, id: 1)
-        guard RegisterEventHotKey(
-            UInt32(kVK_Space), Self.modifiers(of: key), id, GetEventDispatcherTarget(), 0, &hotKey
-        ) == noErr else {
+        guard
+            RegisterEventHotKey(
+                UInt32(kVK_Space), Self.modifiers(of: key), id, GetEventDispatcherTarget(), 0, &hotKey
+            ) == noErr
+        else {
             stop()
             return false
         }

@@ -1,6 +1,6 @@
 import Charts
-import SwiftUI
 import DictateKit
+import SwiftUI
 
 /// The time dictating saved over typing the same words, over the period and
 /// since the first dictation.
@@ -137,9 +137,12 @@ struct LatencyCard: View {
         let shown = Self.shownReviewer(focus, in: whole)
         let series = DictationSeries(records: Self.records(engineRecords, reviewedBy: shown), period: period, now: now)
         // One scale for every model, so switching shows which one is slower.
-        let peak = (shown == nil ? [series] : whole.reviewers.map {
-            DictationSeries(records: Self.records(engineRecords, reviewedBy: $0), period: period, now: now)
-        }).map(Self.peak).max() ?? 0
+        let peak =
+            (shown == nil
+            ? [series]
+            : whole.reviewers.map {
+                DictationSeries(records: Self.records(engineRecords, reviewedBy: $0), period: period, now: now)
+            }).map(Self.peak).max() ?? 0
         return Figures(whole: whole, shown: shown, series: series, peak: peak)
     }
 

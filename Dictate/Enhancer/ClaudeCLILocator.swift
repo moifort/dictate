@@ -11,7 +11,8 @@ nonisolated struct ClaudeCLILocator: Sendable {
         if let override, !override.isEmpty, isExecutable(URL(filePath: override)) {
             return URL(filePath: override)
         }
-        let standalone = [home.appending(path: ".local/bin/claude"), home.appending(path: ".claude/local/claude")]
+        let standalone =
+            [home.appending(path: ".local/bin/claude"), home.appending(path: ".claude/local/claude")]
             + systemDirectories.map { $0.appending(path: "claude") }
         if let found = standalone.first(where: isExecutable) {
             return found

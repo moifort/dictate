@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import Dictate
 
 /// What the menu and the indicator say about a reviewer that cannot answer.
@@ -12,14 +13,18 @@ struct ReviewerProblemTests {
     }
 
     @Test func theExplanationSaysWhatToDo() {
-        #expect(OutcomeMessage.explanation(of: .disconnected, reviewer: .claude, access: .subscription)
-            == "Claude est déconnecté : lancez « claude auth login » dans un terminal.")
-        #expect(OutcomeMessage.explanation(of: .disconnected, reviewer: .gemini, access: .subscription)
-            == APIReviewError.invalidKey(.gemini).localizedDescription)
-        #expect(OutcomeMessage.explanation(of: .rateLimited, reviewer: .openAI, access: .subscription)
-            == APIReviewError.rateLimited(.openAI).localizedDescription)
-        #expect(OutcomeMessage.explanation(of: .rateLimited, reviewer: .claude, access: .apiKey)
-            == APIReviewError.rateLimited(.anthropic).localizedDescription)
+        #expect(
+            OutcomeMessage.explanation(of: .disconnected, reviewer: .claude, access: .subscription)
+                == "Claude est déconnecté : lancez « claude auth login » dans un terminal.")
+        #expect(
+            OutcomeMessage.explanation(of: .disconnected, reviewer: .gemini, access: .subscription)
+                == APIReviewError.invalidKey(.gemini).localizedDescription)
+        #expect(
+            OutcomeMessage.explanation(of: .rateLimited, reviewer: .openAI, access: .subscription)
+                == APIReviewError.rateLimited(.openAI).localizedDescription)
+        #expect(
+            OutcomeMessage.explanation(of: .rateLimited, reviewer: .claude, access: .apiKey)
+                == APIReviewError.rateLimited(.anthropic).localizedDescription)
     }
 }
 
@@ -106,14 +111,18 @@ struct SaveAPIKeyTests {
 /// The menu's line after each dictation.
 struct OutcomeMessageTests {
     @Test func aRawTextSaysWhoDidNotAnswer() {
-        #expect(OutcomeMessage.error(for: .pasted(raw: true), .init(reviewer: .claude))
-            == "Claude n'a pas répondu : texte brut inséré.")
-        #expect(OutcomeMessage.error(for: .pasted(raw: true), .init(reviewer: .claude, cliFound: false))
-            == ClaudeCLIError.notFound.localizedDescription)
-        #expect(OutcomeMessage.error(for: .copied(raw: true), .init(reviewer: .gemini))
-            == "L'API Gemini n'a pas répondu : texte brut inséré.")
-        #expect(OutcomeMessage.error(for: .pasted(raw: true), .init(reviewer: .apple, appleExplanation: "Désactivé"))
-            == "Désactivé")
+        #expect(
+            OutcomeMessage.error(for: .pasted(raw: true), .init(reviewer: .claude))
+                == "Claude n'a pas répondu : texte brut inséré.")
+        #expect(
+            OutcomeMessage.error(for: .pasted(raw: true), .init(reviewer: .claude, cliFound: false))
+                == ClaudeCLIError.notFound.localizedDescription)
+        #expect(
+            OutcomeMessage.error(for: .copied(raw: true), .init(reviewer: .gemini))
+                == "L'API Gemini n'a pas répondu : texte brut inséré.")
+        #expect(
+            OutcomeMessage.error(for: .pasted(raw: true), .init(reviewer: .apple, appleExplanation: "Désactivé"))
+                == "Désactivé")
         #expect(OutcomeMessage.error(for: .pasted(raw: true), .init(reviewer: .none)) == nil)
     }
 
@@ -124,7 +133,8 @@ struct OutcomeMessageTests {
 
     /// A lasting problem wins: it degrades every dictation until the user acts.
     @Test func aLastingProblemWins() {
-        #expect(OutcomeMessage.error(for: .pasted(raw: false), .init(reviewer: .openAI, problem: .disconnected))
-            == APIReviewError.invalidKey(.openAI).localizedDescription)
+        #expect(
+            OutcomeMessage.error(for: .pasted(raw: false), .init(reviewer: .openAI, problem: .disconnected))
+                == APIReviewError.invalidKey(.openAI).localizedDescription)
     }
 }

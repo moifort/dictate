@@ -1,5 +1,5 @@
-import Foundation
 import DictateKit
+import Foundation
 
 /// Captures microphone audio as 16 kHz mono samples.
 protocol AudioRecording: AnyObject {

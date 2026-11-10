@@ -128,10 +128,11 @@ final class TextInserter: TextInserting {
     private func restore(_ items: [[NSPasteboard.PasteboardType: Data]]) {
         pasteboard.clearContents()
         guard !items.isEmpty else { return }
-        pasteboard.writeObjects(items.map { entries in
-            let item = NSPasteboardItem()
-            for (type, data) in entries { item.setData(data, forType: type) }
-            return item
-        })
+        pasteboard.writeObjects(
+            items.map { entries in
+                let item = NSPasteboardItem()
+                for (type, data) in entries { item.setData(data, forType: type) }
+                return item
+            })
     }
 }

@@ -10,12 +10,14 @@ enum ActiveWindow {
         nil
         #else
         guard let app = NSWorkspace.shared.frontmostApplication,
-              let primary = NSScreen.screens.first else { return nil }
+            let primary = NSScreen.screens.first
+        else { return nil }
         // Called as `fn` goes down: a busy app must not delay the pill.
         let ax = AXReader(messagingTimeout: 0.1)
         guard let window = ax.focusedWindow(pid: app.processIdentifier),
-              let position = ax.point(window, kAXPositionAttribute),
-              let size = ax.size(window, kAXSizeAttribute) else { return nil }
+            let position = ax.point(window, kAXPositionAttribute),
+            let size = ax.size(window, kAXSizeAttribute)
+        else { return nil }
         return appKitFrame(axOrigin: position, size: size, primaryHeight: primary.frame.height)
         #endif
     }

@@ -1,5 +1,4 @@
-#!/usr/bin/env swift
-// Renders the background of the Dictate disk image: the window people see
+#!/usr/bin/env swift  // Renders the background of the Dictate disk image: the window people see
 // when they open the DMG, with an arrow from the app to the Applications
 // alias. The two icons themselves are laid out by Finder (see build-dmg.sh);
 // this picture only paints what sits behind them.
@@ -24,12 +23,14 @@ guard CommandLine.arguments.count == 2 else {
 let output = URL(fileURLWithPath: CommandLine.arguments[1])
 
 let pixels = NSSize(width: pointSize.width * scale, height: pointSize.height * scale)
-guard let rep = NSBitmapImageRep(
-    bitmapDataPlanes: nil,
-    pixelsWide: Int(pixels.width), pixelsHigh: Int(pixels.height),
-    bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
-    colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0
-) else {
+guard
+    let rep = NSBitmapImageRep(
+        bitmapDataPlanes: nil,
+        pixelsWide: Int(pixels.width), pixelsHigh: Int(pixels.height),
+        bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
+        colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0
+    )
+else {
     FileHandle.standardError.write(Data("could not allocate the bitmap\n".utf8))
     exit(1)
 }
@@ -125,10 +126,12 @@ func drawCentered(_ text: String, size: CGFloat, weight: NSFont.Weight, color: N
 }
 // One picture for every Mac, whatever its language: English first, then
 // French, the two languages the app speaks. The setup explains the rest.
-drawCentered("Drag Dictate to Applications", size: 17, weight: .semibold,
-             color: NSColor(srgbRed: 0.18, green: 0.19, blue: 0.24, alpha: 1), y: 94)
-drawCentered("Glissez Dictate dans Applications", size: 13, weight: .regular,
-             color: NSColor(srgbRed: 0.38, green: 0.39, blue: 0.46, alpha: 1), y: 74)
+drawCentered(
+    "Drag Dictate to Applications", size: 17, weight: .semibold,
+    color: NSColor(srgbRed: 0.18, green: 0.19, blue: 0.24, alpha: 1), y: 94)
+drawCentered(
+    "Glissez Dictate dans Applications", size: 13, weight: .regular,
+    color: NSColor(srgbRed: 0.38, green: 0.39, blue: 0.46, alpha: 1), y: 74)
 
 NSGraphicsContext.restoreGraphicsState()
 

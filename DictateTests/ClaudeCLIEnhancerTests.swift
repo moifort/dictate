@@ -1,7 +1,8 @@
+import DictateKit
 import Foundation
 import Testing
+
 @testable import Dictate
-import DictateKit
 
 /// Runs the enhancer against fake `claude` shell scripts.
 @MainActor
@@ -26,11 +27,12 @@ struct ClaudeCLIEnhancerTests {
 
     @Test func returnsResultAndSendsDictationAsStreamJSON() async throws {
         let stdinCopy = directory.appending(path: "stdin.txt")
-        let cli = try fakeCLI("""
-        cat > "\(stdinCopy.path)"
-        echo '{"type":"system","subtype":"init"}'
-        echo '{"type":"result","subtype":"success","is_error":false,"result":"Fais un push."}'
-        """)
+        let cli = try fakeCLI(
+            """
+            cat > "\(stdinCopy.path)"
+            echo '{"type":"system","subtype":"init"}'
+            echo '{"type":"result","subtype":"success","is_error":false,"result":"Fais un push."}'
+            """)
         let result = try await makeEnhancer(cli).enhance(transcript: "fais un pouche", context: DictationContext(category: .code))
         #expect(result == "Fais un push.")
 
@@ -43,10 +45,11 @@ struct ClaudeCLIEnhancerTests {
 
     @Test func sendsDoubtfulWordsMarkedAndStripsMarkersFromTheReply() async throws {
         let stdinCopy = directory.appending(path: "stdin.txt")
-        let cli = try fakeCLI("""
-        cat > "\(stdinCopy.path)"
-        echo '{"type":"result","subtype":"success","is_error":false,"result":"Déploie sur <?>Kubernetes</?>."}'
-        """)
+        let cli = try fakeCLI(
+            """
+            cat > "\(stdinCopy.path)"
+            echo '{"type":"result","subtype":"success","is_error":false,"result":"Déploie sur <?>Kubernetes</?>."}'
+            """)
         let words = [
             Transcription.Word(text: "déploie", confidence: 0.9),
             Transcription.Word(text: "sur", confidence: 0.9),
@@ -63,14 +66,15 @@ struct ClaudeCLIEnhancerTests {
     }
 
     @Test func returnsOnTheAssistantTextWithoutWaitingForThePostTurnSummary() async throws {
-        let cli = try fakeCLI("""
-        cat > /dev/null
-        echo '{"type":"assistant","message":{"model":"claude-haiku-5-5","content":[{"type":"thinking","thinking":""}]}}'
-        echo '{"type":"assistant","message":{"model":"claude-haiku-5-5","content":[{"type":"text","text":"Fais un push."}]}}'
-        sleep 5
-        echo '{"type":"system","subtype":"post_turn_summary"}'
-        echo '{"type":"result","subtype":"success","is_error":false,"result":"Fais un push."}'
-        """)
+        let cli = try fakeCLI(
+            """
+            cat > /dev/null
+            echo '{"type":"assistant","message":{"model":"claude-haiku-5-5","content":[{"type":"thinking","thinking":""}]}}'
+            echo '{"type":"assistant","message":{"model":"claude-haiku-5-5","content":[{"type":"text","text":"Fais un push."}]}}'
+            sleep 5
+            echo '{"type":"system","subtype":"post_turn_summary"}'
+            echo '{"type":"result","subtype":"success","is_error":false,"result":"Fais un push."}'
+            """)
         let start = ContinuousClock.now
         let result = try await makeEnhancer(cli).enhance(transcript: "fais un pouche", context: DictationContext())
         #expect(result == "Fais un push.")
@@ -78,21 +82,23 @@ struct ClaudeCLIEnhancerTests {
     }
 
     @Test func aMadeUpErrorReplyIsNotTakenForTheCleanup() async throws {
-        let cli = try fakeCLI("""
-        cat > /dev/null
-        echo '{"type":"assistant","error":"authentication_failed","message":{"model":"<synthetic>","content":[{"type":"text","text":"Please run /login"}]}}'
-        echo '{"type":"result","subtype":"success","is_error":true,"result":"Please run /login"}'
-        """)
+        let cli = try fakeCLI(
+            """
+            cat > /dev/null
+            echo '{"type":"assistant","error":"authentication_failed","message":{"model":"<synthetic>","content":[{"type":"text","text":"Please run /login"}]}}'
+            echo '{"type":"result","subtype":"success","is_error":true,"result":"Please run /login"}'
+            """)
         await #expect(throws: ClaudeCLIError.self) {
             try await makeEnhancer(cli).enhance(transcript: "x", context: DictationContext())
         }
     }
 
     @Test func errorResultThrows() async throws {
-        let cli = try fakeCLI("""
-        cat > /dev/null
-        echo '{"type":"result","subtype":"success","is_error":true,"result":"Please run /login"}'
-        """)
+        let cli = try fakeCLI(
+            """
+            cat > /dev/null
+            echo '{"type":"result","subtype":"success","is_error":true,"result":"Please run /login"}'
+            """)
         await #expect(throws: ClaudeCLIError.self) {
             try await makeEnhancer(cli).enhance(transcript: "x", context: DictationContext())
         }
@@ -125,11 +131,12 @@ struct ClaudeCLIEnhancerTests {
 
     @Test func prewarmedProcessIsUsedThenReplaced() async throws {
         let starts = directory.appending(path: "starts.txt")
-        let cli = try fakeCLI("""
-        echo started >> "\(starts.path)"
-        cat > /dev/null
-        echo '{"type":"result","subtype":"success","is_error":false,"result":"ok"}'
-        """)
+        let cli = try fakeCLI(
+            """
+            echo started >> "\(starts.path)"
+            cat > /dev/null
+            echo '{"type":"result","subtype":"success","is_error":false,"result":"ok"}'
+            """)
         let enhancer = makeEnhancer(cli)
         // A loaded machine can take a while to start the script: wait for it, up to 5 s.
         func waitForStarts(_ count: Int) async throws -> Int {
@@ -151,10 +158,11 @@ struct ClaudeCLIEnhancerTests {
     /// Left idle, the waiting process is stopped, not replaced; the next press starts one.
     @Test func anIdleProcessIsStoppedUntilTheNextPress() async throws {
         let starts = directory.appending(path: "starts.txt")
-        let cli = try fakeCLI("""
-        echo started >> "\(starts.path)"
-        cat > /dev/null
-        """)
+        let cli = try fakeCLI(
+            """
+            echo started >> "\(starts.path)"
+            cat > /dev/null
+            """)
         let enhancer = ClaudeCLIEnhancer(locate: { cli }, systemPrompt: { "prompt" }, idleTimeout: .milliseconds(200))
         enhancer.prewarm()
         #expect(enhancer.isWarm)
@@ -186,14 +194,14 @@ struct ClaudeCLIEnhancerTests {
     }
 }
 
-private extension String {
-    func count(of needle: String) -> Int {
+extension String {
+    fileprivate func count(of needle: String) -> Int {
         components(separatedBy: needle).count - 1
     }
 }
 
-private extension Array where Element: Equatable {
-    func containsSequence(_ sequence: [Element]) -> Bool {
+extension Array where Element: Equatable {
+    fileprivate func containsSequence(_ sequence: [Element]) -> Bool {
         guard sequence.count <= count else { return false }
         return (0...(count - sequence.count)).contains { Array(self[$0..<$0 + sequence.count]) == sequence }
     }

@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import Dictate
 
 @MainActor
@@ -93,9 +94,9 @@ struct WAVFileTests {
         #expect(data.count == 48)
         #expect(Array(data[0..<4]) == Array("RIFF".utf8))
         #expect(Array(data[36..<40]) == Array("data".utf8))
-        #expect(data[22] == 1)                                  // mono
+        #expect(data[22] == 1)  // mono
         #expect(UInt32(data[24]) | UInt32(data[25]) << 8 == 16_000)
-        #expect(data[34] == 16)                                 // bits per sample
+        #expect(data[34] == 16)  // bits per sample
     }
 
     @Test func samplesRoundTripAndClip() throws {
@@ -143,7 +144,7 @@ struct CorpusEvaluationTests {
 
     @Test func rawInsertionsDoNotCountForClaude() {
         let evaluation = CorpusEvaluation(entries: [
-            entry(transcript: "fais un push", inserted: "fais un push", enhanced: false, reference: "fais un push"),
+            entry(transcript: "fais un push", inserted: "fais un push", enhanced: false, reference: "fais un push")
         ])
         #expect(evaluation.lines[parakeet]?.enhancedDictations == 0)
         #expect(evaluation.lines[parakeet]?.enhanced.referenceWords == 0)
@@ -151,14 +152,14 @@ struct CorpusEvaluationTests {
 
     @Test func unknownTokensAreNotCountedAsWords() {
         let evaluation = CorpusEvaluation(entries: [
-            entry(transcript: "dire <unk> oui <unk>", inserted: "Dire « oui ».", reference: "Dire « oui »."),
+            entry(transcript: "dire <unk> oui <unk>", inserted: "Dire « oui ».", reference: "Dire « oui ».")
         ])
         #expect(evaluation.lines[parakeet]?.transcript.errors == 0)
     }
 
     @Test func summaryNamesTheEngine() {
         let evaluation = CorpusEvaluation(entries: [
-            entry(engine: .parakeet, transcript: "a", inserted: "a", reference: "a"),
+            entry(engine: .parakeet, transcript: "a", inserted: "a", reference: "a")
         ])
         #expect(evaluation.lines[parakeet]?.transcript.rate == 0)
         #expect(evaluation.summary.contains("Parakeet seul"))
@@ -191,7 +192,8 @@ struct CorpusEntryDecodingTests {
     }()
 
     private func line(boosting: String) -> Data {
-        Data("""
+        Data(
+            """
             {"audio":1.5,"audioFile":"a.wav","bundleID":null,"category":"code","date":"2026-10-14T10:00:00Z",\
             "enhanced":true,"engine":"parakeet","id":"6F9619FF-8B86-D011-B42D-00C04FC964FF","inserted":"Fais un push.",\
             "language":"fr","reference":"Fais un push.","transcript":"fais un pouche"\(boosting)}

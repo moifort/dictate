@@ -1,6 +1,6 @@
+import DictateKit
 import Foundation
 import Observation
-import DictateKit
 
 /// The speech-to-text model run on this Mac. Parakeet is the only one left;
 /// the type stays because every statistic and corpus entry records it, and
@@ -83,7 +83,7 @@ nonisolated enum ModelStorage {
     static func diskUsage(of folder: URL) -> Int64? {
         let keys: [URLResourceKey] = [.isRegularFileKey, .totalFileAllocatedSizeKey]
         guard FileManager.default.fileExists(atPath: folder.path),
-              let files = FileManager.default.enumerator(at: folder, includingPropertiesForKeys: keys)
+            let files = FileManager.default.enumerator(at: folder, includingPropertiesForKeys: keys)
         else { return nil }
         var total: Int64 = 0
         for case let file as URL in files {

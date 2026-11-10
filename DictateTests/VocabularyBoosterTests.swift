@@ -1,8 +1,9 @@
+import DictateKit
 import FluidAudio
 import Foundation
 import Testing
+
 @testable import Dictate
-import DictateKit
 
 @MainActor
 struct VocabularyBoosterTests {
@@ -204,7 +205,9 @@ struct VocabularyBoostingModelTests {
         return try AudioResampler.samples(fromFile: url)
     }
 
-    private func transcribe(_ sentence: String, voice: String, language: String) async throws -> (plain: Transcription, boosted: Transcription, added: Duration?) {
+    private func transcribe(_ sentence: String, voice: String, language: String) async throws -> (
+        plain: Transcription, boosted: Transcription, added: Duration?
+    ) {
         let booster = VocabularyBooster()
         await booster.load()
         #expect(booster.state == .ready)
@@ -215,7 +218,8 @@ struct VocabularyBoostingModelTests {
         let first = booster.lastDuration
         // The first rescoring also tokenizes the vocabulary and warms the model up.
         let boosted = try await transcriber.transcription(samples: samples, language: language)
-        print("""
+        print(
+            """
             Boosting [\(language)] added \(first.map { "\($0)" } ?? "nothing") the first time, \
             then \(booster.lastDuration.map { "\($0)" } ?? "nothing"), for \(samples.count / AudioAnalysis.sampleRate) s of audio:
               plain:   \(plain.text)

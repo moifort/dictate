@@ -1,5 +1,5 @@
-import Foundation
 import DictateKit
+import Foundation
 
 /// Marks the words the transcriber was unsure of, so the reviewer knows where a
 /// correction may be due and where to leave the text alone.
@@ -28,7 +28,7 @@ nonisolated enum DoubtfulWords {
                 let word = String(chunk)
                 // Allows for a word the transcript has but the timings lack, or the reverse.
                 guard !word.isEmpty,
-                      let index = remaining.prefix(3).firstIndex(where: { $0.text == word })
+                    let index = remaining.prefix(3).firstIndex(where: { $0.text == word })
                 else { return word }
                 let confidence = remaining[index].confidence
                 remaining = remaining[(index + 1)...]
@@ -47,7 +47,7 @@ nonisolated enum DoubtfulWords {
         guard !word.contains(UnknownTokens.token) else { return word }
         let scalars = word.unicodeScalars
         guard let first = scalars.firstIndex(where: { CharacterSet.alphanumerics.contains($0) }),
-              let last = scalars.lastIndex(where: { CharacterSet.alphanumerics.contains($0) })
+            let last = scalars.lastIndex(where: { CharacterSet.alphanumerics.contains($0) })
         else { return word }
         let core = String(scalars[first...last])
         return String(scalars[..<first]) + open + core + close + String(scalars[scalars.index(after: last)...])

@@ -66,10 +66,10 @@ struct StatsView: View {
     }
 }
 
-private extension StatsPeriod {
+extension StatsPeriod {
     /// The segments of the picker, spelled out in words rather than
     /// lettered or numbered.
-    var label: LocalizedStringKey {
+    fileprivate var label: LocalizedStringKey {
         switch self {
         case .day: "Jour"
         case .week: "Semaine"

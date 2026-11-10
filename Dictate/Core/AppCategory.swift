@@ -77,7 +77,7 @@ nonisolated enum AppCategory: String, CaseIterable, Sendable {
         "io.alacritty",
         "com.microsoft.VSCode",
         "com.microsoft.VSCodeInsiders",
-        "com.todesktop.230313mzl4w4u92", // Cursor
+        "com.todesktop.230313mzl4w4u92",  // Cursor
         "com.exafunction.windsurf",
         "dev.zed.Zed",
         "com.apple.dt.Xcode",

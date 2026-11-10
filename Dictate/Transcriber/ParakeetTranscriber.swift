@@ -1,8 +1,8 @@
+import DictateKit
 import FluidAudio
 import Foundation
 import Observation
 import Synchronization
-import DictateKit
 
 /// Local transcription with Parakeet TDT Ultra through FluidAudio, on the
 /// Neural Engine. It takes no vocabulary prompt: the jargon is left to

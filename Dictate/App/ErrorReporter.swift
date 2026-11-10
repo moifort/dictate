@@ -96,9 +96,11 @@ nonisolated enum ErrorReporter {
     /// Never the error itself, whose bridged user info carries its whole text.
     static func reportable(_ error: Error) -> NSError {
         let bridged = error as NSError
-        return NSError(domain: bridged.domain, code: bridged.code, userInfo: [
-            NSLocalizedDescriptionKey: scrubbed(error.localizedDescription),
-        ])
+        return NSError(
+            domain: bridged.domain, code: bridged.code,
+            userInfo: [
+                NSLocalizedDescriptionKey: scrubbed(error.localizedDescription)
+            ])
     }
 
     /// `dictate@1.2.0+45`, the form Sentry splits into version and build.

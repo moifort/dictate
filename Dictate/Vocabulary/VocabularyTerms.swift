@@ -68,10 +68,11 @@ nonisolated enum TermTokenizer {
     /// `+` and `#` stay, since they make another term: "C++" and "C#" are not "C".
     /// The one normalisation of terms, for the corrections and the suggestions.
     static func key(of text: String) -> String {
-        String(String.UnicodeScalarView(
-            text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil)
-                .unicodeScalars.filter { CharacterSet.alphanumerics.contains($0) || $0 == "+" || $0 == "#" }
-        ))
+        String(
+            String.UnicodeScalarView(
+                text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil)
+                    .unicodeScalars.filter { CharacterSet.alphanumerics.contains($0) || $0 == "+" || $0 == "#" }
+            ))
     }
 
     /// The chunk without surrounding punctuation, French elision or English possessive.
@@ -145,7 +146,8 @@ nonisolated enum CorrectedTerms {
         let new = TermTokenizer.tokens(in: corrected)
         guard !old.isEmpty, !new.isEmpty, old.count <= maxWords, new.count <= maxWords else { return [] }
 
-        let oldKeys = old.map(\.key), newKeys = new.map(\.key)
+        let oldKeys = old.map(\.key)
+        let newKeys = new.map(\.key)
         let table = SequenceAlignment.commonSubsequenceTable(oldKeys, newKeys)
         let unmatched = old.count - table[0][0]
         // A rewrite of most of the text says nothing about any single word.
@@ -153,10 +155,13 @@ nonisolated enum CorrectedTerms {
 
         return replacedRuns(oldKeys, newKeys, table: table).compactMap { hunk -> TermCorrection? in
             let hunk = widened(hunk, old: old, new: new)
-            let wrong = Array(old[hunk.old]), right = Array(new[hunk.new])
+            let wrong = Array(old[hunk.old])
+            let right = Array(new[hunk.new])
             guard !wrong.isEmpty, !right.isEmpty, wrong.count <= maxWrongWords, right.count <= maxRightWords,
-                  right.contains(where: TermTokenizer.looksLikeTerm) else { return nil }
-            let wrongKey = wrong.map(\.key).joined(), rightKey = right.map(\.key).joined()
+                right.contains(where: TermTokenizer.looksLikeTerm)
+            else { return nil }
+            let wrongKey = wrong.map(\.key).joined()
+            let rightKey = right.map(\.key).joined()
             let distance = SequenceAlignment.editDistance(Array(wrongKey), Array(rightKey))
             guard Double(distance) <= maxDistanceRatio * Double(max(wrongKey.count, rightKey.count)) else { return nil }
             return TermCorrection(
@@ -174,16 +179,19 @@ nonisolated enum CorrectedTerms {
     /// Takes in the neighbours whose case changed with the run: fixing "visuel
     /// studio" into "Visual Studio" replaces one word, but the term is both.
     private static func widened(_ hunk: Hunk, old: [TermToken], new: [TermToken]) -> Hunk {
-        var oldRange = hunk.old, newRange = hunk.new
+        var oldRange = hunk.old
+        var newRange = hunk.new
         while oldRange.lowerBound > 0, newRange.lowerBound > 0,
-              old[oldRange.lowerBound - 1].key == new[newRange.lowerBound - 1].key,
-              old[oldRange.lowerBound - 1].text != new[newRange.lowerBound - 1].text {
+            old[oldRange.lowerBound - 1].key == new[newRange.lowerBound - 1].key,
+            old[oldRange.lowerBound - 1].text != new[newRange.lowerBound - 1].text
+        {
             oldRange = (oldRange.lowerBound - 1)..<oldRange.upperBound
             newRange = (newRange.lowerBound - 1)..<newRange.upperBound
         }
         while oldRange.upperBound < old.count, newRange.upperBound < new.count,
-              old[oldRange.upperBound].key == new[newRange.upperBound].key,
-              old[oldRange.upperBound].text != new[newRange.upperBound].text {
+            old[oldRange.upperBound].key == new[newRange.upperBound].key,
+            old[oldRange.upperBound].text != new[newRange.upperBound].text
+        {
             oldRange = oldRange.lowerBound..<(oldRange.upperBound + 1)
             newRange = newRange.lowerBound..<(newRange.upperBound + 1)
         }
@@ -193,7 +201,10 @@ nonisolated enum CorrectedTerms {
     /// The runs of words between two matches of the longest common subsequence.
     private static func replacedRuns(_ a: [String], _ b: [String], table: [[Int]]) -> [Hunk] {
         var hunks: [Hunk] = []
-        var i = 0, j = 0, oldStart = 0, newStart = 0
+        var i = 0
+        var j = 0
+        var oldStart = 0
+        var newStart = 0
         func close() {
             if oldStart < i || newStart < j { hunks.append(Hunk(old: oldStart..<i, new: newStart..<j)) }
         }

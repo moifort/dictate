@@ -11,10 +11,13 @@ enum Alerts {
         let alert = NSAlert()
         alert.messageText = String(localized: "Taux d'erreur sur le corpus")
         let seconds = PostInsertionObserver.defaultDelay.components.seconds
-        alert.informativeText = evaluation.summary + "\n\n" + String(localized: """
-            Référence : le texte laissé dans le champ \(seconds) s \
-            après l'insertion. Une erreur non corrigée compte comme juste : ces taux sont des minimums.
-            """)
+        alert.informativeText =
+            evaluation.summary + "\n\n"
+            + String(
+                localized: """
+                    Référence : le texte laissé dans le champ \(seconds) s \
+                    après l'insertion. Une erreur non corrigée compte comme juste : ces taux sont des minimums.
+                    """)
         alert.addButton(withTitle: "OK")
         alert.addButton(withTitle: String(localized: "Afficher dans le Finder"))
         if alert.runModal() == .alertSecondButtonReturn {
@@ -41,10 +44,11 @@ enum Alerts {
         let alert = NSAlert()
         alert.alertStyle = .warning
         alert.messageText = String(localized: "Désinstaller Dictate ?")
-        alert.informativeText = String(localized: """
-            L'application, les modèles de transcription, les statistiques et les réglages \
-            seront placés dans la Corbeille ou effacés, et Dictate quittera.
-            """)
+        alert.informativeText = String(
+            localized: """
+                L'application, les modèles de transcription, les statistiques et les réglages \
+                seront placés dans la Corbeille ou effacés, et Dictate quittera.
+                """)
         alert.addButton(withTitle: String(localized: "Désinstaller")).hasDestructiveAction = true
         alert.addButton(withTitle: String(localized: "Annuler"))
         guard alert.runModal() == .alertFirstButtonReturn else { return }

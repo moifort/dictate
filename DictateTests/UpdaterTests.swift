@@ -1,23 +1,24 @@
 import Foundation
 import Testing
+
 @testable import Dictate
 
 struct ReleaseTests {
     private let feed = """
-    [
-      {"tag_name": "v0.4.0", "draft": true, "prerelease": false, "body": "wip",
-       "assets": [{"name": "Dictate-0.4.0.zip", "browser_download_url": "https://x/0.4.0.zip"}]},
-      {"tag_name": "v0.3.0", "draft": false, "prerelease": false, "body": "Third",
-       "assets": [{"name": "Dictate-0.3.0.zip", "browser_download_url": "https://x/0.3.0.zip"}]},
-      {"tag_name": "v0.2.1", "draft": false, "prerelease": true, "body": "beta",
-       "assets": [{"name": "Dictate-0.2.1.zip", "browser_download_url": "https://x/0.2.1.zip"}]},
-      {"tag_name": "v0.2.0", "draft": false, "prerelease": false, "body": "Second",
-       "assets": [{"name": "Dictate-0.2.0.zip", "browser_download_url": "https://x/0.2.0.zip"}]},
-      {"tag_name": "v0.1.5", "draft": false, "prerelease": false, "body": "No asset", "assets": []},
-      {"tag_name": "v0.1.0", "draft": false, "prerelease": false, "body": "First",
-       "assets": [{"name": "Dictate-0.1.0.zip", "browser_download_url": "https://x/0.1.0.zip"}]}
-    ]
-    """
+        [
+          {"tag_name": "v0.4.0", "draft": true, "prerelease": false, "body": "wip",
+           "assets": [{"name": "Dictate-0.4.0.zip", "browser_download_url": "https://x/0.4.0.zip"}]},
+          {"tag_name": "v0.3.0", "draft": false, "prerelease": false, "body": "Third",
+           "assets": [{"name": "Dictate-0.3.0.zip", "browser_download_url": "https://x/0.3.0.zip"}]},
+          {"tag_name": "v0.2.1", "draft": false, "prerelease": true, "body": "beta",
+           "assets": [{"name": "Dictate-0.2.1.zip", "browser_download_url": "https://x/0.2.1.zip"}]},
+          {"tag_name": "v0.2.0", "draft": false, "prerelease": false, "body": "Second",
+           "assets": [{"name": "Dictate-0.2.0.zip", "browser_download_url": "https://x/0.2.0.zip"}]},
+          {"tag_name": "v0.1.5", "draft": false, "prerelease": false, "body": "No asset", "assets": []},
+          {"tag_name": "v0.1.0", "draft": false, "prerelease": false, "body": "First",
+           "assets": [{"name": "Dictate-0.1.0.zip", "browser_download_url": "https://x/0.1.0.zip"}]}
+        ]
+        """
 
     @Test func keepsOnlyPublishedNewerReleasesWithAZip() throws {
         let newer = try Release.newer(than: "0.1.0", in: Data(feed.utf8))
@@ -29,15 +30,16 @@ struct ReleaseTests {
     /// The API URL of the same asset is kept as a second way to download it.
     @Test func keepsTheAPIURLAsAFallback() throws {
         let json = """
-        [{"tag_name": "v1.0.0", "draft": false, "prerelease": false, "body": "",
-          "assets": [{"name": "Dictate-1.0.0.zip", "browser_download_url": "https://x/1.0.0.zip",
-                      "url": "https://api.github.com/repos/o/r/releases/assets/7"}]}]
-        """
+            [{"tag_name": "v1.0.0", "draft": false, "prerelease": false, "body": "",
+              "assets": [{"name": "Dictate-1.0.0.zip", "browser_download_url": "https://x/1.0.0.zip",
+                          "url": "https://api.github.com/repos/o/r/releases/assets/7"}]}]
+            """
         let release = try #require(try Release.newer(than: "0.1.0", in: Data(json.utf8)).first)
-        #expect(release.downloadURLs == [
-            URL(string: "https://x/1.0.0.zip")!,
-            URL(string: "https://api.github.com/repos/o/r/releases/assets/7")!,
-        ])
+        #expect(
+            release.downloadURLs == [
+                URL(string: "https://x/1.0.0.zip")!,
+                URL(string: "https://api.github.com/repos/o/r/releases/assets/7")!,
+            ])
         let withoutAPI = try #require(try Release.newer(than: "0.1.0", in: Data(feed.utf8)).last)
         #expect(withoutAPI.downloadURLs == [URL(string: "https://x/0.3.0.zip")!])
     }
@@ -200,8 +202,9 @@ struct UpdateInstallerTests {
 
     @Test func requirementLanguage() {
         #expect(UpdateInstaller.Expectation(bundleIdentifier: "a.b", teamIdentifier: nil).requirement == "identifier \"a.b\"")
-        #expect(UpdateInstaller.Expectation(bundleIdentifier: "a.b", teamIdentifier: "T").requirement
-            == "identifier \"a.b\" and anchor apple generic and certificate leaf[subject.OU] = \"T\"")
+        #expect(
+            UpdateInstaller.Expectation(bundleIdentifier: "a.b", teamIdentifier: "T").requirement
+                == "identifier \"a.b\" and anchor apple generic and certificate leaf[subject.OU] = \"T\"")
     }
 
     @Test func buildProductsAreNotUpdatable() {
@@ -231,16 +234,19 @@ struct UpdaterFlowTests {
         try shell("/usr/bin/ditto", ["-c", "-k", "--keepParent", staged.path, archive.path])
 
         let feed = """
-        [{"tag_name": "v9.9.9", "draft": false, "prerelease": false, "body": "Big one",
-          "assets": [{"name": "Dictate-9.9.9.zip", "browser_download_url": "\(archive.absoluteString)"}]}]
-        """
+            [{"tag_name": "v9.9.9", "draft": false, "prerelease": false, "body": "Big one",
+              "assets": [{"name": "Dictate-9.9.9.zip", "browser_download_url": "\(archive.absoluteString)"}]}]
+            """
         var relaunched: URL?
         let updater = Updater(
             currentVersion: "0.1.0",
             bundleURL: installed,
             expectation: .init(bundleIdentifier: try #require(Bundle.main.bundleIdentifier), teamIdentifier: nil),
             fetch: { _ in Data(feed.utf8) },
-            download: { url, progress in progress(1); return url },
+            download: { url, progress in
+                progress(1)
+                return url
+            },
             finish: { relaunched = $0 }
         )
         #expect(updater.canInstall)
@@ -271,9 +277,9 @@ struct UpdaterFlowTests {
         // The archive holds this very test host: announce its version.
         let version = try #require(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String)
         let feed = """
-        [{"tag_name": "v\(version)", "draft": false, "prerelease": false, "body": "",
-          "assets": [{"name": "Dictate-\(version).zip", "browser_download_url": "\(archive.absoluteString)"}]}]
-        """
+            [{"tag_name": "v\(version)", "draft": false, "prerelease": false, "body": "",
+              "assets": [{"name": "Dictate-\(version).zip", "browser_download_url": "\(archive.absoluteString)"}]}]
+            """
         var relaunched: URL?
         var dictating = true
         let updater = Updater(
@@ -321,9 +327,9 @@ struct UpdaterFlowTests {
 
     @Test func keepsTheReleaseWhileDownloadingAndAfterAFailure() async throws {
         let feed = """
-        [{"tag_name": "v9.9.9", "draft": false, "prerelease": false, "body": "Big one",
-          "assets": [{"name": "Dictate-9.9.9.zip", "browser_download_url": "https://x/9.9.9.zip"}]}]
-        """
+            [{"tag_name": "v9.9.9", "draft": false, "prerelease": false, "body": "Big one",
+              "assets": [{"name": "Dictate-9.9.9.zip", "browser_download_url": "https://x/9.9.9.zip"}]}]
+            """
         let updater = Updater(
             currentVersion: "0.1.0",
             bundleURL: FileManager.default.temporaryDirectory.appending(path: "Dictate.app"),
@@ -349,7 +355,10 @@ struct UpdaterFlowTests {
             if case .failed = updater.state { break }
             try await Task.sleep(for: .milliseconds(100))
         }
-        guard case .failed = updater.state else { Issue.record("\(updater.state)"); return }
+        guard case .failed = updater.state else {
+            Issue.record("\(updater.state)")
+            return
+        }
         #expect(updater.available?.version == "9.9.9")
     }
 
@@ -369,10 +378,11 @@ struct UpdaterFlowTests {
             teamIdentifier: "46C337T7YN",
             alsoAccepted: Updater.releaseIdentifiers
         )
-        #expect(expectation.requirement == """
-            (identifier "com.thibautmottet.dictate" or identifier "com.polyforms.dictate") \
-            and anchor apple generic and certificate leaf[subject.OU] = "46C337T7YN"
-            """)
+        #expect(
+            expectation.requirement == """
+                (identifier "com.thibautmottet.dictate" or identifier "com.polyforms.dictate") \
+                and anchor apple generic and certificate leaf[subject.OU] = "46C337T7YN"
+                """)
     }
 
     @Test func anOtherAppOnlyAcceptsItsOwnIdentifier() {
@@ -428,7 +438,8 @@ struct UpdaterOfflineTests {
         #expect(Updater.isTransient(Updater.ServerError(spent)))
         let tooMany = HTTPURLResponse(url: URL(string: "https://api.github.com")!, statusCode: 429, httpVersion: nil, headerFields: [:])!
         #expect(Updater.isTransient(Updater.ServerError(tooMany)))
-        let forbidden = HTTPURLResponse(url: URL(string: "https://api.github.com")!, statusCode: 403, httpVersion: nil, headerFields: ["x-ratelimit-remaining": "42"])!
+        let forbidden = HTTPURLResponse(
+            url: URL(string: "https://api.github.com")!, statusCode: 403, httpVersion: nil, headerFields: ["x-ratelimit-remaining": "42"])!
         #expect(!Updater.isTransient(Updater.ServerError(forbidden)))
     }
 
@@ -453,10 +464,10 @@ struct UpdaterOfflineTests {
     /// Runs an install whose every download fails, the first with `firstFailure`; returns the URLs tried.
     private func installAttempts(firstFailure: Error) async throws -> [String] {
         let feed = """
-        [{"tag_name": "v9.9.9", "draft": false, "prerelease": false, "body": "",
-          "assets": [{"name": "Dictate-9.9.9.zip", "browser_download_url": "https://x/9.9.9.zip",
-                      "url": "https://api.github.com/assets/9"}]}]
-        """
+            [{"tag_name": "v9.9.9", "draft": false, "prerelease": false, "body": "",
+              "assets": [{"name": "Dictate-9.9.9.zip", "browser_download_url": "https://x/9.9.9.zip",
+                          "url": "https://api.github.com/assets/9"}]}]
+            """
         let attempts = Attempts()
         let updater = Updater(
             currentVersion: "0.1.0",
@@ -475,7 +486,10 @@ struct UpdaterOfflineTests {
             if case .failed = updater.state { break }
             try await Task.sleep(for: .milliseconds(50))
         }
-        guard case .failed = updater.state else { Issue.record("\(updater.state)"); return [] }
+        guard case .failed = updater.state else {
+            Issue.record("\(updater.state)")
+            return []
+        }
         return attempts.urls
     }
 
@@ -483,7 +497,12 @@ struct UpdaterOfflineTests {
         private let lock = NSLock()
         private var recorded: [String] = []
         var urls: [String] { lock.withLock { recorded } }
-        func record(_ url: String) -> Int { lock.withLock { recorded.append(url); return recorded.count } }
+        func record(_ url: String) -> Int {
+            lock.withLock {
+                recorded.append(url)
+                return recorded.count
+            }
+        }
     }
 
     @Test func serverSideFailureEndsIdleWithNothingToInstall() async {

@@ -122,16 +122,16 @@ private struct Lollipop: View {
 
 /// How the dates read under each period. The seven columns of a week are
 /// wide enough for "lun."; the twelve of a year only for an initial.
-private extension StatsPeriod {
+extension StatsPeriod {
     /// True when every column gets its own label, under its middle.
-    var namesColumns: Bool {
+    fileprivate var namesColumns: Bool {
         switch self {
         case .week, .year: true
         case .day, .month, .sixMonths: false
         }
     }
 
-    var axisFormat: Date.FormatStyle {
+    fileprivate var axisFormat: Date.FormatStyle {
         switch self {
         case .day: .dateTime.hour()
         case .week: .dateTime.weekday(.abbreviated)

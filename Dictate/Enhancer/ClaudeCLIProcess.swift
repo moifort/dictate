@@ -157,9 +157,9 @@ nonisolated final class ClaudeCLIProcess: @unchecked Sendable {
     /// an `error` field: those are left for the `result` event to report.
     static func assistantText(_ event: [String: Any]) -> String? {
         guard event["type"] as? String == "assistant", event["error"] == nil,
-              let message = event["message"] as? [String: Any],
-              message["model"] as? String != "<synthetic>",
-              let content = message["content"] as? [[String: Any]]
+            let message = event["message"] as? [String: Any],
+            message["model"] as? String != "<synthetic>",
+            let content = message["content"] as? [[String: Any]]
         else { return nil }
         let texts = content.filter { $0["type"] as? String == "text" }.compactMap { $0["text"] as? String }
         return texts.isEmpty ? nil : texts.joined()

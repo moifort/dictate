@@ -1,5 +1,5 @@
-import Foundation
 import DictateKit
+import Foundation
 
 /// One finished dictation as kept for the statistics: when, how much, how
 /// long each step took. Never the text itself.

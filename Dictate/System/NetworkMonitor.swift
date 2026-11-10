@@ -1,7 +1,7 @@
+import DictateKit
 import Foundation
 import Network
 import Observation
-import DictateKit
 
 /// Whether the Mac has a usable network path, for the enhancers that need
 /// one. Assumes online until the system says otherwise.

@@ -1,5 +1,5 @@
-import AppKit
 import AVFoundation
+import AppKit
 import ApplicationServices
 
 /// Checks and requests everything Dictate needs from macOS.

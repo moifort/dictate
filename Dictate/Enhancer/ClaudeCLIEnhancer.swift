@@ -1,5 +1,5 @@
-import Foundation
 import DictateKit
+import Foundation
 
 /// Cleans up transcripts with Claude through the official `claude` CLI, so the
 /// user's Claude subscription is used.

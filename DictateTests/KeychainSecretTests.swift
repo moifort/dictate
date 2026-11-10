@@ -1,6 +1,7 @@
 import Foundation
 import Security
 import Testing
+
 @testable import Dictate
 
 /// Against the real login keychain, under a service of its own. Skipped
@@ -39,7 +40,8 @@ nonisolated enum TestKeychain {
 /// The keys move from the service named after Anthropic to the shared one.
 struct MovingSecretTests {
     @Test func aKeyLeftInTheOldServiceMovesOnFirstRead() throws {
-        let new = InMemorySecret(), old = InMemorySecret("sk-old")
+        let new = InMemorySecret()
+        let old = InMemorySecret("sk-old")
         let secret = MovingSecret(to: new, from: old)
         #expect(try secret.read() == "sk-old")
         #expect(try new.read() == "sk-old")
@@ -52,7 +54,8 @@ struct MovingSecretTests {
     }
 
     @Test func savingOrRemovingClearsTheOldService() throws {
-        let new = InMemorySecret(), old = InMemorySecret("sk-old")
+        let new = InMemorySecret()
+        let old = InMemorySecret("sk-old")
         try MovingSecret(to: new, from: old).write("")
         #expect(try old.read() == nil)
         #expect(try new.read() == nil)

@@ -24,10 +24,10 @@ nonisolated struct Release: Equatable, Sendable {
 
     private init?(github entry: [String: Any]) {
         guard entry["draft"] as? Bool != true, entry["prerelease"] as? Bool != true,
-              let tag = entry["tag_name"] as? String,
-              let assets = entry["assets"] as? [[String: Any]],
-              let zip = assets.first(where: { ($0["name"] as? String)?.hasSuffix(".zip") == true }),
-              let download = (zip["browser_download_url"] as? String).flatMap(URL.init(string:))
+            let tag = entry["tag_name"] as? String,
+            let assets = entry["assets"] as? [[String: Any]],
+            let zip = assets.first(where: { ($0["name"] as? String)?.hasSuffix(".zip") == true }),
+            let download = (zip["browser_download_url"] as? String).flatMap(URL.init(string:))
         else { return nil }
         version = tag.hasPrefix("v") ? String(tag.dropFirst()) : tag
         notes = (entry["body"] as? String ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
@@ -105,13 +105,14 @@ final class Updater {
         self.fetch = fetch
         self.download = download
         self.finish = finish
-        installBlocker = if !UpdateInstaller.isUpdatable(bundleURL) {
-            .notInstalled
-        } else if expectation.teamIdentifier == nil, !allowsUnsignedCopy {
-            .unsignedCopy
-        } else {
-            nil
-        }
+        installBlocker =
+            if !UpdateInstaller.isUpdatable(bundleURL) {
+                .notInstalled
+            } else if expectation.teamIdentifier == nil, !allowsUnsignedCopy {
+                .unsignedCopy
+            } else {
+                nil
+            }
     }
 
     static func relaunchAndQuit(_ bundle: URL) {
@@ -214,7 +215,7 @@ final class Updater {
         guard let code = (error as? URLError)?.code else { return false }
         switch code {
         case .notConnectedToInternet, .networkConnectionLost, .cannotFindHost, .cannotConnectToHost,
-             .dnsLookupFailed, .timedOut, .internationalRoamingOff, .dataNotAllowed:
+            .dnsLookupFailed, .timedOut, .internationalRoamingOff, .dataNotAllowed:
             return true
         default:
             return false
@@ -278,8 +279,9 @@ final class Updater {
                         if case .downloading = self?.state { self?.state = .downloading(fraction) }
                     }
                 }
-            } catch where index < urls.count - 1 && Self.isTransient(error) {
-                Log.app.notice("update download from \(url.host() ?? "?", privacy: .public) failed, trying the next URL: \(error.localizedDescription, privacy: .public)")
+            } catch  where index < urls.count - 1 && Self.isTransient(error) {
+                Log.app.notice(
+                    "update download from \(url.host() ?? "?", privacy: .public) failed, trying the next URL: \(error.localizedDescription, privacy: .public)")
             }
         }
         throw URLError(.badURL)
@@ -294,8 +296,9 @@ final class Updater {
         var info: CFDictionary?
         var team: String?
         if SecCodeCopySelf([], &code) == errSecSuccess, let code,
-           SecCodeCopySigningInformation(code as! SecStaticCode, SecCSFlags(rawValue: kSecCSSigningInformation), &info) == errSecSuccess,
-           let info = info as? [String: Any] {
+            SecCodeCopySigningInformation(code as! SecStaticCode, SecCSFlags(rawValue: kSecCSSigningInformation), &info) == errSecSuccess,
+            let info = info as? [String: Any]
+        {
             team = info[kSecCodeInfoTeamIdentifier as String] as? String
         }
         let identifier = bundle.bundleIdentifier ?? AppIdentity.developerID

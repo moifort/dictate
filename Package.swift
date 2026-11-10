@@ -15,10 +15,10 @@ let package = Package(
     defaultLocalization: "fr",
     platforms: [.macOS("27.0")],
     products: [
-        .library(name: "DictateKit", targets: ["DictateKit"]),
+        .library(name: "DictateKit", targets: ["DictateKit"])
     ],
     dependencies: [
-        .package(url: "https://github.com/FluidInference/FluidAudio", from: "0.18.2"),
+        .package(url: "https://github.com/FluidInference/FluidAudio", from: "0.18.2")
     ],
     targets: [
         .target(
@@ -31,6 +31,6 @@ let package = Package(
                 .enableUpcomingFeature("NonisolatedNonsendingByDefault"),
                 .enableUpcomingFeature("InferIsolatedConformances"),
             ]
-        ),
+        )
     ]
 )

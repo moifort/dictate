@@ -1,7 +1,7 @@
+import DictateKit
 import FluidAudio
 import Foundation
 import Observation
-import DictateKit
 
 /// Searches the audio for the custom vocabulary and rewrites the words
 /// Parakeet mangled, before the reviewer sees the transcript.
@@ -118,8 +118,8 @@ final class VocabularyBooster {
     }
 }
 
-private extension TranscriberState {
-    var isFailed: Bool {
+extension TranscriberState {
+    fileprivate var isFailed: Bool {
         if case .failed = self { true } else { false }
     }
 }

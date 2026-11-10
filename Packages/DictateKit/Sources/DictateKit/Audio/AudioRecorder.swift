@@ -115,7 +115,8 @@ public final class AudioRecorder {
             mElement: kAudioObjectPropertyElementMain
         )
         guard AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &size, &device) == noErr,
-              device != kAudioObjectUnknown else { return nil }
+            device != kAudioObjectUnknown
+        else { return nil }
         return device
     }
 }
@@ -168,11 +169,17 @@ nonisolated final class QueueCapture: @unchecked Sendable {
         for _ in 0..<Self.bufferCount {
             var buffer: AudioQueueBufferRef?
             let allocated = AudioQueueAllocateBuffer(created, Self.framesPerBuffer * 4, &buffer)
-            guard allocated == noErr, let buffer else { stop(); throw Self.error(allocated) }
+            guard allocated == noErr, let buffer else {
+                stop()
+                throw Self.error(allocated)
+            }
             AudioQueueEnqueueBuffer(created, buffer, 0, nil)
         }
         let started = AudioQueueStart(created, nil)
-        guard started == noErr else { stop(); throw Self.error(started) }
+        guard started == noErr else {
+            stop()
+            throw Self.error(started)
+        }
     }
 
     /// Synchronous: no buffer arrives once it returns.

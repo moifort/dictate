@@ -1,4 +1,5 @@
 import Testing
+
 @testable import DictateKit
 
 struct TranscriptionTests {
@@ -6,11 +7,12 @@ struct TranscriptionTests {
         let words = Transcription.words(fromTokens: [
             (" dé", 0.99), ("ploie", 0.9), (" sur", 0.98), (" Ku", 0.95), ("ber", 0.4), ("netis", 0.7),
         ])
-        #expect(words == [
-            .init(text: "déploie", confidence: 0.9),
-            .init(text: "sur", confidence: 0.98),
-            .init(text: "Kubernetis", confidence: 0.4),
-        ])
+        #expect(
+            words == [
+                .init(text: "déploie", confidence: 0.9),
+                .init(text: "sur", confidence: 0.98),
+                .init(text: "Kubernetis", confidence: 0.4),
+            ])
     }
 
     @Test func sentencePieceBoundaryMarkerOpensAWordToo() {

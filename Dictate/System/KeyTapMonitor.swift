@@ -26,14 +26,16 @@ final class KeyTapMonitor {
     func start() -> Bool {
         guard tap == nil else { return true }
         let mask = (1 << CGEventType.flagsChanged.rawValue) | (1 << CGEventType.keyDown.rawValue)
-        guard let tap = CGEvent.tapCreate(
-            tap: .cgSessionEventTap,
-            place: .headInsertEventTap,
-            options: .listenOnly,
-            eventsOfInterest: CGEventMask(mask),
-            callback: keyTapCallback,
-            userInfo: Unmanaged.passUnretained(self).toOpaque()
-        ) else { return false }
+        guard
+            let tap = CGEvent.tapCreate(
+                tap: .cgSessionEventTap,
+                place: .headInsertEventTap,
+                options: .listenOnly,
+                eventsOfInterest: CGEventMask(mask),
+                callback: keyTapCallback,
+                userInfo: Unmanaged.passUnretained(self).toOpaque()
+            )
+        else { return false }
 
         let source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, tap, 0)
         CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
@@ -58,13 +60,15 @@ final class KeyTapMonitor {
             // The key may have gone up while the tap was off.
             resync()
         default:
-            guard let keyEvent = Self.classify(
-                key: key,
-                type: type,
-                keyCode: keyCode,
-                flags: flags,
-                time: ProcessInfo.processInfo.systemUptime
-            ) else { return }
+            guard
+                let keyEvent = Self.classify(
+                    key: key,
+                    type: type,
+                    keyCode: keyCode,
+                    flags: flags,
+                    time: ProcessInfo.processInfo.systemUptime
+                )
+            else { return }
             if let output = gesture.handle(keyEvent) {
                 onGesture?(output)
             }

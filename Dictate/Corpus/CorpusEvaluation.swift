@@ -1,5 +1,5 @@
-import Foundation
 import DictateKit
+import Foundation
 
 /// Word error rates over the corpus, against what the user left in the field.
 ///
@@ -40,14 +40,18 @@ nonisolated struct CorpusEvaluation: Equatable, Sendable {
             var line = lines[setup] ?? Line()
             line.dictations += 1
             // The transcript as it would be inserted without Claude.
-            line.transcript = line.transcript + WordErrorRate.count(
-                reference: reference, hypothesis: UnknownTokens.resolved(entry.transcript), normalization: normalization
-            )
+            line.transcript =
+                line.transcript
+                + WordErrorRate.count(
+                    reference: reference, hypothesis: UnknownTokens.resolved(entry.transcript), normalization: normalization
+                )
             if entry.enhanced {
                 line.enhancedDictations += 1
-                line.enhanced = line.enhanced + WordErrorRate.count(
-                    reference: reference, hypothesis: entry.inserted, normalization: normalization
-                )
+                line.enhanced =
+                    line.enhanced
+                    + WordErrorRate.count(
+                        reference: reference, hypothesis: entry.inserted, normalization: normalization
+                    )
             }
             lines[setup] = line
         }

@@ -30,6 +30,20 @@ The Parakeet integration tests only run once the model
 has been downloaded by the app; the vocabulary boosting ones also need the
 CTC model, downloaded when the setting is turned on.
 
+## Formatting and warnings
+
+`.swift-format` holds the style (four spaces, 160 columns), checked by Xcode's
+own formatter on every push:
+
+```bash
+swift format lint --strict -r Dictate DictateTests Packages/DictateKit Package.swift
+swift format format -i -r Dictate DictateTests Packages/DictateKit Package.swift
+```
+
+A compiler warning fails the build of the app and its tests (`-warnings-as-errors`
+in project.yml) and of DictateKit on CI. Deprecations stay warnings: an API a
+new macOS deprecates is a migration to plan, not a broken build.
+
 ## Localization
 
 The app speaks French and English. Strings are written in French in the code

@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import Dictate
 
 struct DictationStatsTests {
@@ -150,7 +151,10 @@ struct StatsMemoTests {
     @Test func aValueIsComputedOncePerKey() {
         let memo = Memo<Int, String>()
         var runs = 0
-        let compute = { () -> String in runs += 1; return "v\(runs)" }
+        let compute = { () -> String in
+            runs += 1
+            return "v\(runs)"
+        }
         #expect(memo.value(for: 1, compute) == "v1")
         #expect(memo.value(for: 1, compute) == "v1")
         #expect(memo.value(for: 2, compute) == "v2")

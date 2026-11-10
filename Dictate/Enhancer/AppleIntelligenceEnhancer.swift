@@ -1,6 +1,6 @@
+import DictateKit
 import Foundation
 import FoundationModels
-import DictateKit
 
 /// Why the on-device model cannot be used right now, in the user's words.
 nonisolated enum AppleIntelligenceStatus: Equatable, Sendable {
@@ -99,7 +99,7 @@ final class AppleIntelligenceEnhancer: Enhancer {
         defer { prewarm() }
         do {
             return try await respond(session, to: Self.trimmed(context), transcription: transcription)
-        } catch LanguageModelSession.GenerationError.exceededContextWindowSize {
+        } catch  where Self.exceedsContext(error) {
             // A long field: the dictation alone usually fits.
             var bare = context
             bare.precedingText = nil
@@ -107,6 +107,13 @@ final class AppleIntelligenceEnhancer: Enhancer {
             let retry = LanguageModelSession(instructions: systemPrompt())
             return try await respond(retry, to: bare, transcription: transcription)
         }
+    }
+
+    /// The prompt did not fit the model's window, in macOS 27's words or 26's.
+    private static func exceedsContext(_ error: Error) -> Bool {
+        if case LanguageModelError.contextSizeExceeded = error { return true }
+        if case LanguageModelSession.GenerationError.exceededContextWindowSize = error { return true }
+        return false
     }
 
     private func respond(
@@ -117,7 +124,14 @@ final class AppleIntelligenceEnhancer: Enhancer {
             let response = try await session.respond(to: message, options: GenerationOptions(temperature: 0))
             try Task.checkCancellation()
             return DoubtfulWords.strip(PromptBuilder.cleanedText(from: response.content))
+        } catch let error as LanguageModelError {
+            // macOS 27's errors.
+            switch error {
+            case .guardrailViolation, .refusal: throw AppleIntelligenceError.refused
+            default: throw error
+            }
         } catch let error as LanguageModelSession.GenerationError {
+            // macOS 26's, deprecated since: kept while either may come.
             switch error {
             case .guardrailViolation, .refusal: throw AppleIntelligenceError.refused
             case .exceededContextWindowSize: throw error

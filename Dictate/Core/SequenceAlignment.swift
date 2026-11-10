@@ -19,7 +19,8 @@ nonisolated enum SequenceAlignment {
         guard !a.isEmpty, !b.isEmpty else { return [] }
         let table = commonSubsequenceTable(a, b)
         var pairs: [(Int, Int)] = []
-        var i = 0, j = 0
+        var i = 0
+        var j = 0
         while i < a.count, j < b.count {
             if a[i] == b[j] {
                 pairs.append((i, j))

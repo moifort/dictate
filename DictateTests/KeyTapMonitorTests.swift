@@ -1,6 +1,7 @@
 import Carbon.HIToolbox
 import CoreGraphics
 import Testing
+
 @testable import Dictate
 
 struct KeyTapMonitorTests {
@@ -41,7 +42,8 @@ struct KeyTapMonitorTests {
     }
 
     @Test func withControlTheOtherModifiersStillInterrupt() {
-        #expect(KeyTapMonitor.classify(key: .control, type: .flagsChanged, keyCode: 55, flags: [.maskControl, .maskCommand], time: 0) == .otherModifierDown(at: 0))
+        #expect(
+            KeyTapMonitor.classify(key: .control, type: .flagsChanged, keyCode: 55, flags: [.maskControl, .maskCommand], time: 0) == .otherModifierDown(at: 0))
         #expect(KeyTapMonitor.classify(key: .control, type: .keyDown, keyCode: 8, flags: .maskControl, time: 0) == .otherKeyDown(at: 0))
     }
 

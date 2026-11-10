@@ -1,7 +1,7 @@
 import AppKit
+import DictateKit
 import Observation
 import SwiftUI
-import DictateKit
 
 /// Small pill at the bottom centre of the active window's screen, visible only while `fn` is
 /// held and while the dictation is processed.
@@ -60,26 +60,28 @@ final class RecordingIndicator {
     /// An unavailable reviewer wins over the rest: it degrades every
     /// dictation until the user acts. `reviewerProblem` says what is wrong.
     func show(_ outcome: DictationOutcome, reviewerProblem: String? = nil) {
-        let flash: Flash? = switch outcome {
-        case .pasted(let raw) where reviewerProblem != nil, .copied(let raw) where reviewerProblem != nil:
-            .reviewerUnavailable(problem: reviewerProblem ?? "", raw: raw)
-        case .copied: .copied
-        case .unheard: .unheard
-        case .failed(let message): .failed(message)
-        case .modelLoading(let engine): .loading(engine)
-        case .pasted, .discarded: nil
-        }
+        let flash: Flash? =
+            switch outcome {
+            case .pasted(let raw) where reviewerProblem != nil, .copied(let raw) where reviewerProblem != nil:
+                .reviewerUnavailable(problem: reviewerProblem ?? "", raw: raw)
+            case .copied: .copied
+            case .unheard: .unheard
+            case .failed(let message): .failed(message)
+            case .modelLoading(let engine): .loading(engine)
+            case .pasted, .discarded: nil
+            }
         guard let flash else { return }
         flashTask?.cancel()
         state.flash = flash
         flashTask = Task {
             // A sentence takes longer to read than a symbol.
-            let duration: Duration = switch flash {
-            case .copied, .unheard: .seconds(1.6)
-            case .loading: .seconds(2.5)
-            case .failed: .seconds(3)
-            case .reviewerUnavailable: .seconds(4)
-            }
+            let duration: Duration =
+                switch flash {
+                case .copied, .unheard: .seconds(1.6)
+                case .loading: .seconds(2.5)
+                case .failed: .seconds(3)
+                case .reviewerUnavailable: .seconds(4)
+                }
             try? await Task.sleep(for: duration)
             guard !Task.isCancelled else { return }
             state.flash = nil
@@ -139,7 +141,8 @@ final class RecordingIndicator {
         if shouldBeVisible {
             hideTask?.cancel()
             hideTask = nil
-            Log.indicator.info("""
+            Log.indicator.info(
+                """
                 show for \(String(describing: self.controller.phase)), flash \(String(describing: self.state.flash)), \
                 panel visible: \(self.panel?.isVisible ?? false), \
                 on screen: \(self.panel?.occlusionState.contains(.visible) ?? false)
@@ -239,12 +242,13 @@ private struct IndicatorView: View {
 
     private var mode: Mode {
         let processing = !controller.pending.isEmpty
-        let main: Mode.Main = switch controller.phase {
-        case .recording: .recording
-        case .starting: state.isStartingSlowly || processing ? .processing : .none
-        case .transcribing, .enhancing: .processing
-        case .idle: .none
-        }
+        let main: Mode.Main =
+            switch controller.phase {
+            case .recording: .recording
+            case .starting: state.isStartingSlowly || processing ? .processing : .none
+            case .transcribing, .enhancing: .processing
+            case .idle: .none
+            }
         return Mode(main: main, processingBehind: main == .recording && processing, flash: state.flash)
     }
 

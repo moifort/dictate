@@ -1,6 +1,6 @@
 import AppKit
-import Observation
 import DictateKit
+import Observation
 
 /// Wires the dictation pipeline together and exposes its state to the UI.
 @Observable
@@ -182,7 +182,8 @@ final class AppModel {
     }
 
     func start() {
-        Log.app.info("""
+        Log.app.info(
+            """
             start — microphone: \(Permissions.microphone), inputMonitoring: \(Permissions.inputMonitoring), \
             accessibility: \(Permissions.accessibility), fnKeyFree: \(Permissions.fnKeyFree)
             """)
@@ -384,16 +385,20 @@ final class AppModel {
         if case .pasted(raw: true) = outcome { refreshAfterRawInsertion(reviewer) }
         if case .copied(raw: true) = outcome { refreshAfterRawInsertion(reviewer) }
         let problem = enhancer.problem(of: reviewer)
-        lastError = OutcomeMessage.error(for: outcome, .init(
-            reviewer: reviewer,
-            access: settings.claudeAccess,
-            cliFound: claudeCLI.path != nil,
-            appleExplanation: appleIntelligence.explanation,
-            problem: problem
-        ))
-        indicator.show(outcome, reviewerProblem: problem.map {
-            OutcomeMessage.title(of: $0, reviewer: reviewer, access: settings.claudeAccess)
-        })
+        lastError = OutcomeMessage.error(
+            for: outcome,
+            .init(
+                reviewer: reviewer,
+                access: settings.claudeAccess,
+                cliFound: claudeCLI.path != nil,
+                appleExplanation: appleIntelligence.explanation,
+                problem: problem
+            ))
+        indicator.show(
+            outcome,
+            reviewerProblem: problem.map {
+                OutcomeMessage.title(of: $0, reviewer: reviewer, access: settings.claudeAccess)
+            })
     }
 
     private func refreshAfterRawInsertion(_ reviewer: Reviewer) {

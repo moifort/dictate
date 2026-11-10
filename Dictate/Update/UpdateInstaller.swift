@@ -19,7 +19,9 @@ nonisolated enum UpdateError: LocalizedError, Equatable {
         case .versionMismatch(let expected, let found):
             String(localized: "La mise à jour contient la version \(found) au lieu de \(expected).")
         case .notInstalled: String(localized: "Dictate ne tourne pas depuis un emplacement où il peut se mettre à jour.")
-        case .unsignedCopy: String(localized: "Cette copie de Dictate n'est pas signée : elle ne peut pas vérifier ses mises à jour. Téléchargez la dernière version sur le site.")
+        case .unsignedCopy:
+            String(
+                localized: "Cette copie de Dictate n'est pas signée : elle ne peut pas vérifier ses mises à jour. Téléchargez la dernière version sur le site.")
         }
     }
 }
@@ -87,9 +89,10 @@ nonisolated struct UpdateInstaller: Sendable {
     static func scratchDirectory(nextTo bundle: URL) -> URL {
         (try? FileManager.default.url(
             for: .itemReplacementDirectory, in: .userDomainMask, appropriateFor: bundle, create: true
-        )) ?? FileManager.default.temporaryDirectory.appending(
-            path: "Dictate-update-\(UUID().uuidString)", directoryHint: .isDirectory
-        )
+        ))
+            ?? FileManager.default.temporaryDirectory.appending(
+                path: "Dictate-update-\(UUID().uuidString)", directoryHint: .isDirectory
+            )
     }
 
     /// Puts `replacement` where `current` is. The old bundle is restored if the

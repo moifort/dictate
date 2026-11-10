@@ -44,7 +44,8 @@ nonisolated struct FieldContext: Equatable, Sendable {
     /// (`file:`, `about:`, `chrome:`…).
     static func webHost(of url: URL) -> String? {
         guard let scheme = url.scheme?.lowercased(), scheme == "http" || scheme == "https",
-              let host = url.host(percentEncoded: false)?.lowercased(), !host.isEmpty else { return nil }
+            let host = url.host(percentEncoded: false)?.lowercased(), !host.isEmpty
+        else { return nil }
         return host
     }
 }

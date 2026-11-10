@@ -45,10 +45,11 @@ nonisolated enum WordErrorRate {
         if normalization.lowercase { text = text.lowercased() }
         if normalization.foldDiacritics { text = text.folding(options: .diacriticInsensitive, locale: nil) }
         if normalization.stripPunctuation {
-            text = String(text.unicodeScalars.map { scalar in
-                CharacterSet.punctuationCharacters.contains(scalar) || CharacterSet.symbols.contains(scalar)
-                    ? " " : Character(scalar)
-            })
+            text = String(
+                text.unicodeScalars.map { scalar in
+                    CharacterSet.punctuationCharacters.contains(scalar) || CharacterSet.symbols.contains(scalar)
+                        ? " " : Character(scalar)
+                })
         }
         return text.split(whereSeparator: \.isWhitespace).map(String.init)
     }

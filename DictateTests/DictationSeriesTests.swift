@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import Dictate
 
 struct DictationSeriesTests {
@@ -105,12 +106,13 @@ struct DictationSeriesTests {
     // MARK: - Figures
 
     @Test func bucketAddsWordsAndTakesMedianTimings() {
-        let series = series([
-            record(daysAgo: 0, hour: 9, words: 5, transcription: 1, enhancement: 1),
-            record(daysAgo: 0, hour: 10, words: 7, transcription: 2, enhancement: 1),
-            // A Claude timeout must not drag the whole day.
-            record(daysAgo: 0, hour: 11, words: 8, transcription: 3, enhancement: 8),
-        ], .week)
+        let series = series(
+            [
+                record(daysAgo: 0, hour: 9, words: 5, transcription: 1, enhancement: 1),
+                record(daysAgo: 0, hour: 10, words: 7, transcription: 2, enhancement: 1),
+                // A Claude timeout must not drag the whole day.
+                record(daysAgo: 0, hour: 11, words: 8, transcription: 3, enhancement: 8),
+            ], .week)
         let today = series.buckets.last!
         #expect(today.words == 20)
         #expect(today.dictations == 3)
@@ -140,15 +142,16 @@ struct DictationSeriesTests {
     // MARK: - Reviewers
 
     @Test func eachColumnCountsTheDictationsPerReviewer() {
-        let series = series([
-            record(daysAgo: 0, hour: 9, reviewer: .claude),
-            record(daysAgo: 0, hour: 10, reviewer: .claude),
-            record(daysAgo: 0, hour: 11, reviewer: .claude),
-            // Offline for the afternoon.
-            record(daysAgo: 0, hour: 15, reviewer: .apple),
-            record(daysAgo: 0, hour: 16, enhancement: nil),
-            record(daysAgo: 1, reviewer: .claude),
-        ], .week)
+        let series = series(
+            [
+                record(daysAgo: 0, hour: 9, reviewer: .claude),
+                record(daysAgo: 0, hour: 10, reviewer: .claude),
+                record(daysAgo: 0, hour: 11, reviewer: .claude),
+                // Offline for the afternoon.
+                record(daysAgo: 0, hour: 15, reviewer: .apple),
+                record(daysAgo: 0, hour: 16, enhancement: nil),
+                record(daysAgo: 1, reviewer: .claude),
+            ], .week)
         let today = series.buckets.last!
         #expect(today.reviewers == [.claude: 3, .apple: 1])
         #expect(today.share(of: .claude) == 0.75)
@@ -170,11 +173,12 @@ struct DictationSeriesTests {
     }
 
     @Test func theDelayShowsTheMostUsedModelUntilAnotherIsPicked() {
-        let mixed = series([
-            record(daysAgo: 0, hour: 9, reviewer: .claude),
-            record(daysAgo: 0, hour: 10, reviewer: .claude),
-            record(daysAgo: 1, reviewer: .apple),
-        ], .week)
+        let mixed = series(
+            [
+                record(daysAgo: 0, hour: 9, reviewer: .claude),
+                record(daysAgo: 0, hour: 10, reviewer: .claude),
+                record(daysAgo: 1, reviewer: .apple),
+            ], .week)
         #expect(LatencyCard.shownReviewer(nil, in: mixed) == .claude)
         #expect(LatencyCard.shownReviewer(.apple, in: mixed) == .apple)
         let claudeOnly = series([record(daysAgo: 0, reviewer: .claude)], .week)
@@ -193,10 +197,12 @@ struct DictationSeriesTests {
     @Test func theDelayLabelNamesTheModelBehindTheColumn() {
         let claude = series([record(daysAgo: 0, transcription: 2, enhancement: 1)], .week).buckets.last!
         #expect(LatencyCard.label(claude) == "\(StatsFormat.seconds(3)) s · Claude")
-        let mixed = series([
-            record(daysAgo: 0, hour: 9, reviewer: .claude),
-            record(daysAgo: 0, hour: 10, reviewer: .apple),
-        ], .week).buckets.last!
+        let mixed = series(
+            [
+                record(daysAgo: 0, hour: 9, reviewer: .claude),
+                record(daysAgo: 0, hour: 10, reviewer: .apple),
+            ], .week
+        ).buckets.last!
         // The percent sign is spaced or not with the locale.
         let label = LatencyCard.label(mixed)
         #expect(label.contains("· Apple Intelligence 50") && label.contains(", Claude 50"))

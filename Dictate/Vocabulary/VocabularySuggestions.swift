@@ -138,7 +138,8 @@ nonisolated struct VocabularySuggestionState: Codable, Equatable, Sendable {
 
     private mutating func trimSightings() {
         guard sightings.count > Self.maxSightings else { return }
-        let evicted = sightings
+        let evicted =
+            sightings
             .sorted { ($0.value.count, $0.value.lastSeen) < ($1.value.count, $1.value.lastSeen) }
             .prefix(sightings.count - Self.maxSightings)
         for (key, _) in evicted { sightings[key] = nil }
@@ -164,7 +165,8 @@ final class VocabularySuggestions {
 
     init(file: URL = VocabularySuggestions.defaultFile) {
         self.file = file
-        state = (try? Data(contentsOf: file)).flatMap { try? Self.decoder.decode(VocabularySuggestionState.self, from: $0) }?
+        state =
+            (try? Data(contentsOf: file)).flatMap { try? Self.decoder.decode(VocabularySuggestionState.self, from: $0) }?
             .rekeyed() ?? VocabularySuggestionState()
     }
 

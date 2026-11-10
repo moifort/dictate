@@ -58,7 +58,8 @@ nonisolated struct IdentifierMigration {
     /// The whole defaults domain, when this copy has none yet.
     private func migrateDefaults(from other: String) -> Bool {
         guard defaults.persistentDomain(forName: current)?.isEmpty ?? true,
-              let old = defaults.persistentDomain(forName: other), !old.isEmpty else { return false }
+            let old = defaults.persistentDomain(forName: other), !old.isEmpty
+        else { return false }
         defaults.setPersistentDomain(old, forName: current)
         return true
     }
@@ -66,10 +67,12 @@ nonisolated struct IdentifierMigration {
     /// Each key this copy lacks.
     private func migrateKeys(from other: String) -> [APIProvider] {
         APIProvider.allCases.filter { provider in
-            let mine = secret(current, provider), theirs = secret(other, provider)
+            let mine = secret(current, provider)
+            let theirs = secret(other, provider)
             guard (try? mine.read()) == .some(nil),
-                  let key = try? theirs.read(), !key.isEmpty,
-                  (try? mine.write(key)) != nil else { return false }
+                let key = try? theirs.read(), !key.isEmpty,
+                (try? mine.write(key)) != nil
+            else { return false }
             return true
         }
     }

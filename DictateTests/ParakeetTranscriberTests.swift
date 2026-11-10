@@ -1,7 +1,8 @@
+import DictateKit
 import Foundation
 import Testing
+
 @testable import Dictate
-import DictateKit
 
 /// Needs the Parakeet model already downloaded by the app; skipped otherwise.
 @MainActor

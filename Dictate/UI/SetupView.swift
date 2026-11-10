@@ -1,5 +1,5 @@
-import SwiftUI
 import DictateKit
+import SwiftUI
 
 /// Onboarding in the manner of Apple's setup assistants: a welcome page, a
 /// checklist of everything Dictate needs, ticked one line at a time as macOS
@@ -52,7 +52,9 @@ struct SetupView: View {
             }
 
             if index > 0 {
-                Button { go(to: index - 1) } label: {
+                Button {
+                    go(to: index - 1)
+                } label: {
                     Image(systemName: "chevron.left")
                         .font(.callout.weight(.semibold))
                         .frame(width: 22, height: 22)
@@ -242,9 +244,7 @@ private struct ChecklistRow<Content: View>: View {
     }
 
     private var statusStyle: AnyShapeStyle {
-        if done { AnyShapeStyle(.green) }
-        else if unfolded { AnyShapeStyle(.tint) }
-        else { AnyShapeStyle(.secondary) }
+        if done { AnyShapeStyle(.green) } else if unfolded { AnyShapeStyle(.tint) } else { AnyShapeStyle(.secondary) }
     }
 }
 
@@ -282,7 +282,7 @@ private struct StepActions: View {
                 Button(Distribution.isAppStore ? LocalizedStringKey("Continuer") : "Autoriser le micro") {
                     Task { await Permissions.requestMicrophone() }
                 }
-                    .buttonStyle(.glassProminent)
+                .buttonStyle(.glassProminent)
             }
 
         #if !APP_STORE
@@ -497,7 +497,7 @@ private struct ReviewStep: View {
             return Text("Claude relit vos dictées avec votre abonnement.")
         }
         if let detected = detectedSummary {
-            return Text("Abonnement Claude détecté.") + Text(verbatim: " ") + Text(detected)
+            return Text("\(Text("Abonnement Claude détecté.")) \(detected)")
         }
         return Text("Abonnement Claude détecté : Claude relit vos dictées.")
     }
@@ -513,7 +513,8 @@ private struct ReviewStep: View {
             reviewer == .apple ? reviewer.displayName : String(localized: "clé \(reviewer.displayName)")
         }
         let list = names.formatted(.list(type: .and))
-        let fallback = others.contains(.apple)
+        let fallback =
+            others.contains(.apple)
             ? String(localized: " Apple Intelligence prend le relais hors ligne.")
             : ""
         return String(localized: "Aussi détectés : \(list). \(chosen.displayName) passe en premier.") + fallback
@@ -534,8 +535,8 @@ private struct ReviewStep: View {
 
 // MARK: - Step copy
 
-private extension SetupStep {
-    var heading: LocalizedStringKey {
+extension SetupStep {
+    fileprivate var heading: LocalizedStringKey {
         switch self {
         case .language: "Langue de dictée"
         case .microphone: "Micro"
@@ -547,7 +548,7 @@ private extension SetupStep {
         }
     }
 
-    var explanation: LocalizedStringKey {
+    fileprivate var explanation: LocalizedStringKey {
         switch self {
         case .language:
             "La transcription est plus fiable quand elle sait à l'avance dans quelle langue vous parlez. Dictate a repris celle de macOS ; changez-la si vous dictez dans une autre. Les termes techniques anglais restent reconnus."
@@ -566,7 +567,7 @@ private extension SetupStep {
         }
     }
 
-    var symbol: String {
+    fileprivate var symbol: String {
         switch self {
         case .language: "character.bubble"
         case .microphone: "mic"
@@ -683,16 +684,20 @@ private struct WelcomePage: View {
             AppTile()
         } content: {
             VStack(alignment: .leading, spacing: 22) {
-                FeatureRow(symbol: "lock.shield", title: "Transcription sur ce Mac",
-                           detail: "Le modèle tourne en local. Votre voix ne quitte pas l'ordinateur.")
-                FeatureRow(symbol: "sparkles", title: "Texte relu par l'IA",
-                           detail: "Hésitations, ponctuation et jargon corrigés, par Apple Intelligence sur ce Mac ou par Claude.")
+                FeatureRow(
+                    symbol: "lock.shield", title: "Transcription sur ce Mac",
+                    detail: "Le modèle tourne en local. Votre voix ne quitte pas l'ordinateur.")
+                FeatureRow(
+                    symbol: "sparkles", title: "Texte relu par l'IA",
+                    detail: "Hésitations, ponctuation et jargon corrigés, par Apple Intelligence sur ce Mac ou par Claude.")
                 if Distribution.isAppStore {
-                    FeatureRow(symbol: "keyboard", title: "Un seul raccourci",
-                               detail: "option + espace suffit, même par-dessus une app en plein écran.")
+                    FeatureRow(
+                        symbol: "keyboard", title: "Un seul raccourci",
+                        detail: "option + espace suffit, même par-dessus une app en plein écran.")
                 } else {
-                    FeatureRow(symbol: "keyboard", title: "Une seule touche",
-                               detail: "control suffit, même par-dessus une app en plein écran. fn au choix dans les Réglages.")
+                    FeatureRow(
+                        symbol: "keyboard", title: "Une seule touche",
+                        detail: "control suffit, même par-dessus une app en plein écran. fn au choix dans les Réglages.")
                 }
             }
             .frame(maxWidth: 400)
@@ -705,8 +710,11 @@ private struct AppTile: View {
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(LinearGradient(colors: [.accentColor.opacity(0.95), .accentColor.opacity(0.65)],
-                                     startPoint: .topLeading, endPoint: .bottomTrailing))
+                .fill(
+                    LinearGradient(
+                        colors: [.accentColor.opacity(0.95), .accentColor.opacity(0.65)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing)
+                )
                 .shadow(color: .accentColor.opacity(0.35), radius: 18, y: 8)
             Image(systemName: "waveform")
                 .font(.system(size: 42, weight: .medium))
@@ -794,10 +802,15 @@ private struct TryItPage: View {
         case .transcribing: .transcribing
         case .enhancing: .enhancing
         case .idle:
-            if case .failed = model.transcriber.state { .failed }
-            else if model.transcriber.state != .ready { .preparing }
-            else if !text.isEmpty, dictationLanded { .success }
-            else { .ready }
+            if case .failed = model.transcriber.state {
+                .failed
+            } else if model.transcriber.state != .ready {
+                .preparing
+            } else if !text.isEmpty, dictationLanded {
+                .success
+            } else {
+                .ready
+            }
         }
     }
 

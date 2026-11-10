@@ -2,6 +2,7 @@ import FluidAudio
 import Foundation
 import Synchronization
 import Testing
+
 @testable import DictateKit
 
 struct DownloadTrackerTests {

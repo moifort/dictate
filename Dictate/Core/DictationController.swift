@@ -1,6 +1,6 @@
+import DictateKit
 import Foundation
 import Observation
-import DictateKit
 
 enum DictationPhase: Equatable {
     case idle
@@ -212,7 +212,11 @@ final class DictationController {
             }
 
         case .cancelled:
-            if capture == .starting { pendingGesture = .cancelled; starting?.cancel(); return }
+            if capture == .starting {
+                pendingGesture = .cancelled
+                starting?.cancel()
+                return
+            }
             guard capture == .recording else { return }
             recordingLimit?.cancel()
             _ = recorder.stop()
@@ -221,7 +225,11 @@ final class DictationController {
         case .released:
             // Cuts short the wait for a headset still switching to its call
             // profile: what was said meanwhile could not be heard anyway.
-            if capture == .starting { pendingGesture = .released; starting?.cancel(); return }
+            if capture == .starting {
+                pendingGesture = .released
+                starting?.cancel()
+                return
+            }
             guard capture == .recording else { return }
             recordingLimit?.cancel()
             // Read on release rather than press: Electron apps only build their
@@ -341,7 +349,9 @@ final class DictationController {
         guard samples.count >= Self.minimumSampleCount, !AudioAnalysis.isSilent(samples) else {
             let audio = Double(samples.count) / Double(AudioAnalysis.sampleRate)
             let peak = AudioAnalysis.peakRMS(samples)
-            Log.dictation.info("discarded \(audio, format: .fixed(precision: 1)) s of audio, peak RMS \(peak, format: .fixed(precision: 4)) (threshold \(AudioAnalysis.silenceThreshold, format: .fixed(precision: 4)))")
+            Log.dictation.info(
+                "discarded \(audio, format: .fixed(precision: 1)) s of audio, peak RMS \(peak, format: .fixed(precision: 4)) (threshold \(AudioAnalysis.silenceThreshold, format: .fixed(precision: 4)))"
+            )
             return complete(id, emptyOutcome(samples))
         }
         guard let (transcript, transcription) = await transcribe(samples) else {
@@ -362,16 +372,17 @@ final class DictationController {
         let outcome = await insert(review, of: transcript, samples: samples, dictation: dictation, context: context)
         let insertion = clock.now - start
         Log.dictation.info("inserted in \(insertion.milliseconds) ms")
-        events.onRecord?(DictationRecord(
-            date: .now,
-            words: DictationRecord.wordCount(of: review.text),
-            audio: Double(samples.count) / Double(AudioAnalysis.sampleRate),
-            engine: Self.engine,
-            transcription: transcription.timeInterval,
-            enhancement: review.duration.map(\.timeInterval),
-            reviewer: review.reviewer,
-            insertion: insertion.timeInterval
-        ))
+        events.onRecord?(
+            DictationRecord(
+                date: .now,
+                words: DictationRecord.wordCount(of: review.text),
+                audio: Double(samples.count) / Double(AudioAnalysis.sampleRate),
+                engine: Self.engine,
+                transcription: transcription.timeInterval,
+                enhancement: review.duration.map(\.timeInterval),
+                reviewer: review.reviewer,
+                insertion: insertion.timeInterval
+            ))
         complete(id, outcome)
     }
 
@@ -403,7 +414,8 @@ final class DictationController {
         var context = context
         context.include(await fieldContext.value)
         // Sizes only: the text, title and host are the user's.
-        Log.dictation.info("""
+        Log.dictation.info(
+            """
             field context: \(context.precedingText?.count ?? 0) characters before, \
             \(context.followingText?.count ?? 0) after, label \(context.fieldLabel != nil), \
             title \(context.windowTitle != nil), web \(context.webHost != nil), \
@@ -467,23 +479,25 @@ final class DictationController {
         let submit = !review.raw && AutoSend.applies(to: focus.frontmostBundleID(), in: settings.autoSendApps())
         await inserter.paste(review.text, submit: submit)
         // A single read later on, shared by every consumer.
-        let followUp: Task<InsertionFollowUp?, Never>? = if let observer, let watch {
-            Task { await observer.followUp(watch, inserted: review.text) }
-        } else {
-            nil
-        }
+        let followUp: Task<InsertionFollowUp?, Never>? =
+            if let observer, let watch {
+                Task { await observer.followUp(watch, inserted: review.text) }
+            } else {
+                nil
+            }
         if follow, let followUp, let onFollowUp = events.onFollowUp {
             Task {
                 if let result = await followUp.value { onFollowUp(result) }
             }
         }
         if keep {
-            events.onSample?(DictationSample(
-                date: .now, samples: samples, engine: Self.engine, language: settings.language(),
-                bundleID: dictation.bundleID, category: context.category,
-                transcript: transcript.text, inserted: review.text, enhanced: review.duration != nil && !review.raw,
-                vocabularyBoosted: transcript.vocabularyBoosted, followUp: followUp
-            ))
+            events.onSample?(
+                DictationSample(
+                    date: .now, samples: samples, engine: Self.engine, language: settings.language(),
+                    bundleID: dictation.bundleID, category: context.category,
+                    transcript: transcript.text, inserted: review.text, enhanced: review.duration != nil && !review.raw,
+                    vocabularyBoosted: transcript.vocabularyBoosted, followUp: followUp
+                ))
         }
         return .pasted(raw: review.raw)
     }

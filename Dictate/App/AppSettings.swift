@@ -258,7 +258,8 @@ final class AppSettings {
         let supported = saved.map(DictationLanguage.supportedCodes.contains) ?? true
         language = supported ? saved ?? DictationLanguage.preferred() : DictationLanguage.preferred()
         languageConfirmed = supported && defaults.bool(forKey: Keys.languageConfirmed)
-        pushToTalkKey = defaults.string(forKey: Keys.pushToTalkKey).flatMap(PushToTalkKey.init(rawValue:))
+        pushToTalkKey =
+            defaults.string(forKey: Keys.pushToTalkKey).flatMap(PushToTalkKey.init(rawValue:))
             .flatMap { PushToTalkKey.available.contains($0) ? $0 : nil } ?? PushToTalkKey.available[0]
         shareFieldContext = defaults.object(forKey: Keys.shareFieldContext) as? Bool ?? true
         dictatedEmojis = defaults.object(forKey: Keys.dictatedEmojis) as? Bool ?? true

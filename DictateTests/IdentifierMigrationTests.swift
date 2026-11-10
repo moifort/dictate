@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import Dictate
 
 /// A copy under one release identifier inheriting what the other left.
@@ -33,7 +34,8 @@ struct IdentifierMigrationTests {
     }
 
     @Test func nothingOfItsOwnIsOverwritten() throws {
-        let theirs = AppPaths(identifier: old, library: library), mine = AppPaths(identifier: new, library: library)
+        let theirs = AppPaths(identifier: old, library: library)
+        let mine = AppPaths(identifier: new, library: library)
         for paths in [theirs, mine] {
             try FileManager.default.createDirectory(at: paths.statistics.deletingLastPathComponent(), withIntermediateDirectories: true)
             try Data(paths.identifier.utf8).write(to: paths.statistics)

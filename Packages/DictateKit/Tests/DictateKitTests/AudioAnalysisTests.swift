@@ -1,4 +1,5 @@
 import Testing
+
 @testable import DictateKit
 
 struct AudioAnalysisTests {
@@ -33,8 +34,8 @@ struct AudioAnalysisTests {
 
     @Test func meterLevelFollowsADecibelScale() {
         #expect(AudioAnalysis.meterLevel(rms: 0) == 0)
-        #expect(AudioAnalysis.meterLevel(rms: 0.001) < 0.05)        // -60 dB: silence
-        #expect(abs(AudioAnalysis.meterLevel(rms: 0.056) - 0.62) < 0.05) // -25 dB: normal speech
-        #expect(AudioAnalysis.meterLevel(rms: 0.5) == 1)             // -6 dB: full scale
+        #expect(AudioAnalysis.meterLevel(rms: 0.001) < 0.05)  // -60 dB: silence
+        #expect(abs(AudioAnalysis.meterLevel(rms: 0.056) - 0.62) < 0.05)  // -25 dB: normal speech
+        #expect(AudioAnalysis.meterLevel(rms: 0.5) == 1)  // -6 dB: full scale
     }
 }

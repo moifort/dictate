@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import Dictate
 
 struct TermTokenizerTests {
@@ -50,28 +51,33 @@ struct CorrectedTermsTests {
     }
 
     @Test func aMisheardNameIsFound() {
-        #expect(corrections("On se voit chez cloud demain.", "On se voit chez Claude demain.")
-            == [TermCorrection(wrong: "cloud", right: "Claude")])
+        #expect(
+            corrections("On se voit chez cloud demain.", "On se voit chez Claude demain.")
+                == [TermCorrection(wrong: "cloud", right: "Claude")])
     }
 
     @Test func englishNameIsFound() {
-        #expect(corrections("I pushed it to get hub yesterday.", "I pushed it to GitHub yesterday.")
-            == [TermCorrection(wrong: "get hub", right: "GitHub")])
+        #expect(
+            corrections("I pushed it to get hub yesterday.", "I pushed it to GitHub yesterday.")
+                == [TermCorrection(wrong: "get hub", right: "GitHub")])
     }
 
     @Test func severalWordsBecomingOneTermAreFound() {
-        #expect(corrections("On déploie sur cube are net is ce soir.", "On déploie sur Kubernetes ce soir.")
-            == [TermCorrection(wrong: "cube are net is", right: "Kubernetes")])
+        #expect(
+            corrections("On déploie sur cube are net is ce soir.", "On déploie sur Kubernetes ce soir.")
+                == [TermCorrection(wrong: "cube are net is", right: "Kubernetes")])
     }
 
     @Test func aShortPhraseIsFound() {
-        #expect(corrections("Ouvre visuel studio pour voir.", "Ouvre Visual Studio pour voir.")
-            == [TermCorrection(wrong: "visuel studio", right: "Visual Studio")])
+        #expect(
+            corrections("Ouvre visuel studio pour voir.", "Ouvre Visual Studio pour voir.")
+                == [TermCorrection(wrong: "visuel studio", right: "Visual Studio")])
     }
 
     @Test func anAcronymIsFound() {
-        #expect(corrections("Envoie le fichier à la S N C F.", "Envoie le fichier à la SNCF.")
-            == [TermCorrection(wrong: "S N C F", right: "SNCF")])
+        #expect(
+            corrections("Envoie le fichier à la S N C F.", "Envoie le fichier à la SNCF.")
+                == [TermCorrection(wrong: "S N C F", right: "SNCF")])
     }
 
     @Test func aNameAfterTheFirstWordIsFound() {
@@ -84,8 +90,9 @@ struct CorrectedTermsTests {
     }
 
     @Test func aCaseChangeNextToTheFixBelongsToTheTerm() {
-        #expect(corrections("Ouvre visual code.", "Ouvre Visual Studio Code.")
-            == [TermCorrection(wrong: "visual code", right: "Visual Studio Code")])
+        #expect(
+            corrections("Ouvre visual code.", "Ouvre Visual Studio Code.")
+                == [TermCorrection(wrong: "visual code", right: "Visual Studio Code")])
     }
 
     @Test func severalFixesInOneDictationAreAllFound() {
@@ -93,10 +100,11 @@ struct CorrectedTermsTests {
             "Dis à Guyom que la PR sur swift UI est prête.",
             "Dis à Guillaume que la PR sur SwiftUI est prête."
         )
-        #expect(found == [
-            TermCorrection(wrong: "Guyom", right: "Guillaume"),
-            TermCorrection(wrong: "swift UI", right: "SwiftUI"),
-        ])
+        #expect(
+            found == [
+                TermCorrection(wrong: "Guyom", right: "Guillaume"),
+                TermCorrection(wrong: "swift UI", right: "SwiftUI"),
+            ])
     }
 
     @Test func caseOnlyEditsAreIgnored() {
@@ -129,17 +137,19 @@ struct CorrectedTermsTests {
     }
 
     @Test func aRewriteIsIgnored() {
-        #expect(corrections(
-            "Je pense qu'on devrait livrer la version demain matin avec Paul.",
-            "Livraison reportée : on attend le retour de Pauline sur la version."
-        ).isEmpty)
+        #expect(
+            corrections(
+                "Je pense qu'on devrait livrer la version demain matin avec Paul.",
+                "Livraison reportée : on attend le retour de Pauline sur la version."
+            ).isEmpty)
     }
 
     @Test func aLongReplacementIsIgnored() {
-        #expect(corrections(
-            "Demande à Marc de relire avant ce soir s'il te plaît.",
-            "Demande à l'équipe Marketing Europe Ouest de relire avant ce soir s'il te plaît."
-        ).isEmpty)
+        #expect(
+            corrections(
+                "Demande à Marc de relire avant ce soir s'il te plaît.",
+                "Demande à l'équipe Marketing Europe Ouest de relire avant ce soir s'il te plaît."
+            ).isEmpty)
     }
 
     @Test func emptyTextsGiveNothing() {

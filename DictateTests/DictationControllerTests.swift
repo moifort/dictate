@@ -1,7 +1,8 @@
+import DictateKit
 import Foundation
 import Testing
+
 @testable import Dictate
-import DictateKit
 
 @MainActor
 struct DictationControllerTests {
@@ -409,7 +410,8 @@ struct DictationControllerTests {
         let (controller, fakes) = makeController(transcript: .failure(FakeError()))
         await dictate(controller)
         #expect(fakes.inserter.pasted.isEmpty)
-        if case .failed = controller.lastOutcome {} else {
+        if case .failed = controller.lastOutcome {
+        } else {
             Issue.record("expected failure, got \(String(describing: controller.lastOutcome))")
         }
     }
@@ -827,7 +829,8 @@ struct DictationControllerTests {
         controller.handle(.pressed)
         await controller.waitUntilStarted()
         #expect(controller.phase == .idle)
-        if case .failed = controller.lastOutcome {} else {
+        if case .failed = controller.lastOutcome {
+        } else {
             Issue.record("expected failure")
         }
     }

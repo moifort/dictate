@@ -1,6 +1,7 @@
-import Testing
-@testable import Dictate
 import DictateKit
+import Testing
+
+@testable import Dictate
 
 struct PromptBuilderTests {
     @Test func systemPromptListsVocabulary() {
@@ -98,8 +99,9 @@ struct PromptBuilderTests {
 
     @Test func userMessageWithoutConfidencesIsThePlainOne() {
         let context = DictationContext(category: .chat)
-        #expect(PromptBuilder.userMessage(transcription: Transcription(text: "ça marche"), context: context)
-            == PromptBuilder.userMessage(transcript: "ça marche", context: context))
+        #expect(
+            PromptBuilder.userMessage(transcription: Transcription(text: "ça marche"), context: context)
+                == PromptBuilder.userMessage(transcript: "ça marche", context: context))
     }
 
     @Test func cleanedTextDropsTheModelsAsides() {

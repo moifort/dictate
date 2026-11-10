@@ -1,6 +1,6 @@
+import DictateKit
 import SwiftUI
 import UniformTypeIdentifiers
-import DictateKit
 
 /// Classic macOS preferences: icon tabs in the toolbar, labels in the left
 /// column. The app itself, then the stages of a dictation: transcription,
@@ -58,7 +58,9 @@ private struct DictationSettings: View {
             LabeledContent("Moteur :") {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(model.transcriber.engine.displayName)
-                    Hint("25 langues européennes, sur cette machine. Le lexique est appliqué par la relecture, et par Parakeet si vous renforcez le vocabulaire (onglet Lexique). \(model.transcriber.engine.downloadSize) Mo à télécharger au premier usage.")
+                    Hint(
+                        "25 langues européennes, sur cette machine. Le lexique est appliqué par la relecture, et par Parakeet si vous renforcez le vocabulaire (onglet Lexique). \(model.transcriber.engine.downloadSize) Mo à télécharger au premier usage."
+                    )
                     ModelWeights(model: model)
                     EngineStatus(model: model)
                 }
@@ -81,7 +83,8 @@ private struct DictationSettings: View {
                 LabeledContent("Évaluation :") {
                     VStack(alignment: .leading, spacing: 6) {
                         Toggle("Garder les dictées pour mesurer la précision", isOn: Bindable(model.settings).keepEvaluationCorpus)
-                        Hint("""
+                        Hint(
+                            """
                             Conserve sur ce Mac l'audio, la transcription, le texte inséré et le contenu du champ \
                             \(PostInsertionObserver.defaultDelay.components.seconds) s plus tard, vos corrections comprises. \
                             Rien n'est envoyé.
@@ -107,7 +110,10 @@ private struct DictationSettings: View {
         case .control:
             String(localized: "Maintenez l'une des touches control pour dicter. Un raccourci comme control-C n'enregistre rien.")
         case .optionSpace:
-            String(localized: "Maintenez option + espace pour dicter, puis collez le texte avec ⌘V. Sur un clavier français, option + espace tape aussi l'espace insécable : préférez alors control + option + espace.")
+            String(
+                localized:
+                    "Maintenez option + espace pour dicter, puis collez le texte avec ⌘V. Sur un clavier français, option + espace tape aussi l'espace insécable : préférez alors control + option + espace."
+            )
         case .controlOptionSpace:
             String(localized: "Maintenez control + option + espace pour dicter, puis collez le texte avec ⌘V.")
         }
@@ -147,7 +153,11 @@ private struct AutoSendAppList: View {
                     Button {
                         settings.addAutoSendApp(app.bundleID)
                     } label: {
-                        Label { Text(verbatim: app.name) } icon: { Image(nsImage: app.icon ?? NSImage()) }
+                        Label {
+                            Text(verbatim: app.name)
+                        } icon: {
+                            Image(nsImage: app.icon ?? NSImage())
+                        }
                     }
                 }
                 if !runningApps.isEmpty { Divider() }
@@ -169,12 +179,14 @@ private struct AutoSendAppList: View {
     }
 
     private func chooseApp() {
-        guard let url = FilePicker.chooseFile(
-            types: [.applicationBundle],
-            in: URL(filePath: "/Applications"),
-            message: String(localized: "Choisissez une app où appuyer sur Entrée après la dictée"),
-            prompt: String(localized: "Ajouter")
-        ), let bundleID = Bundle(url: url)?.bundleIdentifier else { return }
+        guard
+            let url = FilePicker.chooseFile(
+                types: [.applicationBundle],
+                in: URL(filePath: "/Applications"),
+                message: String(localized: "Choisissez une app où appuyer sur Entrée après la dictée"),
+                prompt: String(localized: "Ajouter")
+            ), let bundleID = Bundle(url: url)?.bundleIdentifier
+        else { return }
         settings.addAutoSendApp(bundleID)
     }
 }
@@ -290,7 +302,8 @@ private struct ModelWeights: View {
             // Measured again when the engine changes or its download completes.
             .task(id: "\(engine.rawValue)-\(model.transcriber.state == .ready)") {
                 let folder = model.transcriber.modelFolder
-                diskUsage = model.transcriber.isModelDownloaded
+                diskUsage =
+                    model.transcriber.isModelDownloaded
                     ? await Task.detached { ModelStorage.diskUsage(of: folder) }.value
                     : nil
             }
@@ -329,7 +342,8 @@ private struct LexiconSettings: View {
                         isOn: Bindable(model.settings).boostVocabulary
                     )
                     .onChange(of: model.settings.boostVocabulary) { model.vocabularyBoostingChanged() }
-                    Hint("""
+                    Hint(
+                        """
                         Un second modèle cherche ces termes dans l'audio et corrige la transcription avant la relecture. \
                         Entraîné surtout sur l'anglais : son effet en français reste à mesurer. \
                         Environ 100 Mo à télécharger.
@@ -345,7 +359,8 @@ private struct LexiconSettings: View {
                 LabeledContent("Suggestions :") {
                     VStack(alignment: .leading, spacing: 6) {
                         Toggle("Suggérer des mots pour le vocabulaire", isOn: Bindable(model.settings).suggestVocabulary)
-                        Hint("""
+                        Hint(
+                            """
                             Relit le champ \(PostInsertionObserver.defaultDelay.components.seconds) s après chaque dictée \
                             pour repérer les noms que vous corrigez, et compte ceux qui reviennent dans le texte déjà écrit \
                             (avec « Lire le texte autour du curseur »). Tout reste sur ce Mac.
@@ -413,7 +428,9 @@ private struct GeneralSettings: View {
             LabeledContent("Confidentialité :") {
                 VStack(alignment: .leading, spacing: 6) {
                     Toggle("Envoyer les rapports d'erreur", isOn: Bindable(model.settings).sendErrorReports)
-                    Hint("Les plantages et les erreurs partent vers Sentry pour être corrigés : l'erreur, les versions et les réglages utiles, jamais ce que vous dites ou écrivez.")
+                    Hint(
+                        "Les plantages et les erreurs partent vers Sentry pour être corrigés : l'erreur, les versions et les réglages utiles, jamais ce que vous dites ou écrivez."
+                    )
                 }
             }
         }
@@ -570,10 +587,13 @@ private struct ReviewSettings: View {
     private var claudeAccess: some View {
         LabeledContent("Accès :") {
             VStack(alignment: .leading, spacing: 6) {
-                Picker("Accès", selection: Binding(
-                    get: { model.settings.claudeAccess },
-                    set: { model.selectClaudeAccess($0) }
-                )) {
+                Picker(
+                    "Accès",
+                    selection: Binding(
+                        get: { model.settings.claudeAccess },
+                        set: { model.selectClaudeAccess($0) }
+                    )
+                ) {
                     ForEach(ClaudeAccess.allCases) { access in
                         Text(access.displayName).tag(access)
                     }
@@ -625,20 +645,21 @@ private struct ReviewSettings: View {
     }
 
     private var reviewerHint: String {
-        let hint = switch model.settings.reviewer {
-        case .none:
-            String(localized: "Le texte transcrit est inséré tel quel, hésitations comprises.")
-        case .apple:
-            String(localized: "Le modèle d'Apple Intelligence, sur ce Mac. Rien ne sort de l'ordinateur, aucun compte nécessaire.")
-        case .claude where model.settings.claudeAccess == .apiKey:
-            String(localized: "Modèle Haiku, via votre clé API Anthropic. Un peu plus rapide et plus sûr sur le jargon.")
-        case .claude:
-            String(localized: "Modèle Haiku, via votre abonnement Claude. Un peu plus rapide et plus sûr sur le jargon.")
-        case .openAI:
-            String(localized: "Modèle GPT-5.4 nano sans raisonnement, le plus rapide d'OpenAI, via votre clé API.")
-        case .gemini:
-            String(localized: "Modèle Gemini 3.5 Flash-Lite, le plus rapide de Google, via votre clé API.")
-        }
+        let hint =
+            switch model.settings.reviewer {
+            case .none:
+                String(localized: "Le texte transcrit est inséré tel quel, hésitations comprises.")
+            case .apple:
+                String(localized: "Le modèle d'Apple Intelligence, sur ce Mac. Rien ne sort de l'ordinateur, aucun compte nécessaire.")
+            case .claude where model.settings.claudeAccess == .apiKey:
+                String(localized: "Modèle Haiku, via votre clé API Anthropic. Un peu plus rapide et plus sûr sur le jargon.")
+            case .claude:
+                String(localized: "Modèle Haiku, via votre abonnement Claude. Un peu plus rapide et plus sûr sur le jargon.")
+            case .openAI:
+                String(localized: "Modèle GPT-5.4 nano sans raisonnement, le plus rapide d'OpenAI, via votre clé API.")
+            case .gemini:
+                String(localized: "Modèle Gemini 3.5 Flash-Lite, le plus rapide de Google, via votre clé API.")
+            }
         guard !model.settings.reviewerIsChosen, !Distribution.isAppStore else { return hint }
         return String(localized: "Choix automatique : Claude, sinon OpenAI, sinon Gemini, sinon Apple Intelligence, selon ce qui est détecté.") + " " + hint
     }
@@ -721,12 +742,14 @@ private struct ReviewSettings: View {
 
     private func chooseClaudeCLI() {
         // The bundled CLI lives inside claude.app, and standalone installs in ~/.local.
-        guard let url = FilePicker.chooseFile(
-            in: model.claudeCLI.path?.deletingLastPathComponent(),
-            message: String(localized: "Choisissez l'exécutable claude"),
-            prompt: String(localized: "Choisir"),
-            insidePackages: true
-        ) else { return }
+        guard
+            let url = FilePicker.chooseFile(
+                in: model.claudeCLI.path?.deletingLastPathComponent(),
+                message: String(localized: "Choisissez l'exécutable claude"),
+                prompt: String(localized: "Choisir"),
+                insidePackages: true
+            )
+        else { return }
         model.settings.cliPathOverride = url.path
         model.settingsChanged()
     }

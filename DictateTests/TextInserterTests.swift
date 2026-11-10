@@ -1,5 +1,6 @@
 import AppKit
 import Testing
+
 @testable import Dictate
 
 /// On a pasteboard of its own, with the keys recorded rather than posted.

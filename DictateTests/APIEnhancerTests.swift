@@ -1,7 +1,8 @@
+import DictateKit
 import Foundation
 import Testing
+
 @testable import Dictate
-import DictateKit
 
 @MainActor
 struct APIEnhancerTests {
@@ -78,10 +79,13 @@ struct APIEnhancerTests {
 
     @Test func enhanceSendsTheTrimmedKeyAndCleansTheReply() async throws {
         let sent = OneShot<URLRequest>()
-        let enhancer = APIEnhancer(provider: .openAI, apiKey: { " sk-test \n" }, systemPrompt: { "system" }) { request in
-            sent.resolve(.success(request))
-            return (Self.json(["choices": [["message": ["content": "Je pousse sur main."]]]]), Self.response(200))
-        }
+        let enhancer = APIEnhancer(
+            provider: .openAI, apiKey: { " sk-test \n" }, systemPrompt: { "system" },
+            send: { request in
+                sent.resolve(.success(request))
+                return (Self.json(["choices": [["message": ["content": "Je pousse sur main."]]]]), Self.response(200))
+            }
+        )
         #expect(try await enhancer.enhance(transcript: "euh je pousse sur main", context: DictationContext()) == "Je pousse sur main.")
         let request = try await sent.value()
         #expect(request.value(forHTTPHeaderField: "authorization") == "Bearer sk-test")
@@ -89,10 +93,13 @@ struct APIEnhancerTests {
     }
 
     @Test func withoutAKeyNothingIsSent() async {
-        let enhancer = APIEnhancer(provider: .gemini, apiKey: { "" }, systemPrompt: { "" }) { _ in
-            Issue.record("no request expected")
-            return (Data(), URLResponse())
-        }
+        let enhancer = APIEnhancer(
+            provider: .gemini, apiKey: { "" }, systemPrompt: { "" },
+            send: { _ in
+                Issue.record("no request expected")
+                return (Data(), URLResponse())
+            }
+        )
         await #expect(throws: APIReviewError.missingKey(.gemini)) {
             try await enhancer.enhance(transcript: "x", context: DictationContext())
         }

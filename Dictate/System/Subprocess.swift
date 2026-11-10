@@ -40,9 +40,10 @@ nonisolated enum Subprocess {
                 // What is left in the pipe. Not after a timeout: a child the tool
                 // started may still hold the pipe open, and the read would wait for it.
                 if !collected.timedOut { collected.append(output.fileHandleForReading.readDataToEndOfFile()) }
-                continuation.resume(returning: Output(
-                    status: process.terminationStatus, data: collected.data, timedOut: collected.timedOut
-                ))
+                continuation.resume(
+                    returning: Output(
+                        status: process.terminationStatus, data: collected.data, timedOut: collected.timedOut
+                    ))
             }
             do {
                 try process.run()

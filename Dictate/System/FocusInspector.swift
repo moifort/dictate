@@ -34,9 +34,9 @@ final class FocusInspector: FocusInspecting, FieldReading {
 
     func focusedField() async -> (any ReadableField)? {
         guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier,
-              let focused = await AXReader.read({ ax in
-                  ax.focusedElement(pid: pid).flatMap { ax.isSecure($0) ? nil : AXElement($0) }
-              })
+            let focused = await AXReader.read({ ax in
+                ax.focusedElement(pid: pid).flatMap { ax.isSecure($0) ? nil : AXElement($0) }
+            })
         else { return nil }
         return AccessibilityField(element: focused)
     }
@@ -121,13 +121,16 @@ nonisolated final class AXReader {
         }
         // Rich editors and web `contenteditable` expose a selection and a settable value.
         let settable = isSettable(focused, kAXValueAttribute)
-        let hasSelection = copyValue(focused, kAXSelectedTextRangeAttribute) != nil
+        let hasSelection =
+            copyValue(focused, kAXSelectedTextRangeAttribute) != nil
             // A page edited as a whole (Mail's message body) is focused as its web
             // area, which only exposes text markers; its value is settable when editable.
             || (role == Self.webAreaRole && copyValue(focused, Self.selectedTextMarkerRange) != nil)
         let editable = hasSelection && settable
         if !editable {
-            Log.dictation.notice("no editable focus: role \(role ?? "none", privacy: .public), selection \(hasSelection), settable \(settable), in time \(self.isWithinBudget())")
+            Log.dictation.notice(
+                "no editable focus: role \(role ?? "none", privacy: .public), selection \(hasSelection), settable \(settable), in time \(self.isWithinBudget())"
+            )
         }
         return editable
     }
@@ -160,7 +163,8 @@ nonisolated final class AXReader {
 
     private func selectedRange(_ element: AXUIElement) -> CFRange? {
         guard let value = copyValue(element, kAXSelectedTextRangeAttribute),
-              CFGetTypeID(value) == AXValueGetTypeID() else { return nil }
+            CFGetTypeID(value) == AXValueGetTypeID()
+        else { return nil }
         var range = CFRange()
         return AXValueGetValue(value as! AXValue, .cfRange, &range) ? range : nil
     }
@@ -198,7 +202,8 @@ nonisolated final class AXReader {
         }
         // AX ranges count UTF-16 units, like NSString.
         guard let value = copyString(element, kAXValueAttribute) as NSString?,
-              range.location + range.length <= value.length else { return nil }
+            range.location + range.length <= value.length
+        else { return nil }
         return value.substring(with: NSRange(location: range.location, length: range.length))
     }
 
@@ -307,7 +312,8 @@ private final class AccessibilityField: ReadableField {
         // worth copying, and the field is read twice per dictation.
         let count = ax.copyValue(element, kAXNumberOfCharactersAttribute) as? Int
         guard count.map({ $0 <= maxLength }) ?? true,
-              let text = ax.copyString(element, kAXValueAttribute) else { return nil }
+            let text = ax.copyString(element, kAXValueAttribute)
+        else { return nil }
         let length = (text as NSString).length
         // Not every app reports the length: the copy is checked too.
         guard length <= maxLength else { return nil }

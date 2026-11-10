@@ -23,6 +23,10 @@ jobs:
       - name: Set up Xcode 27 and the project
         uses: ./.github/actions/setup-xcode
 
+      # Xcode's own swift-format, with the repository's .swift-format.
+      - name: Check the formatting
+        run: swift format lint --strict -r Dictate DictateTests Packages/DictateKit Package.swift
+
       - name: Restore the Debug build
         id: derived-data
         uses: ./.github/actions/derived-data
@@ -45,8 +49,16 @@ jobs:
         run: scripts/check-packages.sh
 
       # The microphone, audio analysis and Parakeet package has its own tests.
+      # A warning in its own code fails, as the app's do (project.yml); not
+      # in FluidAudio's, nor a deprecation, a migration to plan.
       - name: Run the DictateKit tests
-        run: swift test --package-path Packages/DictateKit
+        run: |
+          set -euo pipefail
+          swift test --package-path Packages/DictateKit 2>&1 | tee "$RUNNER_TEMP/dictatekit.log"
+          if grep -E "/Packages/DictateKit/(Sources|Tests)/[^ ]*: warning:" "$RUNNER_TEMP/dictatekit.log" | grep -v DeprecatedDeclaration; then
+            echo "::error::DictateKit builds with warnings"
+            exit 1
+          fi
 
       # Builds the root manifest the way an app depending on this repository does,
       # in a copy so that the app's Package.resolved stays as it is.
