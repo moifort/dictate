@@ -42,14 +42,15 @@ struct Uninstaller {
         alert.addButton(withTitle: String(localized: "Désinstaller")).hasDestructiveAction = true
         alert.addButton(withTitle: String(localized: "Annuler"))
         guard alert.runModal() == .alertFirstButtonReturn else { return }
-        run()
+        Task { await run() }
     }
 
-    func run() {
+    func run() async {
         Log.app.info("uninstalling \(bundleIdentifier, privacy: .public)")
-        try? SMAppService.mainApp.unregister()
-        resetPrivacyGrants()
+        try? await SMAppService.mainApp.unregister()
+        await resetPrivacyGrants()
         UserDefaults.standard.removePersistentDomain(forName: bundleIdentifier)
+        Self.removeAPIKeys()
 
         let existing = (leftovers + (removesBundle ? [bundle] : []))
             .filter { FileManager.default.fileExists(atPath: $0.path) }
@@ -64,11 +65,16 @@ struct Uninstaller {
 
     /// Best effort: grants stored in the system database need an admin, and
     /// macOS drops them anyway once the app is gone from the disk.
-    private func resetPrivacyGrants() {
-        let tccutil = Process()
-        tccutil.executableURL = URL(filePath: "/usr/bin/tccutil")
-        tccutil.arguments = ["reset", "All", bundleIdentifier]
-        try? tccutil.run()
-        tccutil.waitUntilExit()
+    private func resetPrivacyGrants() async {
+        do {
+            _ = try await Subprocess.run(URL(filePath: "/usr/bin/tccutil"), ["reset", "All", bundleIdentifier], timeout: .seconds(10))
+        } catch {
+            Log.app.error("tccutil could not run: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    /// The keys live in the keychain, which the Trash does not reach.
+    static func removeAPIKeys(_ store: (APIProvider) -> SecretStore = { KeychainSecret(account: $0.keychainAccount) }) {
+        for provider in APIProvider.allCases { store(provider).write("") }
     }
 }
