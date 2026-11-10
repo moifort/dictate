@@ -17,9 +17,7 @@ final class EvaluationCorpus {
     /// One folder per bundle identifier, like the statistics: a Debug build
     /// must not mix its test dictations into the release's corpus.
     static var defaultFolder: URL {
-        URL.applicationSupportDirectory
-            .appending(path: "Dictate/Corpus", directoryHint: .isDirectory)
-            .appending(path: Bundle.main.bundleIdentifier ?? "Dictate", directoryHint: .isDirectory)
+        AppPaths().corpus
     }
 
     init(folder: URL = EvaluationCorpus.defaultFolder) {

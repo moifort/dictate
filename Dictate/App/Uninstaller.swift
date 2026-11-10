@@ -5,24 +5,19 @@ import ServiceManagement
 /// rather than being deleted, so a mistaken click can still be undone.
 struct Uninstaller {
     let bundle: URL
-    let bundleIdentifier: String
-    let home: URL
+    let paths: AppPaths
+
+    var bundleIdentifier: String { paths.identifier }
 
     init(bundle: Bundle = .main, home: URL = .homeDirectory) {
         self.bundle = bundle.bundleURL
-        bundleIdentifier = bundle.bundleIdentifier ?? "com.thibautmottet.dictate"
-        self.home = home
+        paths = AppPaths(
+            identifier: bundle.bundleIdentifier ?? AppIdentity.developerID,
+            library: home.appending(path: "Library", directoryHint: .isDirectory)
+        )
     }
 
-    /// Models, statistics and caches. The models alone weigh a few gigabytes.
-    var leftovers: [URL] {
-        let library = home.appending(path: "Library", directoryHint: .isDirectory)
-        return [
-            library.appending(path: "Application Support/Dictate", directoryHint: .isDirectory),
-            library.appending(path: "Caches/\(bundleIdentifier)", directoryHint: .isDirectory),
-            library.appending(path: "HTTPStorages/\(bundleIdentifier)", directoryHint: .isDirectory),
-        ]
-    }
+    var leftovers: [URL] { paths.leftovers }
 
     /// A Debug build runs from DerivedData: trashing it would only break the next build.
     var removesBundle: Bool {

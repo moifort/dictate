@@ -137,7 +137,7 @@ nonisolated final class QueueCapture: @unchecked Sendable {
     private static let bufferCount = 4
 
     private var queue: AudioQueueRef?
-    private let callbacks = DispatchQueue(label: "com.thibautmottet.dictate.microphone", qos: .userInteractive)
+    private let callbacks = DispatchQueue(label: "\(LogSubsystem.name).microphone", qos: .userInteractive)
 
     init(onBuffer: @escaping @Sendable (AVAudioPCMBuffer) -> Void) throws {
         var description = AudioStreamBasicDescription(

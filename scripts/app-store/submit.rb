@@ -5,7 +5,7 @@
 require_relative "asc"
 
 marketing, build_number = ARGV.fetch(0), ARGV.fetch(1)
-app = ASC.get("/v1/apps?filter[bundleId]=com.polyforms.dictate")["data"].first or abort("No Dictate app")
+app = ASC.get("/v1/apps?filter[bundleId]=#{ASC::BUNDLE_ID}")["data"].first or abort("No Dictate app")
 version = ASC.get("/v1/apps/#{app['id']}/appStoreVersions?filter[platform]=MAC_OS&filter[versionString]=#{marketing}")["data"].first or abort("No App Store version #{marketing}")
 
 # App Store Connect takes several minutes to process an upload.

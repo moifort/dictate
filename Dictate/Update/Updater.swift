@@ -286,7 +286,7 @@ final class Updater {
     }
 
     /// The identifiers Dictate ships under, old and new (Polyforms).
-    static let releaseIdentifiers = ["com.thibautmottet.dictate", "com.polyforms.dictate"]
+    static let releaseIdentifiers = AppIdentity.releases
 
     /// Same app, and the same team when this build carries one.
     static func expectation(bundle: Bundle = .main) -> UpdateInstaller.Expectation {
@@ -298,7 +298,7 @@ final class Updater {
            let info = info as? [String: Any] {
             team = info[kSecCodeInfoTeamIdentifier as String] as? String
         }
-        let identifier = bundle.bundleIdentifier ?? releaseIdentifiers[0]
+        let identifier = bundle.bundleIdentifier ?? AppIdentity.developerID
         return .init(
             bundleIdentifier: identifier,
             teamIdentifier: team,

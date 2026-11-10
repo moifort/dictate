@@ -9,7 +9,7 @@
 # once in App Store Connect (docs/app-store.md).
 require_relative "asc"
 
-BUNDLE_ID = "com.polyforms.dictate"
+BUNDLE_ID = ASC::BUNDLE_ID
 SITE = "https://dictate.polyforms.co/"
 SUPPORT = "https://github.com/moifort/dictate/issues"
 

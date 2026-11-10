@@ -26,8 +26,10 @@ cd "$(dirname "$0")/.."
 DESTINATION=export
 [ "${1:-}" = "--upload" ] && DESTINATION=upload
 
-TEAM_ID=46C337T7YN
-BUNDLE_ID=com.polyforms.dictate
+# Read from project.yml, their one source.
+TEAM_ID=$(awk '/DEVELOPMENT_TEAM:/ { print $2; exit }' project.yml)
+BUNDLE_ID=$(awk '/^        AppStore:/ { found = 1 } found && /PRODUCT_BUNDLE_IDENTIFIER:/ { print $2; exit }' project.yml)
+[ -n "$TEAM_ID" ] && [ -n "$BUNDLE_ID" ] || { echo "Team ID or App Store bundle ID not found in project.yml" >&2; exit 1; }
 MARKETING="${MARKETING:-$(git describe --tags --abbrev=0 --match 'v*' | sed 's/^v//')}"
 BUILD="${BUILD:-$(git rev-list --count HEAD)}"
 OUT=build/app-store

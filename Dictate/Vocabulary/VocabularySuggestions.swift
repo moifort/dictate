@@ -140,10 +140,7 @@ final class VocabularySuggestions {
 
     /// One folder per bundle identifier, like the corpus.
     static var defaultFile: URL {
-        URL.applicationSupportDirectory
-            .appending(path: "Dictate/Vocabulary", directoryHint: .isDirectory)
-            .appending(path: Bundle.main.bundleIdentifier ?? "Dictate", directoryHint: .isDirectory)
-            .appending(path: "suggestions.json")
+        AppPaths().vocabularySuggestions
     }
 
     init(file: URL = VocabularySuggestions.defaultFile) {

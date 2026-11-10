@@ -22,7 +22,7 @@ nonisolated struct KeychainError: LocalizedError, Equatable {
 
 /// A generic password in the login keychain.
 nonisolated struct KeychainSecret: SecretStore {
-    var service = (Bundle.main.bundleIdentifier ?? "com.polyforms.dictate") + ".anthropic"
+    var service = AppIdentity.current + ".anthropic"
     var account: String
 
     private var query: [String: Any] {

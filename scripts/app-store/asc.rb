@@ -10,6 +10,9 @@ require "net/http"
 require "base64"
 
 module ASC
+  # The App Store build's identifier (project.yml, AppStore configuration).
+  BUNDLE_ID = "com.polyforms.dictate"
+
   module_function
 
   def token

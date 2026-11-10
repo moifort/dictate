@@ -5,7 +5,7 @@
 require_relative "asc"
 
 marketing = ARGV.fetch(0)
-app = ASC.get("/v1/apps?filter[bundleId]=com.polyforms.dictate")["data"].first or abort("No Dictate app in App Store Connect")
+app = ASC.get("/v1/apps?filter[bundleId]=#{ASC::BUNDLE_ID}")["data"].first or abort("No Dictate app in App Store Connect")
 versions = ASC.get("/v1/apps/#{app['id']}/appStoreVersions?filter[platform]=MAC_OS")["data"]
 if versions.any? { |v| v["attributes"]["versionString"] == marketing }
   puts "App Store version #{marketing} already exists"

@@ -60,7 +60,7 @@ enum TranscriberState: Equatable {
 /// Where the models are downloaded, and what they take on disk.
 nonisolated enum ModelStorage {
     static var defaultDirectory: URL {
-        URL.applicationSupportDirectory.appending(path: "Dictate/Models", directoryHint: .isDirectory)
+        AppPaths().models
     }
 
     /// Whisper was offered until it was removed (2026-10-14): its model,

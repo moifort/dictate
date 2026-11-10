@@ -1,6 +1,7 @@
 import Foundation
 import Network
 import Observation
+import DictateKit
 
 /// Whether the Mac has a usable network path, for the enhancers that need
 /// one. Assumes online until the system says otherwise.
@@ -18,7 +19,7 @@ final class NetworkMonitor {
                 Log.app.info("network \(online ? "reachable" : "unreachable", privacy: .public)")
             }
         }
-        monitor.start(queue: DispatchQueue(label: "com.thibautmottet.dictate.network"))
+        monitor.start(queue: DispatchQueue(label: "\(LogSubsystem.name).network"))
     }
 
     func stop() {

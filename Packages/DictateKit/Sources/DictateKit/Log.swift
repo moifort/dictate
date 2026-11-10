@@ -1,7 +1,11 @@
 import os
 
-/// The same subsystem and category as Dictate's own dictation log:
-/// `log stream --predicate 'subsystem == "com.thibautmottet.dictate"'`.
+/// Where Dictate and DictateKit log, one subsystem for both:
+/// `log stream --predicate 'subsystem == "com.polyforms.dictate"'`.
+public nonisolated enum LogSubsystem {
+    public static let name = "com.polyforms.dictate"
+}
+
 nonisolated enum Log {
-    static let dictation = Logger(subsystem: "com.thibautmottet.dictate", category: "dictation")
+    static let dictation = Logger(subsystem: LogSubsystem.name, category: "dictation")
 }

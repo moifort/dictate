@@ -12,9 +12,7 @@ final class DictationHistory {
     /// One file per bundle identifier: a Debug build must not mix its test
     /// dictations into the statistics of the installed release.
     static var defaultFile: URL {
-        URL.applicationSupportDirectory
-            .appending(path: "Dictate/Statistics", directoryHint: .isDirectory)
-            .appending(path: "\(Bundle.main.bundleIdentifier ?? "Dictate").jsonl")
+        AppPaths().statistics
     }
 
     init(file: URL = DictationHistory.defaultFile) {

@@ -8,7 +8,7 @@ require "digest"
 
 ROOT = File.expand_path("../../docs/app-store-screenshots", __dir__)
 
-app = ASC.get("/v1/apps?filter[bundleId]=com.polyforms.dictate")["data"].first or abort("No Dictate app")
+app = ASC.get("/v1/apps?filter[bundleId]=#{ASC::BUNDLE_ID}")["data"].first or abort("No Dictate app")
 version = ASC.get("/v1/apps/#{app['id']}/appStoreVersions?filter[platform]=MAC_OS")["data"]
   .find { |v| %w[PREPARE_FOR_SUBMISSION DEVELOPER_REJECTED REJECTED METADATA_REJECTED].include?(v["attributes"]["appStoreState"]) } or abort("No editable version")
 
