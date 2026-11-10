@@ -10,12 +10,13 @@ nonisolated struct FieldSnapshot: Equatable, Sendable {
 /// A text field that can be read again later, even once the focus moved on.
 protocol ReadableField: AnyObject {
     /// Nil when the field is gone, became secure or no longer exposes its text.
-    func snapshot() -> FieldSnapshot?
+    /// Async: an app slow to answer must not hold the main actor.
+    func snapshot() async -> FieldSnapshot?
 }
 
 protocol FieldReading: AnyObject {
     /// The focused text field; nil for password fields and when nothing readable has focus.
-    func focusedField() -> (any ReadableField)?
+    func focusedField() async -> (any ReadableField)?
 }
 
 /// A field caught right before a paste, to be compared with what it becomes.
@@ -43,7 +44,8 @@ nonisolated struct InsertionFollowUp: Equatable, Sendable {
 /// `followUp(_:inserted:)` once the paste is posted.
 ///
 /// A second dictation into the same field would blur the comparison: `settle()`
-/// reads every waiting field at once, and should be called when one starts.
+/// reads every waiting field at once, and should be called when one starts and
+/// awaited before it pastes.
 final class PostInsertionObserver {
     /// Long enough to fix a word or two, short enough to precede most sends.
     static let defaultDelay: Duration = .seconds(5)
@@ -64,8 +66,8 @@ final class PostInsertionObserver {
     }
 
     /// The focused field and its content. Nil when it cannot be read.
-    func watchFocusedField() -> InsertionWatch? {
-        guard let field = reader.focusedField(), let before = field.snapshot() else { return nil }
+    func watchFocusedField() async -> InsertionWatch? {
+        guard let field = await reader.focusedField(), let before = await field.snapshot() else { return nil }
         return InsertionWatch(field: field, before: before)
     }
 
@@ -77,21 +79,22 @@ final class PostInsertionObserver {
             waiting[id] = Waiter(watch: watch, inserted: inserted, continuation: continuation)
             Task { [delay] in
                 try? await Task.sleep(for: delay)
-                self.complete(id)
+                await self.complete(id)
             }
         }
     }
 
-    /// Reads every waiting field now.
-    func settle() {
-        for id in Array(waiting.keys) { complete(id) }
+    /// Reads every waiting field now, and returns once they are read.
+    func settle() async {
+        for id in Array(waiting.keys) { await complete(id) }
     }
 
     var hasPendingFollowUps: Bool { !waiting.isEmpty }
 
-    private func complete(_ id: UUID) {
+    private func complete(_ id: UUID) async {
+        // Removed before the read, so the timer and `settle()` read it once.
         guard let waiter = waiting.removeValue(forKey: id) else { return }
-        let followUp = waiter.watch.field.snapshot().map {
+        let followUp = await waiter.watch.field.snapshot().map {
             InsertionFollowUp(before: waiter.watch.before, after: $0, inserted: waiter.inserted)
         }
         waiter.continuation.resume(returning: followUp)

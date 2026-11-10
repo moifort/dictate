@@ -43,8 +43,10 @@ protocol FocusInspecting: AnyObject {
     /// Text is nil for password fields and when the app does not expose it.
     /// Async so the controller can run it alongside the transcription.
     func fieldContext(maxLength: Int) async -> FieldContext
-    /// Whether the focused UI element accepts text input.
-    func hasEditableFocus() -> Bool
+    /// Whether the focused UI element accepts text input. Async and bounded
+    /// in time: it runs right before the paste, and a busy app must not
+    /// freeze the main actor meanwhile.
+    func hasEditableFocus() async -> Bool
 }
 
 protocol TextInserting: AnyObject {

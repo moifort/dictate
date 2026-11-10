@@ -71,7 +71,7 @@ struct EvaluationCorpusTests {
     @Test func recordWaitsForTheUsersFixes() async {
         let field = CorpusFakeField(text: "Salut, ")
         let observer = PostInsertionObserver(reader: CorpusFakeReader(field: field), delay: .milliseconds(10))
-        let watch = observer.watchFocusedField()!
+        let watch = await observer.watchFocusedField()!
         field.text = "Salut, Fais un push sur main."
         let followUp = Task { await observer.followUp(watch, inserted: "Fais un push.") }
         let corpus = EvaluationCorpus(folder: folder)
@@ -216,7 +216,7 @@ private final class CorpusFakeField: ReadableField {
 
     init(text: String) { self.text = text }
 
-    func snapshot() -> FieldSnapshot? {
+    func snapshot() async -> FieldSnapshot? {
         FieldSnapshot(text: text, selection: NSRange(location: (text as NSString).length, length: 0))
     }
 }
@@ -227,5 +227,5 @@ private final class CorpusFakeReader: FieldReading {
 
     init(field: CorpusFakeField?) { self.field = field }
 
-    func focusedField() -> (any ReadableField)? { field }
+    func focusedField() async -> (any ReadableField)? { field }
 }

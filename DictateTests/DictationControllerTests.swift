@@ -893,7 +893,7 @@ private final class FakeFocus: FocusInspecting {
 
     func frontmostBundleID() -> String? { bundleID }
     func frontmostAppName() -> String? { "Terminal" }
-    func hasEditableFocus() -> Bool { editable }
+    func hasEditableFocus() async -> Bool { editable }
 
     func fieldContext(maxLength: Int) async -> FieldContext {
         fieldContextReads += 1
@@ -912,12 +912,12 @@ private final class FakeFieldReader: FieldReading, ReadableField {
 
     init(text: String) { self.text = text }
 
-    func focusedField() -> (any ReadableField)? {
+    func focusedField() async -> (any ReadableField)? {
         focusedFieldCalls += 1
         return self
     }
 
-    func snapshot() -> FieldSnapshot? {
+    func snapshot() async -> FieldSnapshot? {
         snapshots += 1
         return FieldSnapshot(text: text, selection: NSRange(location: (text as NSString).length, length: 0))
     }

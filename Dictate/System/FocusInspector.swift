@@ -3,11 +3,11 @@ import AppKit
 import ApplicationServices
 
 /// Uses the Accessibility API to find out whether a text field has focus.
+///
+/// Every read runs off the main actor under one overall deadline: an app
+/// that is slow to answer (Electron, a busy browser) can hold each call for
+/// the whole messaging timeout, and the reads sit right before the paste.
 final class FocusInspector: FocusInspecting, FieldReading {
-    private static let textRoles: Set<String> = [
-        kAXTextFieldRole, kAXTextAreaRole, kAXComboBoxRole, "AXSearchField",
-    ]
-
     private var electronEnabledPIDs: Set<pid_t> = []
 
     /// Also turns on the accessibility tree of Electron apps (VS Code, Slack…),
@@ -22,62 +22,42 @@ final class FocusInspector: FocusInspecting, FieldReading {
         NSWorkspace.shared.frontmostApplication?.localizedName
     }
 
-    func hasEditableFocus() -> Bool {
-        let ax = AXReader()
-        guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier,
-              let focused = ax.focusedElement(pid: pid) else { return false }
-
-        let role = ax.copyString(focused, kAXRoleAttribute)
-        if let role, Self.textRoles.contains(role) {
-            return true
-        }
-        // Rich editors and web `contenteditable` expose a selection and a settable value.
-        var settable: DarwinBoolean = false
-        AXUIElementIsAttributeSettable(focused, kAXValueAttribute as CFString, &settable)
-        let hasSelection = ax.copyValue(focused, kAXSelectedTextRangeAttribute) != nil
-            // A page edited as a whole (Mail's message body) is focused as its web
-            // area, which only exposes text markers; its value is settable when editable.
-            || (role == Self.webAreaRole && ax.copyValue(focused, Self.selectedTextMarkerRange) != nil)
-        let editable = hasSelection && settable.boolValue
-        if !editable {
-            Log.dictation.notice("no editable focus: role \(role ?? "none", privacy: .public), selection \(hasSelection), settable \(settable.boolValue)")
-        }
-        return editable
+    func hasEditableFocus() async -> Bool {
+        guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier else { return false }
+        return await AXReader.read { $0.hasEditableFocus(pid: pid) }
     }
-
-    private static let webAreaRole = "AXWebArea"
-    private static let selectedTextMarkerRange = "AXSelectedTextMarkerRange"
 
     func fieldContext(maxLength: Int) async -> FieldContext {
         guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier else { return FieldContext() }
-        return await Self.fieldContext(pid: pid, maxLength: maxLength)
+        return await AXReader.read { $0.fieldContext(pid: pid, maxLength: maxLength) }
     }
 
-    private nonisolated static let readBudget = Duration.seconds(1)
-
-    /// Off the main actor: an Electron app can hold each call for the whole
-    /// messaging timeout, and the transcription runs meanwhile.
-    @concurrent
-    private nonisolated static func fieldContext(pid: pid_t, maxLength: Int) async -> FieldContext {
-        // A busy app would otherwise block the dictation for the default 6 s per
-        // call; the budget caps the whole read, whatever the number of calls.
-        AXReader(deadline: .now + readBudget).fieldContext(pid: pid, maxLength: maxLength)
-    }
-
-    func focusedField() -> (any ReadableField)? {
-        let ax = AXReader()
+    func focusedField() async -> (any ReadableField)? {
         guard let pid = NSWorkspace.shared.frontmostApplication?.processIdentifier,
-              let focused = ax.focusedElement(pid: pid), !ax.isSecure(focused) else { return nil }
+              let focused = await AXReader.read({ ax in
+                  ax.focusedElement(pid: pid).flatMap { ax.isSecure($0) ? nil : AXElement($0) }
+              })
+        else { return nil }
         return AccessibilityField(element: focused)
     }
 
+    /// Off the main actor and not awaited: the app builds its tree in the background.
     private func enableManualAccessibility(for pid: pid_t) {
         guard !electronEnabledPIDs.contains(pid) else { return }
         electronEnabledPIDs.insert(pid)
-        let element = AXUIElementCreateApplication(pid)
-        AXUIElementSetMessagingTimeout(element, 0.5)
-        AXUIElementSetAttributeValue(element, "AXManualAccessibility" as CFString, kCFBooleanTrue)
+        Task.detached(priority: .userInitiated) {
+            let element = AXUIElementCreateApplication(pid)
+            AXUIElementSetMessagingTimeout(element, AXReader.messagingTimeout)
+            AXUIElementSetAttributeValue(element, "AXManualAccessibility" as CFString, kCFBooleanTrue)
+        }
     }
+}
+
+/// An accessibility element handed from one thread to another. Each read
+/// uses it from one thread at a time, which the AX API allows.
+nonisolated struct AXElement: @unchecked Sendable {
+    let element: AXUIElement
+    init(_ element: AXUIElement) { self.element = element }
 }
 
 /// Accessibility reads, optionally capped by a deadline. Not shared between
@@ -87,10 +67,45 @@ private nonisolated final class AXReader {
     /// Web pages nest deeply; past this, the focused element is not in a page.
     private static let maxWebAreaDepth = 60
 
+    /// The overall time one read may take, whatever the number of calls: a
+    /// busy app would otherwise block for the default 6 s per call.
+    static let readBudget = Duration.seconds(1)
+
     private var deadline: ContinuousClock.Instant?
 
     init(deadline: ContinuousClock.Instant? = nil) {
         self.deadline = deadline
+    }
+
+    /// Runs `body` off the main actor with a reader capped by `budget`.
+    @concurrent
+    static func read<T: Sendable>(budget: Duration = readBudget, _ body: @Sendable (AXReader) -> T) async -> T {
+        body(AXReader(deadline: .now + budget))
+    }
+
+    private static let textRoles: Set<String> = [
+        kAXTextFieldRole, kAXTextAreaRole, kAXComboBoxRole, "AXSearchField",
+    ]
+    private static let webAreaRole = "AXWebArea"
+    private static let selectedTextMarkerRange = "AXSelectedTextMarkerRange"
+
+    func hasEditableFocus(pid: pid_t) -> Bool {
+        guard let focused = focusedElement(pid: pid) else { return false }
+        let role = copyString(focused, kAXRoleAttribute)
+        if let role, Self.textRoles.contains(role) {
+            return true
+        }
+        // Rich editors and web `contenteditable` expose a selection and a settable value.
+        let settable = isSettable(focused, kAXValueAttribute)
+        let hasSelection = copyValue(focused, kAXSelectedTextRangeAttribute) != nil
+            // A page edited as a whole (Mail's message body) is focused as its web
+            // area, which only exposes text markers; its value is settable when editable.
+            || (role == Self.webAreaRole && copyValue(focused, Self.selectedTextMarkerRange) != nil)
+        let editable = hasSelection && settable
+        if !editable {
+            Log.dictation.notice("no editable focus: role \(role ?? "none", privacy: .public), selection \(hasSelection), settable \(settable), in time \(self.isWithinBudget())")
+        }
+        return editable
     }
 
     func fieldContext(pid: pid_t, maxLength: Int) -> FieldContext {
@@ -218,6 +233,13 @@ private nonisolated final class AXReader {
         if result == .cannotComplete, deadline != nil { deadline = .now }
     }
 
+    private func isSettable(_ element: AXUIElement, _ attribute: String) -> Bool {
+        guard isWithinBudget() else { return false }
+        var settable: DarwinBoolean = false
+        noteTimeout(AXUIElementIsAttributeSettable(element, attribute as CFString, &settable))
+        return settable.boolValue
+    }
+
     func copyValue(_ element: AXUIElement, _ attribute: String) -> CFTypeRef? {
         guard isWithinBudget() else { return nil }
         var value: CFTypeRef?
@@ -243,20 +265,23 @@ private nonisolated final class AXReader {
 /// again after the user moved to another field or app.
 private final class AccessibilityField: ReadableField {
     /// Beyond this, the field is a document rather than a message: not worth copying.
-    private static let maxLength = 200_000
+    private nonisolated static let maxLength = 200_000
 
-    private let element: AXUIElement
+    private let element: AXElement
 
-    init(element: AXUIElement) {
+    init(element: AXElement) {
         self.element = element
     }
 
-    func snapshot() -> FieldSnapshot? {
-        let ax = AXReader()
+    func snapshot() async -> FieldSnapshot? {
+        await AXReader.read { [element] ax in Self.snapshot(element.element, ax) }
+    }
+
+    private nonisolated static func snapshot(_ element: AXUIElement, _ ax: AXReader) -> FieldSnapshot? {
         guard !ax.isSecure(element),
               let text = ax.copyString(element, kAXValueAttribute) else { return nil }
         let length = (text as NSString).length
-        guard length <= Self.maxLength else { return nil }
+        guard length <= maxLength else { return nil }
         // Without a selection, assume the caret sits at the end, where a paste usually lands.
         var selection = CFRange(location: length, length: 0)
         if let value = ax.copyValue(element, kAXSelectedTextRangeAttribute), CFGetTypeID(value) == AXValueGetTypeID() {

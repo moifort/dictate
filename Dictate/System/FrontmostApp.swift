@@ -14,7 +14,7 @@ final class FrontmostApp: FocusInspecting, FieldReading {
 
     func fieldContext(maxLength: Int) async -> FieldContext { FieldContext() }
 
-    func hasEditableFocus() -> Bool { false }
+    func hasEditableFocus() async -> Bool { false }
 
-    func focusedField() -> (any ReadableField)? { nil }
+    func focusedField() async -> (any ReadableField)? { nil }
 }

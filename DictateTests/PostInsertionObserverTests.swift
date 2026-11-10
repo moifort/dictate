@@ -65,7 +65,7 @@ struct PostInsertionObserverTests {
     @Test func readsTheSameFieldAgainAfterTheDelay() async {
         let field = FakeField(text: "Salut, ")
         let observer = PostInsertionObserver(reader: FakeReader(field: field), delay: .milliseconds(20))
-        let watch = observer.watchFocusedField()
+        let watch = await observer.watchFocusedField()
         #expect(watch?.before.text == "Salut, ")
 
         field.text = "Salut, Fais un pouche."
@@ -81,24 +81,24 @@ struct PostInsertionObserverTests {
     @Test func settleReadsWaitingFieldsAtOnce() async {
         let field = FakeField(text: "")
         let observer = PostInsertionObserver(reader: FakeReader(field: field), delay: .seconds(60))
-        let watch = observer.watchFocusedField()!
+        let watch = await observer.watchFocusedField()!
         field.text = "Premier."
         let followUp = Task { await observer.followUp(watch, inserted: "Premier.") }
         while !observer.hasPendingFollowUps { await Task.yield() }
-        observer.settle()
+        await observer.settle()
         field.text = "Premier. Second."
         #expect(await followUp.value?.corrected == "Premier.")
     }
 
-    @Test func noFocusedFieldMeansNothingToWatch() {
+    @Test func noFocusedFieldMeansNothingToWatch() async {
         let observer = PostInsertionObserver(reader: FakeReader(field: nil))
-        #expect(observer.watchFocusedField() == nil)
+        #expect(await observer.watchFocusedField() == nil)
     }
 
     @Test func aFieldGoneByThenGivesNoFollowUp() async {
         let field = FakeField(text: "Salut, ")
         let observer = PostInsertionObserver(reader: FakeReader(field: field), delay: .milliseconds(10))
-        let watch = observer.watchFocusedField()!
+        let watch = await observer.watchFocusedField()!
         field.readable = false
         #expect(await observer.followUp(watch, inserted: "OK") == nil)
     }
@@ -112,7 +112,7 @@ private final class FakeField: ReadableField {
     init(text: String) { self.text = text }
 
     /// The caret at the end, as after typing or pasting.
-    func snapshot() -> FieldSnapshot? {
+    func snapshot() async -> FieldSnapshot? {
         readable ? FieldSnapshot(text: text, selection: NSRange(location: (text as NSString).length, length: 0)) : nil
     }
 }
@@ -123,5 +123,5 @@ private final class FakeReader: FieldReading {
 
     init(field: FakeField?) { self.field = field }
 
-    func focusedField() -> (any ReadableField)? { field }
+    func focusedField() async -> (any ReadableField)? { field }
 }

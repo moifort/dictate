@@ -92,6 +92,9 @@ final class DictationController {
     /// The engine is shared: transcriptions run one after the other.
     @ObservationIgnored private var transcribing: Task<Void, Never>?
     @ObservationIgnored private var starting: Task<Void, Never>?
+    /// The previous dictations' fields being read again, which must be over
+    /// before the next paste changes them.
+    @ObservationIgnored private var settling: Task<Void, Never>?
     /// Releases the recording once it reaches `maximumRecording`.
     @ObservationIgnored private var recordingLimit: Task<Void, Never>?
     /// Longest recording before it is released on its own: a key-up nobody
@@ -176,7 +179,9 @@ final class DictationController {
             if let engine = loadingEngine() { return finish(.modelLoading(engine)) }
             cutTail()
             // The previous dictation's field is read now, before this one lands in it.
-            insertionObserver?.settle()
+            if let observer = insertionObserver {
+                settling = Task { await observer.settle() }
+            }
             bundleID = focus.frontmostBundleID()
             context = DictationContext(
                 category: AppCategory(bundleID: bundleID),
@@ -383,14 +388,15 @@ final class DictationController {
 
         // Texts land in release order, even when Claude was faster on a later one.
         await previous?.value
+        await settling?.value
         let start = clock.now
         let outcome: DictationOutcome
-        if focus.hasEditableFocus() {
+        if await focus.hasEditableFocus() {
             let keep = keepSamples() && onSample != nil
             let follow = followInsertions() && onFollowUp != nil
             let observer = keep || follow ? insertionObserver : nil
             // Read before the paste: Cmd+V lands some time after it is posted.
-            let watch = observer?.watchFocusedField()
+            let watch = await observer?.watchFocusedField()
             // The app in front now, not at the press: the text lands here.
             let submit = AutoSend.applies(to: focus.frontmostBundleID(), in: autoSendApps())
             await inserter.paste(text, submit: submit)
