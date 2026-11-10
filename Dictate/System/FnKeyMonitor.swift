@@ -11,10 +11,10 @@ final class FnKeyMonitor {
 
     /// Switching keys mid-press drops the press rather than leaving it stuck.
     var key: PushToTalkKey = .fn {
-        didSet { if key != oldValue { gesture = FnKeyGesture() } }
+        didSet { if key != oldValue { gesture = key.gesture } }
     }
 
-    private var gesture = FnKeyGesture()
+    private var gesture = PushToTalkKey.fn.gesture
     private let watch = KeyStateWatch()
     private var tap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
@@ -97,7 +97,7 @@ final class FnKeyMonitor {
             flags.contains(key.flag) ? .fnDown(at: time) : .fnUp(at: time)
         case .flagsChanged:
             // Only a modifier going down counts: releasing Shift mid-dictation is not a shortcut.
-            flags.isDisjoint(with: otherModifiers) ? nil : .otherKeyDown(at: time)
+            flags.isDisjoint(with: otherModifiers) ? nil : .otherModifierDown(at: time)
         case .keyDown:
             .otherKeyDown(at: time)
         default:

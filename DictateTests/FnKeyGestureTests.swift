@@ -68,4 +68,27 @@ struct FnKeyGestureTests {
         var gesture = FnKeyGesture()
         #expect(gesture.resync(keyIsDown: false, at: 1) == nil)
     }
+
+    /// control held a while, then C: a shortcut, never a dictation of the room.
+    @Test func withControlAKeyCancelsEvenLate() {
+        var gesture = PushToTalkKey.control.gesture
+        #expect(gesture.handle(.fnDown(at: 10)) == .pressed)
+        #expect(gesture.handle(.otherKeyDown(at: 25)) == .cancelled)
+        #expect(gesture.handle(.fnUp(at: 26)) == nil)
+    }
+
+    /// Shift for a capital mid-dictation is not a shortcut: past the window, ignored.
+    @Test func withControlALateModifierIsIgnored() {
+        var gesture = PushToTalkKey.control.gesture
+        #expect(gesture.handle(.fnDown(at: 10)) == .pressed)
+        #expect(gesture.handle(.otherModifierDown(at: 11)) == nil)
+        #expect(gesture.handle(.fnUp(at: 12)) == .released)
+    }
+
+    @Test func withFnALateKeyIsStillIgnored() {
+        var gesture = PushToTalkKey.fn.gesture
+        #expect(gesture.handle(.fnDown(at: 10)) == .pressed)
+        #expect(gesture.handle(.otherKeyDown(at: 11)) == nil)
+        #expect(gesture.handle(.fnUp(at: 12)) == .released)
+    }
 }

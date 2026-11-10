@@ -3,8 +3,10 @@ import Foundation
 nonisolated enum FnKeyEvent: Equatable, Sendable {
     case fnDown(at: TimeInterval)
     case fnUp(at: TimeInterval)
-    /// Any other key or modifier pressed while `fn` may be held.
+    /// Any other key pressed while `fn` may be held.
     case otherKeyDown(at: TimeInterval)
+    /// Another modifier going down while `fn` may be held.
+    case otherModifierDown(at: TimeInterval)
 }
 
 nonisolated enum FnKeyGestureOutput: Equatable, Sendable {
@@ -19,8 +21,13 @@ nonisolated enum FnKeyGestureOutput: Equatable, Sendable {
 /// `minimumDuration`, or `fn` used as a modifier for another key within that
 /// same window, ends with `cancelled` instead of `released`. Past the window
 /// the user is dictating: a stray key is ignored and the dictation goes on.
+///
+/// With `cancelsOnAnyKey` (control), a key typed while the modifier is held
+/// cancels at any time: control held a while before a shortcut is a shortcut,
+/// and recording on would transcribe the room and paste it.
 nonisolated struct FnKeyGesture: Sendable {
     var minimumDuration: TimeInterval = 0.3
+    var cancelsOnAnyKey = false
 
     private var downAt: TimeInterval?
     private var interrupted = false
@@ -45,6 +52,11 @@ nonisolated struct FnKeyGesture: Sendable {
             return .pressed
 
         case .otherKeyDown(let time):
+            guard let start = downAt, !interrupted, cancelsOnAnyKey || time - start < minimumDuration else { return nil }
+            interrupted = true
+            return .cancelled
+
+        case .otherModifierDown(let time):
             guard let start = downAt, !interrupted, time - start < minimumDuration else { return nil }
             interrupted = true
             return .cancelled

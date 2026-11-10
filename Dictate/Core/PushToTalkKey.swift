@@ -51,6 +51,14 @@ nonisolated enum PushToTalkKey: String, CaseIterable, Identifiable, Sendable {
         }
     }
 
+    /// Control is mostly a shortcut modifier: a key typed while it is held is a
+    /// shortcut, however long it was held first. fn and ⌥Space keep the short
+    /// window, past which a stray key does not cost the dictation.
+    var cancelsOnAnyKey: Bool { self == .control }
+
+    /// A fresh gesture recognizer for this key.
+    var gesture: FnKeyGesture { FnKeyGesture(cancelsOnAnyKey: cancelsOnAnyKey) }
+
     /// Only fn has a system action of its own that must be disabled.
     var needsSystemKeyFreed: Bool { self == .fn }
 }
