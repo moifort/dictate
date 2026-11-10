@@ -6,12 +6,16 @@ import SwiftUI
 struct StatsView: View {
     let history: DictationHistory
     @AppStorage("stats.period") private var period: StatsPeriod = .week
+    @State private var statsMemo = Memo<StatsKey, DictationStats>()
+    @State private var seriesMemo = Memo<StatsKey, DictationSeries>()
 
     var body: some View {
         // Read on every change of the history, and again past midnight
-        // through the timeline, so "today" never goes stale.
+        // through the timeline, so "today" never goes stale. Worked out
+        // again only when the history, the period or the hour changed.
         TimelineView(.everyMinute) { context in
-            let stats = DictationStats(records: history.records, now: context.date)
+            let key = StatsKey(records: history.records, period: period, now: context.date)
+            let stats = statsMemo.value(for: key) { DictationStats(records: history.records, now: context.date) }
             Group {
                 if stats.isEmpty {
                     ContentUnavailableView(
@@ -20,7 +24,9 @@ struct StatsView: View {
                         description: Text("Maintenez la touche de dictée et parlez : vos statistiques apparaîtront ici.")
                     )
                 } else {
-                    let series = DictationSeries(records: history.records, period: period, now: context.date)
+                    let series = seriesMemo.value(for: key) {
+                        DictationSeries(records: history.records, period: period, now: context.date)
+                    }
                     ScrollView {
                         VStack(spacing: 12) {
                             // First and across the whole window: the figure

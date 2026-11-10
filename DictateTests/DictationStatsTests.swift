@@ -144,3 +144,28 @@ struct StatsFormatTests {
         #expect(parts.map(\.unit) == ["h", "min"])
     }
 }
+
+@MainActor
+struct StatsMemoTests {
+    @Test func aValueIsComputedOncePerKey() {
+        let memo = Memo<Int, String>()
+        var runs = 0
+        let compute = { () -> String in runs += 1; return "v\(runs)" }
+        #expect(memo.value(for: 1, compute) == "v1")
+        #expect(memo.value(for: 1, compute) == "v1")
+        #expect(memo.value(for: 2, compute) == "v2")
+        #expect(runs == 2)
+    }
+
+    /// A new dictation, another period or the next hour: worked out again.
+    @Test func theKeyFollowsTheHistoryThePeriodAndTheHour() {
+        let calendar = Calendar(identifier: .gregorian)
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let record = DictationRecord(date: now, words: 3, audio: 1, transcription: 0.2, enhancement: 1, insertion: 0)
+        let key = StatsKey(records: [record], period: .week, now: now, calendar: calendar)
+        #expect(key == StatsKey(records: [record], period: .week, now: now.addingTimeInterval(60), calendar: calendar))
+        #expect(key != StatsKey(records: [record, record], period: .week, now: now, calendar: calendar))
+        #expect(key != StatsKey(records: [record], period: .day, now: now, calendar: calendar))
+        #expect(key != StatsKey(records: [record], period: .week, now: now.addingTimeInterval(3_600), calendar: calendar))
+    }
+}

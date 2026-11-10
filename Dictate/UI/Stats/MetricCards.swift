@@ -115,8 +115,23 @@ struct LatencyCard: View {
     private let engine = TranscriptionEngine.parakeet
     /// The model picked; nil until the user picks one.
     @State private var focus = ScreenshotMode.reviewer
+    @State private var memo = Memo<Figures.Key, Figures>()
 
-    var body: some View {
+    /// Everything the card draws, worked out again only when the history,
+    /// the period, the hour or the model picked changed.
+    struct Figures {
+        struct Key: Equatable {
+            let stats: StatsKey
+            let focus: Reviewer?
+        }
+
+        let whole: DictationSeries
+        let shown: Reviewer?
+        let series: DictationSeries
+        let peak: Double
+    }
+
+    private func figures() -> Figures {
         let engineRecords = records.filter { $0.engine == engine }
         let whole = DictationSeries(records: engineRecords, period: period, now: now)
         let shown = Self.shownReviewer(focus, in: whole)
@@ -125,6 +140,12 @@ struct LatencyCard: View {
         let peak = (shown == nil ? [series] : whole.reviewers.map {
             DictationSeries(records: Self.records(engineRecords, reviewedBy: $0), period: period, now: now)
         }).map(Self.peak).max() ?? 0
+        return Figures(whole: whole, shown: shown, series: series, peak: peak)
+    }
+
+    var body: some View {
+        let figures = memo.value(for: .init(stats: StatsKey(records: records, period: period, now: now), focus: focus), figures)
+        let (whole, shown, series, peak) = (figures.whole, figures.shown, figures.series, figures.peak)
         StatsCard(title: "Délai d'affichage", symbol: "timer", color: StatsPalette.latency) {
             if let shown {
                 Picker("Relecture", selection: Binding(get: { shown }, set: { focus = $0 }).animation(.snappy)) {
