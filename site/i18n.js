@@ -125,6 +125,7 @@
     "aria.demo": "Demo",
     "aria.timeline": "How it works",
     "aria.prices": "Prices of the alternatives",
+    "aria.store": "Download on the Mac App Store",
     "meta.description": "Hold control, speak, release: clean text, polished for the context, appears wherever you type. Transcribed on your Mac, no account, free and open source."
   };
 

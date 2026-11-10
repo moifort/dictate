@@ -224,6 +224,14 @@ section {
 }
 .button.ghost:hover { background: rgba(0, 0, 0, 0.09); }
 
+/* Apple's own badge, unaltered: one file per language, as tall as the buttons. */
+.store-badge { display: inline-flex; border-radius: 9px; transition: transform 0.15s ease, opacity 0.15s ease; }
+.store-badge:hover { opacity: 0.85; }
+.store-badge:active { transform: scale(0.97); }
+.store-badge img { display: block; height: 50px; width: auto; }
+.store-badge .en, .i18n-en .store-badge .fr { display: none; }
+.i18n-en .store-badge .en { display: block; }
+
 .hero-meta {
   margin: 22px 0 0;
   font-size: 14px;
