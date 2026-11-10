@@ -162,3 +162,29 @@ struct RecurringTermsTests {
         #expect(RecurringTerms.terms(in: "ok. Merci. Demain on verra.").isEmpty)
     }
 }
+
+/// One key for the corrections and the suggestions.
+struct TermKeyTests {
+    @Test func symbolsThatMakeAnotherTermStay() {
+        #expect(TermTokenizer.key(of: "C++") == "c++")
+        #expect(TermTokenizer.key(of: "C#") != TermTokenizer.key(of: "C"))
+    }
+
+    @Test func theSuggestionsUseTheSameKey() {
+        #expect(VocabularySuggestionState.key(of: "Node.js") == TermTokenizer.key(of: "nodejs"))
+    }
+
+    /// Saved before the key dropped punctuation: re-keyed, the counts merged.
+    @Test func anOlderStateIsReKeyed() {
+        var state = VocabularySuggestionState()
+        let date = Date(timeIntervalSince1970: 1_800_000_000)
+        state.ignored = ["node.js"]
+        state.sightings = [
+            "kube-ctl": .init(term: "kube-ctl", count: 2, lastSeen: date),
+            "kubectl": .init(term: "kubectl", count: 1, lastSeen: date),
+        ]
+        let rekeyed = state.rekeyed()
+        #expect(rekeyed.ignored == ["nodejs"])
+        #expect(rekeyed.sightings["kubectl"]?.count == 3)
+    }
+}

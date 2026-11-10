@@ -47,10 +47,29 @@ nonisolated struct VocabularySuggestionState: Codable, Equatable, Sendable {
     /// Recurring terms by key.
     var sightings: [String: Sighting] = [:]
 
-    /// Case and accents ignored: "Aurelien" in the vocabulary covers "Aurélien".
+    /// Case, accents and punctuation ignored, like the corrections: "Aurelien"
+    /// in the vocabulary covers "Aurélien", and "node.js" covers "nodejs".
     static func key(of term: String) -> String {
-        term.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        TermTokenizer.key(of: term)
+    }
+
+    /// The state saved before the key dropped punctuation, under today's keys:
+    /// a term turned down then stays turned down.
+    func rekeyed() -> VocabularySuggestionState {
+        var state = self
+        state.ignored = Set(ignored.map(Self.key))
+        state.sightings = [:]
+        for (_, sighting) in sightings {
+            let key = Self.key(of: sighting.term)
+            if var known = state.sightings[key] {
+                known.count += sighting.count
+                known.lastSeen = max(known.lastSeen, sighting.lastSeen)
+                state.sightings[key] = known
+            } else {
+                state.sightings[key] = sighting
+            }
+        }
+        return state
     }
 
     /// Suggests each corrected term at once: the user spelled it out. Returns the number added.
@@ -145,8 +164,8 @@ final class VocabularySuggestions {
 
     init(file: URL = VocabularySuggestions.defaultFile) {
         self.file = file
-        state = (try? Data(contentsOf: file)).flatMap { try? Self.decoder.decode(VocabularySuggestionState.self, from: $0) }
-            ?? VocabularySuggestionState()
+        state = (try? Data(contentsOf: file)).flatMap { try? Self.decoder.decode(VocabularySuggestionState.self, from: $0) }?
+            .rekeyed() ?? VocabularySuggestionState()
     }
 
     /// The waiting suggestions not in the vocabulary yet, which the user may have edited by hand.

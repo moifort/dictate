@@ -63,11 +63,14 @@ nonisolated enum TermTokenizer {
         return parts.count >= 2 && parts.contains { $0.count >= 2 }
     }
 
-    /// Lowercase key of a word or phrase, for comparisons that ignore case, accents and punctuation.
+    /// Lowercase key of a word or phrase, for comparisons that ignore case,
+    /// accents and punctuation: "node.js" is "nodejs", "Aurélien" is "aurelien".
+    /// `+` and `#` stay, since they make another term: "C++" and "C#" are not "C".
+    /// The one normalisation of terms, for the corrections and the suggestions.
     static func key(of text: String) -> String {
         String(String.UnicodeScalarView(
             text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil)
-                .unicodeScalars.filter(CharacterSet.alphanumerics.contains)
+                .unicodeScalars.filter { CharacterSet.alphanumerics.contains($0) || $0 == "+" || $0 == "#" }
         ))
     }
 
