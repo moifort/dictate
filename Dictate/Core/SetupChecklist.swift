@@ -73,4 +73,13 @@ nonisolated struct SetupChecklist: Equatable, Sendable {
     var hasStarted: Bool { language }
 
     var completedCount: Int { steps.count - pending.count }
+
+    /// How often to look again, since macOS does not notify permission
+    /// changes: every second while dictation cannot work, every half minute
+    /// while only the optional reviewer is missing (installing Claude, a
+    /// model download), never once everything is ready.
+    var pollInterval: TimeInterval? {
+        if isComplete { return nil }
+        return needsOnboarding ? 1 : 30
+    }
 }

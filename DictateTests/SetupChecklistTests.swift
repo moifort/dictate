@@ -71,4 +71,18 @@ struct SetupChecklistTests {
         checklist.microphone = false
         #expect(checklist.needsOnboarding)
     }
+
+    /// A missing optional reviewer must not keep the app polling every second for ever.
+    @Test func pollingSlowsDownOnceOnlyTheReviewerIsMissing() {
+        var checklist = SetupChecklist(
+            language: true, microphone: true, inputMonitoring: true, accessibility: true,
+            fnKeyFree: true, transcriptionModel: true, review: false
+        )
+        #expect(checklist.pollInterval == 30)
+        checklist.microphone = false
+        #expect(checklist.pollInterval == 1)
+        checklist.microphone = true
+        checklist.review = true
+        #expect(checklist.pollInterval == nil)
+    }
 }

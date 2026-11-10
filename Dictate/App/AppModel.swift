@@ -283,17 +283,21 @@ final class AppModel {
         settingsChanged()
     }
 
+    /// Polls at the pace `SetupChecklist.pollInterval` asks for, and stops once complete.
     private func pollSetupUntilComplete() {
-        guard !setup.isComplete, setupPoll == nil else { return }
-        setupPoll = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
+        let interval = setup.pollInterval
+        guard setupPoll?.timeInterval != interval else { return }
+        setupPoll?.invalidate()
+        setupPoll = nil
+        guard let interval else {
+            Log.app.info("setup complete")
+            return
+        }
+        setupPoll = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated {
                 guard let self else { return }
                 self.refreshSetup()
-                if self.setup.isComplete {
-                    Log.app.info("setup complete")
-                    self.setupPoll?.invalidate()
-                    self.setupPoll = nil
-                }
+                self.pollSetupUntilComplete()
             }
         }
     }
