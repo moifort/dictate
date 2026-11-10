@@ -7,7 +7,7 @@ import DictateKit
 final class AppModel {
     let settings: AppSettings
     let recorder = AudioRecorder()
-    let transcriber: SwitchableTranscriber
+    let transcriber: ParakeetTranscriber
     /// The experimental vocabulary rescoring of Parakeet's transcript.
     let booster: VocabularyBooster
     let controller: DictationController
@@ -50,8 +50,7 @@ final class AppModel {
         self.settings = settings
         let booster = VocabularyBooster()
         self.booster = booster
-        let parakeet = ParakeetTranscriber(booster: booster, boostedVocabulary: { settings.boostedVocabulary })
-        let transcriber = SwitchableTranscriber(engine: settings.transcriptionEngine, parakeet: parakeet)
+        let transcriber = ParakeetTranscriber(booster: booster, boostedVocabulary: { settings.boostedVocabulary })
         self.transcriber = transcriber
         let locator = locator
         let focus = FieldInspector()
@@ -88,7 +87,6 @@ final class AppModel {
             language: { settings.language },
             enhancementEnabled: { settings.enhancementEnabled },
             shareFieldContext: { settings.shareFieldContext },
-            transcriptionEngine: { [transcriber] in transcriber.engine },
             loadingEngine: { [transcriber] in
                 // A failed load is retried by the dictation itself.
                 transcriber.state.isBusy || transcriber.state == .notLoaded ? transcriber.engine : nil
@@ -216,7 +214,7 @@ final class AppModel {
     /// The settings an error report needs to be understood.
     private func reportSettings() {
         ErrorReporter.setTags([
-            "engine": settings.transcriptionEngine.rawValue,
+            "engine": transcriber.engine.rawValue,
             "push_to_talk": settings.pushToTalkKey.rawValue,
             "language": settings.language,
             "reviewer": settings.reviewer.rawValue,

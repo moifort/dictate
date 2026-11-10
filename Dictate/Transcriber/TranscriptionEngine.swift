@@ -2,7 +2,9 @@ import Foundation
 import Observation
 import DictateKit
 
-/// The speech-to-text model run on this Mac.
+/// The speech-to-text model run on this Mac. Parakeet is the only one left;
+/// the type stays because every statistic and corpus entry records it, and
+/// names it on screen.
 nonisolated enum TranscriptionEngine: String, CaseIterable, Codable, Identifiable, Sendable {
     /// Parakeet TDT Ultra: 25 European languages, no vocabulary.
     case parakeet
@@ -51,66 +53,6 @@ enum TranscriberState: Equatable {
         switch self {
         case .downloading, .loading: true
         default: false
-        }
-    }
-}
-
-/// A transcriber backed by a model that is downloaded once, then kept in memory.
-@MainActor protocol ModelTranscriber: Transcriber {
-    var state: TranscriberState { get }
-    /// True once every file is on disk, so loading needs no network.
-    var isModelDownloaded: Bool { get }
-    /// Where the model's files live once downloaded.
-    var modelFolder: URL { get }
-    /// Downloads the model on first use, then loads it in memory.
-    func load() async
-    /// Frees the model's memory; the next transcription loads it again.
-    func unload() async
-}
-
-/// Routes dictations to the engine picked in the settings and keeps only that
-/// engine's model in memory: two models together would hold well over 1 GB.
-@Observable
-final class SwitchableTranscriber: Transcriber {
-    private(set) var engine: TranscriptionEngine
-    @ObservationIgnored private let parakeet: any ModelTranscriber
-
-    init(engine: TranscriptionEngine, parakeet: any ModelTranscriber = ParakeetTranscriber()) {
-        self.engine = engine
-        self.parakeet = parakeet
-    }
-
-    var active: any ModelTranscriber { transcriber(for: engine) }
-    var state: TranscriberState { active.state }
-    var isModelDownloaded: Bool { active.isModelDownloaded }
-    var modelFolder: URL { active.modelFolder }
-
-    func load() async {
-        await active.load()
-    }
-
-    /// Unloads the previous engine and loads the new one in parallel: a
-    /// first-time download must not wait for the previous model to be freed.
-    func select(_ engine: TranscriptionEngine) {
-        guard engine != self.engine else { return }
-        let previous = active
-        self.engine = engine
-        let next = active
-        Task { await previous.unload() }
-        Task { await next.load() }
-    }
-
-    func transcribe(samples: [Float], language: String) async throws -> String {
-        try await active.transcribe(samples: samples, language: language)
-    }
-
-    func transcription(samples: [Float], language: String) async throws -> Transcription {
-        try await active.transcription(samples: samples, language: language)
-    }
-
-    private func transcriber(for engine: TranscriptionEngine) -> any ModelTranscriber {
-        switch engine {
-        case .parakeet: parakeet
         }
     }
 }

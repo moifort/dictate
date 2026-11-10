@@ -8,12 +8,14 @@ import DictateKit
 /// Neural Engine. It takes no vocabulary prompt: the jargon is left to
 /// Claude, unless the experimental vocabulary boosting rescores its output.
 @Observable
-final class ParakeetTranscriber: ModelTranscriber {
+final class ParakeetTranscriber: Transcriber {
     nonisolated static let modelVersion = ParakeetEngine.modelVersion
 
     private(set) var state: TranscriberState = .notLoaded
     @ObservationIgnored let modelFolder: URL
-    @ObservationIgnored private let engine: ParakeetEngine
+    /// What the statistics and the screens call this model.
+    @ObservationIgnored let engine = TranscriptionEngine.parakeet
+    @ObservationIgnored private let parakeet: ParakeetEngine
     @ObservationIgnored private let booster: VocabularyBooster?
     /// The terms to search the audio for; empty when boosting is off.
     @ObservationIgnored private let boostedVocabulary: () -> [String]
@@ -24,7 +26,7 @@ final class ParakeetTranscriber: ModelTranscriber {
         boostedVocabulary: @escaping () -> [String] = { [] }
     ) {
         modelFolder = Self.modelFolder(in: modelDirectory)
-        engine = ParakeetEngine(folder: modelFolder)
+        parakeet = ParakeetEngine(folder: modelFolder)
         self.booster = booster
         self.boostedVocabulary = boostedVocabulary
     }
@@ -47,7 +49,7 @@ final class ParakeetTranscriber: ModelTranscriber {
         guard !state.isBusy, state != .ready else { return }
         state = .loading
         do {
-            try await engine.load { [weak self] fraction in
+            try await parakeet.load { [weak self] fraction in
                 Task { @MainActor in
                     guard let self, self.state.isBusy else { return }
                     // The download is over: what remains is compiling the model for this Mac.
@@ -66,7 +68,7 @@ final class ParakeetTranscriber: ModelTranscriber {
     /// finish anyway, and the model is then freed at the next launch.
     func unload() async {
         guard state == .ready else { return }
-        await engine.unload()
+        await parakeet.unload()
         state = .notLoaded
     }
 
@@ -76,7 +78,7 @@ final class ParakeetTranscriber: ModelTranscriber {
 
     func transcription(samples: [Float], language: String) async throws -> Transcription {
         if state != .ready { await load() }
-        let (transcription, tokenTimings) = try await engine.transcribe(samples: samples, language: language)
+        let (transcription, tokenTimings) = try await parakeet.transcribe(samples: samples, language: language)
         let vocabulary = boostedVocabulary()
         guard let booster, !vocabulary.isEmpty else { return transcription }
         return await booster.boost(transcription, tokenTimings: tokenTimings, samples: samples, vocabulary: vocabulary)

@@ -18,7 +18,6 @@ struct DictationControllerTests {
         editableFocus: Bool = true,
         enhancementEnabled: Bool = true,
         shareFieldContext: Bool = true,
-        engine: TranscriptionEngine = .parakeet,
         reviewer: Reviewer? = .claude,
         loadingEngine: TranscriptionEngine? = nil,
         maximumRecording: Duration = .seconds(60),
@@ -45,7 +44,6 @@ struct DictationControllerTests {
             language: { "fr" },
             enhancementEnabled: { enhancementEnabled },
             shareFieldContext: { shareFieldContext },
-            transcriptionEngine: { engine },
             loadingEngine: { loadingEngine },
             enhancementTimeout: .milliseconds(200),
             diverges: diverges,
@@ -512,7 +510,7 @@ struct DictationControllerTests {
     }
 
     @Test func dictationIsRecordedWithItsEngine() async {
-        let (controller, _) = makeController(engine: .parakeet)
+        let (controller, _) = makeController()
         var records: [DictationRecord] = []
         controller.onRecord = { records.append($0) }
         await dictate(controller)

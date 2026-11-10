@@ -25,11 +25,6 @@ final class AppSettings {
         didSet { defaults.set(languageConfirmed, forKey: Keys.languageConfirmed) }
     }
 
-    /// The model that turns speech into text.
-    var transcriptionEngine: TranscriptionEngine {
-        didSet { defaults.set(transcriptionEngine.rawValue, forKey: Keys.transcriptionEngine) }
-    }
-
     /// The modifier held to dictate.
     var pushToTalkKey: PushToTalkKey {
         didSet { defaults.set(pushToTalkKey.rawValue, forKey: Keys.pushToTalkKey) }
@@ -248,9 +243,6 @@ final class AppSettings {
         let supported = saved.map(DictationLanguage.supportedCodes.contains) ?? true
         language = supported ? saved ?? DictationLanguage.preferred() : DictationLanguage.preferred()
         languageConfirmed = supported && defaults.bool(forKey: Keys.languageConfirmed)
-        // "whisper", saved before it was removed, no longer decodes.
-        transcriptionEngine = defaults.string(forKey: Keys.transcriptionEngine)
-            .flatMap(TranscriptionEngine.init(rawValue:)) ?? .parakeet
         pushToTalkKey = defaults.string(forKey: Keys.pushToTalkKey).flatMap(PushToTalkKey.init(rawValue:))
             .flatMap { PushToTalkKey.available.contains($0) ? $0 : nil } ?? PushToTalkKey.available[0]
         shareFieldContext = defaults.object(forKey: Keys.shareFieldContext) as? Bool ?? true
@@ -271,7 +263,6 @@ final class AppSettings {
     private enum Keys {
         static let language = "language"
         static let languageConfirmed = "languageConfirmed"
-        static let transcriptionEngine = "transcriptionEngine"
         static let pushToTalkKey = "pushToTalkKey"
         static let reviewer = "reviewer"
         /// Older versions' on/off switch, read once for the migration.

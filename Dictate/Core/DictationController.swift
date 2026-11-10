@@ -64,8 +64,6 @@ final class DictationController {
     @ObservationIgnored private let enhancementEnabled: () -> Bool
     /// Whether the text before the cursor may be sent to Claude.
     @ObservationIgnored private let shareFieldContext: () -> Bool
-    /// The engine behind `transcriber`, for the statistics.
-    @ObservationIgnored private let transcriptionEngine: () -> TranscriptionEngine
     /// The engine whose model is not in memory yet, nil once dictation can start.
     @ObservationIgnored private let loadingEngine: () -> TranscriptionEngine?
     @ObservationIgnored private let enhancementTimeout: Duration
@@ -147,7 +145,6 @@ final class DictationController {
         language: @escaping () -> String,
         enhancementEnabled: @escaping () -> Bool,
         shareFieldContext: @escaping () -> Bool,
-        transcriptionEngine: @escaping () -> TranscriptionEngine = { .parakeet },
         loadingEngine: @escaping () -> TranscriptionEngine? = { nil },
         enhancementTimeout: Duration = .seconds(8),
         diverges: @escaping (_ reply: String, _ transcript: String) -> Bool = ReviewGuard.diverges,
@@ -164,7 +161,6 @@ final class DictationController {
         self.language = language
         self.enhancementEnabled = enhancementEnabled
         self.shareFieldContext = shareFieldContext
-        self.transcriptionEngine = transcriptionEngine
         self.loadingEngine = loadingEngine
         self.enhancementTimeout = enhancementTimeout
         self.diverges = diverges
@@ -352,7 +348,8 @@ final class DictationController {
         let audio = Double(samples.count) / Double(AudioAnalysis.sampleRate)
         var transcript: Transcription
         let transcription: Duration
-        let engine = transcriptionEngine()
+        // The only engine, recorded with each dictation for the statistics.
+        let engine = TranscriptionEngine.parakeet
         do {
             (transcript, transcription) = try await transcribeInTurn(samples)
             transcript.text = transcript.text.trimmingCharacters(in: .whitespacesAndNewlines)

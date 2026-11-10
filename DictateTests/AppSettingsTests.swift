@@ -151,16 +151,6 @@ struct AppSettingsTests {
         #expect(AppSettings(defaults: UserDefaults(suiteName: suite)!).pushToTalkKey == .fn)
     }
 
-    @Test func transcriptionEngineIsParakeetByDefault() {
-        #expect(makeSettings().transcriptionEngine == .parakeet)
-    }
-
-    @Test func aSavedWhisperEngineFallsBackToParakeet() {
-        let defaults = UserDefaults(suiteName: "AppSettingsTests-\(UUID().uuidString)")!
-        defaults.set("whisper", forKey: "transcriptionEngine")
-        #expect(AppSettings(defaults: defaults).transcriptionEngine == .parakeet)
-    }
-
     @Test func claudeGoesThroughTheSubscriptionByDefault() {
         let settings = AppSettings(defaults: UserDefaults(suiteName: "AppSettingsTests-\(UUID().uuidString)")!, apiKeyStores: { _ in InMemorySecret() })
         #expect(settings.claudeAccess == .subscription)
