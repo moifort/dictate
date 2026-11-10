@@ -95,6 +95,16 @@ left as a run artifact:
 | `ASC_KEY_P8` | Content of that key's `.p8` file |
 | `SENTRY_AUTH_TOKEN` | Sentry token with `project:releases` and `project:write`, to upload the dSYMs |
 
+## Identifiers and data
+
+Dictate ships as `com.thibautmottet.dictate` (Developer ID) and
+`com.polyforms.dictate` (Mac App Store); `AppIdentity` holds both, and
+`AppPaths` every file kept per identifier. At launch, a release copy that has
+no settings, keys, statistics, corpus or suggestions of its own copies those
+left under the other identifier (`IdentifierMigration`), so the Developer ID
+build can move to the Polyforms identifier without losing anything. The
+App Store build's sandbox hides the other copy's files: there it finds nothing.
+
 ## Error reporting
 
 Release builds send caught errors and crashes to Sentry, project

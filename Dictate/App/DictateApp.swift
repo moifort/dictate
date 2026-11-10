@@ -57,6 +57,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     override init() {
         // Before the model: its setup already touches the microphone and the models.
         ErrorReporter.start()
+        // Before the settings are read: they may come from the other identifier.
+        if !Self.isRunningTests {
+            let migrated = IdentifierMigration().run()
+            if !migrated.isEmpty { Log.app.info("brought over: \(migrated.joined(separator: ", "), privacy: .public)") }
+        }
         model = AppModel()
         super.init()
     }
