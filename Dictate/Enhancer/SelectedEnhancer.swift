@@ -99,17 +99,16 @@ final class SelectedEnhancer: Enhancer {
     }
 
     func review(_ transcription: Transcription, context: DictationContext) async throws -> Review {
-        let chosen = reviewer()
+        let chosen = effectiveReviewer
         switch chosen {
         case .none:
             throw SelectedEnhancerError.noReviewer
         case .apple:
+            if reviewer() != .apple {
+                Log.dictation.info("offline: Apple Intelligence reviews instead of \(self.reviewer().rawValue, privacy: .public)")
+            }
             return try await ask(.apple, apple, transcription, context)
         case .claude, .openAI, .gemini:
-            if !isOnline(), appleAvailable() {
-                Log.dictation.info("offline: Apple Intelligence reviews instead of \(chosen.rawValue, privacy: .public)")
-                return Review(text: try await apple.enhance(transcription, context: context), reviewer: .apple)
-            }
             guard let remote = chosen == .claude ? claude : others[chosen] else {
                 throw SelectedEnhancerError.noReviewer
             }

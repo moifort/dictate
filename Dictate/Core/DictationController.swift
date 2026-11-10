@@ -480,36 +480,39 @@ final class DictationController {
             var review = try await work.value
             review.text = review.text.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !diverges(review.text, transcript.text) else {
-                // The guard doing its job: a reply that answered the field or
-                // followed something written in it. Never typed, never sent.
-                let name = review.reviewer?.rawValue ?? "reviewer"
-                Log.dictation.notice("\(name, privacy: .public) reply left the dictation, raw transcript inserted")
-                ErrorReporter.breadcrumb("\(name) reply diverged", category: "enhancer")
+                noteRawInsertion(.diverged, error: nil)
                 return nil
             }
             return review
-        } catch is CancellationError {
-            // The cutoff doing its job: the raw transcript goes in and the
-            // record keeps no enhancement time, which is where a slow Claude
-            // shows. Not a failure to look into.
+        } catch {
+            noteRawInsertion(ReviewFailure(error), error: error)
+            return nil
+        }
+    }
+
+    /// Why the raw transcript went in. Only an unexpected failure is reported:
+    /// the others are a cutoff, a guard or a service doing their job.
+    private func noteRawInsertion(_ failure: ReviewFailure, error: Error?) {
+        let details = error?.localizedDescription ?? ""
+        switch failure {
+        case .timedOut:
+            // The record keeps the time, which is where a slow reviewer shows.
             Log.dictation.notice("enhancement timed out after \(self.enhancementTimeout), raw transcript inserted")
             ErrorReporter.breadcrumb("enhancement timed out after \(enhancementTimeout)", category: "enhancer")
-            return nil
-        } catch let error as ClaudeCLIError where error.isUsageLimit {
-            // The subscription's limit is spent until it resets: Claude's
-            // answer, not a failure of ours. The raw transcript goes in.
-            Log.dictation.notice("claude usage limit reached, raw transcript inserted: \(error.localizedDescription, privacy: .public)")
-            ErrorReporter.breadcrumb("claude usage limit reached", category: "enhancer")
-            return nil
-        } catch let error as ClaudeCLIError where error.isDisconnected {
-            // Only the user can sign in again, and the indicator tells them.
-            Log.dictation.notice("claude signed out, raw transcript inserted: \(error.localizedDescription, privacy: .public)")
-            ErrorReporter.breadcrumb("claude signed out", category: "enhancer")
-            return nil
-        } catch {
-            Log.dictation.error("enhancement failed: \(error.localizedDescription, privacy: .public)")
-            ErrorReporter.capture(error, "enhancement failed, raw transcript inserted", category: "enhancer")
-            return nil
+        case .rateLimited:
+            Log.dictation.notice("reviewer limit reached, raw transcript inserted: \(details, privacy: .public)")
+            ErrorReporter.breadcrumb("reviewer limit reached", category: "enhancer")
+        case .disconnected:
+            // Only the user can sign in again or fix the key, and the indicator tells them.
+            Log.dictation.notice("reviewer signed out or key refused, raw transcript inserted: \(details, privacy: .public)")
+            ErrorReporter.breadcrumb("reviewer signed out or key refused", category: "enhancer")
+        case .diverged:
+            // A reply that answered the field or followed something written in it.
+            Log.dictation.notice("reply left the dictation, raw transcript inserted")
+            ErrorReporter.breadcrumb("reply diverged", category: "enhancer")
+        case .other:
+            Log.dictation.error("enhancement failed: \(details, privacy: .public)")
+            if let error { ErrorReporter.capture(error, "enhancement failed, raw transcript inserted", category: "enhancer") }
         }
     }
 
