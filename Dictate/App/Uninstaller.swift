@@ -75,6 +75,6 @@ struct Uninstaller {
 
     /// The keys live in the keychain, which the Trash does not reach.
     static func removeAPIKeys(_ store: (APIProvider) -> SecretStore = { KeychainSecret(account: $0.keychainAccount) }) {
-        for provider in APIProvider.allCases { store(provider).write("") }
+        for provider in APIProvider.allCases { try? store(provider).write("") }
     }
 }

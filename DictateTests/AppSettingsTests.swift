@@ -167,7 +167,7 @@ struct AppSettingsTests {
         #expect(APIProvider.allCases.allSatisfy { !settings.hasAPIKey($0) })
     }
 
-    @Test func eachKeyPersistsApartAndStaysOutOfUserDefaults() {
+    @Test func eachKeyPersistsApartAndStaysOutOfUserDefaults() throws {
         let suite = "AppSettingsTests-\(UUID().uuidString)"
         let stores = Dictionary(uniqueKeysWithValues: APIProvider.allCases.map { ($0, InMemorySecret()) })
         let settings = AppSettings(defaults: UserDefaults(suiteName: suite)!, apiKeyStores: { stores[$0]! })
@@ -182,7 +182,29 @@ struct AppSettingsTests {
         let stored = UserDefaults(suiteName: suite)!.dictionaryRepresentation().values.compactMap { $0 as? String }
         #expect(!stored.contains("sk-ant-test"))
         settings.setAPIKey("", for: .anthropic)
-        #expect(stores[.anthropic]!.read() == nil)
+        #expect(try stores[.anthropic]!.read() == nil)
+    }
+
+    /// A locked keychain is not an empty one: the key comes back once it opens.
+    @Test func aKeyTheKeychainCouldNotReadIsReadAgain() throws {
+        let store = InMemorySecret("sk-test")
+        store.failure = KeychainError(status: errSecInteractionNotAllowed)
+        let settings = AppSettings(defaults: UserDefaults(suiteName: "AppSettingsTests-\(UUID().uuidString)")!, apiKeyStores: { _ in store })
+        #expect(!settings.hasAPIKey(.openAI))
+        store.failure = nil
+        settings.reloadUnreadableAPIKeys()
+        #expect(settings.apiKey(.openAI) == "sk-test")
+    }
+
+    /// A save the keychain refuses keeps the previous key, in memory and on disk.
+    @Test func aRefusedSaveKeepsThePreviousKey() throws {
+        let store = InMemorySecret("sk-old")
+        let settings = AppSettings(defaults: UserDefaults(suiteName: "AppSettingsTests-\(UUID().uuidString)")!, apiKeyStores: { _ in store })
+        store.failure = KeychainError(status: errSecInteractionNotAllowed)
+        #expect(!settings.setAPIKey("sk-new", for: .gemini))
+        #expect(settings.apiKey(.gemini) == "sk-old")
+        store.failure = nil
+        #expect(try store.read() == "sk-old")
     }
 
     @Test func aLanguageOnlyWhisperUnderstoodIsAskedAgain() {

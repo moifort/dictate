@@ -15,6 +15,6 @@ struct UninstallerTests {
     @Test func theAPIKeysLeaveWithTheApp() {
         let stores = Dictionary(uniqueKeysWithValues: APIProvider.allCases.map { ($0, InMemorySecret("key-\($0.rawValue)")) })
         Uninstaller.removeAPIKeys { stores[$0]! }
-        #expect(stores.values.allSatisfy { $0.read() == nil })
+        #expect(stores.values.allSatisfy { (try? $0.read()) == .some(nil) })
     }
 }

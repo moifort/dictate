@@ -1,11 +1,23 @@
 import Foundation
 import Security
 
-/// Where the Anthropic API key lives. Never UserDefaults: its plist is readable by anyone.
+/// Where an API key lives. Never UserDefaults: its plist is readable by anyone.
 nonisolated protocol SecretStore: Sendable {
-    func read() -> String?
-    /// An empty value removes the secret.
-    func write(_ value: String)
+    /// Nil when no secret is stored; throws when the store could not be read.
+    func read() throws -> String?
+    /// An empty value removes the secret. Throws when it could not be saved,
+    /// leaving the previous one in place.
+    func write(_ value: String) throws
+}
+
+/// A keychain call that did not succeed.
+nonisolated struct KeychainError: LocalizedError, Equatable {
+    let status: OSStatus
+
+    var errorDescription: String? {
+        let message = SecCopyErrorMessageString(status, nil) as String? ?? "OSStatus \(status)"
+        return String(localized: "Trousseau : \(message)")
+    }
 }
 
 /// A generic password in the login keychain.
@@ -17,28 +29,34 @@ nonisolated struct KeychainSecret: SecretStore {
         [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service, kSecAttrAccount as String: account]
     }
 
-    func read() -> String? {
+    func read() throws -> String? {
         var item: CFTypeRef?
         var search = query
         search[kSecReturnData as String] = true
         search[kSecMatchLimit as String] = kSecMatchLimitOne
-        guard SecItemCopyMatching(search as CFDictionary, &item) == errSecSuccess, let data = item as? Data else { return nil }
+        let status = SecItemCopyMatching(search as CFDictionary, &item)
+        if status == errSecItemNotFound { return nil }
+        guard status == errSecSuccess, let data = item as? Data else { throw KeychainError(status: status) }
         return String(decoding: data, as: UTF8.self)
     }
 
-    func write(_ value: String) {
-        SecItemDelete(query as CFDictionary)
-        guard !value.isEmpty else { return }
-        var item = query
-        item[kSecValueData as String] = Data(value.utf8)
-        item[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
-        let status = SecItemAdd(item as CFDictionary, nil)
-        if status != errSecSuccess {
-            ErrorReporter.capture(
-                NSError(domain: NSOSStatusErrorDomain, code: Int(status)),
-                "API key could not be saved to the keychain", category: "settings"
-            )
+    /// Updates the item in place, or adds it: never deletes first, so a failed
+    /// save keeps the previous key.
+    func write(_ value: String) throws {
+        guard !value.isEmpty else {
+            let status = SecItemDelete(query as CFDictionary)
+            guard status == errSecSuccess || status == errSecItemNotFound else { throw KeychainError(status: status) }
+            return
         }
+        let attributes: [String: Any] = [
+            kSecValueData as String: Data(value.utf8),
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly,
+        ]
+        var status = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
+        if status == errSecItemNotFound {
+            status = SecItemAdd(query.merging(attributes) { $1 } as CFDictionary, nil)
+        }
+        guard status == errSecSuccess else { throw KeychainError(status: status) }
     }
 }
 
@@ -46,14 +64,22 @@ nonisolated struct KeychainSecret: SecretStore {
 nonisolated final class InMemorySecret: SecretStore, @unchecked Sendable {
     private let lock = NSLock()
     private var value: String?
+    /// Thrown by the next reads and writes, to play a locked keychain.
+    var failure: (any Error)?
 
     init(_ value: String? = nil) { self.value = value }
 
-    func read() -> String? {
-        lock.withLock { value }
+    func read() throws -> String? {
+        try lock.withLock {
+            if let failure { throw failure }
+            return value
+        }
     }
 
-    func write(_ newValue: String) {
-        lock.withLock { value = newValue.isEmpty ? nil : newValue }
+    func write(_ newValue: String) throws {
+        try lock.withLock {
+            if let failure { throw failure }
+            value = newValue.isEmpty ? nil : newValue
+        }
     }
 }

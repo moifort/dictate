@@ -172,7 +172,10 @@ final class AppModel {
     /// Saves the key and uses it: whoever types a key wants that reviewer.
     /// An empty key removes it, and its reviewer goes back to the automatic choice.
     func saveAPIKey(_ key: String, for provider: APIProvider) {
-        settings.setAPIKey(key.trimmingCharacters(in: .whitespacesAndNewlines), for: provider)
+        guard settings.setAPIKey(key.trimmingCharacters(in: .whitespacesAndNewlines), for: provider) else {
+            reviewTestResult = String(localized: "La clé n'a pas pu être enregistrée dans le trousseau.")
+            return
+        }
         reviewTestResult = nil
         let saved = settings.hasAPIKey(provider)
         if provider == .anthropic { settings.claudeAccess = saved ? .apiKey : .subscription }
@@ -224,6 +227,7 @@ final class AppModel {
         // Claude is the default when its CLI is here: while it is not, keep
         // looking, so that installing it is picked up.
         if settings.reviewer != .claude || claudeCLIPath == nil { refreshClaudeCLI() }
+        settings.reloadUnreadableAPIKeys()
         let status = AppleIntelligenceEnhancer.status
         if status != appleIntelligence { appleIntelligence = status }
         let checklist = SetupChecklist(

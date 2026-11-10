@@ -116,6 +116,9 @@ final class AppSettings {
 
     /// Each provider's API key, kept in the keychain.
     private(set) var apiKeys: [APIProvider: String] = [:]
+    /// The keys the keychain could not read, say while it was locked: read
+    /// again by `reloadUnreadableAPIKeys()`, never taken for missing.
+    @ObservationIgnored private var unreadableKeys: Set<APIProvider> = []
 
     /// Empty when none is saved.
     func apiKey(_ provider: APIProvider) -> String { apiKeys[provider] ?? "" }
@@ -124,10 +127,37 @@ final class AppSettings {
         !apiKey(provider).trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
 
-    /// An empty key removes it.
-    func setAPIKey(_ key: String, for provider: APIProvider) {
+    /// An empty key removes it. False when the keychain refused, the previous key kept.
+    @discardableResult
+    func setAPIKey(_ key: String, for provider: APIProvider) -> Bool {
+        do {
+            try apiKeyStores(provider).write(key)
+        } catch {
+            Log.app.error("API key could not be saved: \(error.localizedDescription, privacy: .public)")
+            ErrorReporter.capture(error, "API key could not be saved to the keychain", category: "settings")
+            return false
+        }
         apiKeys[provider] = key.isEmpty ? nil : key
-        apiKeyStores(provider).write(key)
+        unreadableKeys.remove(provider)
+        return true
+    }
+
+    /// Reads the keys the keychain refused earlier again.
+    func reloadUnreadableAPIKeys() {
+        for provider in unreadableKeys { loadAPIKey(provider) }
+    }
+
+    private func loadAPIKey(_ provider: APIProvider) {
+        do {
+            let key = try apiKeyStores(provider).read()
+            unreadableKeys.remove(provider)
+            if let key, !key.isEmpty, apiKeys[provider] != key { apiKeys[provider] = key }
+        } catch {
+            guard !unreadableKeys.contains(provider) else { return }
+            unreadableKeys.insert(provider)
+            Log.app.error("API key could not be read: \(error.localizedDescription, privacy: .public)")
+            ErrorReporter.capture(error, "API key could not be read from the keychain", category: "settings", level: .warning)
+        }
     }
 
     /// Back to the automatic choice, e.g. once the chosen reviewer's key is removed.
@@ -222,14 +252,10 @@ final class AppSettings {
         keepEvaluationCorpus = defaults.bool(forKey: Keys.keepEvaluationCorpus)
         suggestVocabulary = defaults.bool(forKey: Keys.suggestVocabulary)
         claudeAccess = defaults.string(forKey: Keys.claudeAccess).flatMap(ClaudeAccess.init(rawValue:)) ?? .subscription
-        var keys: [APIProvider: String] = [:]
-        for provider in APIProvider.allCases {
-            if let key = apiKeyStores(provider).read(), !key.isEmpty { keys[provider] = key }
-        }
-        apiKeys = keys
         cliPathOverride = defaults.string(forKey: Keys.cliPathOverride) ?? ""
         vocabularyText = defaults.string(forKey: Keys.vocabulary) ?? Self.defaultVocabulary.joined(separator: "\n")
         boostVocabulary = defaults.bool(forKey: Keys.boostVocabulary)
+        for provider in APIProvider.allCases { loadAPIKey(provider) }
     }
 
     private enum Keys {

@@ -2401,6 +2401,22 @@
         }
       }
     },
+    "La clé n'a pas pu être enregistrée dans le trousseau.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The key could not be saved to the keychain."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La clé n'a pas pu être enregistrée dans le trousseau."
+          }
+        }
+      }
+    },
     "La signature de la mise à jour est invalide. %@": {
       "localizations": {
         "en": {
@@ -4357,6 +4373,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Transcription…"
+          }
+        }
+      }
+    },
+    "Trousseau : %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keychain: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trousseau : %@"
           }
         }
       }
