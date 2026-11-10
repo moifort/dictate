@@ -135,3 +135,13 @@ struct ClaudeEnhancerTests {
         #expect(!cli.warm)
     }
 }
+
+struct APISessionTests {
+    @Test func theSessionKeepsNothingAndGivesUpInTime() {
+        let configuration = APIEnhancer.session.configuration
+        #expect(configuration.urlCache == nil)
+        #expect(configuration.httpCookieStorage == nil)
+        #expect(configuration.timeoutIntervalForRequest <= 10)
+        #expect(configuration.timeoutIntervalForResource <= 20)
+    }
+}

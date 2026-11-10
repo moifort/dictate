@@ -180,6 +180,20 @@ nonisolated enum APIReviewError: LocalizedError, Equatable {
 final class APIEnhancer: Enhancer {
     typealias Send = @Sendable (URLRequest) async throws -> (Data, URLResponse)
 
+    /// Ephemeral: no cookie, no cache, nothing of the dictation written to
+    /// disk. Its own time limits rather than the shared session's minute: the
+    /// controller gives up after 8 s anyway, and a stalled connection should
+    /// not outlive it by long.
+    nonisolated static let session: URLSession = {
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.timeoutIntervalForRequest = 10
+        configuration.timeoutIntervalForResource = 20
+        configuration.urlCache = nil
+        configuration.httpCookieStorage = nil
+        configuration.httpShouldSetCookies = false
+        return URLSession(configuration: configuration)
+    }()
+
     let provider: APIProvider
     private let apiKey: () -> String
     private let systemPrompt: () -> String
@@ -191,7 +205,7 @@ final class APIEnhancer: Enhancer {
         apiKey: @escaping () -> String,
         systemPrompt: @escaping () -> String,
         model: String? = nil,
-        send: @escaping Send = { try await URLSession.shared.data(for: $0) }
+        send: @escaping Send = { try await APIEnhancer.session.data(for: $0) }
     ) {
         self.provider = provider
         self.apiKey = apiKey
