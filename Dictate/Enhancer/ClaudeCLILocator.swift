@@ -24,7 +24,7 @@ nonisolated struct ClaudeCLILocator: Sendable {
         let root = home.appending(path: "Library/Application Support/Claude/claude-code")
         let fileManager = FileManager.default
         let versions = (try? fileManager.contentsOfDirectory(atPath: root.path)) ?? []
-        for version in versions.sorted { Version($1) < Version($0) } {
+        for version in versions.sorted(by: { Version($1) < Version($0) }) {
             let versionURL = root.appending(path: version)
             let builds = (try? fileManager.contentsOfDirectory(atPath: versionURL.path)) ?? []
             for build in builds {

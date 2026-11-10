@@ -9,7 +9,7 @@ public actor ParakeetEngine {
 
     private let folder: URL
     private var manager: AsrManager?
-    private var loading: Task<Void, Error>?
+    private let loads = SharedLoad()
 
     public init(folder: URL) {
         self.folder = folder
@@ -18,12 +18,7 @@ public actor ParakeetEngine {
     /// Concurrent callers share one load: a dictation during startup must not
     /// trigger a second download or a second copy of the model in memory.
     public func load(progress: @escaping @Sendable (Double) -> Void = { _ in }) async throws {
-        guard manager == nil else { return }
-        if let loading { return try await loading.value }
-        let task = Task { try await performLoad(progress: progress) }
-        loading = task
-        defer { loading = nil }
-        try await task.value
+        try await loads.run(isLoaded: manager != nil) { try await self.performLoad(progress: progress) }
     }
 
     private func performLoad(progress: @escaping @Sendable (Double) -> Void) async throws {

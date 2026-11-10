@@ -11,7 +11,8 @@ import DictateKit
 final class ParakeetTranscriber: Transcriber {
     nonisolated static let modelVersion = ParakeetEngine.modelVersion
 
-    private(set) var state: TranscriberState = .notLoaded
+    @ObservationIgnored private let loader = ModelLoader(name: "parakeet")
+    var state: TranscriberState { loader.state }
     @ObservationIgnored let modelFolder: URL
     /// What the statistics and the screens call this model.
     @ObservationIgnored let engine = TranscriptionEngine.parakeet
@@ -46,22 +47,7 @@ final class ParakeetTranscriber: Transcriber {
     }
 
     func load() async {
-        guard !state.isBusy, state != .ready else { return }
-        state = .loading
-        do {
-            try await parakeet.load { [weak self] fraction in
-                Task { @MainActor in
-                    guard let self, self.state.isBusy else { return }
-                    // The download is over: what remains is compiling the model for this Mac.
-                    self.state = fraction < 1 ? .downloading(fraction) : .loading
-                }
-            }
-            state = .ready
-            ErrorReporter.breadcrumb("parakeet model ready", category: "transcriber")
-        } catch {
-            ErrorReporter.capture(error, "parakeet model failed to load", category: "transcriber")
-            state = .failed(error.localizedDescription)
-        }
+        await loader.load { [parakeet] progress in try await parakeet.load(progress: progress) }
     }
 
     /// Skipped while the model is downloading or loading: that load will
@@ -69,7 +55,7 @@ final class ParakeetTranscriber: Transcriber {
     func unload() async {
         guard state == .ready else { return }
         await parakeet.unload()
-        state = .notLoaded
+        loader.unloaded()
     }
 
     func transcribe(samples: [Float], language: String) async throws -> String {

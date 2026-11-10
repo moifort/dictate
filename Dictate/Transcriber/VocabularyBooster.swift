@@ -14,7 +14,8 @@ import DictateKit
 /// evaluation corpus.
 @Observable
 final class VocabularyBooster {
-    private(set) var state: TranscriberState = .notLoaded
+    @ObservationIgnored private let loader = ModelLoader(name: "vocabulary boosting")
+    var state: TranscriberState { loader.state }
     /// What the last rescoring added to the dictation, for the tests.
     @ObservationIgnored private(set) var lastDuration: Duration?
     @ObservationIgnored let modelFolder: URL
@@ -59,21 +60,7 @@ final class VocabularyBooster {
     }
 
     private func bringIn() async {
-        guard !state.isBusy, state != .ready else { return }
-        state = .loading
-        do {
-            try await engine.load { [weak self] fraction in
-                Task { @MainActor in
-                    guard let self, self.state.isBusy else { return }
-                    self.state = fraction < 1 ? .downloading(fraction) : .loading
-                }
-            }
-            state = .ready
-            ErrorReporter.breadcrumb("vocabulary boosting model ready", category: "transcriber")
-        } catch {
-            ErrorReporter.capture(error, "vocabulary boosting model failed to load", category: "transcriber")
-            state = .failed(error.localizedDescription)
-        }
+        await loader.load { [engine] progress in try await engine.load(progress: progress) }
         // Turned off while it loaded: the unload left it to this load.
         if !wanted { await release() }
     }
@@ -87,7 +74,7 @@ final class VocabularyBooster {
     }
 
     private func release() async {
-        state = .notLoaded
+        loader.unloaded()
         await engine.unload()
     }
 
@@ -269,7 +256,7 @@ actor CtcVocabularyEngine: VocabularyRescoring {
 
     nonisolated let folder: URL
     private var loaded: Loaded?
-    private var loading: Task<Void, Error>?
+    private let loads = SharedLoad()
     private var session: Session?
 
     init(folder: URL) {
@@ -282,12 +269,7 @@ actor CtcVocabularyEngine: VocabularyRescoring {
 
     /// Concurrent callers share one load, like `ParakeetEngine`.
     func load(progress: @escaping @Sendable (Double) -> Void) async throws {
-        guard loaded == nil else { return }
-        if let loading { return try await loading.value }
-        let task = Task { try await performLoad(progress: progress) }
-        loading = task
-        defer { loading = nil }
-        try await task.value
+        try await loads.run(isLoaded: loaded != nil) { try await self.performLoad(progress: progress) }
     }
 
     private func performLoad(progress: @escaping @Sendable (Double) -> Void) async throws {
