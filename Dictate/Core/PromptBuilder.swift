@@ -63,21 +63,19 @@ nonisolated enum PromptBuilder {
 
     static func userMessage(transcript: String, context: DictationContext) -> String {
         var message = "<context>\(context.category.rawValue)</context>\n"
-        if let app = context.appName, !app.isEmpty {
-            message += "<app>\(app)</app>\n"
-        }
+        message += inlineTag("app", context.appName, maxLength: Limit.app)
         message += inlineTag("site", context.webHost, maxLength: Limit.host)
         message += inlineTag("window_title", context.windowTitle, maxLength: Limit.title)
         message += inlineTag("field_label", context.fieldLabel, maxLength: Limit.label)
         if let preceding = context.precedingText?.trimmingCharacters(in: .whitespacesAndNewlines), !preceding.isEmpty {
-            message += "<preceding_text>\n\(sanitized(preceding, tag: "preceding_text"))\n</preceding_text>\n"
+            message += "<preceding_text>\n\(sanitized(preceding))\n</preceding_text>\n"
         }
         if let following = followingLine(context.followingText) {
-            message += "<following_text>\n\(sanitized(following, tag: "following_text"))\n</following_text>\n"
+            message += "<following_text>\n\(sanitized(following))\n</following_text>\n"
         }
         message += """
             <dictation>
-            \(transcript)
+            \(sanitized(transcript))
             </dictation>
             """
         return message
@@ -98,6 +96,7 @@ nonisolated enum PromptBuilder {
 
     /// Prompt budget for each piece of context, in characters.
     enum Limit {
+        static let app = 60
         static let host = 100
         static let title = 120
         static let label = 80
@@ -123,13 +122,22 @@ nonisolated enum PromptBuilder {
         let line = value?.split(whereSeparator: \.isNewline).joined(separator: " ")
             .trimmingCharacters(in: .whitespaces) ?? ""
         guard !line.isEmpty else { return "" }
-        return "<\(tag)>\(sanitized(truncated(line, to: maxLength), tag: tag))</\(tag)>\n"
+        return "<\(tag)>\(sanitized(truncated(line, to: maxLength)))</\(tag)>\n"
     }
 
-    /// The field may contain anything, including our own closing tags.
-    private static func sanitized(_ text: String, tag: String) -> String {
-        text.replacingOccurrences(of: "</\(tag)>", with: "")
-            .replacingOccurrences(of: "<dictation>", with: "")
+    /// Every tag the prompt and the reply are built from.
+    static let tags = [
+        "context", "app", "site", "window_title", "field_label",
+        "preceding_text", "following_text", "dictation", "cleaned", "vocabulary",
+    ]
+
+    /// The field, the title and even the dictation may contain anything,
+    /// our own tags included: none of them may open or close a block.
+    static func sanitized(_ text: String) -> String {
+        tags.reduce(text) { text, tag in
+            text.replacingOccurrences(of: "<\(tag)>", with: "", options: .caseInsensitive)
+                .replacingOccurrences(of: "</\(tag)>", with: "", options: .caseInsensitive)
+        }
     }
 
     /// The user message with the words the transcriber doubted marked for Claude.
