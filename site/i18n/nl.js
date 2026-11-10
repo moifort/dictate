@@ -1,0 +1,186 @@
+/* Dictate landing page: its texts in "nl", read by i18n.js and main.js. */
+window.DICTATE_I18N = {
+  "text": {
+    "meta.title": "Dictate — Dicteren voor de Mac, gratis en open source",
+    "nav.demo": "Demo",
+    "nav.features": "Functies",
+    "nav.faq": "Vragen",
+    "nav.compare": "Vergelijking",
+    "cmp.title": "Dictate naast de rest",
+    "cmp.lead": "Een gratis, opensource-alternatief voor Wispr Flow, Typeless, Superwhisper en VoiceInk.",
+    "cmp.row.transcribe": "Transcriptie",
+    "cmp.row.review": "AI-controle",
+    "cmp.row.offline": "Volledig offline",
+    "cmp.row.oss": "Open source",
+    "cmp.row.langs": "Talen",
+    "cmp.row.price": "Prijs",
+    "cmp.cloud": "Cloud",
+    "cmp.onMac": "Op de Mac",
+    "cmp.macOrCloud": "Mac of cloud",
+    "cmp.apiKey": "Je API-sleutel",
+    "cmp.appleOrClaude": "Apple Intelligence of Claude",
+    "cmp.yes": "Ja",
+    "cmp.no": "Nee",
+    "cmp.localModels": "Lokale modellen",
+    "cmp.noAccount": "Geen account, geen sleutel",
+    "cmp.gpl": "GPL",
+    "cmp.mit": "MIT",
+    "cmp.hundred": "100+",
+    "cmp.european": "25 Europese",
+    "cmp.free": "Gratis",
+    "cmp.calloutTitle": "Transcriptie en controle, allebei op de Mac.",
+    "cmp.calloutText": "Met Apple Intelligence gaat er niets online: geen account, geen sleutel, geen netwerk. Zet de wifi uit en Dictate schrijft gewoon door.",
+    "cmp.note": "Volgens de websites en documentatie van de makers, op 17&nbsp;oktober&nbsp;2026. Dictate dekt minder talen: Parakeet herkent alleen Europese talen.",
+    "nav.download": "Download",
+    "hero.eyebrow": "Dicteren voor de Mac",
+    "hero.title": "Nauwelijks gedacht,<br><span class=\"gradient-text\">al geschreven.</span>",
+    "hero.subtitle": "Houd <kbd class=\"key inline\" data-key-hero><span class=\"key-glyph\">⌃</span><span class=\"key-name\">control</span></kbd> ingedrukt, spreek, laat los: nette tekst, afgestemd op de context, verschijnt waar je typt.",
+    "dl.mac": "Download voor Mac",
+    "hero.seeDemo": "Bekijk de demo",
+    "hero.meta": "Gratis · Open source · <span data-version>Nieuwste versie</span> · macOS 27 · Apple Silicon",
+    "demo.badge": "<span class=\"live-tag\"><i aria-hidden=\"true\"></i>Live</span>Demo",
+    "demo.title": "Van stem naar tekst.",
+    "demo.lead": "Een hele e-mail zonder iets te typen. Nou ja, bijna: één toets, control.",
+    "demo.window": "Nieuw bericht",
+    "demo.to": "Aan:",
+    "demo.subject": "Onderwerp:",
+    "tl.hold": "Ingedrukt houden",
+    "tl.speak": "Spreken",
+    "tl.release": "Loslaten",
+    "tl.review": "Nagekeken door AI<small class=\"tl-context\"><img src=\"apps/mail.png\" width=\"14\" height=\"14\" alt=\"\">context: Mail</small>",
+    "tl.written": "Geschreven",
+    "feat.title": "Binnen handbereik.",
+    "feat.lead": "Geen venster om te openen, geen knop om op te klikken, geen ruw transcript om te verbeteren.",
+    "ptt.hint": "houden · spreken · loslaten",
+    "ptt.text": "Eén toets, <kbd><span class=\"kbd-glyph\">⌃</span>control</kbd> of <kbd><span class=\"kbd-glyph\">🌐︎</span>fn</kbd>, wat jij wilt. Houd hem ingedrukt terwijl je spreekt, laat los, en het staat er. Wachten hoeft niet: houd hem opnieuw ingedrukt terwijl de laatste zin wordt nagekeken en praat door, de zinnen komen in de juiste volgorde.",
+    "clean.raw": "eh dus eigenlijk wilde ik ik je zeggen dat de de vergadering naar dinsdag is verplaatst",
+    "clean.clean": "Ik wilde je zeggen dat de vergadering naar dinsdag is verplaatst.",
+    "clean.title": "Nagekeken door AI",
+    "clean.text": "Een AI leest het transcript na en schrijft het netjes uit: de ‘ehs’, herhalingen en valse starts verdwijnen, interpunctie en vaktermen worden verbeterd. De betekenis en de woorden blijven van jou. Door Claude met je abonnement, of door Apple Intelligence op je Mac: zonder netwerk neemt die het over en blijft alles offline.",
+    "latency.title": "Ongeveer 1,5 seconde",
+    "latency.text": "Dat is de mediane tijd tussen het einde van je zin en het verschijnen op het scherm, transcriptie en controle inbegrepen. De statistieken volgen die dag na dag en tonen welk model heeft nagekeken: Claude, of Apple Intelligence terwijl je offline was.",
+    "context.title": "Past zich aan de context aan",
+    "context.text": "De toon volgt de app waarin je schrijft: iets verzorgder in Mail, direct in Slack, technisch in Claude Code, ruw in Terminal.",
+    "cursor.title": "Overal waar je typt",
+    "cursor.text": "Mail, Berichten, Slack, Notities, Cursor, Terminal, ChatGPT of Claude: de zin wordt getypt in het veld dat de focus heeft. Is er geen, dan wacht hij op het klembord.",
+    "send.title": "Vanzelf verstuurd",
+    "send.text": "In Claude gaat het bericht weg zodra het geschreven is: Dictate drukt voor jou op Return. Kies de apps waarin dat gebeurt, Berichten of Slack bijvoorbeeld, of zet het uit in de instellingen. Overal elders wacht de tekst tot jij hem verstuurt.",
+    "send.key": "return",
+    "saved.typing": "Typen",
+    "saved.caption": "Bespaarde tijd sinds het begin",
+    "saved.title": "Bespaarde tijd, geteld",
+    "saved.text": "De statistieken vergelijken elk dictaat met de tijd die typen had gekost, aan 40 woorden per minuut. De tijd voor het spreken en het wachten op de tekst gaat eraf: wat overblijft is de echt bespaarde tijd, dag na dag en sinds je eerste dictaat.",
+    "langs.title": "25 talen en jouw woordenschat",
+    "langs.text": "Kies de dicteertaal en voeg je eigen woorden toe: namen, jargon, productnamen. Ze worden geschreven zoals jij ze zou schrijven. Ook de interface spreekt alle 25.",
+    "offline.airplane": "Vliegtuigmodus",
+    "offline.on": "Aan",
+    "offline.off": "Uit",
+    "offline.typed": "We landen om 18 uur, ik bel je als ik buiten ben.",
+    "offline.caption": "Parakeet en Apple Intelligence, op deze Mac.",
+    "offline.title": "Werkt offline",
+    "offline.text": "De transcriptie draait op je Mac met Parakeet, een model dat geen netwerk nodig heeft, en de controle ook, met Apple Intelligence. In een vliegtuig of trein zonder bereik schrijft Dictate gewoon door.",
+    "pill.title": "Discreet",
+    "pill.text": "Een kleine pil onder in het scherm toont dat Dictate luistert, dan werkt, en verdwijnt weer. Heeft hij niets gehoord, dan zie je een doorgestreepte luidspreker. Met AirPods wacht hij tot hun microfoon antwoordt voordat hij ‘luisteren’ toont, zodat je weet wanneer je kunt spreken.",
+    "emoji.title": "Smileys ook",
+    "emoji.text": "Zeg ‘smiley duim omhoog’ en Dictate schrijft 👍. Elke Apple-emoji, met je stem.",
+    "faq.title": "Veelgestelde vragen",
+    "faq.q1": "Waarom is het gratis?",
+    "faq.a1": "Omdat Dictate draaien niets kost: geen server, geen account. De transcriptie gebeurt op je Mac en de controle loopt via het Claude-abonnement dat je al hebt, of via Apple Intelligence op je Mac. Wij hoeven niets te betalen, dus jij ook niet. Geen pro-versie, geen beperkte proefperiode.",
+    "faq.q2": "Heb ik een Claude-abonnement nodig?",
+    "faq.a2": "Nee. Met Claude Code of de Claude-app geïnstalleerd en ingelogd op je account kijkt Claude elk dictaat na via het commando <code>claude</code>, op je abonnement. Zonder abonnement plak je een API-sleutel van Claude, OpenAI of Gemini in Instellingen: elk gebruikt zijn snelste model. Zonder dat alles kijkt Apple Intelligence na, gewoon op je Mac. Je kiest in Instellingen, en als de controle niet antwoordt, wordt het ruwe transcript toch ingevoegd. Raakt Claude uitgelogd, dan meldt de pil dat en neemt Apple Intelligence het over.",
+    "faq.q3": "Werkt het offline?",
+    "faq.a3": "Ja. Het transcriptiemodel (ongeveer 630 MB, gedownload bij de configuratie) draait volledig op je Mac, en de controle ook wanneer die via Apple Intelligence loopt. Alleen de controle door Claude heeft een verbinding nodig.",
+    "faq.q4": "Wat is het verschil met dicteren in macOS?",
+    "faq.a4": "Het dicteren van Apple schrijft wat het hoort, aarzelingen inbegrepen, en je moet het starten en stoppen. Dictate zit in één toets die je ingedrukt houdt, haalt de ‘ehs’ en herhalingen weg, verbetert vaktermen en past de toon aan de app aan. En je stem gaat niet naar Apple.",
+    "faq.q5": "Welke talen?",
+    "faq.a5": "Vijfentwintig Europese talen: Nederlands, Engels, Frans, Duits, Spaans, Italiaans, Portugees, Pools, Zweeds, Deens, Fins, Hongaars, Grieks, Tsjechisch, Roemeens, Oekraïens en meer. De taal kies je in Instellingen en je woordenschat voeg je toe in het lexicon. De app zelf spreekt ze alle vijfentwintig, afhankelijk van de taal van je Mac.",
+    "faq.q6": "Wat vraagt Dictate bij de configuratie?",
+    "faq.a6": "Drie macOS-toestemmingen: de microfoon, invoerbewaking voor de toets en toegankelijkheid om het veld te vinden en erin te typen. Een assistent loopt ze een voor een met je door en downloadt daarna het transcriptiemodel. Daarna woont Dictate in de menubalk en houdt het zichzelf up-to-date.",
+    "faq.q7": "Op welke Macs?",
+    "faq.a7": "macOS 27 en Apple silicon, van M1 tot de nieuwste. De app is ondertekend en genotariseerd door Apple.",
+    "dl.title": "Gratis &amp; open source",
+    "dl.lead": "Andere dicteer-apps kosten geld per maand of per licentie. Dictate kost niets, en de code is openbaar.",
+    "price.wispr": "€&nbsp;12 / maand",
+    "price.typeless": "$&nbsp;12 / maand",
+    "price.superwhisper": "$&nbsp;8,49 / maand",
+    "price.voiceink": "$&nbsp;25 eenmalig",
+    "price.us": "<b class=\"gradient-text\">Gratis</b> · open source",
+    "price.note": "Prijzen van de betaalde abonnementen, op 17&nbsp;oktober&nbsp;2026 overgenomen van de websites van de makers. De gratis versies van Wispr Flow en Typeless beperken het aantal woorden.",
+    "dl.code": "Bekijk de code",
+    "dl.meta": "<span data-version>Nieuwste versie</span> · macOS 27 · Apple Silicon",
+    "footer.privacy": "Privacy",
+    "dl.brew": "Of met Homebrew: <code>brew install --cask moifort/tap/dictate</code>",
+    "dl.storeNote": "In de Mac App Store: houd option + spatie ingedrukt om te dicteren en plak daarna met ⌘V. De controle gebeurt daar door Apple Intelligence.",
+    "footer.credit": "Dictate is een opensourceproject van <a href=\"https://github.com/moifort\" rel=\"noopener\">Polyforms</a>. Transcriptie door Parakeet (NVIDIA) via FluidAudio. Controle door Claude (Anthropic) of Apple Intelligence.",
+    "footer.releases": "Alle versies",
+    "footer.issues": "Meld een probleem",
+    "footer.docs": "Documentatie",
+    "aria.demo": "Demonstratie",
+    "aria.timeline": "Zo werkt het",
+    "aria.prices": "Prijzen van de alternatieven",
+    "aria.store": "Download in de Mac App Store",
+    "meta.description": "Houd control ingedrukt, spreek, laat los: nette tekst, afgestemd op de context, verschijnt waar je typt. Getranscribeerd op je Mac, zonder account, gratis en open source."
+  },
+  "badge": "badges/nl.svg",
+  "demo": {
+    "decimal": ",",
+    "version": "Versie {v}",
+    "emojiWords": "smiley duim omhoog",
+    "scenarios": [
+      {
+        "to": "Arthur G.",
+        "subject": "De tollen",
+        "prefix": "Hoi Arthur,\n\n",
+        "heard": "eh dus ik ik wilde je zeggen dat de tollen zijn aangekomen eh we kunnen ze zaterdag uitproberen als je wilt en en jij zegt me welke het langst draait",
+        "clean": "Ik wilde je zeggen dat de tollen zijn aangekomen. We kunnen ze zaterdag uitproberen als je wilt, en jij zegt me welke het langst draait."
+      },
+      {
+        "to": "Colas D.",
+        "subject": "Barbecue van zondag",
+        "prefix": "Hoi Colas,\n\n",
+        "heard": "dus eh voor zondag zorg ik voor de varkenskoteletten en en jij neemt het brood eh en de drankjes mee",
+        "clean": "Voor zondag zorg ik voor de varkenskoteletten, en jij neemt het brood en de drankjes mee."
+      }
+    ],
+    "phrases": [
+      {
+        "app": "Mail",
+        "text": "Hoi Marie, bedankt voor je feedback, ik pas het vanochtend aan."
+      },
+      {
+        "app": "Slack",
+        "text": "zien we elkaar om 14 uur in zaal Lumière?"
+      },
+      {
+        "app": "Notes",
+        "text": "Idee: de leverancier voor het einde van de maand opnieuw benaderen."
+      },
+      {
+        "app": "Terminal",
+        "text": "start de tests van de betaalmodule"
+      },
+      {
+        "app": "Claude",
+        "text": "Leg uit wat deze functie doet."
+      }
+    ],
+    "sends": [
+      {
+        "app": "Claude",
+        "text": "Vat deze PR samen in drie punten."
+      },
+      {
+        "app": "Messages",
+        "text": "Ik ben er over tien minuten!"
+      },
+      {
+        "app": "Slack",
+        "text": "Ik lees de spec en laat het je weten."
+      },
+      {
+        "app": "Notes",
+        "text": "Brood en eieren kopen."
+      }
+    ]
+  }
+};

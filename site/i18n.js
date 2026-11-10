@@ -1,143 +1,57 @@
-/* Dictate landing page: English for every browser that is not set to French.
- * The page is written in French; elements carrying data-i18n get their English
- * HTML from here before the first paint (the head script hides the page until
- * then). data-i18n-aria translates an aria-label. */
+/* Dictate landing page: its 25 languages.
+ * The page is written in French. The head script picks the language
+ * (<html lang>); every language but French has its texts in i18n/<code>.js.
+ * Elements carrying data-i18n get their HTML from there before the first
+ * paint (the head script hides the page until then), data-i18n-aria
+ * translates an aria-label, and the App Store badge takes Apple's artwork for
+ * that language. main.js starts once the texts are in: its demo reads them. */
 (() => {
   "use strict";
   const root = document.documentElement;
-  if (!root.classList.contains("i18n-en")) return;
+  // The same cache-busting query as this script's own.
+  const version = new URL(document.currentScript.src).search;
 
-  const EN = {
-    "meta.title": "Dictate — Voice dictation for Mac, free and open source",
-    "nav.demo": "Demo",
-    "nav.features": "Features",
-    "nav.faq": "FAQ",
-    "nav.compare": "Compare",
-    "cmp.title": "Dictate vs. the others",
-    "cmp.lead": "A free, open-source alternative to Wispr Flow, Typeless, Superwhisper and VoiceInk.",
-    "cmp.row.transcribe": "Transcription",
-    "cmp.row.review": "AI cleanup",
-    "cmp.row.offline": "Fully offline",
-    "cmp.row.oss": "Open source",
-    "cmp.row.langs": "Languages",
-    "cmp.row.price": "Price",
-    "cmp.cloud": "Cloud",
-    "cmp.onMac": "On the Mac",
-    "cmp.macOrCloud": "Mac or cloud",
-    "cmp.apiKey": "Your API key",
-    "cmp.appleOrClaude": "Apple Intelligence, or Claude",
-    "cmp.yes": "Yes",
-    "cmp.no": "No",
-    "cmp.localModels": "Local models",
-    "cmp.noAccount": "No account, no key",
-    "cmp.gpl": "GPL",
-    "cmp.mit": "MIT",
-    "cmp.hundred": "100+",
-    "cmp.european": "25 European",
-    "cmp.free": "Free",
-    "cmp.calloutTitle": "Transcription and cleanup, both on the Mac.",
-    "cmp.calloutText": "With Apple Intelligence, nothing goes online: no account, no key, no network. Turn Wi-Fi off and Dictate still writes.",
-    "cmp.note": "From the publishers' websites and documentation, as of October&nbsp;17,&nbsp;2026. Dictate covers fewer languages: Parakeet only recognizes European languages.",
-    "nav.download": "Download",
-    "hero.eyebrow": "Voice dictation for Mac",
-    "hero.title": "Barely thought,<br><span class=\"gradient-text\">already written.</span>",
-    "hero.subtitle": "\n      Hold <kbd class=\"key inline\" data-key-hero><span class=\"key-glyph\">⌃</span><span class=\"key-name\">control</span></kbd>, speak, release: clean text, polished for the context, appears wherever you type.\n    ",
-    "dl.mac": "Download for Mac",
-    "hero.seeDemo": "See the demo",
-    "hero.meta": "\n      Free · Open source · <span data-version>Latest version</span> · macOS 27 · Apple Silicon\n    ",
-    "demo.badge": "<span class=\"live-tag\"><i aria-hidden=\"true\"></i>Live</span>Demo",
-    "demo.title": "From voice to text.",
-    "demo.lead": "A whole email without typing a thing. Well, almost: one key, control.",
-    "demo.window": "New Message",
-    "demo.to": "To:",
-    "demo.subject": "Subject:",
-    "tl.hold": "Hold",
-    "tl.speak": "Speak",
-    "tl.release": "Release",
-    "tl.review": "Reviewed by AI<small class=\"tl-context\"><img src=\"apps/mail.png\" width=\"14\" height=\"14\" alt=\"\">context: Mail</small>",
-    "tl.written": "Written",
-    "feat.title": "At your fingertips.",
-    "feat.lead": "No window to open, no button to click, no raw transcript to fix.",
-    "ptt.hint": "hold · speak · release",
-    "ptt.text": "One key, <kbd><span class=\"kbd-glyph\">⌃</span>control</kbd> or <kbd><span class=\"kbd-glyph\">🌐︎</span>fn</kbd>, your choice. Hold it while you speak, let go, and it's written. No need to wait: hold it again while the last sentence is reviewed and keep talking, sentences land in order.",
-    "clean.raw": "um so actually I I wanted to tell you that the the meeting moved to Tuesday",
-    "clean.clean": "I wanted to tell you that the meeting moved to Tuesday.",
-    "clean.title": "Reviewed by AI",
-    "clean.text": "An AI reads the transcript back and writes it cleanly: the “ums”, repetitions and false starts disappear, punctuation and technical terms are fixed. The meaning and the words stay yours. By Claude with your subscription, or by Apple Intelligence on your Mac: with no network, it steps in and everything stays offline.",
-    "latency.title": "About 1.5 seconds",
-    "latency.text": "That's the median time between the end of your sentence and its appearance on screen, transcription and review included. The statistics track it day by day and show which model did the review: Claude, or Apple Intelligence while you were offline.",
-    "context.title": "Adapts to the context",
-    "context.text": "The tone follows the app you're writing in: a bit more polished in Mail, direct in Slack, technical in Claude Code, raw in Terminal.",
-    "cursor.title": "Wherever you type",
-    "cursor.text": "Mail, Messages, Slack, Notes, Cursor, Terminal, ChatGPT or Claude: the sentence is typed into the field that has focus. If there is none, it waits on the clipboard.",
-    "send.title": "Sent on its own",
-    "send.text": "In Claude, the message goes out as soon as it is written: Dictate presses Return for you. Pick the apps where it does, Messages or Slack for instance, or turn it off in the settings. Everywhere else, the text waits for you to send it.",
-    "send.key": "return",
-    "saved.typing": "Typing",
-    "saved.caption": "Time saved since the start",
-    "saved.title": "Time saved, counted",
-    "saved.text": "The statistics compare every dictation with the time it would have taken to type, at 40 words per minute. The time spent speaking and waiting for the text is taken out: what's left is the time actually saved, day after day, and since your first dictation.",
-    "langs.title":"25 languages and your vocabulary",
-    "langs.text": "Pick the dictation language and add your own words: names, jargon, product names. They come out spelled the way you would write them. The interface speaks all 25 too.",
-    "offline.airplane": "Airplane Mode",
-    "offline.on": "On",
-    "offline.off": "Off",
-    "offline.typed": "We land at 6 pm, I'll call you on the way out.",
-    "offline.caption": "Parakeet and Apple Intelligence, on this Mac.",
-    "offline.title": "Works offline",
-    "offline.text": "Transcription runs on your Mac with Parakeet, a model that needs no network, and so does the review, with Apple Intelligence. On a plane or a train with no signal, Dictate still writes.",
-    "pill.title": "Discreet",
-    "pill.text": "A small pill at the bottom of the screen shows that Dictate is listening, then working, then fades away. If it heard nothing, a crossed-out speaker tells you. With AirPods, it waits for their microphone to answer before it shows listening, so you know when to speak.",
-    "emoji.title": "Smileys too",
-    "emoji.text": "Say “smiley thumbs up” and Dictate writes 👍. Every Apple emoji, by voice.",
-    "faq.title": "Frequently asked questions",
-    "faq.q1": "Why is it free?",
-    "faq.a1": "Because Dictate costs nothing to run: no server, no account. Transcription happens on your Mac, and the review goes through the Claude subscription you already have, or through Apple Intelligence on your Mac. There's nothing to pay us, so nothing to bill you. No pro version, no limited trial.",
-    "faq.q2": "Do I need a Claude subscription?",
-    "faq.a2": "No. With Claude Code or the Claude app installed and signed in to your account, Claude reviews each dictation through the <code>claude</code> command, on your subscription. Without a subscription, paste a Claude, OpenAI or Gemini API key in Settings: each runs its fastest model. With none of these, Apple Intelligence reviews it right on your Mac. You pick one or the other in Settings, and if the review doesn't answer, the raw transcript is inserted anyway. If Claude gets signed out, the pill tells you and Apple Intelligence steps in.",
-    "faq.q3": "Does it work offline?",
-    "faq.a3": "Yes. The transcription model (about 630 MB, downloaded at setup) runs entirely on your Mac, and so does the review when it goes through Apple Intelligence. Only the review by Claude needs a connection.",
-    "faq.q4": "How is it different from macOS dictation?",
-    "faq.a4": "Apple's dictation writes what it hears, hesitations included, and you have to start it and stop it. Dictate fits in one key you hold, removes the “ums” and repetitions, fixes technical terms and adapts the tone to the app. And your voice doesn't go to Apple.",
-    "faq.q5": "Which languages?",
-    "faq.a5": "Twenty-five European languages: English, French, German, Spanish, Italian, Portuguese, Dutch, Polish, Swedish, Danish, Finnish, Hungarian, Greek, Czech, Romanian, Ukrainian and more. You pick the language in Settings and add your vocabulary in the lexicon. The app itself speaks all twenty-five, following your Mac's language.",
-    "faq.q6": "What does Dictate ask for at setup?",
-    "faq.a6": "Three macOS permissions: the microphone, input monitoring for the key, and accessibility to find the field and type into it. An assistant walks you through them one by one, then downloads the transcription model. After that, Dictate lives in the menu bar and keeps itself up to date.",
-    "faq.q7": "Which Macs?",
-    "faq.a7": "macOS 27 and Apple silicon, from M1 to the latest. The app is signed and notarized by Apple.",
-    "dl.title": "Free &amp; Open source",
-    "dl.lead": "Other dictation apps charge by the month or by the license. Dictate costs nothing, and its code is public.",
-    "price.wispr": "€12&nbsp;/ month",
-    "price.typeless": "$12&nbsp;/ month",
-    "price.superwhisper": "$8.49&nbsp;/ month",
-    "price.voiceink": "$25 once",
-    "price.us": "<b class=\"gradient-text\">Free</b> · open source",
-    "price.note": "Paid plan prices, taken from the publishers' websites on October&nbsp;17,&nbsp;2026. The free tiers of Wispr Flow and Typeless limit the number of words.",
-    "dl.code": "View the code",
-    "dl.meta": "<span data-version>Latest version</span> · macOS 27 · Apple Silicon",
-    "footer.privacy": "Privacy",
-    "dl.brew": "Or with Homebrew: <code>brew install --cask moifort/tap/dictate</code>",
-    "dl.storeNote": "On the Mac App Store: hold option + space to dictate, then paste with ⌘V. The cleanup there is done by Apple Intelligence.",
-    "footer.credit": "Dictate is an open-source project by <a href=\"https://github.com/moifort\" rel=\"noopener\">Polyforms</a>.\n     Transcription by Parakeet (NVIDIA) via FluidAudio. Review by Claude (Anthropic) or Apple Intelligence.",
-    "footer.releases": "All releases",
-    "footer.issues": "Report an issue",
-    "footer.docs": "Documentation",
-    "aria.demo": "Demo",
-    "aria.timeline": "How it works",
-    "aria.prices": "Prices of the alternatives",
-    "aria.store": "Download on the Mac App Store",
-    "meta.description": "Hold control, speak, release: clean text, polished for the context, appears wherever you type. Transcribed on your Mac, no account, free and open source."
+  const start = () => {
+    root.classList.remove("i18n-pending");
+    const main = document.createElement("script");
+    main.src = `main.js${version}`;
+    document.body.append(main);
   };
 
-  root.lang = "en";
-  for (const el of document.querySelectorAll("[data-i18n]")) {
-    const html = EN[el.dataset.i18n];
-    if (html !== undefined) el.innerHTML = html;
+  const apply = (dictionary) => {
+    for (const el of document.querySelectorAll("[data-i18n]")) {
+      const html = dictionary.text[el.dataset.i18n];
+      if (html !== undefined) el.innerHTML = html;
+    }
+    for (const el of document.querySelectorAll("[data-i18n-aria]")) {
+      const label = dictionary.text[el.dataset.i18nAria];
+      if (label !== undefined) el.setAttribute("aria-label", label);
+    }
+    document.querySelector('meta[name="description"]')?.setAttribute("content", dictionary.text["meta.description"]);
+    for (const img of document.querySelectorAll("[data-store-badge]")) img.src = dictionary.badge;
+  };
+
+  const load = (lang, otherwise) => {
+    const script = document.createElement("script");
+    script.src = `i18n/${lang}.js${version}`;
+    script.onload = () => {
+      root.lang = lang;
+      apply(window.DICTATE_I18N);
+      start();
+    };
+    script.onerror = otherwise;
+    document.head.append(script);
+  };
+
+  if (root.lang === "fr") {
+    start();
+    return;
   }
-  for (const el of document.querySelectorAll("[data-i18n-aria]")) {
-    const label = EN[el.dataset.i18nAria];
-    if (label !== undefined) el.setAttribute("aria-label", label);
-  }
-  document.querySelector('meta[name="description"]')?.setAttribute("content", EN["meta.description"]);
-  root.classList.remove("i18n-pending");
+  // A dictionary that does not load gives English, then the French page as written.
+  load(root.lang, () =>
+    load("en", () => {
+      root.lang = "fr";
+      start();
+    }),
+  );
 })();

@@ -69,6 +69,15 @@ scheme), since some of them read user-facing text.
 The disk image's background is one picture for every Mac: its instruction is
 written in English, then French.
 
+The landing page (`site/`) follows the same 25 languages. It is written in
+French in `index.html`; the head script picks the browser's language, and
+`i18n.js` loads `i18n/<code>.js` for any other: the page's texts by
+`data-i18n` key, the demo's scripted texts read by `main.js`, and the App
+Store badge (`badges/<code>.svg`, Apple's artwork, which only exists in some
+of the languages: the others get the English one). A new text goes into
+`index.html` in French and into each `i18n/<code>.js`. `privacy.html` is not
+translated.
+
 ## Updates
 
 Dictate checks GitHub releases shortly after launch and every six hours. A

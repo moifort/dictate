@@ -1,0 +1,186 @@
+/* Dictate landing page: its texts in "mt", read by i18n.js and main.js. */
+window.DICTATE_I18N = {
+  "text": {
+    "meta.title": "Dictate — Dettatura bil-vuċi għall-Mac, b’xejn u open source",
+    "nav.demo": "Demo",
+    "nav.features": "Funzjonijiet",
+    "nav.faq": "Mistoqsijiet",
+    "nav.compare": "Paragun",
+    "cmp.title": "Dictate ħdejn l-oħrajn",
+    "cmp.lead": "Alternattiva b’xejn u open source għal Wispr Flow, Typeless, Superwhisper u VoiceInk.",
+    "cmp.row.transcribe": "Traskrizzjoni",
+    "cmp.row.review": "Reviżjoni bl-AI",
+    "cmp.row.offline": "Kollox offline",
+    "cmp.row.oss": "Open source",
+    "cmp.row.langs": "Lingwi",
+    "cmp.row.price": "Prezz",
+    "cmp.cloud": "Cloud",
+    "cmp.onMac": "Fuq il-Mac",
+    "cmp.macOrCloud": "Mac jew cloud",
+    "cmp.apiKey": "Iċ-ċavetta API tiegħek",
+    "cmp.appleOrClaude": "Apple Intelligence jew Claude",
+    "cmp.yes": "Iva",
+    "cmp.no": "Le",
+    "cmp.localModels": "Mudelli lokali",
+    "cmp.noAccount": "Bla kont u bla ċavetta",
+    "cmp.gpl": "GPL",
+    "cmp.mit": "MIT",
+    "cmp.hundred": "100+",
+    "cmp.european": "25 Ewropea",
+    "cmp.free": "B’xejn",
+    "cmp.calloutTitle": "Traskrizzjoni u reviżjoni, it-tnejn fuq il-Mac.",
+    "cmp.calloutText": "B’Apple Intelligence xejn ma jmur online: l-ebda kont, l-ebda ċavetta, l-ebda netwerk. Itfi l-Wi-Fi u Dictate xorta jikteb.",
+    "cmp.note": "Skont is-siti u d-dokumentazzjoni tal-pubblikaturi, fis-17&nbsp;ta’&nbsp;Ottubru&nbsp;2026. Dictate jkopri inqas lingwi: Parakeet jagħraf biss lingwi Ewropej.",
+    "nav.download": "Niżżel",
+    "hero.eyebrow": "Dettatura bil-vuċi għall-Mac",
+    "hero.title": "Għadek kif ħsibtha,<br><span class=\"gradient-text\">diġà miktuba.</span>",
+    "hero.subtitle": "Żomm <kbd class=\"key inline\" data-key-hero><span class=\"key-glyph\">⌃</span><span class=\"key-name\">control</span></kbd> magħfus, tkellem, itlaq: test nadif, rivedut skont il-kuntest, jidher fejn qed tikteb.",
+    "dl.mac": "Niżżel għall-Mac",
+    "hero.seeDemo": "Ara d-demo",
+    "hero.meta": "B’xejn · Open source · <span data-version>L-aħħar verżjoni</span> · macOS 27 · Apple Silicon",
+    "demo.badge": "<span class=\"live-tag\"><i aria-hidden=\"true\"></i>Live</span>Demo",
+    "demo.title": "Mill-vuċi għat-test.",
+    "demo.lead": "Email sħiħa mingħajr ma tittajpja xejn. Jew kważi: tasta waħda, control.",
+    "demo.window": "Messaġġ ġdid",
+    "demo.to": "Lil:",
+    "demo.subject": "Suġġett:",
+    "tl.hold": "Żomm",
+    "tl.speak": "Tkellem",
+    "tl.release": "Itlaq",
+    "tl.review": "Rivedut mill-AI<small class=\"tl-context\"><img src=\"apps/mail.png\" width=\"14\" height=\"14\" alt=\"\">kuntest: Mail</small>",
+    "tl.written": "Miktub",
+    "feat.title": "Tasta waħda bogħod.",
+    "feat.lead": "L-ebda tieqa x’tiftaħ, l-ebda buttuna x’tagħfas, l-ebda traskrizzjoni mhux maħduma x’tikkoreġi.",
+    "ptt.hint": "żomm · tkellem · itlaq",
+    "ptt.text": "Tasta waħda, <kbd><span class=\"kbd-glyph\">⌃</span>control</kbd> jew <kbd><span class=\"kbd-glyph\">🌐︎</span>fn</kbd>, kif tippreferi. Żommha magħfusa waqt li titkellem, itlaq, u jkun miktub. M’hemmx għalfejn tistenna: erġa’ żommha waqt li l-aħħar sentenza tkun qed tiġi riveduta u kompli tkellem, is-sentenzi jaslu fl-ordni.",
+    "clean.raw": "eħe mela fil-fatt jien jien ridt ngħidlek li li l-laqgħa ġiet imċaqalqa għat-Tlieta",
+    "clean.clean": "Ridt ngħidlek li l-laqgħa ġiet imċaqalqa għat-Tlieta.",
+    "clean.title": "Rivedut mill-AI",
+    "clean.text": "AI terġa’ taqra t-traskrizzjoni u tiktibha nadifa: l-“eħe”, ir-repetizzjonijiet u l-bidu ħażin jisparixxu, il-punteġġjatura u t-termini tekniċi jiġu kkoreġuti. It-tifsira u l-kliem jibqgħu tiegħek. Minn Claude bl-abbonament tiegħek, jew minn Apple Intelligence fuq il-Mac tiegħek: mingħajr netwerk jidħol hu u kollox jibqa’ offline.",
+    "latency.title": "Madwar sekonda u nofs",
+    "latency.text": "Dan huwa l-ħin medjan bejn tmiem is-sentenza tiegħek u d-dehra tagħha fuq l-iskrin, bit-traskrizzjoni u r-reviżjoni inklużi. L-istatistika ssegwih jum b’jum u turi liema mudell għamel ir-reviżjoni: Claude, jew Apple Intelligence waqt li kont offline.",
+    "context.title": "Jadatta għall-kuntest",
+    "context.text": "It-ton isegwi l-app li qed tikteb fiha: ftit aktar irfinut f’Mail, dirett fi Slack, tekniku f’Claude Code, mhux maħdum fit-Terminal.",
+    "cursor.title": "Kull fejn tikteb",
+    "cursor.text": "Mail, Messages, Slack, Notes, Cursor, Terminal, ChatGPT jew Claude: is-sentenza tinkiteb fil-kaxxa li għandha l-fokus. Jekk m’hemm l-ebda waħda, tistenna fil-clipboard.",
+    "send.title": "Jintbagħat waħdu",
+    "send.text": "F’Claude, il-messaġġ jitlaq hekk kif jinkiteb: Dictate jagħfas Return għalik. Agħżel l-apps fejn jagħmel dan, Messages jew Slack pereżempju, jew itfih fis-settings. Kullimkien ieħor, it-test jistenna li tibagħtu int.",
+    "send.key": "return",
+    "saved.typing": "Ittajpjar",
+    "saved.caption": "Ħin iffrankat mill-bidu",
+    "saved.title": "Il-ħin iffrankat, magħdud",
+    "saved.text": "L-istatistika tqabbel kull dettatura mal-ħin li kien jieħu biex tittajpjaha, b’40 kelma fil-minuta. Il-ħin tad-diskors u tal-istennija għat-test jitnaqqas: li jibqa’ huwa l-ħin li verament iffrankajt, jum wara jum u mill-ewwel dettatura tiegħek.",
+    "langs.title": "25 lingwa u l-vokabularju tiegħek",
+    "langs.text": "Agħżel il-lingwa tad-dettatura u żid kliemek: ismijiet, ġargon, ismijiet ta’ prodotti. Jinkitbu kif kont tiktibhom int. L-interfaċċa wkoll titkellem il-25 kollha.",
+    "offline.airplane": "Airplane Mode",
+    "offline.on": "Mixgħul",
+    "offline.off": "Mitfi",
+    "offline.typed": "Ninżlu fis-6 ta’ filgħaxija, inċempillek kif noħroġ.",
+    "offline.caption": "Parakeet u Apple Intelligence, fuq dan il-Mac.",
+    "offline.title": "Jaħdem offline",
+    "offline.text": "It-traskrizzjoni taħdem fuq il-Mac tiegħek b’Parakeet, mudell li ma jeħtieġx netwerk, u r-reviżjoni wkoll, b’Apple Intelligence. Fuq ajruplan jew ferrovija bla sinjal, Dictate xorta jikteb.",
+    "pill.title": "Diskret",
+    "pill.text": "Pillola żgħira fil-qiegħ tal-iskrin turi li Dictate qed jisma’, imbagħad jaħdem, u mbagħad tisparixxi. Jekk ma sema’ xejn, jgħidlek speaker maqtugħ. Bl-AirPods, jistenna li l-mikrofonu tagħhom iwieġeb qabel ma juri li qed jisma’, biex tkun taf meta titkellem.",
+    "emoji.title": "L-ismileys ukoll",
+    "emoji.text": "Għid “smiley saba’ ’l fuq” u Dictate jikteb 👍. L-emojis kollha ta’ Apple, bil-vuċi.",
+    "faq.title": "Mistoqsijiet frekwenti",
+    "faq.q1": "Għaliex huwa b’xejn?",
+    "faq.a1": "Għax Dictate ma jiswa xejn biex jaħdem: l-ebda server, l-ebda kont. It-traskrizzjoni ssir fuq il-Mac tiegħek, u r-reviżjoni tgħaddi mill-abbonament ta’ Claude li diġà għandek, jew minn Apple Intelligence fuq il-Mac tiegħek. M’għandna xejn x’inħallsu, allura xejn x’inżommulek. L-ebda verżjoni pro, l-ebda prova limitata.",
+    "faq.q2": "Għandi bżonn abbonament ta’ Claude?",
+    "faq.a2": "Le. B’Claude Code jew l-app Claude installati u illoggjati fil-kont tiegħek, Claude jirrevedi kull dettatura permezz tal-kmand <code>claude</code>, bl-abbonament tiegħek. Mingħajr abbonament, waħħal ċavetta API ta’ Claude, OpenAI jew Gemini fis-settings: kull waħda tuża l-aktar mudell veloċi tagħha. Mingħajr xejn minn dan, Apple Intelligence jirrevedi direttament fuq il-Mac tiegħek. Tagħżel fis-settings, u jekk ir-reviżjoni ma twiġibx, it-traskrizzjoni mhux maħduma tiddaħħal xorta waħda. Jekk Claude jiġi skonnettjat, il-pillola tgħidlek u jidħol Apple Intelligence.",
+    "faq.q3": "Jaħdem offline?",
+    "faq.a3": "Iva. Il-mudell tat-traskrizzjoni (madwar 630 MB, imniżżel waqt il-konfigurazzjoni) jaħdem kollu kemm hu fuq il-Mac tiegħek, u r-reviżjoni wkoll meta tgħaddi minn Apple Intelligence. Ir-reviżjoni minn Claude biss teħtieġ konnessjoni.",
+    "faq.q4": "X’inhi d-differenza mid-dettatura ta’ macOS?",
+    "faq.a4": "Id-dettatura ta’ Apple tikteb dak li tisma’, bl-eżitazzjonijiet b’kollox, u trid tibdieha u twaqqafha. Dictate joqgħod f’tasta waħda li żżomm, ineħħi l-“eħe” u r-repetizzjonijiet, jikkoreġi t-termini tekniċi u jadatta t-ton għall-app. U leħnek ma jmurx għand Apple.",
+    "faq.q5": "Liema lingwi?",
+    "faq.a5": "Ħamsa u għoxrin lingwa Ewropea: il-Malti, l-Ingliż, il-Franċiż, il-Ġermaniż, l-Ispanjol, it-Taljan, il-Portugiż, l-Olandiż, il-Pollakk, l-Iżvediż, id-Daniż, il-Finlandiż, l-Ungeriż, il-Grieg, iċ-Ċek, ir-Rumen, l-Ukren u oħrajn. Il-lingwa tagħżilha fis-settings u l-vokabularju tiegħek iżżidu fil-lessiku. L-app innifisha titkellem il-ħamsa u għoxrin kollha, skont il-lingwa tal-Mac tiegħek.",
+    "faq.q6": "X’jitlob Dictate waqt il-konfigurazzjoni?",
+    "faq.a6": "Tliet permessi ta’ macOS: il-mikrofonu, il-monitoraġġ tal-input għat-tasta, u l-aċċessibbiltà biex isib il-kaxxa u jikteb fiha. Assistent jgħaddik minnhom wieħed wieħed, imbagħad iniżżel il-mudell tat-traskrizzjoni. Wara dan, Dictate jgħix fil-menu bar u jżomm lilu nnifsu aġġornat.",
+    "faq.q7": "Fuq liema Macs?",
+    "faq.a7": "macOS 27 u ċippa ta’ Apple, mill-M1 sal-aktar riċenti. L-app hija ffirmata u nnotarizzata minn Apple.",
+    "dl.title": "B’xejn &amp; open source",
+    "dl.lead": "L-apps l-oħra tad-dettatura jitħallsu kull xahar jew b’liċenzja. Dictate ma jiswa xejn, u l-kodiċi tiegħu huwa pubbliku.",
+    "price.wispr": "€12&nbsp;/ xahar",
+    "price.typeless": "$12&nbsp;/ xahar",
+    "price.superwhisper": "$8.49&nbsp;/ xahar",
+    "price.voiceink": "$25 darba",
+    "price.us": "<b class=\"gradient-text\">B’xejn</b> · open source",
+    "price.note": "Prezzijiet tal-pjanijiet bi ħlas, meħuda fis-17&nbsp;ta’&nbsp;Ottubru&nbsp;2026 mis-siti tal-pubblikaturi. Il-verżjonijiet b’xejn ta’ Wispr Flow u Typeless jillimitaw in-numru ta’ kliem.",
+    "dl.code": "Ara l-kodiċi",
+    "dl.meta": "<span data-version>L-aħħar verżjoni</span> · macOS 27 · Apple Silicon",
+    "footer.privacy": "Privatezza",
+    "dl.brew": "Jew b’Homebrew: <code>brew install --cask moifort/tap/dictate</code>",
+    "dl.storeNote": "Fuq il-Mac App Store: żomm option + spazju magħfusin biex tiddetta, imbagħad waħħal b’⌘V. Hemmhekk ir-reviżjoni ssir minn Apple Intelligence.",
+    "footer.credit": "Dictate huwa proġett open source ta’ <a href=\"https://github.com/moifort\" rel=\"noopener\">Polyforms</a>. Traskrizzjoni minn Parakeet (NVIDIA) permezz ta’ FluidAudio. Reviżjoni minn Claude (Anthropic) jew Apple Intelligence.",
+    "footer.releases": "Il-verżjonijiet kollha",
+    "footer.issues": "Irrapporta problema",
+    "footer.docs": "Dokumentazzjoni",
+    "aria.demo": "Dimostrazzjoni",
+    "aria.timeline": "Kif jaħdem",
+    "aria.prices": "Prezzijiet tal-alternattivi",
+    "aria.store": "Niżżel mill-Mac App Store",
+    "meta.description": "Żomm control magħfus, tkellem, itlaq: test nadif, rivedut skont il-kuntest, jidher fejn qed tikteb. Traskritt fuq il-Mac tiegħek, bla kont, b’xejn u open source."
+  },
+  "badge": "badges/en.svg",
+  "demo": {
+    "decimal": ",",
+    "version": "Verżjoni {v}",
+    "emojiWords": "smiley saba’ ’l fuq",
+    "scenarios": [
+      {
+        "to": "Arthur G.",
+        "subject": "Iż-żugraga",
+        "prefix": "Ħelow Arthur,\n\n",
+        "heard": "eħe mela jien jien ridt ngħidlek li ż-żugraga waslu eħe nistgħu nippruvawhom is-Sibt jekk trid u u tgħidli liema waħda ddur l-aktar fit-tul",
+        "clean": "Ridt ngħidlek li ż-żugraga waslu. Nistgħu nippruvawhom is-Sibt jekk trid, u tgħidli liema waħda ddur l-aktar fit-tul."
+      },
+      {
+        "to": "Colas D.",
+        "subject": "Il-barbecue tal-Ħadd",
+        "prefix": "Ħelow Colas,\n\n",
+        "heard": "mela eħe għall-Ħadd jien nieħu ħsieb il-kustilji tal-majjal u u int iġġib il-ħobż eħe u x-xorb",
+        "clean": "Għall-Ħadd, jien nieħu ħsieb il-kustilji tal-majjal, u int iġġib il-ħobż u x-xorb."
+      }
+    ],
+    "phrases": [
+      {
+        "app": "Mail",
+        "text": "Ħelow Marie, grazzi tal-kummenti, nirranġaha dalgħodu."
+      },
+      {
+        "app": "Slack",
+        "text": "niltaqgħu fis-2 ta’ waranofsinhar fil-kamra Lumière?"
+      },
+      {
+        "app": "Notes",
+        "text": "Idea: infakkar lill-fornitur qabel tmiem ix-xahar."
+      },
+      {
+        "app": "Terminal",
+        "text": "ħaddem it-testijiet tal-modulu tal-ħlas"
+      },
+      {
+        "app": "Claude",
+        "text": "Spjegali x’tagħmel din il-funzjoni."
+      }
+    ],
+    "sends": [
+      {
+        "app": "Claude",
+        "text": "Ġabar dan il-PR fi tliet punti."
+      },
+      {
+        "app": "Messages",
+        "text": "Ġej fi żmien għaxar minuti!"
+      },
+      {
+        "app": "Slack",
+        "text": "Naqra l-ispeċifikazzjoni u ngħidlek."
+      },
+      {
+        "app": "Notes",
+        "text": "Nixtri ħobż u bajd."
+      }
+    ]
+  }
+};

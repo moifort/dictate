@@ -1,0 +1,186 @@
+/* Dictate landing page: its texts in "lv", read by i18n.js and main.js. */
+window.DICTATE_I18N = {
+  "text": {
+    "meta.title": "Dictate — Diktēšana Mac datoram, bezmaksas un atvērtā pirmkoda",
+    "nav.demo": "Demo",
+    "nav.features": "Funkcijas",
+    "nav.faq": "Jautājumi",
+    "nav.compare": "Salīdzinājums",
+    "cmp.title": "Dictate līdzās citiem",
+    "cmp.lead": "Bezmaksas atvērtā pirmkoda alternatīva Wispr Flow, Typeless, Superwhisper un VoiceInk.",
+    "cmp.row.transcribe": "Transkripcija",
+    "cmp.row.review": "MI pārskatīšana",
+    "cmp.row.offline": "Viss bezsaistē",
+    "cmp.row.oss": "Atvērtais pirmkods",
+    "cmp.row.langs": "Valodas",
+    "cmp.row.price": "Cena",
+    "cmp.cloud": "Mākonis",
+    "cmp.onMac": "Mac datorā",
+    "cmp.macOrCloud": "Mac vai mākonis",
+    "cmp.apiKey": "Jūsu API atslēga",
+    "cmp.appleOrClaude": "Apple Intelligence vai Claude",
+    "cmp.yes": "Jā",
+    "cmp.no": "Nē",
+    "cmp.localModels": "Lokāli modeļi",
+    "cmp.noAccount": "Bez konta un atslēgas",
+    "cmp.gpl": "GPL",
+    "cmp.mit": "MIT",
+    "cmp.hundred": "100+",
+    "cmp.european": "25 Eiropas",
+    "cmp.free": "Bez maksas",
+    "cmp.calloutTitle": "Transkripcija un pārskatīšana — abas Mac datorā.",
+    "cmp.calloutText": "Ar Apple Intelligence nekas nenonāk tīmeklī: ne konta, ne atslēgas, ne tīkla. Izslēdziet Wi-Fi, un Dictate joprojām raksta.",
+    "cmp.note": "Pēc izstrādātāju vietnēm un dokumentācijas, stāvoklis 2026.&nbsp;gada 17.&nbsp;oktobrī. Dictate aptver mazāk valodu: Parakeet atpazīst tikai Eiropas valodas.",
+    "nav.download": "Lejupielādēt",
+    "hero.eyebrow": "Diktēšana Mac datoram",
+    "hero.title": "Tikko iedomāts,<br><span class=\"gradient-text\">jau uzrakstīts.</span>",
+    "hero.subtitle": "Turiet nospiestu <kbd class=\"key inline\" data-key-hero><span class=\"key-glyph\">⌃</span><span class=\"key-name\">control</span></kbd>, runājiet, atlaidiet: tīrs, kontekstam pielāgots teksts parādās tur, kur rakstāt.",
+    "dl.mac": "Lejupielādēt Mac datoram",
+    "hero.seeDemo": "Skatīt demo",
+    "hero.meta": "Bez maksas · Atvērtais pirmkods · <span data-version>Jaunākā versija</span> · macOS 27 · Apple Silicon",
+    "demo.badge": "<span class=\"live-tag\"><i aria-hidden=\"true\"></i>Live</span>Demo",
+    "demo.title": "No balss līdz tekstam.",
+    "demo.lead": "Vesels e-pasts, neko nerakstot. Nu, gandrīz: viens taustiņš, control.",
+    "demo.window": "Jauns ziņojums",
+    "demo.to": "Kam:",
+    "demo.subject": "Tēma:",
+    "tl.hold": "Turiet",
+    "tl.speak": "Runājiet",
+    "tl.release": "Atlaidiet",
+    "tl.review": "Pārskatījis MI<small class=\"tl-context\"><img src=\"apps/mail.png\" width=\"14\" height=\"14\" alt=\"\">konteksts: Mail</small>",
+    "tl.written": "Uzrakstīts",
+    "feat.title": "Viena taustiņa attālumā.",
+    "feat.lead": "Nav loga, ko atvērt, nav pogas, ko spiest, nav neapstrādātas transkripcijas, ko labot.",
+    "ptt.hint": "turiet · runājiet · atlaidiet",
+    "ptt.text": "Viens taustiņš, <kbd><span class=\"kbd-glyph\">⌃</span>control</kbd> vai <kbd><span class=\"kbd-glyph\">🌐︎</span>fn</kbd>, pēc jūsu izvēles. Turiet to, kamēr runājat, atlaidiet, un ir uzrakstīts. Nav jāgaida: turiet to atkal, kamēr tiek pārskatīts pēdējais teikums, un runājiet tālāk, teikumi nonāk pēc kārtas.",
+    "clean.raw": "ēē nu īstenībā es es gribēju tev pateikt ka ka sapulce ir pārcelta uz otrdienu",
+    "clean.clean": "Es gribēju tev pateikt, ka sapulce ir pārcelta uz otrdienu.",
+    "clean.title": "Pārskatījis MI",
+    "clean.text": "MI pārlasa transkripciju un uzraksta to tīri: “ēē”, atkārtojumi un nepareizi iesākumi pazūd, pieturzīmes un tehniskie termini tiek izlaboti. Jēga un vārdi paliek jūsu. To dara Claude ar jūsu abonementu vai Apple Intelligence jūsu Mac datorā: bez tīkla darbu pārņem tas, un viss paliek bezsaistē.",
+    "latency.title": "Aptuveni 1,5 sekundes",
+    "latency.text": "Tas ir mediānais laiks no jūsu teikuma beigām līdz tā parādīšanai ekrānā, ieskaitot transkripciju un pārskatīšanu. Statistika tam seko dienu no dienas un rāda, kurš modelis pārskatīja: Claude vai Apple Intelligence, kamēr bijāt bezsaistē.",
+    "context.title": "Pielāgojas kontekstam",
+    "context.text": "Tonis seko lietotnei, kurā rakstāt: nedaudz slīpētāks lietotnē Mail, tiešs Slack, tehnisks Claude Code, neapstrādāts Terminal.",
+    "cursor.title": "Visur, kur rakstāt",
+    "cursor.text": "Mail, Messages, Slack, Notes, Cursor, Terminal, ChatGPT vai Claude: teikums tiek ierakstīts laukā, kurā ir fokuss. Ja tāda nav, tas gaida starpliktuvē.",
+    "send.title": "Nosūtās pats",
+    "send.text": "Lietotnē Claude ziņa aiziet, tiklīdz tā ir uzrakstīta: Dictate jūsu vietā nospiež Return. Izvēlieties lietotnes, kurās tas notiek, piemēram, Messages vai Slack, vai izslēdziet to iestatījumos. Visur citur teksts gaida, līdz to nosūtīsiet.",
+    "send.key": "return",
+    "saved.typing": "Rakstīšana",
+    "saved.caption": "Ietaupītais laiks kopš sākuma",
+    "saved.title": "Ietaupītais laiks, saskaitīts",
+    "saved.text": "Statistika salīdzina katru diktējumu ar laiku, kas būtu vajadzīgs tā ierakstīšanai ar ātrumu 40 vārdi minūtē. Runāšanas un teksta gaidīšanas laiks tiek atskaitīts: paliek patiesi ietaupītais laiks, dienu no dienas un kopš jūsu pirmā diktējuma.",
+    "langs.title": "25 valodas un jūsu vārdu krājums",
+    "langs.text": "Izvēlieties diktēšanas valodu un pievienojiet savus vārdus: īpašvārdus, žargonu, produktu nosaukumus. Tie tiek rakstīti tā, kā rakstītu jūs. Arī saskarne runā visās 25.",
+    "offline.airplane": "Lidmašīnas režīms",
+    "offline.on": "Ieslēgts",
+    "offline.off": "Izslēgts",
+    "offline.typed": "Nolaižamies plkst. 18, piezvanīšu, kad iziešu.",
+    "offline.caption": "Parakeet un Apple Intelligence, šajā Mac datorā.",
+    "offline.title": "Darbojas bezsaistē",
+    "offline.text": "Transkripcija darbojas jūsu Mac datorā ar Parakeet, modeli, kam nav vajadzīgs tīkls, un pārskatīšana tāpat, ar Apple Intelligence. Lidmašīnā vai vilcienā bez signāla Dictate joprojām raksta.",
+    "pill.title": "Neuzkrītošs",
+    "pill.text": "Maza kapsula ekrāna apakšā rāda, ka Dictate klausās, tad strādā, un pēc tam izgaist. Ja tas neko nesadzirdēja, to pasaka pārsvītrots skaļrunis. Ar AirPods tas pagaida, līdz atbild to mikrofons, pirms rāda klausīšanos, lai jūs zinātu, kad runāt.",
+    "emoji.title": "Arī smaidiņi",
+    "emoji.text": "Sakiet “smaidiņš īkšķis uz augšu”, un Dictate uzraksta 👍. Visas Apple emocijzīmes, ar balsi.",
+    "faq.title": "Biežāk uzdotie jautājumi",
+    "faq.q1": "Kāpēc tas ir bez maksas?",
+    "faq.a1": "Tāpēc, ka Dictate darbināšana neko nemaksā: nav servera, nav konta. Transkripcija notiek jūsu Mac datorā, un pārskatīšana iet caur Claude abonementu, kas jums jau ir, vai caur Apple Intelligence jūsu Mac datorā. Mums nav par ko maksāt, tātad nav par ko prasīt samaksu no jums. Nav pro versijas, nav ierobežota izmēģinājuma.",
+    "faq.q2": "Vai man vajag Claude abonementu?",
+    "faq.a2": "Nē. Ja Claude Code vai lietotne Claude ir instalēta un pierakstīta jūsu kontā, Claude pārskata katru diktējumu ar komandu <code>claude</code>, ar jūsu abonementu. Bez abonementa iestatījumos ielīmējiet Claude, OpenAI vai Gemini API atslēgu: katra izmanto savu ātrāko modeli. Ja nav nekā no tā, pārskata Apple Intelligence, tieši jūsu Mac datorā. Jūs izvēlaties iestatījumos, un, ja pārskatīšana neatbild, neapstrādātā transkripcija tiek ievietota tik un tā. Ja Claude izrakstās, kapsula to pasaka, un darbu pārņem Apple Intelligence.",
+    "faq.q3": "Vai tas darbojas bezsaistē?",
+    "faq.a3": "Jā. Transkripcijas modelis (aptuveni 630 MB, lejupielādēts iestatīšanas laikā) pilnībā darbojas jūsu Mac datorā, un pārskatīšana tāpat, ja tā iet caur Apple Intelligence. Savienojums vajadzīgs tikai pārskatīšanai ar Claude.",
+    "faq.q4": "Ar ko tas atšķiras no macOS diktēšanas?",
+    "faq.a4": "Apple diktēšana raksta to, ko dzird, ar visu vilcināšanos, un tā ir jāieslēdz un jāaptur. Dictate ietilpst vienā taustiņā, ko turat, noņem “ēē” un atkārtojumus, izlabo tehniskos terminus un pielāgo toni lietotnei. Un jūsu balss nenonāk pie Apple.",
+    "faq.q5": "Kādas valodas?",
+    "faq.a5": "Divdesmit piecas Eiropas valodas: latviešu, angļu, franču, vācu, spāņu, itāļu, portugāļu, holandiešu, poļu, zviedru, dāņu, somu, ungāru, grieķu, čehu, rumāņu, ukraiņu un citas. Valodu izvēlaties iestatījumos, un savu vārdu krājumu pievienojat leksikonā. Pati lietotne runā visās divdesmit piecās, atbilstoši jūsu Mac valodai.",
+    "faq.q6": "Ko Dictate prasa iestatīšanas laikā?",
+    "faq.a6": "Trīs macOS atļaujas: mikrofonu, ievades uzraudzību taustiņam un pieejamību, lai atrastu lauku un tajā rakstītu. Palīgs izved jūs cauri tām pa vienai un pēc tam lejupielādē transkripcijas modeli. Pēc tam Dictate dzīvo izvēlņu joslā un pats sevi atjaunina.",
+    "faq.q7": "Kuros Mac datoros?",
+    "faq.a7": "macOS 27 un Apple čips, no M1 līdz jaunākajiem. Lietotni ir parakstījis un notariāli apstiprinājis Apple.",
+    "dl.title": "Bez maksas &amp; atvērtais pirmkods",
+    "dl.lead": "Citas diktēšanas lietotnes maksā par mēnesi vai par licenci. Dictate nemaksā neko, un tā kods ir publisks.",
+    "price.wispr": "12&nbsp;€ / mēnesī",
+    "price.typeless": "12&nbsp;$ / mēnesī",
+    "price.superwhisper": "8,49&nbsp;$ / mēnesī",
+    "price.voiceink": "25&nbsp;$ vienreiz",
+    "price.us": "<b class=\"gradient-text\">Bez maksas</b> · atvērtais pirmkods",
+    "price.note": "Maksas plānu cenas, 2026.&nbsp;gada 17.&nbsp;oktobrī ņemtas no izstrādātāju vietnēm. Wispr Flow un Typeless bezmaksas versijas ierobežo vārdu skaitu.",
+    "dl.code": "Skatīt kodu",
+    "dl.meta": "<span data-version>Jaunākā versija</span> · macOS 27 · Apple Silicon",
+    "footer.privacy": "Konfidencialitāte",
+    "dl.brew": "Vai ar Homebrew: <code>brew install --cask moifort/tap/dictate</code>",
+    "dl.storeNote": "Veikalā Mac App Store: lai diktētu, turiet nospiestu option + atstarpi, pēc tam ielīmējiet ar ⌘V. Tur pārskatīšanu veic Apple Intelligence.",
+    "footer.credit": "Dictate ir <a href=\"https://github.com/moifort\" rel=\"noopener\">Polyforms</a> atvērtā pirmkoda projekts. Transkripcija: Parakeet (NVIDIA) caur FluidAudio. Pārskatīšana: Claude (Anthropic) vai Apple Intelligence.",
+    "footer.releases": "Visas versijas",
+    "footer.issues": "Ziņot par problēmu",
+    "footer.docs": "Dokumentācija",
+    "aria.demo": "Demonstrācija",
+    "aria.timeline": "Kā tas darbojas",
+    "aria.prices": "Alternatīvu cenas",
+    "aria.store": "Lejupielādēt veikalā Mac App Store",
+    "meta.description": "Turiet nospiestu control, runājiet, atlaidiet: tīrs, kontekstam pielāgots teksts parādās tur, kur rakstāt. Transkribēts jūsu Mac datorā, bez konta, bez maksas un ar atvērto pirmkodu."
+  },
+  "badge": "badges/en.svg",
+  "demo": {
+    "decimal": ",",
+    "version": "Versija {v}",
+    "emojiWords": "smaidiņš īkšķis uz augšu",
+    "scenarios": [
+      {
+        "to": "Arthur G.",
+        "subject": "Vilciņi",
+        "prefix": "Sveiks, Arthur,\n\n",
+        "heard": "ēē nu es es gribēju tev pateikt ka vilciņi ir atnākuši ēē varam tos izmēģināt sestdien ja gribi un un tu pasaki kurš griežas visilgāk",
+        "clean": "Es gribēju tev pateikt, ka vilciņi ir atnākuši. Varam tos izmēģināt sestdien, ja gribi, un tu pasaki, kurš griežas visilgāk."
+      },
+      {
+        "to": "Colas D.",
+        "subject": "Svētdienas grils",
+        "prefix": "Sveiks, Colas,\n\n",
+        "heard": "nu ēē svētdienai es parūpēšos par cūkgaļas karbonādēm un un tu paņem maizi ēē un dzērienus",
+        "clean": "Svētdienai es parūpēšos par cūkgaļas karbonādēm, un tu paņem maizi un dzērienus."
+      }
+    ],
+    "phrases": [
+      {
+        "app": "Mail",
+        "text": "Sveika, Marie, paldies par atsauksmi, šorīt to izlabošu."
+      },
+      {
+        "app": "Slack",
+        "text": "tiekamies plkst. 14 Lumière telpā?"
+      },
+      {
+        "app": "Notes",
+        "text": "Ideja: līdz mēneša beigām atgādināt piegādātājam."
+      },
+      {
+        "app": "Terminal",
+        "text": "palaid maksājumu moduļa testus"
+      },
+      {
+        "app": "Claude",
+        "text": "Izskaidro, ko dara šī funkcija."
+      }
+    ],
+    "sends": [
+      {
+        "app": "Claude",
+        "text": "Apkopo šo PR trīs punktos."
+      },
+      {
+        "app": "Messages",
+        "text": "Būšu pēc desmit minūtēm!"
+      },
+      {
+        "app": "Slack",
+        "text": "Izlasīšu specifikāciju un atrakstīšu."
+      },
+      {
+        "app": "Notes",
+        "text": "Nopirkt maizi un olas."
+      }
+    ]
+  }
+};

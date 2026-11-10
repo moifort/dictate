@@ -13,8 +13,9 @@
   "use strict";
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  // Set by i18n.js for every browser that is not in French.
-  const english = document.documentElement.lang === "en";
+  // The demo's texts in the page's language, loaded by i18n.js for every
+  // browser that is not in French: the French ones are written here.
+  const demoTexts = window.DICTATE_I18N ? window.DICTATE_I18N.demo : null;
 
   // ---------------------------------------------------------------------------
   // Waves
@@ -335,23 +336,7 @@
       clean: "Pour dimanche, je m'occupe des côtelettes de porc, et toi tu prends le pain et les boissons.",
     },
   ];
-  const SCENARIOS_EN = [
-    {
-      to: "Arthur G.",
-      subject: "Spinning tops",
-      prefix: "Hi Arthur,\n\n",
-      heard: "um so I I wanted to tell you the spinning tops arrived um we can try them on Saturday if you want and and you tell me which one spins the longest",
-      clean: "I wanted to tell you the spinning tops arrived. We can try them on Saturday if you want, and you tell me which one spins the longest.",
-    },
-    {
-      to: "Colas D.",
-      subject: "Sunday barbecue",
-      prefix: "Hi Colas,\n\n",
-      heard: "so um for Sunday I'll take care of the pork chops and and you bring the bread um and the drinks",
-      clean: "For Sunday, I'll take care of the pork chops, and you bring the bread and the drinks.",
-    },
-  ];
-  const SCENARIOS = english ? SCENARIOS_EN : SCENARIOS_FR;
+  const SCENARIOS = demoTexts ? demoTexts.scenarios : SCENARIOS_FR;
 
   const dom = {
     to: document.querySelector("[data-mail-to]"),
@@ -584,7 +569,7 @@
       hand.style.transform = `rotate(${(tenths / 10 / dial) * 360}deg)`;
       arc.style.strokeDashoffset = String(100 - (tenths / 10 / dial) * 100);
       const seconds = (tenths / 10).toFixed(1);
-      timer.textContent = (english ? seconds : seconds.replace(".", ",")) + " s";
+      timer.textContent = seconds.replace(".", demoTexts ? demoTexts.decimal : ",") + " s";
     };
     (async () => {
       show(0);
@@ -658,14 +643,7 @@
       { app: "Terminal", text: "lance les tests du module de paiement" },
       { app: "Claude", text: "Explique-moi ce que fait cette fonction." },
     ];
-    const phrasesEn = [
-      { app: "Mail", text: "Hi Marie, thanks for the feedback, I'll fix it this morning." },
-      { app: "Slack", text: "see you at 2pm in the Lumière room?" },
-      { app: "Notes", text: "Idea: follow up with the supplier before the end of the month." },
-      { app: "Terminal", text: "run the payment module tests" },
-      { app: "Claude", text: "Explain what this function does." },
-    ];
-    const phrases = english ? phrasesEn : phrasesFr;
+    const phrases = demoTexts ? demoTexts.phrases : phrasesFr;
     (async () => {
       let p = 0;
       for (;;) {
@@ -688,7 +666,7 @@
   const emojiTyped = document.querySelector("[data-emoji-typed]");
   const emojiResult = document.querySelector("[data-emoji-result]");
   if (emojiTyped && emojiResult) {
-    const words = english ? "smiley thumbs up" : "smiley pouce en l'air";
+    const words = demoTexts ? demoTexts.emojiWords : "smiley pouce en l'air";
     (async () => {
       for (;;) {
         emojiResult.classList.remove("shown");
@@ -719,13 +697,7 @@
       { app: "Slack", text: "Je relis la spec et je te dis." },
       { app: "Notes", text: "Acheter du pain et des œufs." },
     ];
-    const sendsEn = [
-      { app: "Claude", text: "Sum up this PR in three points." },
-      { app: "Messages", text: "Be there in ten minutes!" },
-      { app: "Slack", text: "Reading the spec, I'll get back to you." },
-      { app: "Notes", text: "Buy bread and eggs." },
-    ];
-    const sends = english ? sendsEn : sendsFr;
+    const sends = demoTexts ? demoTexts.sends : sendsFr;
     (async () => {
       let p = 0;
       for (;;) {
@@ -841,7 +813,7 @@
     .then((release) => {
       if (!release || !release.tag_name) return;
       const version = release.tag_name.replace(/^v/, "");
-      for (const el of document.querySelectorAll("[data-version]")) el.textContent = `Version ${version}`;
+      for (const el of document.querySelectorAll("[data-version]")) el.textContent = (demoTexts ? demoTexts.version : "Version {v}").replace("{v}", version);
       const dmg = (release.assets || []).find((a) => a.name.endsWith(".dmg"));
       if (dmg) {
         for (const a of document.querySelectorAll("[data-download]")) a.href = dmg.browser_download_url;

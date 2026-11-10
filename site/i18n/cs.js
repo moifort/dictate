@@ -1,0 +1,186 @@
+/* Dictate landing page: its texts in "cs", read by i18n.js and main.js. */
+window.DICTATE_I18N = {
+  "text": {
+    "meta.title": "Dictate — Diktování pro Mac, zdarma a open source",
+    "nav.demo": "Demo",
+    "nav.features": "Funkce",
+    "nav.faq": "Otázky",
+    "nav.compare": "Srovnání",
+    "cmp.title": "Dictate vedle ostatních",
+    "cmp.lead": "Bezplatná open source alternativa k Wispr Flow, Typeless, Superwhisper a VoiceInk.",
+    "cmp.row.transcribe": "Přepis",
+    "cmp.row.review": "Kontrola AI",
+    "cmp.row.offline": "Vše offline",
+    "cmp.row.oss": "Open source",
+    "cmp.row.langs": "Jazyky",
+    "cmp.row.price": "Cena",
+    "cmp.cloud": "Cloud",
+    "cmp.onMac": "Na Macu",
+    "cmp.macOrCloud": "Mac nebo cloud",
+    "cmp.apiKey": "Váš klíč API",
+    "cmp.appleOrClaude": "Apple Intelligence nebo Claude",
+    "cmp.yes": "Ano",
+    "cmp.no": "Ne",
+    "cmp.localModels": "Lokální modely",
+    "cmp.noAccount": "Bez účtu a klíče",
+    "cmp.gpl": "GPL",
+    "cmp.mit": "MIT",
+    "cmp.hundred": "100+",
+    "cmp.european": "25 evropských",
+    "cmp.free": "Zdarma",
+    "cmp.calloutTitle": "Přepis i kontrola, obojí na Macu.",
+    "cmp.calloutText": "S Apple Intelligence nejde nic na internet: žádný účet, žádný klíč, žádná síť. Vypněte Wi-Fi a Dictate píše dál.",
+    "cmp.note": "Podle webů a dokumentace výrobců, stav k 17.&nbsp;říjnu&nbsp;2026. Dictate pokrývá méně jazyků: Parakeet rozpoznává jen evropské jazyky.",
+    "nav.download": "Stáhnout",
+    "hero.eyebrow": "Diktování pro Mac",
+    "hero.title": "Sotva pomyšleno,<br><span class=\"gradient-text\">už napsáno.</span>",
+    "hero.subtitle": "Podržte <kbd class=\"key inline\" data-key-hero><span class=\"key-glyph\">⌃</span><span class=\"key-name\">control</span></kbd>, mluvte, uvolněte: čistý text, upravený podle kontextu, se objeví tam, kde píšete.",
+    "dl.mac": "Stáhnout pro Mac",
+    "hero.seeDemo": "Zobrazit demo",
+    "hero.meta": "Zdarma · Open source · <span data-version>Nejnovější verze</span> · macOS 27 · Apple Silicon",
+    "demo.badge": "<span class=\"live-tag\"><i aria-hidden=\"true\"></i>Live</span>Demo",
+    "demo.title": "Od hlasu k textu.",
+    "demo.lead": "Celý e-mail bez psaní. Tedy skoro: jedna klávesa, control.",
+    "demo.window": "Nová zpráva",
+    "demo.to": "Komu:",
+    "demo.subject": "Předmět:",
+    "tl.hold": "Podržet",
+    "tl.speak": "Mluvit",
+    "tl.release": "Uvolnit",
+    "tl.review": "Zkontrolováno AI<small class=\"tl-context\"><img src=\"apps/mail.png\" width=\"14\" height=\"14\" alt=\"\">kontext: Mail</small>",
+    "tl.written": "Napsáno",
+    "feat.title": "Na dosah klávesy.",
+    "feat.lead": "Žádné okno k otevření, žádné tlačítko ke kliknutí, žádný surový přepis k opravování.",
+    "ptt.hint": "podržet · mluvit · uvolnit",
+    "ptt.text": "Jediná klávesa, <kbd><span class=\"kbd-glyph\">⌃</span>control</kbd> nebo <kbd><span class=\"kbd-glyph\">🌐︎</span>fn</kbd>, podle vás. Držte ji, když mluvíte, uvolněte, a je to napsáno. Není třeba čekat: podržte ji znovu, zatímco se kontroluje poslední věta, a mluvte dál, věty dorazí popořadě.",
+    "clean.raw": "ehm no vlastně já já jsem ti chtěl říct že že schůzka je přesunutá na úterý",
+    "clean.clean": "Chtěl jsem ti říct, že schůzka je přesunutá na úterý.",
+    "clean.title": "Zkontrolováno AI",
+    "clean.text": "AI přepis přečte a zapíše ho načisto: „ehm“, opakování a chybné začátky zmizí, interpunkce a odborné výrazy se opraví. Smysl i slova zůstávají vaše. Claudem s vaším předplatným, nebo Apple Intelligence na vašem Macu: bez sítě ji zastoupí a vše zůstane offline.",
+    "latency.title": "Asi 1,5 sekundy",
+    "latency.text": "To je medián času mezi koncem vaší věty a jejím zobrazením na obrazovce, včetně přepisu a kontroly. Statistiky ho sledují den po dni a ukazují, který model kontroloval: Claude, nebo Apple Intelligence, když jste byli offline.",
+    "context.title": "Přizpůsobí se kontextu",
+    "context.text": "Tón se řídí aplikací, ve které píšete: o něco uhlazenější v Mailu, přímý ve Slacku, technický v Claude Code, surový v Terminálu.",
+    "cursor.title": "Všude, kde píšete",
+    "cursor.text": "Mail, Zprávy, Slack, Poznámky, Cursor, Terminál, ChatGPT nebo Claude: věta se zapíše do aktivního pole. Pokud žádné není, počká ve schránce.",
+    "send.title": "Odešle se sama",
+    "send.text": "V Claude zpráva odejde, jakmile je napsaná: Dictate za vás stiskne Return. Vyberte aplikace, kde to dělá, třeba Zprávy nebo Slack, nebo to vypněte v nastavení. Všude jinde text počká, až ho odešlete.",
+    "send.key": "return",
+    "saved.typing": "Psaní",
+    "saved.caption": "Čas ušetřený od začátku",
+    "saved.title": "Ušetřený čas, spočítaný",
+    "saved.text": "Statistiky porovnávají každý diktát s časem, který by zabralo jeho napsání rychlostí 40 slov za minutu. Čas strávený mluvením a čekáním na text se odečte: zbývá skutečně ušetřený čas, den po dni a od vašeho prvního diktátu.",
+    "langs.title": "25 jazyků a vaše slovní zásoba",
+    "langs.text": "Vyberte jazyk diktování a přidejte vlastní slova: jména, žargon, názvy produktů. Zapíší se tak, jak byste je napsali vy. Všech 25 jazyků umí i rozhraní.",
+    "offline.airplane": "Letový režim",
+    "offline.on": "Zapnuto",
+    "offline.off": "Vypnuto",
+    "offline.typed": "Přistáváme v 18 hodin, zavolám ti, až vyjdu.",
+    "offline.caption": "Parakeet a Apple Intelligence, na tomto Macu.",
+    "offline.title": "Funguje offline",
+    "offline.text": "Přepis běží na vašem Macu s Parakeetem, modelem, který nepotřebuje síť, a kontrola také, s Apple Intelligence. V letadle nebo ve vlaku bez signálu Dictate píše dál.",
+    "pill.title": "Diskrétní",
+    "pill.text": "Malá pilulka u dolního okraje obrazovky ukazuje, že Dictate poslouchá, pak pracuje, a potom zmizí. Pokud nic neslyšela, řekne vám to přeškrtnutý reproduktor. S AirPods počká, až jejich mikrofon odpoví, než ukáže poslech, abyste věděli, kdy mluvit.",
+    "emoji.title": "Smajlíky také",
+    "emoji.text": "Řekněte „smajlík palec nahoru“ a Dictate napíše 👍. Všechna emoji od Applu, hlasem.",
+    "faq.title": "Časté otázky",
+    "faq.q1": "Proč je to zdarma?",
+    "faq.a1": "Protože provoz Dictate nic nestojí: žádný server, žádný účet. Přepis probíhá na vašem Macu a kontrola jde přes předplatné Claude, které už máte, nebo přes Apple Intelligence na vašem Macu. Nemáme co platit, takže vám nemáme co účtovat. Žádná verze pro, žádná omezená zkušební doba.",
+    "faq.q2": "Potřebuji předplatné Claude?",
+    "faq.a2": "Ne. Když je Claude Code nebo aplikace Claude nainstalovaná a přihlášená k vašemu účtu, Claude kontroluje každý diktát příkazem <code>claude</code>, v rámci vašeho předplatného. Bez předplatného vložte v Nastavení klíč API Claude, OpenAI nebo Gemini: každý používá svůj nejrychlejší model. Bez toho všeho kontroluje Apple Intelligence přímo na vašem Macu. Vybíráte v Nastavení, a když kontrola neodpoví, vloží se i tak surový přepis. Pokud se Claude odhlásí, pilulka vám to řekne a zastoupí ho Apple Intelligence.",
+    "faq.q3": "Funguje to offline?",
+    "faq.a3": "Ano. Model přepisu (asi 630 MB, stahuje se při nastavení) běží celý na vašem Macu, a kontrola také, když jde přes Apple Intelligence. Připojení potřebuje jen kontrola Claudem.",
+    "faq.q4": "Čím se liší od diktování v macOS?",
+    "faq.a4": "Diktování od Applu píše, co slyší, včetně zaváhání, a musíte ho spouštět a zastavovat. Dictate se vejde do jedné klávesy, kterou držíte, odstraní „ehm“ a opakování, opraví odborné výrazy a přizpůsobí tón aplikaci. A váš hlas nejde k Applu.",
+    "faq.q5": "Jaké jazyky?",
+    "faq.a5": "Dvacet pět evropských jazyků: čeština, angličtina, francouzština, němčina, španělština, italština, portugalština, nizozemština, polština, švédština, dánština, finština, maďarština, řečtina, rumunština, ukrajinština a další. Jazyk vyberete v Nastavení a slovní zásobu přidáte v lexikonu. Samotná aplikace mluví všemi pětadvaceti, podle jazyka vašeho Macu.",
+    "faq.q6": "Co Dictate žádá při nastavení?",
+    "faq.a6": "Tři oprávnění macOS: mikrofon, monitorování vstupu kvůli klávese a zpřístupnění, aby našel pole a psal do něj. Průvodce vás jimi provede jedno po druhém a pak stáhne model přepisu. Potom Dictate žije v řádku nabídek a sám se aktualizuje.",
+    "faq.q7": "Na jakých Macích?",
+    "faq.a7": "macOS 27 a čip Apple, od M1 po nejnovější. Aplikace je podepsaná a notarizovaná společností Apple.",
+    "dl.title": "Zdarma &amp; open source",
+    "dl.lead": "Jiné aplikace pro diktování se platí měsíčně nebo za licenci. Dictate nestojí nic a jeho kód je veřejný.",
+    "price.wispr": "12&nbsp;€ / měsíc",
+    "price.typeless": "12&nbsp;$ / měsíc",
+    "price.superwhisper": "8,49&nbsp;$ / měsíc",
+    "price.voiceink": "25&nbsp;$ jednorázově",
+    "price.us": "<b class=\"gradient-text\">Zdarma</b> · open source",
+    "price.note": "Ceny placených tarifů, zjištěné 17.&nbsp;října&nbsp;2026 na webech výrobců. Bezplatné verze Wispr Flow a Typeless omezují počet slov.",
+    "dl.code": "Zobrazit kód",
+    "dl.meta": "<span data-version>Nejnovější verze</span> · macOS 27 · Apple Silicon",
+    "footer.privacy": "Soukromí",
+    "dl.brew": "Nebo přes Homebrew: <code>brew install --cask moifort/tap/dictate</code>",
+    "dl.storeNote": "V Mac App Storu: pro diktování podržte option + mezerník a pak vložte pomocí ⌘V. Kontrolu tam provádí Apple Intelligence.",
+    "footer.credit": "Dictate je open source projekt od <a href=\"https://github.com/moifort\" rel=\"noopener\">Polyforms</a>. Přepis: Parakeet (NVIDIA) přes FluidAudio. Kontrola: Claude (Anthropic) nebo Apple Intelligence.",
+    "footer.releases": "Všechny verze",
+    "footer.issues": "Nahlásit problém",
+    "footer.docs": "Dokumentace",
+    "aria.demo": "Ukázka",
+    "aria.timeline": "Jak to funguje",
+    "aria.prices": "Ceny alternativ",
+    "aria.store": "Stáhnout v Mac App Storu",
+    "meta.description": "Podržte control, mluvte, uvolněte: čistý text, upravený podle kontextu, se objeví tam, kde píšete. Přepis na vašem Macu, bez účtu, zdarma a open source."
+  },
+  "badge": "badges/en.svg",
+  "demo": {
+    "decimal": ",",
+    "version": "Verze {v}",
+    "emojiWords": "smajlík palec nahoru",
+    "scenarios": [
+      {
+        "to": "Arthur G.",
+        "subject": "Káči",
+        "prefix": "Ahoj Arthure,\n\n",
+        "heard": "ehm tak já já jsem ti chtěl říct že káči dorazily ehm můžeme je vyzkoušet v sobotu jestli chceš a a řekneš mi která se točí nejdéle",
+        "clean": "Chtěl jsem ti říct, že káči dorazily. Můžeme je vyzkoušet v sobotu, jestli chceš, a řekneš mi, která se točí nejdéle."
+      },
+      {
+        "to": "Colas D.",
+        "subject": "Nedělní grilování",
+        "prefix": "Ahoj Colasi,\n\n",
+        "heard": "tak ehm na neděli já si vezmu na starost vepřové kotlety a a ty vezmeš chleba ehm a pití",
+        "clean": "Na neděli si vezmu na starost vepřové kotlety a ty vezmeš chleba a pití."
+      }
+    ],
+    "phrases": [
+      {
+        "app": "Mail",
+        "text": "Ahoj Marie, díky za zpětnou vazbu, opravím to dnes dopoledne."
+      },
+      {
+        "app": "Slack",
+        "text": "sejdeme se ve 14 hodin v místnosti Lumière?"
+      },
+      {
+        "app": "Notes",
+        "text": "Nápad: připomenout se dodavateli do konce měsíce."
+      },
+      {
+        "app": "Terminal",
+        "text": "spusť testy platebního modulu"
+      },
+      {
+        "app": "Claude",
+        "text": "Vysvětli mi, co dělá tahle funkce."
+      }
+    ],
+    "sends": [
+      {
+        "app": "Claude",
+        "text": "Shrň tenhle PR do tří bodů."
+      },
+      {
+        "app": "Messages",
+        "text": "Jsem tam za deset minut!"
+      },
+      {
+        "app": "Slack",
+        "text": "Přečtu si specifikaci a ozvu se."
+      },
+      {
+        "app": "Notes",
+        "text": "Koupit chleba a vejce."
+      }
+    ]
+  }
+};

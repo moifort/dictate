@@ -1,0 +1,186 @@
+/* Dictate landing page: its texts in "da", read by i18n.js and main.js. */
+window.DICTATE_I18N = {
+  "text": {
+    "meta.title": "Dictate — Diktering til Mac, gratis og open source",
+    "nav.demo": "Demo",
+    "nav.features": "Funktioner",
+    "nav.faq": "Spørgsmål",
+    "nav.compare": "Sammenligning",
+    "cmp.title": "Dictate over for de andre",
+    "cmp.lead": "Et gratis open source-alternativ til Wispr Flow, Typeless, Superwhisper og VoiceInk.",
+    "cmp.row.transcribe": "Transskription",
+    "cmp.row.review": "AI-gennemgang",
+    "cmp.row.offline": "Helt offline",
+    "cmp.row.oss": "Open source",
+    "cmp.row.langs": "Sprog",
+    "cmp.row.price": "Pris",
+    "cmp.cloud": "Cloud",
+    "cmp.onMac": "På Mac",
+    "cmp.macOrCloud": "Mac eller cloud",
+    "cmp.apiKey": "Din API-nøgle",
+    "cmp.appleOrClaude": "Apple Intelligence eller Claude",
+    "cmp.yes": "Ja",
+    "cmp.no": "Nej",
+    "cmp.localModels": "Lokale modeller",
+    "cmp.noAccount": "Ingen konto, ingen nøgle",
+    "cmp.gpl": "GPL",
+    "cmp.mit": "MIT",
+    "cmp.hundred": "100+",
+    "cmp.european": "25 europæiske",
+    "cmp.free": "Gratis",
+    "cmp.calloutTitle": "Transskription og gennemgang, begge på Mac.",
+    "cmp.calloutText": "Med Apple Intelligence går intet på nettet: ingen konto, ingen nøgle, intet netværk. Slå wi-fi fra, og Dictate skriver stadig.",
+    "cmp.note": "Ifølge udgivernes websteder og dokumentation pr. 17.&nbsp;oktober&nbsp;2026. Dictate dækker færre sprog: Parakeet genkender kun europæiske sprog.",
+    "nav.download": "Hent",
+    "hero.eyebrow": "Diktering til Mac",
+    "hero.title": "Knap nok tænkt,<br><span class=\"gradient-text\">allerede skrevet.</span>",
+    "hero.subtitle": "Hold <kbd class=\"key inline\" data-key-hero><span class=\"key-glyph\">⌃</span><span class=\"key-name\">control</span></kbd> nede, tal, slip: en ren tekst, tilpasset sammenhængen, dukker op, der hvor du skriver.",
+    "dl.mac": "Hent til Mac",
+    "hero.seeDemo": "Se demoen",
+    "hero.meta": "Gratis · Open source · <span data-version>Nyeste version</span> · macOS 27 · Apple Silicon",
+    "demo.badge": "<span class=\"live-tag\"><i aria-hidden=\"true\"></i>Live</span>Demo",
+    "demo.title": "Fra stemme til tekst.",
+    "demo.lead": "En hel e-mail uden at skrive noget. Nå ja, næsten: én tast, control.",
+    "demo.window": "Ny besked",
+    "demo.to": "Til:",
+    "demo.subject": "Emne:",
+    "tl.hold": "Hold nede",
+    "tl.speak": "Tal",
+    "tl.release": "Slip",
+    "tl.review": "Gennemgået af AI<small class=\"tl-context\"><img src=\"apps/mail.png\" width=\"14\" height=\"14\" alt=\"\">kontekst: Mail</small>",
+    "tl.written": "Skrevet",
+    "feat.title": "Lige ved hånden.",
+    "feat.lead": "Intet vindue at åbne, ingen knap at klikke på, ingen rå transskription at rette.",
+    "ptt.hint": "hold nede · tal · slip",
+    "ptt.text": "Én tast, <kbd><span class=\"kbd-glyph\">⌃</span>control</kbd> eller <kbd><span class=\"kbd-glyph\">🌐︎</span>fn</kbd>, du vælger. Hold den nede, mens du taler, slip, og det står der. Du behøver ikke vente: hold den nede igen, mens den sidste sætning bliver gennemgået, og tal videre, sætningerne lander i rækkefølge.",
+    "clean.raw": "øh altså faktisk ville jeg jeg sige at at mødet er flyttet til tirsdag",
+    "clean.clean": "Jeg ville sige, at mødet er flyttet til tirsdag.",
+    "clean.title": "Gennemgået af AI",
+    "clean.text": "En AI læser transskriptionen igennem og skriver den rent: alle “øh”, gentagelser og falske starter forsvinder, tegnsætning og fagudtryk rettes. Meningen og ordene er stadig dine. Af Claude med dit abonnement eller af Apple Intelligence på din Mac: uden netværk tager den over, og alt bliver offline.",
+    "latency.title": "Omkring 1,5 sekunder",
+    "latency.text": "Det er mediantiden mellem slutningen på din sætning og dens fremkomst på skærmen, transskription og gennemgang inklusive. Statistikken følger den dag for dag og viser, hvilken model der gennemgik: Claude, eller Apple Intelligence, mens du var offline.",
+    "context.title": "Tilpasser sig sammenhængen",
+    "context.text": "Tonen følger den app, du skriver i: lidt mere poleret i Mail, direkte i Slack, teknisk i Claude Code, rå i Terminal.",
+    "cursor.title": "Overalt hvor du skriver",
+    "cursor.text": "Mail, Beskeder, Slack, Noter, Cursor, Terminal, ChatGPT eller Claude: sætningen skrives i det felt, der har fokus. Er der intet, venter den på udklipsholderen.",
+    "send.title": "Sendt af sig selv",
+    "send.text": "I Claude ryger beskeden af sted, så snart den er skrevet: Dictate trykker på Retur for dig. Vælg de apps, hvor det sker, for eksempel Beskeder eller Slack, eller slå det fra i indstillingerne. Alle andre steder venter teksten på, at du sender den.",
+    "send.key": "return",
+    "saved.typing": "Skrive",
+    "saved.caption": "Sparet tid siden starten",
+    "saved.title": "Sparet tid, talt op",
+    "saved.text": "Statistikken sammenligner hvert diktat med den tid, det ville have taget at skrive det, ved 40 ord i minuttet. Tiden brugt på at tale og vente på teksten trækkes fra: tilbage er den tid, du reelt har sparet, dag efter dag og siden dit første diktat.",
+    "langs.title": "25 sprog og dit ordforråd",
+    "langs.text": "Vælg dikteringssprog, og tilføj dine egne ord: navne, fagsprog, produktnavne. De bliver skrevet, som du selv ville skrive dem. Brugerfladen taler også alle 25.",
+    "offline.airplane": "Flyfunktion",
+    "offline.on": "Til",
+    "offline.off": "Fra",
+    "offline.typed": "Vi lander kl. 18, jeg ringer, når jeg er ude.",
+    "offline.caption": "Parakeet og Apple Intelligence, på denne Mac.",
+    "offline.title": "Virker offline",
+    "offline.text": "Transskriptionen kører på din Mac med Parakeet, en model, der ikke behøver netværk, og det gør gennemgangen også, med Apple Intelligence. På et fly eller i et tog uden dækning skriver Dictate stadig.",
+    "pill.title": "Diskret",
+    "pill.text": "En lille pille nederst på skærmen viser, at Dictate lytter, derefter arbejder, og så forsvinder. Hvis den intet hørte, fortæller en overstreget højttaler dig det. Med AirPods venter den på, at deres mikrofon svarer, før den viser, at den lytter, så du ved, hvornår du kan tale.",
+    "emoji.title": "Smileys også",
+    "emoji.text": "Sig “smiley tommel op”, og Dictate skriver 👍. Alle Apples emojis, med stemmen.",
+    "faq.title": "Ofte stillede spørgsmål",
+    "faq.q1": "Hvorfor er det gratis?",
+    "faq.a1": "Fordi Dictate ikke koster noget at drive: ingen server, ingen konto. Transskriptionen sker på din Mac, og gennemgangen går via det Claude-abonnement, du allerede har, eller via Apple Intelligence på din Mac. Vi har intet at betale, så der er intet at opkræve. Ingen pro-version, ingen begrænset prøveperiode.",
+    "faq.q2": "Skal jeg have et Claude-abonnement?",
+    "faq.a2": "Nej. Med Claude Code eller Claude-appen installeret og logget ind på din konto gennemgår Claude hvert diktat via kommandoen <code>claude</code>, på dit abonnement. Uden abonnement indsætter du en API-nøgle fra Claude, OpenAI eller Gemini i Indstillinger: hver bruger sin hurtigste model. Uden nogen af delene gennemgår Apple Intelligence direkte på din Mac. Du vælger i Indstillinger, og hvis gennemgangen ikke svarer, indsættes den rå transskription alligevel. Bliver Claude logget ud, siger pillen det, og Apple Intelligence tager over.",
+    "faq.q3": "Virker det offline?",
+    "faq.a3": "Ja. Transskriptionsmodellen (ca. 630 MB, hentes under indstillingen) kører helt på din Mac, og det gør gennemgangen også, når den går via Apple Intelligence. Kun gennemgangen med Claude kræver forbindelse.",
+    "faq.q4": "Hvad er forskellen fra diktering i macOS?",
+    "faq.a4": "Apples diktering skriver, hvad den hører, inklusive tøven, og du skal starte og stoppe den. Dictate ligger i én tast, du holder nede, fjerner “øh” og gentagelser, retter fagudtryk og tilpasser tonen til appen. Og din stemme sendes ikke til Apple.",
+    "faq.q5": "Hvilke sprog?",
+    "faq.a5": "Femogtyve europæiske sprog: dansk, engelsk, fransk, tysk, spansk, italiensk, portugisisk, hollandsk, polsk, svensk, finsk, ungarsk, græsk, tjekkisk, rumænsk, ukrainsk og flere. Sproget vælger du i Indstillinger, og dit ordforråd tilføjer du i leksikonet. Selve appen taler alle femogtyve, efter sproget på din Mac.",
+    "faq.q6": "Hvad beder Dictate om under indstillingen?",
+    "faq.a6": "Tre macOS-tilladelser: mikrofonen, overvågning af input til tasten og tilgængelighed for at finde feltet og skrive i det. En assistent fører dig igennem dem én ad gangen og henter derefter transskriptionsmodellen. Derefter bor Dictate i menulinjen og holder sig selv opdateret.",
+    "faq.q7": "Hvilke Mac-computere?",
+    "faq.a7": "macOS 27 og Apple Silicon, fra M1 til de nyeste. Appen er signeret og notariseret af Apple.",
+    "dl.title": "Gratis &amp; open source",
+    "dl.lead": "Andre dikteringsapps koster pr. måned eller pr. licens. Dictate koster ingenting, og koden er offentlig.",
+    "price.wispr": "12&nbsp;€ / måned",
+    "price.typeless": "12&nbsp;$ / måned",
+    "price.superwhisper": "8,49&nbsp;$ / måned",
+    "price.voiceink": "25&nbsp;$ én gang",
+    "price.us": "<b class=\"gradient-text\">Gratis</b> · open source",
+    "price.note": "Priser på betalte abonnementer, hentet den 17.&nbsp;oktober&nbsp;2026 fra udgivernes websteder. Gratisversionerne af Wispr Flow og Typeless begrænser antallet af ord.",
+    "dl.code": "Se koden",
+    "dl.meta": "<span data-version>Nyeste version</span> · macOS 27 · Apple Silicon",
+    "footer.privacy": "Anonymitet",
+    "dl.brew": "Eller med Homebrew: <code>brew install --cask moifort/tap/dictate</code>",
+    "dl.storeNote": "I Mac App Store: hold option + mellemrum nede for at diktere, og sæt derefter ind med ⌘V. Dér laves gennemgangen af Apple Intelligence.",
+    "footer.credit": "Dictate er et open source-projekt fra <a href=\"https://github.com/moifort\" rel=\"noopener\">Polyforms</a>. Transskription med Parakeet (NVIDIA) via FluidAudio. Gennemgang med Claude (Anthropic) eller Apple Intelligence.",
+    "footer.releases": "Alle versioner",
+    "footer.issues": "Rapporter et problem",
+    "footer.docs": "Dokumentation",
+    "aria.demo": "Demonstration",
+    "aria.timeline": "Sådan virker det",
+    "aria.prices": "Alternativernes priser",
+    "aria.store": "Hent i Mac App Store",
+    "meta.description": "Hold control nede, tal, slip: en ren tekst, tilpasset sammenhængen, dukker op, der hvor du skriver. Transskriberet på din Mac, uden konto, gratis og open source."
+  },
+  "badge": "badges/da.svg",
+  "demo": {
+    "decimal": ",",
+    "version": "Version {v}",
+    "emojiWords": "smiley tommel op",
+    "scenarios": [
+      {
+        "to": "Arthur G.",
+        "subject": "Snurretoppene",
+        "prefix": "Hej Arthur,\n\n",
+        "heard": "øh altså jeg jeg ville sige at snurretoppene er kommet øh vi kan prøve dem på lørdag hvis du vil og og du siger hvilken der snurrer længst",
+        "clean": "Jeg ville sige, at snurretoppene er kommet. Vi kan prøve dem på lørdag, hvis du vil, og du siger, hvilken der snurrer længst."
+      },
+      {
+        "to": "Colas D.",
+        "subject": "Grill på søndag",
+        "prefix": "Hej Colas,\n\n",
+        "heard": "altså øh til søndag tager jeg mig af svinekoteletterne og og du tager brødet med øh og drikkevarerne",
+        "clean": "Til søndag tager jeg mig af svinekoteletterne, og du tager brødet og drikkevarerne med."
+      }
+    ],
+    "phrases": [
+      {
+        "app": "Mail",
+        "text": "Hej Marie, tak for din tilbagemelding, jeg retter det her til formiddag."
+      },
+      {
+        "app": "Slack",
+        "text": "ses vi kl. 14 i lokale Lumière?"
+      },
+      {
+        "app": "Notes",
+        "text": "Idé: rykke leverandøren inden månedens udgang."
+      },
+      {
+        "app": "Terminal",
+        "text": "kør testene til betalingsmodulet"
+      },
+      {
+        "app": "Claude",
+        "text": "Forklar, hvad denne funktion gør."
+      }
+    ],
+    "sends": [
+      {
+        "app": "Claude",
+        "text": "Opsummer denne PR i tre punkter."
+      },
+      {
+        "app": "Messages",
+        "text": "Jeg er der om ti minutter!"
+      },
+      {
+        "app": "Slack",
+        "text": "Jeg læser specen og vender tilbage."
+      },
+      {
+        "app": "Notes",
+        "text": "Købe brød og æg."
+      }
+    ]
+  }
+};

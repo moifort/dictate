@@ -1,0 +1,186 @@
+/* Dictate landing page: its texts in "sl", read by i18n.js and main.js. */
+window.DICTATE_I18N = {
+  "text": {
+    "meta.title": "Dictate — Narekovanje za Mac, brezplačno in odprtokodno",
+    "nav.demo": "Demo",
+    "nav.features": "Funkcije",
+    "nav.faq": "Vprašanja",
+    "nav.compare": "Primerjava",
+    "cmp.title": "Dictate ob drugih",
+    "cmp.lead": "Brezplačna odprtokodna alternativa za Wispr Flow, Typeless, Superwhisper in VoiceInk.",
+    "cmp.row.transcribe": "Prepis",
+    "cmp.row.review": "Pregled z UI",
+    "cmp.row.offline": "Vse brez povezave",
+    "cmp.row.oss": "Odprta koda",
+    "cmp.row.langs": "Jeziki",
+    "cmp.row.price": "Cena",
+    "cmp.cloud": "Oblak",
+    "cmp.onMac": "Na Macu",
+    "cmp.macOrCloud": "Mac ali oblak",
+    "cmp.apiKey": "Vaš ključ API",
+    "cmp.appleOrClaude": "Apple Intelligence ali Claude",
+    "cmp.yes": "Da",
+    "cmp.no": "Ne",
+    "cmp.localModels": "Lokalni modeli",
+    "cmp.noAccount": "Brez računa in ključa",
+    "cmp.gpl": "GPL",
+    "cmp.mit": "MIT",
+    "cmp.hundred": "100+",
+    "cmp.european": "25 evropskih",
+    "cmp.free": "Brezplačno",
+    "cmp.calloutTitle": "Prepis in pregled, oboje na Macu.",
+    "cmp.calloutText": "Z Apple Intelligence nič ne gre na splet: brez računa, brez ključa, brez omrežja. Izklopite Wi-Fi in Dictate še vedno piše.",
+    "cmp.note": "Po spletnih mestih in dokumentaciji izdelovalcev, stanje 17.&nbsp;oktobra&nbsp;2026. Dictate pokriva manj jezikov: Parakeet prepozna samo evropske jezike.",
+    "nav.download": "Prenesi",
+    "hero.eyebrow": "Narekovanje za Mac",
+    "hero.title": "Komaj pomišljeno,<br><span class=\"gradient-text\">že napisano.</span>",
+    "hero.subtitle": "Držite <kbd class=\"key inline\" data-key-hero><span class=\"key-glyph\">⌃</span><span class=\"key-name\">control</span></kbd>, govorite, spustite: čisto besedilo, pregledano glede na kontekst, se pojavi tam, kjer pišete.",
+    "dl.mac": "Prenesi za Mac",
+    "hero.seeDemo": "Oglejte si demo",
+    "hero.meta": "Brezplačno · Odprta koda · <span data-version>Najnovejša različica</span> · macOS 27 · Apple Silicon",
+    "demo.badge": "<span class=\"live-tag\"><i aria-hidden=\"true\"></i>Live</span>Demo",
+    "demo.title": "Od glasu do besedila.",
+    "demo.lead": "Celo e-sporočilo brez tipkanja. No, skoraj: ena tipka, control.",
+    "demo.window": "Novo sporočilo",
+    "demo.to": "Za:",
+    "demo.subject": "Zadeva:",
+    "tl.hold": "Držite",
+    "tl.speak": "Govorite",
+    "tl.release": "Spustite",
+    "tl.review": "Pregledala UI<small class=\"tl-context\"><img src=\"apps/mail.png\" width=\"14\" height=\"14\" alt=\"\">kontekst: Mail</small>",
+    "tl.written": "Napisano",
+    "feat.title": "Na dosegu tipke.",
+    "feat.lead": "Nobenega okna za odpiranje, nobenega gumba za klik, nobenega surovega prepisa za popravljanje.",
+    "ptt.hint": "držite · govorite · spustite",
+    "ptt.text": "Ena sama tipka, <kbd><span class=\"kbd-glyph\">⌃</span>control</kbd> ali <kbd><span class=\"kbd-glyph\">🌐︎</span>fn</kbd>, po vaši izbiri. Držite jo, medtem ko govorite, spustite, in je napisano. Ni treba čakati: držite jo znova, medtem ko se zadnji stavek pregleduje, in govorite naprej, stavki prispejo po vrsti.",
+    "clean.raw": "ee no v bistvu sem sem ti hotel povedati da da je sestanek prestavljen na torek",
+    "clean.clean": "Hotel sem ti povedati, da je sestanek prestavljen na torek.",
+    "clean.title": "Pregledala UI",
+    "clean.text": "UI prepis prebere in ga zapiše na čisto: »ee«, ponovitve in napačni začetki izginejo, ločila in strokovni izrazi se popravijo. Pomen in besede ostanejo vaši. To naredi Claude z vašo naročnino ali Apple Intelligence na vašem Macu: brez omrežja prevzame on in vse ostane brez povezave.",
+    "latency.title": "Približno 1,5 sekunde",
+    "latency.text": "To je mediana časa med koncem vašega stavka in njegovim prikazom na zaslonu, skupaj s prepisom in pregledom. Statistika ga spremlja dan za dnem in pokaže, kateri model je pregledal: Claude ali Apple Intelligence, ko ste bili brez povezave.",
+    "context.title": "Prilagodi se kontekstu",
+    "context.text": "Ton sledi aplikaciji, v kateri pišete: nekoliko bolj izpiljen v Mailu, neposreden v Slacku, strokoven v Claude Code, surov v Terminalu.",
+    "cursor.title": "Kjer koli pišete",
+    "cursor.text": "Mail, Sporočila, Slack, Zapiski, Cursor, Terminal, ChatGPT ali Claude: stavek se vpiše v polje, ki je v žarišču. Če ga ni, počaka v odložišču.",
+    "send.title": "Pošlje se samo",
+    "send.text": "V Claudu sporočilo odide, takoj ko je napisano: Dictate namesto vas pritisne Return. Izberite aplikacije, v katerih to stori, na primer Sporočila ali Slack, ali to izklopite v nastavitvah. Povsod drugod besedilo počaka, da ga pošljete.",
+    "send.key": "return",
+    "saved.typing": "Tipkanje",
+    "saved.caption": "Prihranjen čas od začetka",
+    "saved.title": "Prihranjen čas, preštet",
+    "saved.text": "Statistika vsak narek primerja s časom, ki bi ga vzelo tipkanje, pri 40 besedah na minuto. Čas govorjenja in čakanja na besedilo se odšteje: ostane zares prihranjen čas, dan za dnem in od vašega prvega nareka.",
+    "langs.title": "25 jezikov in vaše besedišče",
+    "langs.text": "Izberite jezik narekovanja in dodajte svoje besede: imena, žargon, imena izdelkov. Zapišejo se tako, kot bi jih zapisali vi. Tudi vmesnik govori vseh 25.",
+    "offline.airplane": "Letalski način",
+    "offline.on": "Vklopljeno",
+    "offline.off": "Izklopljeno",
+    "offline.typed": "Pristanemo ob 18. uri, pokličem te, ko pridem ven.",
+    "offline.caption": "Parakeet in Apple Intelligence, na tem Macu.",
+    "offline.title": "Deluje brez povezave",
+    "offline.text": "Prepis teče na vašem Macu s Parakeetom, modelom, ki ne potrebuje omrežja, pregled pa prav tako, z Apple Intelligence. Na letalu ali vlaku brez signala Dictate še vedno piše.",
+    "pill.title": "Diskretno",
+    "pill.text": "Majhna kapsula na dnu zaslona pokaže, da Dictate posluša, nato dela, in potem izgine. Če ni ničesar slišal, vam to pove prečrtan zvočnik. Z AirPods počaka, da se odzove njihov mikrofon, preden pokaže poslušanje, da veste, kdaj govoriti.",
+    "emoji.title": "Tudi smeški",
+    "emoji.text": "Recite »smeško palec gor« in Dictate napiše 👍. Vsi Applovi emojiji, z glasom.",
+    "faq.title": "Pogosta vprašanja",
+    "faq.q1": "Zakaj je brezplačno?",
+    "faq.a1": "Ker delovanje Dictata nič ne stane: brez strežnika, brez računa. Prepis poteka na vašem Macu, pregled pa gre prek naročnine Claude, ki jo že imate, ali prek Apple Intelligence na vašem Macu. Nimamo česa plačati, zato vam nimamo česa zaračunati. Brez različice pro, brez omejenega preizkusa.",
+    "faq.q2": "Ali potrebujem naročnino Claude?",
+    "faq.a2": "Ne. Ko sta Claude Code ali aplikacija Claude nameščena in prijavljena v vaš račun, Claude vsak narek pregleda z ukazom <code>claude</code>, z vašo naročnino. Brez naročnine v nastavitvah prilepite ključ API Claude, OpenAI ali Gemini: vsak uporablja svoj najhitrejši model. Brez vsega tega pregleduje Apple Intelligence, kar na vašem Macu. Izberete v nastavitvah, in če se pregled ne odzove, se surov prepis vseeno vstavi. Če se Claude odjavi, vam to pove kapsula in prevzame Apple Intelligence.",
+    "faq.q3": "Ali deluje brez povezave?",
+    "faq.a3": "Da. Model za prepis (približno 630 MB, prenesen ob nastavitvi) teče v celoti na vašem Macu, pregled pa prav tako, kadar gre prek Apple Intelligence. Povezavo potrebuje samo pregled s Claudom.",
+    "faq.q4": "V čem se razlikuje od narekovanja v macOS?",
+    "faq.a4": "Applovo narekovanje zapiše, kar sliši, skupaj z obotavljanji, in ga morate zagnati ter ustaviti. Dictate je v eni tipki, ki jo držite, odstrani »ee« in ponovitve, popravi strokovne izraze in prilagodi ton aplikaciji. In vaš glas ne gre k Applu.",
+    "faq.q5": "Kateri jeziki?",
+    "faq.a5": "Petindvajset evropskih jezikov: slovenščina, angleščina, francoščina, nemščina, španščina, italijanščina, portugalščina, nizozemščina, poljščina, švedščina, danščina, finščina, madžarščina, grščina, češčina, romunščina, ukrajinščina in drugi. Jezik izberete v nastavitvah, besedišče pa dodate v leksikonu. Sama aplikacija govori vseh petindvajset, glede na jezik vašega Maca.",
+    "faq.q6": "Kaj Dictate zahteva ob nastavitvi?",
+    "faq.a6": "Tri dovoljenja macOS: mikrofon, spremljanje vnosa za tipko in dostopnost, da najde polje in piše vanj. Pomočnik vas vodi skozi vsako posebej, nato prenese model za prepis. Potem Dictate živi v menijski vrstici in se sam posodablja.",
+    "faq.q7": "Na katerih Macih?",
+    "faq.a7": "macOS 27 in Applov čip, od M1 do najnovejših. Aplikacijo je podpisal in overil Apple.",
+    "dl.title": "Brezplačno &amp; odprtokodno",
+    "dl.lead": "Druge aplikacije za narekovanje se plačujejo mesečno ali z licenco. Dictate ne stane nič, njegova koda pa je javna.",
+    "price.wispr": "12&nbsp;€ / mesec",
+    "price.typeless": "12&nbsp;$ / mesec",
+    "price.superwhisper": "8,49&nbsp;$ / mesec",
+    "price.voiceink": "25&nbsp;$ enkrat",
+    "price.us": "<b class=\"gradient-text\">Brezplačno</b> · odprta koda",
+    "price.note": "Cene plačljivih paketov, zajete 17.&nbsp;oktobra&nbsp;2026 na spletnih mestih izdelovalcev. Brezplačni različici Wispr Flow in Typeless omejujeta število besed.",
+    "dl.code": "Oglejte si kodo",
+    "dl.meta": "<span data-version>Najnovejša različica</span> · macOS 27 · Apple Silicon",
+    "footer.privacy": "Zasebnost",
+    "dl.brew": "Ali s Homebrew: <code>brew install --cask moifort/tap/dictate</code>",
+    "dl.storeNote": "V trgovini Mac App Store: za narekovanje držite option + preslednico, nato prilepite z ⌘V. Tam pregled opravi Apple Intelligence.",
+    "footer.credit": "Dictate je odprtokodni projekt podjetja <a href=\"https://github.com/moifort\" rel=\"noopener\">Polyforms</a>. Prepis: Parakeet (NVIDIA) prek FluidAudio. Pregled: Claude (Anthropic) ali Apple Intelligence.",
+    "footer.releases": "Vse različice",
+    "footer.issues": "Prijavite težavo",
+    "footer.docs": "Dokumentacija",
+    "aria.demo": "Predstavitev",
+    "aria.timeline": "Kako deluje",
+    "aria.prices": "Cene alternativ",
+    "aria.store": "Prenesite v trgovini Mac App Store",
+    "meta.description": "Držite control, govorite, spustite: čisto besedilo, pregledano glede na kontekst, se pojavi tam, kjer pišete. Prepisano na vašem Macu, brez računa, brezplačno in odprtokodno."
+  },
+  "badge": "badges/en.svg",
+  "demo": {
+    "decimal": ",",
+    "version": "Različica {v}",
+    "emojiWords": "smeško palec gor",
+    "scenarios": [
+      {
+        "to": "Arthur G.",
+        "subject": "Vrtavke",
+        "prefix": "Živjo Arthur,\n\n",
+        "heard": "ee no sem sem ti hotel povedati da so vrtavke prispele ee lahko jih preizkusimo v soboto če želiš in in mi poveš katera se vrti najdlje",
+        "clean": "Hotel sem ti povedati, da so vrtavke prispele. Lahko jih preizkusimo v soboto, če želiš, in mi poveš, katera se vrti najdlje."
+      },
+      {
+        "to": "Colas D.",
+        "subject": "Nedeljski žar",
+        "prefix": "Živjo Colas,\n\n",
+        "heard": "no ee za nedeljo jaz poskrbim za svinjske zarebrnice in in ti prineseš kruh ee in pijačo",
+        "clean": "Za nedeljo jaz poskrbim za svinjske zarebrnice, ti pa prineseš kruh in pijačo."
+      }
+    ],
+    "phrases": [
+      {
+        "app": "Mail",
+        "text": "Živjo Marie, hvala za povratne informacije, to popravim danes dopoldne."
+      },
+      {
+        "app": "Slack",
+        "text": "se vidimo ob 14. uri v sobi Lumière?"
+      },
+      {
+        "app": "Notes",
+        "text": "Ideja: do konca meseca opomniti dobavitelja."
+      },
+      {
+        "app": "Terminal",
+        "text": "zaženi teste plačilnega modula"
+      },
+      {
+        "app": "Claude",
+        "text": "Razloži mi, kaj dela ta funkcija."
+      }
+    ],
+    "sends": [
+      {
+        "app": "Claude",
+        "text": "Povzemi ta PR v treh točkah."
+      },
+      {
+        "app": "Messages",
+        "text": "Pridem čez deset minut!"
+      },
+      {
+        "app": "Slack",
+        "text": "Preberem specifikacijo in ti sporočim."
+      },
+      {
+        "app": "Notes",
+        "text": "Kupiti kruh in jajca."
+      }
+    ]
+  }
+};

@@ -1,0 +1,186 @@
+/* Dictate landing page: its texts in "hu", read by i18n.js and main.js. */
+window.DICTATE_I18N = {
+  "text": {
+    "meta.title": "Dictate — Diktálás Macre, ingyenes és nyílt forráskódú",
+    "nav.demo": "Demó",
+    "nav.features": "Funkciók",
+    "nav.faq": "Kérdések",
+    "nav.compare": "Összehasonlítás",
+    "cmp.title": "A Dictate a többiekhez képest",
+    "cmp.lead": "Ingyenes, nyílt forráskódú alternatíva a Wispr Flow, a Typeless, a Superwhisper és a VoiceInk helyett.",
+    "cmp.row.transcribe": "Átírás",
+    "cmp.row.review": "MI-ellenőrzés",
+    "cmp.row.offline": "Teljesen offline",
+    "cmp.row.oss": "Nyílt forráskód",
+    "cmp.row.langs": "Nyelvek",
+    "cmp.row.price": "Ár",
+    "cmp.cloud": "Felhő",
+    "cmp.onMac": "A Macen",
+    "cmp.macOrCloud": "Mac vagy felhő",
+    "cmp.apiKey": "Saját API-kulcs",
+    "cmp.appleOrClaude": "Apple Intelligence vagy Claude",
+    "cmp.yes": "Igen",
+    "cmp.no": "Nem",
+    "cmp.localModels": "Helyi modellek",
+    "cmp.noAccount": "Se fiók, se kulcs",
+    "cmp.gpl": "GPL",
+    "cmp.mit": "MIT",
+    "cmp.hundred": "100+",
+    "cmp.european": "25 európai",
+    "cmp.free": "Ingyenes",
+    "cmp.calloutTitle": "Átírás és ellenőrzés, mindkettő a Macen.",
+    "cmp.calloutText": "Az Apple Intelligence-szel semmi sem megy fel a netre: nincs fiók, nincs kulcs, nincs hálózat. Kapcsolja ki a Wi-Fit, a Dictate akkor is ír.",
+    "cmp.note": "A kiadók webhelyei és dokumentációja alapján, 2026.&nbsp;október&nbsp;17-i állapot. A Dictate kevesebb nyelvet fed le: a Parakeet csak európai nyelveket ismer fel.",
+    "nav.download": "Letöltés",
+    "hero.eyebrow": "Diktálás Macre",
+    "hero.title": "Alig gondolta ki,<br><span class=\"gradient-text\">már le is van írva.</span>",
+    "hero.subtitle": "Tartsa lenyomva a <kbd class=\"key inline\" data-key-hero><span class=\"key-glyph\">⌃</span><span class=\"key-name\">control</span></kbd> billentyűt, beszéljen, engedje fel: a helyzethez igazított, tiszta szöveg ott jelenik meg, ahol éppen ír.",
+    "dl.mac": "Letöltés Macre",
+    "hero.seeDemo": "Demó megtekintése",
+    "hero.meta": "Ingyenes · Nyílt forráskód · <span data-version>Legújabb verzió</span> · macOS 27 · Apple Silicon",
+    "demo.badge": "<span class=\"live-tag\"><i aria-hidden=\"true\"></i>Live</span>Demó",
+    "demo.title": "A hangtól a szövegig.",
+    "demo.lead": "Egy egész e-mail gépelés nélkül. Na jó, majdnem: egyetlen billentyű, a control.",
+    "demo.window": "Új üzenet",
+    "demo.to": "Címzett:",
+    "demo.subject": "Tárgy:",
+    "tl.hold": "Lenyomás",
+    "tl.speak": "Beszéd",
+    "tl.release": "Felengedés",
+    "tl.review": "MI ellenőrizte<small class=\"tl-context\"><img src=\"apps/mail.png\" width=\"14\" height=\"14\" alt=\"\">kontextus: Mail</small>",
+    "tl.written": "Leírva",
+    "feat.title": "Egy billentyűnyire.",
+    "feat.lead": "Nincs megnyitandó ablak, nincs kattintandó gomb, nincs javítandó nyers átirat.",
+    "ptt.hint": "lenyomás · beszéd · felengedés",
+    "ptt.text": "Egyetlen billentyű, a <kbd><span class=\"kbd-glyph\">⌃</span>control</kbd> vagy az <kbd><span class=\"kbd-glyph\">🌐︎</span>fn</kbd>, ahogy Ön szeretné. Tartsa lenyomva, amíg beszél, engedje fel, és már le is van írva. Várni sem kell: nyomja le újra, amíg az előző mondat ellenőrzése tart, és beszéljen tovább, a mondatok sorrendben érkeznek.",
+    "clean.raw": "öö szóval igazából azt azt akartam mondani hogy a a megbeszélés átkerült keddre",
+    "clean.clean": "Azt akartam mondani, hogy a megbeszélés átkerült keddre.",
+    "clean.title": "MI ellenőrizte",
+    "clean.text": "Egy MI átolvassa az átiratot, és letisztázza: az „öö”-k, az ismétlések és a félbehagyott kezdések eltűnnek, az írásjelek és a szakkifejezések javulnak. A jelentés és a szavak az Önéi maradnak. A Claude végzi az előfizetésével, vagy az Apple Intelligence a Macjén: hálózat nélkül ő veszi át, és minden offline marad.",
+    "latency.title": "Körülbelül 1,5 másodperc",
+    "latency.text": "Ennyi a medián idő a mondat vége és a képernyőn való megjelenése között, átírással és ellenőrzéssel együtt. A statisztikák napról napra követik, és megmutatják, melyik modell ellenőrzött: a Claude, vagy az Apple Intelligence, amíg offline volt.",
+    "context.title": "Alkalmazkodik a helyzethez",
+    "context.text": "A hangnem követi az appot, amelyben ír: kicsit csiszoltabb a Mailben, közvetlen a Slackben, szakszerű a Claude Code-ban, nyers a Terminálban.",
+    "cursor.title": "Bárhol, ahol ír",
+    "cursor.text": "Mail, Üzenetek, Slack, Jegyzetek, Cursor, Terminál, ChatGPT vagy Claude: a mondat abba a mezőbe kerül, amelyiken a fókusz van. Ha nincs ilyen, a vágólapon várakozik.",
+    "send.title": "Magától elküldi",
+    "send.text": "A Claude-ban az üzenet elmegy, amint le van írva: a Dictate megnyomja Ön helyett a Return billentyűt. Válassza ki az appokat, ahol ezt megteszi, például az Üzeneteket vagy a Slacket, vagy kapcsolja ki a beállításokban. Mindenhol máshol a szöveg megvárja, hogy Ön küldje el.",
+    "send.key": "return",
+    "saved.typing": "Gépelés",
+    "saved.caption": "A kezdetek óta megtakarított idő",
+    "saved.title": "A megtakarított idő, megszámolva",
+    "saved.text": "A statisztikák minden diktálást összevetnek azzal az idővel, amennyi a begépeléséhez kellett volna, percenként 40 szóval. A beszéddel és a szövegre várással töltött időt levonják: ami marad, az a ténylegesen megtakarított idő, napról napra és az első diktálás óta.",
+    "langs.title": "25 nyelv és a saját szókincse",
+    "langs.text": "Válassza ki a diktálás nyelvét, és adja hozzá saját szavait: neveket, szakzsargont, termékneveket. Úgy lesznek leírva, ahogyan Ön írná. A felület is beszéli mind a 25-öt.",
+    "offline.airplane": "Repülőgép mód",
+    "offline.on": "Be",
+    "offline.off": "Ki",
+    "offline.typed": "18 órakor szállunk le, hívlak, amikor kiértem.",
+    "offline.caption": "Parakeet és Apple Intelligence, ezen a Macen.",
+    "offline.title": "Offline is működik",
+    "offline.text": "Az átírás a Macjén fut a Parakeettel, egy hálózatot nem igénylő modellel, és az ellenőrzés is, az Apple Intelligence-szel. Repülőn vagy vonaton, térerő nélkül is ír a Dictate.",
+    "pill.title": "Diszkrét",
+    "pill.text": "Egy kis kapszula a képernyő alján jelzi, hogy a Dictate figyel, majd dolgozik, aztán eltűnik. Ha semmit sem hallott, egy áthúzott hangszóró jelzi. AirPodsszal megvárja, hogy a mikrofonjuk válaszoljon, mielőtt figyelést mutatna, így tudja, mikor beszélhet.",
+    "emoji.title": "Szmájlik is",
+    "emoji.text": "Mondja: „szmájli hüvelykujj fel”, és a Dictate ezt írja: 👍. Az Apple összes emojija, hanggal.",
+    "faq.title": "Gyakori kérdések",
+    "faq.q1": "Miért ingyenes?",
+    "faq.a1": "Mert a Dictate működtetése semmibe sem kerül: nincs szerver, nincs fiók. Az átírás a Macjén történik, az ellenőrzés pedig a már meglévő Claude-előfizetésén vagy a Macjén futó Apple Intelligence-en keresztül megy. Nekünk nincs mit fizetnünk, így Önnek sincs mit kiszámláznunk. Nincs pro verzió, nincs korlátozott próbaidő.",
+    "faq.q2": "Kell hozzá Claude-előfizetés?",
+    "faq.a2": "Nem. Ha a Claude Code vagy a Claude app telepítve van, és be van jelentkezve a fiókjába, a Claude minden diktálást a <code>claude</code> paranccsal ellenőriz, az előfizetésén. Előfizetés nélkül illesszen be egy Claude-, OpenAI- vagy Gemini-API-kulcsot a Beállításokban: mindegyik a leggyorsabb modelljét használja. Ha egyik sincs, az Apple Intelligence ellenőriz, közvetlenül a Macjén. A Beállításokban választhat, és ha az ellenőrzés nem válaszol, a nyers átirat akkor is beszúródik. Ha a Claude kijelentkezik, a kapszula jelzi, és az Apple Intelligence veszi át.",
+    "faq.q3": "Működik offline?",
+    "faq.a3": "Igen. Az átírási modell (körülbelül 630 MB, a beállításkor töltődik le) teljes egészében a Macjén fut, és az ellenőrzés is, ha az Apple Intelligence végzi. Csak a Claude általi ellenőrzéshez kell kapcsolat.",
+    "faq.q4": "Miben más, mint a macOS diktálása?",
+    "faq.a4": "Az Apple diktálása azt írja le, amit hall, a hezitálásokkal együtt, és el kell indítani, majd le kell állítani. A Dictate egyetlen lenyomva tartott billentyűben elfér, eltávolítja az „öö”-ket és az ismétléseket, kijavítja a szakkifejezéseket, és az apphoz igazítja a hangnemet. És a hangja nem megy az Apple-höz.",
+    "faq.q5": "Milyen nyelveken?",
+    "faq.a5": "Huszonöt európai nyelven: magyar, angol, francia, német, spanyol, olasz, portugál, holland, lengyel, svéd, dán, finn, görög, cseh, román, ukrán és továbbiak. A nyelvet a Beállításokban választhatja ki, a szókincsét pedig a lexikonban adhatja hozzá. Maga az app mind a huszonötöt beszéli, a Mac nyelvéhez igazodva.",
+    "faq.q6": "Mit kér a Dictate a beállításkor?",
+    "faq.a6": "Három macOS-engedélyt: a mikrofont, a bemenet figyelését a billentyűhöz, és a kisegítő lehetőségeket, hogy megtalálja a mezőt és beleírjon. Egy asszisztens egyenként végigvezeti rajtuk, majd letölti az átírási modellt. Ezután a Dictate a menüsorban él, és naprakészen tartja magát.",
+    "faq.q7": "Milyen Maceken?",
+    "faq.a7": "macOS 27 és Apple-chip, az M1-től a legújabbakig. Az appot az Apple aláírta és hitelesítette.",
+    "dl.title": "Ingyenes &amp; nyílt forráskódú",
+    "dl.lead": "A többi diktálóapp havidíjas vagy licencdíjas. A Dictate semmibe sem kerül, a kódja pedig nyilvános.",
+    "price.wispr": "12&nbsp;€ / hó",
+    "price.typeless": "12&nbsp;$ / hó",
+    "price.superwhisper": "8,49&nbsp;$ / hó",
+    "price.voiceink": "25&nbsp;$ egyszer",
+    "price.us": "<b class=\"gradient-text\">Ingyenes</b> · nyílt forráskód",
+    "price.note": "A fizetős csomagok árai, 2026.&nbsp;október&nbsp;17-én a kiadók webhelyeiről. A Wispr Flow és a Typeless ingyenes változata korlátozza a szavak számát.",
+    "dl.code": "Kód megtekintése",
+    "dl.meta": "<span data-version>Legújabb verzió</span> · macOS 27 · Apple Silicon",
+    "footer.privacy": "Adatvédelem",
+    "dl.brew": "Vagy Homebrew-val: <code>brew install --cask moifort/tap/dictate</code>",
+    "dl.storeNote": "A Mac App Store-ban: diktáláshoz tartsa lenyomva az option + szóköz billentyűket, majd illessze be a ⌘V paranccsal. Ott az ellenőrzést az Apple Intelligence végzi.",
+    "footer.credit": "A Dictate a <a href=\"https://github.com/moifort\" rel=\"noopener\">Polyforms</a> nyílt forráskódú projektje. Átírás: Parakeet (NVIDIA) a FluidAudión keresztül. Ellenőrzés: Claude (Anthropic) vagy Apple Intelligence.",
+    "footer.releases": "Minden verzió",
+    "footer.issues": "Hiba jelentése",
+    "footer.docs": "Dokumentáció",
+    "aria.demo": "Bemutató",
+    "aria.timeline": "Így működik",
+    "aria.prices": "Az alternatívák árai",
+    "aria.store": "Letöltés a Mac App Store-ból",
+    "meta.description": "Tartsa lenyomva a control billentyűt, beszéljen, engedje fel: a helyzethez igazított, tiszta szöveg ott jelenik meg, ahol éppen ír. Átírás a Macjén, fiók nélkül, ingyenesen és nyílt forráskóddal."
+  },
+  "badge": "badges/en.svg",
+  "demo": {
+    "decimal": ",",
+    "version": "{v} verzió",
+    "emojiWords": "szmájli hüvelykujj fel",
+    "scenarios": [
+      {
+        "to": "Arthur G.",
+        "subject": "A pörgettyűk",
+        "prefix": "Szia Arthur!\n\n",
+        "heard": "öö szóval azt azt akartam mondani hogy megjöttek a pörgettyűk öö szombaton kipróbálhatjuk ha szeretnéd és és megmondod melyik pörög a legtovább",
+        "clean": "Azt akartam mondani, hogy megjöttek a pörgettyűk. Szombaton kipróbálhatjuk, ha szeretnéd, és megmondod, melyik pörög a legtovább."
+      },
+      {
+        "to": "Colas D.",
+        "subject": "Vasárnapi grillezés",
+        "prefix": "Szia Colas!\n\n",
+        "heard": "szóval öö vasárnapra én intézem a sertéskarajt és és te hozod a kenyeret öö meg az italokat",
+        "clean": "Vasárnapra én intézem a sertéskarajt, te pedig hozod a kenyeret és az italokat."
+      }
+    ],
+    "phrases": [
+      {
+        "app": "Mail",
+        "text": "Szia Marie, köszi a visszajelzést, ma délelőtt kijavítom."
+      },
+      {
+        "app": "Slack",
+        "text": "találkozunk 14 órakor a Lumière teremben?"
+      },
+      {
+        "app": "Notes",
+        "text": "Ötlet: megsürgetni a beszállítót a hónap vége előtt."
+      },
+      {
+        "app": "Terminal",
+        "text": "futtasd a fizetési modul tesztjeit"
+      },
+      {
+        "app": "Claude",
+        "text": "Magyarázd el, mit csinál ez a függvény."
+      }
+    ],
+    "sends": [
+      {
+        "app": "Claude",
+        "text": "Foglald össze ezt a PR-t három pontban."
+      },
+      {
+        "app": "Messages",
+        "text": "Tíz perc múlva ott vagyok!"
+      },
+      {
+        "app": "Slack",
+        "text": "Átolvasom a specifikációt, és szólok."
+      },
+      {
+        "app": "Notes",
+        "text": "Kenyeret és tojást venni."
+      }
+    ]
+  }
+};

@@ -1,0 +1,186 @@
+/* Dictate landing page: its texts in "et", read by i18n.js and main.js. */
+window.DICTATE_I18N = {
+  "text": {
+    "meta.title": "Dictate — Dikteerimine Macile, tasuta ja avatud lähtekoodiga",
+    "nav.demo": "Demo",
+    "nav.features": "Funktsioonid",
+    "nav.faq": "Küsimused",
+    "nav.compare": "Võrdlus",
+    "cmp.title": "Dictate teiste kõrval",
+    "cmp.lead": "Tasuta ja avatud lähtekoodiga alternatiiv rakendustele Wispr Flow, Typeless, Superwhisper ja VoiceInk.",
+    "cmp.row.transcribe": "Transkriptsioon",
+    "cmp.row.review": "Tehisaru ülevaatus",
+    "cmp.row.offline": "Kõik võrguta",
+    "cmp.row.oss": "Avatud lähtekood",
+    "cmp.row.langs": "Keeled",
+    "cmp.row.price": "Hind",
+    "cmp.cloud": "Pilv",
+    "cmp.onMac": "Macis",
+    "cmp.macOrCloud": "Mac või pilv",
+    "cmp.apiKey": "Teie API-võti",
+    "cmp.appleOrClaude": "Apple Intelligence või Claude",
+    "cmp.yes": "Jah",
+    "cmp.no": "Ei",
+    "cmp.localModels": "Kohalikud mudelid",
+    "cmp.noAccount": "Ei kontot ega võtit",
+    "cmp.gpl": "GPL",
+    "cmp.mit": "MIT",
+    "cmp.hundred": "100+",
+    "cmp.european": "25 Euroopa keelt",
+    "cmp.free": "Tasuta",
+    "cmp.calloutTitle": "Transkriptsioon ja ülevaatus, mõlemad Macis.",
+    "cmp.calloutText": "Apple Intelligence’iga ei lähe midagi võrku: ei kontot, ei võtit, ei võrguühendust. Lülitage Wi-Fi välja ja Dictate kirjutab ikka.",
+    "cmp.note": "Väljaandjate veebisaitide ja dokumentatsiooni põhjal, seisuga 17.&nbsp;oktoober&nbsp;2026. Dictate katab vähem keeli: Parakeet tunneb ära ainult Euroopa keeli.",
+    "nav.download": "Laadi alla",
+    "hero.eyebrow": "Dikteerimine Macile",
+    "hero.title": "Vaevu mõeldud,<br><span class=\"gradient-text\">juba kirjas.</span>",
+    "hero.subtitle": "Hoidke all <kbd class=\"key inline\" data-key-hero><span class=\"key-glyph\">⌃</span><span class=\"key-name\">control</span></kbd>, rääkige, vabastage: puhas, kontekstile vastav tekst ilmub sinna, kuhu kirjutate.",
+    "dl.mac": "Laadi alla Macile",
+    "hero.seeDemo": "Vaata demo",
+    "hero.meta": "Tasuta · Avatud lähtekood · <span data-version>Uusim versioon</span> · macOS 27 · Apple Silicon",
+    "demo.badge": "<span class=\"live-tag\"><i aria-hidden=\"true\"></i>Live</span>Demo",
+    "demo.title": "Häälest tekstiks.",
+    "demo.lead": "Terve e-kiri ilma midagi tippimata. Noh, peaaegu: üks klahv, control.",
+    "demo.window": "Uus sõnum",
+    "demo.to": "Saaja:",
+    "demo.subject": "Teema:",
+    "tl.hold": "Hoidke",
+    "tl.speak": "Rääkige",
+    "tl.release": "Vabastage",
+    "tl.review": "Tehisaru üle vaadanud<small class=\"tl-context\"><img src=\"apps/mail.png\" width=\"14\" height=\"14\" alt=\"\">kontekst: Mail</small>",
+    "tl.written": "Kirjutatud",
+    "feat.title": "Ühe klahvi kaugusel.",
+    "feat.lead": "Pole akent, mida avada, pole nuppu, mida klõpsata, pole toortranskriptsiooni, mida parandada.",
+    "ptt.hint": "hoidke · rääkige · vabastage",
+    "ptt.text": "Üksainus klahv, <kbd><span class=\"kbd-glyph\">⌃</span>control</kbd> või <kbd><span class=\"kbd-glyph\">🌐︎</span>fn</kbd>, nagu soovite. Hoidke seda rääkimise ajal all, vabastage, ja tekst on kirjas. Ootama ei pea: hoidke seda uuesti all, kuni viimast lauset üle vaadatakse, ja rääkige edasi, laused saabuvad järjekorras.",
+    "clean.raw": "ee no tegelikult ma ma tahtsin öelda et et koosolek on lükatud teisipäevale",
+    "clean.clean": "Ma tahtsin öelda, et koosolek on lükatud teisipäevale.",
+    "clean.title": "Tehisaru üle vaadanud",
+    "clean.text": "Tehisaru loeb transkriptsiooni üle ja kirjutab selle puhtalt välja: „ee“-d, kordused ja valestardid kaovad, kirjavahemärgid ja tehnilised terminid parandatakse. Mõte ja sõnad jäävad teie omaks. Seda teeb Claude teie tellimusega või Apple Intelligence teie Macis: võrguta võtab töö üle tema ja kõik jääb võrguühenduseta.",
+    "latency.title": "Umbes 1,5 sekundit",
+    "latency.text": "See on mediaanaeg teie lause lõpu ja selle ekraanile ilmumise vahel, koos transkriptsiooni ja ülevaatusega. Statistika jälgib seda päevast päeva ja näitab, milline mudel üle vaatas: Claude või Apple Intelligence, kui olite võrgust väljas.",
+    "context.title": "Kohandub kontekstiga",
+    "context.text": "Toon järgib rakendust, milles kirjutate: veidi viimistletum Mailis, otsekohene Slackis, tehniline Claude Code’is, toores Terminalis.",
+    "cursor.title": "Kõikjal, kus kirjutate",
+    "cursor.text": "Mail, Messages, Slack, Notes, Cursor, Terminal, ChatGPT või Claude: lause sisestatakse väljale, millel on fookus. Kui sellist pole, ootab see lõikelaual.",
+    "send.title": "Saadab ise ära",
+    "send.text": "Claude’is läheb sõnum teele kohe, kui see on kirjutatud: Dictate vajutab teie eest Return-klahvi. Valige rakendused, kus ta seda teeb, näiteks Messages või Slack, või lülitage see seadetes välja. Mujal ootab tekst, kuni selle saadate.",
+    "send.key": "return",
+    "saved.typing": "Tippimine",
+    "saved.caption": "Algusest peale säästetud aeg",
+    "saved.title": "Säästetud aeg, kokku loetud",
+    "saved.text": "Statistika võrdleb iga dikteerimist ajaga, mis oleks kulunud selle tippimiseks kiirusel 40 sõna minutis. Rääkimisele ja teksti ootamisele kulunud aeg arvatakse maha: järele jääb tegelikult säästetud aeg, päevast päeva ja alates teie esimesest dikteerimisest.",
+    "langs.title": "25 keelt ja teie sõnavara",
+    "langs.text": "Valige dikteerimiskeel ja lisage oma sõnu: nimesid, erialasõnavara, tootenimesid. Need kirjutatakse nii, nagu teie neid kirjutaksite. Ka liides räägib kõiki 25 keelt.",
+    "offline.airplane": "Lennukirežiim",
+    "offline.on": "Sees",
+    "offline.off": "Väljas",
+    "offline.typed": "Maandume kell 18, helistan, kui väljas olen.",
+    "offline.caption": "Parakeet ja Apple Intelligence, selles Macis.",
+    "offline.title": "Töötab võrguta",
+    "offline.text": "Transkriptsioon töötab teie Macis Parakeetiga, mudeliga, mis ei vaja võrku, ja ülevaatus samuti, Apple Intelligence’iga. Lennukis või rongis ilma levita kirjutab Dictate ikka.",
+    "pill.title": "Märkamatu",
+    "pill.text": "Väike kapsel ekraani allservas näitab, et Dictate kuulab, seejärel töötab, ja siis kaob. Kui ta midagi ei kuulnud, annab sellest märku läbikriipsutatud kõlar. AirPodsidega ootab ta enne kuulamise näitamist, kuni nende mikrofon vastab, et teaksite, millal rääkida.",
+    "emoji.title": "Naerunäod ka",
+    "emoji.text": "Öelge „naerunägu pöial püsti“ ja Dictate kirjutab 👍. Kõik Apple’i emojid, häälega.",
+    "faq.title": "Korduma kippuvad küsimused",
+    "faq.q1": "Miks see on tasuta?",
+    "faq.a1": "Sest Dictate’i käitamine ei maksa midagi: pole serverit, pole kontot. Transkriptsioon toimub teie Macis ja ülevaatus käib teil juba olemasoleva Claude’i tellimuse või teie Maci Apple Intelligence’i kaudu. Meil pole millegi eest maksta, seega pole ka teilt midagi küsida. Pole pro-versiooni, pole piiratud prooviaega.",
+    "faq.q2": "Kas mul on vaja Claude’i tellimust?",
+    "faq.a2": "Ei. Kui Claude Code või rakendus Claude on installitud ja teie kontole sisse logitud, vaatab Claude iga dikteerimise üle käsuga <code>claude</code>, teie tellimusega. Ilma tellimuseta kleepige seadetesse Claude’i, OpenAI või Gemini API-võti: igaüks kasutab oma kiireimat mudelit. Kui midagi neist pole, vaatab üle Apple Intelligence, otse teie Macis. Valite seadetes ja kui ülevaatus ei vasta, sisestatakse toortranskriptsioon ikkagi. Kui Claude logitakse välja, annab kapsel sellest teada ja töö võtab üle Apple Intelligence.",
+    "faq.q3": "Kas see töötab võrguta?",
+    "faq.a3": "Jah. Transkriptsioonimudel (umbes 630 MB, laaditakse alla seadistamisel) töötab täielikult teie Macis ja ülevaatus samuti, kui see käib Apple Intelligence’i kaudu. Ühendust vajab ainult Claude’i ülevaatus.",
+    "faq.q4": "Mille poolest see erineb macOS-i dikteerimisest?",
+    "faq.a4": "Apple’i dikteerimine kirjutab seda, mida kuuleb, koos kõhklustega, ning see tuleb käivitada ja peatada. Dictate mahub ühte klahvi, mida all hoiate, eemaldab „ee“-d ja kordused, parandab tehnilised terminid ja kohandab tooni rakendusega. Ja teie hääl ei lähe Apple’ile.",
+    "faq.q5": "Millised keeled?",
+    "faq.a5": "Kakskümmend viis Euroopa keelt: eesti, inglise, prantsuse, saksa, hispaania, itaalia, portugali, hollandi, poola, rootsi, taani, soome, ungari, kreeka, tšehhi, rumeenia, ukraina ja teised. Keele valite seadetes ja sõnavara lisate leksikonis. Rakendus ise räägib kõiki kahtkümmend viit, vastavalt teie Maci keelele.",
+    "faq.q6": "Mida Dictate seadistamisel küsib?",
+    "faq.a6": "Kolme macOS-i luba: mikrofoni, sisendi jälgimist klahvi jaoks ja hõlbustust, et leida väli ja sinna kirjutada. Abiline juhatab teid neist ükshaaval läbi ja laadib seejärel alla transkriptsioonimudeli. Pärast seda elab Dictate menüüribal ja hoiab end ise ajakohasena.",
+    "faq.q7": "Millistes Macides?",
+    "faq.a7": "macOS 27 ja Apple’i kiip, M1-st uusimateni. Rakendus on Apple’i allkirjastatud ja notariseeritud.",
+    "dl.title": "Tasuta &amp; avatud lähtekood",
+    "dl.lead": "Teised dikteerimisrakendused maksavad kuu või litsentsi kaupa. Dictate ei maksa midagi ja selle kood on avalik.",
+    "price.wispr": "12&nbsp;€ / kuu",
+    "price.typeless": "12&nbsp;$ / kuu",
+    "price.superwhisper": "8,49&nbsp;$ / kuu",
+    "price.voiceink": "25&nbsp;$ üks kord",
+    "price.us": "<b class=\"gradient-text\">Tasuta</b> · avatud lähtekood",
+    "price.note": "Tasuliste pakettide hinnad, võetud 17.&nbsp;oktoobril&nbsp;2026 väljaandjate veebisaitidelt. Wispr Flow’ ja Typelessi tasuta versioonid piiravad sõnade arvu.",
+    "dl.code": "Vaata koodi",
+    "dl.meta": "<span data-version>Uusim versioon</span> · macOS 27 · Apple Silicon",
+    "footer.privacy": "Privaatsus",
+    "dl.brew": "Või Homebrew’ga: <code>brew install --cask moifort/tap/dictate</code>",
+    "dl.storeNote": "Mac App Store’is: dikteerimiseks hoidke all option + tühik, seejärel kleepige klahvidega ⌘V. Seal teeb ülevaatuse Apple Intelligence.",
+    "footer.credit": "Dictate on <a href=\"https://github.com/moifort\" rel=\"noopener\">Polyformsi</a> avatud lähtekoodiga projekt. Transkriptsioon: Parakeet (NVIDIA) FluidAudio kaudu. Ülevaatus: Claude (Anthropic) või Apple Intelligence.",
+    "footer.releases": "Kõik versioonid",
+    "footer.issues": "Teata probleemist",
+    "footer.docs": "Dokumentatsioon",
+    "aria.demo": "Tutvustus",
+    "aria.timeline": "Kuidas see töötab",
+    "aria.prices": "Alternatiivide hinnad",
+    "aria.store": "Laadi alla Mac App Store’ist",
+    "meta.description": "Hoidke all control, rääkige, vabastage: puhas, kontekstile vastav tekst ilmub sinna, kuhu kirjutate. Transkribeeritakse teie Macis, ilma kontota, tasuta ja avatud lähtekoodiga."
+  },
+  "badge": "badges/en.svg",
+  "demo": {
+    "decimal": ",",
+    "version": "Versioon {v}",
+    "emojiWords": "naerunägu pöial püsti",
+    "scenarios": [
+      {
+        "to": "Arthur G.",
+        "subject": "Vurrid",
+        "prefix": "Tere, Arthur!\n\n",
+        "heard": "ee no ma ma tahtsin öelda et vurrid on kohal ee me võime neid laupäeval proovida kui tahad ja ja sa ütled milline keerleb kõige kauem",
+        "clean": "Ma tahtsin öelda, et vurrid on kohal. Me võime neid laupäeval proovida, kui tahad, ja sa ütled, milline keerleb kõige kauem."
+      },
+      {
+        "to": "Colas D.",
+        "subject": "Pühapäevane grill",
+        "prefix": "Tere, Colas!\n\n",
+        "heard": "no ee pühapäevaks võtan mina seakarbonaadid ja ja sina tood leiva ee ja joogid",
+        "clean": "Pühapäevaks võtan mina seakarbonaadid ja sina tood leiva ja joogid."
+      }
+    ],
+    "phrases": [
+      {
+        "app": "Mail",
+        "text": "Tere, Marie, aitäh tagasiside eest, parandan selle täna hommikul."
+      },
+      {
+        "app": "Slack",
+        "text": "kas näeme kell 14 Lumière’i ruumis?"
+      },
+      {
+        "app": "Notes",
+        "text": "Idee: tuletada tarnijale enne kuu lõppu meelde."
+      },
+      {
+        "app": "Terminal",
+        "text": "käivita maksemooduli testid"
+      },
+      {
+        "app": "Claude",
+        "text": "Selgita, mida see funktsioon teeb."
+      }
+    ],
+    "sends": [
+      {
+        "app": "Claude",
+        "text": "Võta see PR kolme punktiga kokku."
+      },
+      {
+        "app": "Messages",
+        "text": "Olen kümne minuti pärast kohal!"
+      },
+      {
+        "app": "Slack",
+        "text": "Loen spetsifikatsiooni läbi ja annan teada."
+      },
+      {
+        "app": "Notes",
+        "text": "Osta leiba ja mune."
+      }
+    ]
+  }
+};

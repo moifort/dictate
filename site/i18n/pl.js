@@ -1,0 +1,186 @@
+/* Dictate landing page: its texts in "pl", read by i18n.js and main.js. */
+window.DICTATE_I18N = {
+  "text": {
+    "meta.title": "Dictate — Dyktowanie dla Maca, darmowe i open source",
+    "nav.demo": "Demo",
+    "nav.features": "Funkcje",
+    "nav.faq": "Pytania",
+    "nav.compare": "Porównanie",
+    "cmp.title": "Dictate na tle innych",
+    "cmp.lead": "Darmowa alternatywa open source dla Wispr Flow, Typeless, Superwhisper i VoiceInk.",
+    "cmp.row.transcribe": "Transkrypcja",
+    "cmp.row.review": "Korekta AI",
+    "cmp.row.offline": "Wszystko offline",
+    "cmp.row.oss": "Open source",
+    "cmp.row.langs": "Języki",
+    "cmp.row.price": "Cena",
+    "cmp.cloud": "Chmura",
+    "cmp.onMac": "Na Macu",
+    "cmp.macOrCloud": "Mac lub chmura",
+    "cmp.apiKey": "Twój klucz API",
+    "cmp.appleOrClaude": "Apple Intelligence lub Claude",
+    "cmp.yes": "Tak",
+    "cmp.no": "Nie",
+    "cmp.localModels": "Modele lokalne",
+    "cmp.noAccount": "Bez konta i klucza",
+    "cmp.gpl": "GPL",
+    "cmp.mit": "MIT",
+    "cmp.hundred": "100+",
+    "cmp.european": "25 europejskich",
+    "cmp.free": "Za darmo",
+    "cmp.calloutTitle": "Transkrypcja i korekta, obie na Macu.",
+    "cmp.calloutText": "Z Apple Intelligence nic nie trafia do sieci: bez konta, bez klucza, bez internetu. Wyłącz Wi-Fi, a Dictate nadal pisze.",
+    "cmp.note": "Według stron i dokumentacji producentów, stan na 17&nbsp;października&nbsp;2026. Dictate obsługuje mniej języków: Parakeet rozpoznaje tylko języki europejskie.",
+    "nav.download": "Pobierz",
+    "hero.eyebrow": "Dyktowanie dla Maca",
+    "hero.title": "Ledwie pomyślane,<br><span class=\"gradient-text\">już napisane.</span>",
+    "hero.subtitle": "Przytrzymaj <kbd class=\"key inline\" data-key-hero><span class=\"key-glyph\">⌃</span><span class=\"key-name\">control</span></kbd>, mów, puść: czysty tekst, dopasowany do kontekstu, pojawia się tam, gdzie piszesz.",
+    "dl.mac": "Pobierz na Maca",
+    "hero.seeDemo": "Zobacz demo",
+    "hero.meta": "Za darmo · Open source · <span data-version>Najnowsza wersja</span> · macOS 27 · Apple Silicon",
+    "demo.badge": "<span class=\"live-tag\"><i aria-hidden=\"true\"></i>Live</span>Demo",
+    "demo.title": "Od głosu do tekstu.",
+    "demo.lead": "Cały e-mail bez pisania czegokolwiek. No, prawie: jeden klawisz, control.",
+    "demo.window": "Nowa wiadomość",
+    "demo.to": "Do:",
+    "demo.subject": "Temat:",
+    "tl.hold": "Przytrzymaj",
+    "tl.speak": "Mów",
+    "tl.release": "Puść",
+    "tl.review": "Sprawdzone przez AI<small class=\"tl-context\"><img src=\"apps/mail.png\" width=\"14\" height=\"14\" alt=\"\">kontekst: Mail</small>",
+    "tl.written": "Napisane",
+    "feat.title": "Na wyciągnięcie palca.",
+    "feat.lead": "Żadnego okna do otwarcia, żadnego przycisku do kliknięcia, żadnej surowej transkrypcji do poprawiania.",
+    "ptt.hint": "przytrzymaj · mów · puść",
+    "ptt.text": "Jeden klawisz, <kbd><span class=\"kbd-glyph\">⌃</span>control</kbd> lub <kbd><span class=\"kbd-glyph\">🌐︎</span>fn</kbd>, do wyboru. Trzymaj go, gdy mówisz, puść, i gotowe. Nie trzeba czekać: przytrzymaj go znów, gdy ostatnie zdanie jest jeszcze sprawdzane, i mów dalej, zdania trafiają po kolei.",
+    "clean.raw": "yyy no więc właściwie to ja ja chciałem ci powiedzieć że że spotkanie jest przesunięte na wtorek",
+    "clean.clean": "Chciałem ci powiedzieć, że spotkanie jest przesunięte na wtorek.",
+    "clean.title": "Sprawdzone przez AI",
+    "clean.text": "AI czyta transkrypcję i zapisuje ją na czysto: „yyy”, powtórzenia i falstarty znikają, interpunkcja i terminy techniczne zostają poprawione. Sens i słowa pozostają Twoje. Przez Claude w ramach Twojej subskrypcji albo przez Apple Intelligence na Twoim Macu: bez sieci to ono przejmuje pracę i wszystko zostaje offline.",
+    "latency.title": "Około 1,5 sekundy",
+    "latency.text": "To mediana czasu między końcem Twojego zdania a jego pojawieniem się na ekranie, łącznie z transkrypcją i korektą. Statystyki śledzą ją dzień po dniu i pokazują, który model sprawdzał: Claude czy Apple Intelligence, gdy nie było sieci.",
+    "context.title": "Dopasowuje się do kontekstu",
+    "context.text": "Ton podąża za aplikacją, w której piszesz: nieco staranniejszy w Mail, bezpośredni w Slacku, techniczny w Claude Code, surowy w Terminalu.",
+    "cursor.title": "Wszędzie tam, gdzie piszesz",
+    "cursor.text": "Mail, Wiadomości, Slack, Notatki, Cursor, Terminal, ChatGPT czy Claude: zdanie jest wpisywane w aktywne pole. Jeśli takiego nie ma, czeka w schowku.",
+    "send.title": "Wysyła się samo",
+    "send.text": "W Claude wiadomość wychodzi od razu po napisaniu: Dictate naciska Return za Ciebie. Wybierz aplikacje, w których to robi, na przykład Wiadomości lub Slack, albo wyłącz to w ustawieniach. W pozostałych tekst czeka, aż go wyślesz.",
+    "send.key": "return",
+    "saved.typing": "Pisanie",
+    "saved.caption": "Czas zaoszczędzony od początku",
+    "saved.title": "Zaoszczędzony czas, policzony",
+    "saved.text": "Statystyki porównują każde dyktowanie z czasem, jaki zajęłoby wpisanie go przy 40 słowach na minutę. Czas mówienia i oczekiwania na tekst jest odejmowany: zostaje czas naprawdę zaoszczędzony, dzień po dniu i od pierwszego dyktowania.",
+    "langs.title": "25 języków i Twoje słownictwo",
+    "langs.text": "Wybierz język dyktowania i dodaj własne słowa: nazwy własne, żargon, nazwy produktów. Są zapisywane tak, jak sam byś je zapisał. Interfejs też mówi we wszystkich 25.",
+    "offline.airplane": "Tryb Samolot",
+    "offline.on": "Włączony",
+    "offline.off": "Wyłączony",
+    "offline.typed": "Lądujemy o 18, zadzwonię po wyjściu.",
+    "offline.caption": "Parakeet i Apple Intelligence, na tym Macu.",
+    "offline.title": "Działa offline",
+    "offline.text": "Transkrypcja działa na Twoim Macu dzięki Parakeet, modelowi, który nie potrzebuje sieci, a korekta również, dzięki Apple Intelligence. W samolocie lub pociągu bez zasięgu Dictate nadal pisze.",
+    "pill.title": "Dyskretny",
+    "pill.text": "Mała pastylka u dołu ekranu pokazuje, że Dictate słucha, potem pracuje, a następnie znika. Jeśli nic nie usłyszała, informuje o tym przekreślony głośnik. Z AirPods czeka, aż ich mikrofon odpowie, zanim pokaże słuchanie, żebyś wiedział, kiedy mówić.",
+    "emoji.title": "Buźki też",
+    "emoji.text": "Powiedz „buźka kciuk w górę”, a Dictate napisze 👍. Wszystkie emoji Apple, głosem.",
+    "faq.title": "Często zadawane pytania",
+    "faq.q1": "Dlaczego jest za darmo?",
+    "faq.a1": "Bo działanie Dictate nic nie kosztuje: bez serwera, bez konta. Transkrypcja odbywa się na Twoim Macu, a korekta przechodzi przez subskrypcję Claude, którą już masz, albo przez Apple Intelligence na Twoim Macu. Nie mamy nic do zapłacenia, więc nie mamy czego Ci naliczać. Bez wersji pro, bez ograniczonego okresu próbnego.",
+    "faq.q2": "Czy potrzebuję subskrypcji Claude?",
+    "faq.a2": "Nie. Gdy Claude Code lub aplikacja Claude są zainstalowane i zalogowane na Twoje konto, Claude sprawdza każde dyktowanie poleceniem <code>claude</code>, w ramach Twojej subskrypcji. Bez subskrypcji wklej w Ustawieniach klucz API Claude, OpenAI lub Gemini: każdy używa swojego najszybszego modelu. Bez żadnego z nich korektę robi Apple Intelligence, od razu na Twoim Macu. Wybierasz w Ustawieniach, a jeśli korekta nie odpowiada, wstawiana jest surowa transkrypcja. Gdy Claude zostanie wylogowany, pastylka o tym powie, a pracę przejmie Apple Intelligence.",
+    "faq.q3": "Czy działa offline?",
+    "faq.a3": "Tak. Model transkrypcji (około 630 MB, pobierany podczas konfiguracji) działa w całości na Twoim Macu, a korekta również, gdy przechodzi przez Apple Intelligence. Połączenia wymaga tylko korekta przez Claude.",
+    "faq.q4": "Czym różni się od dyktowania w macOS?",
+    "faq.a4": "Dyktowanie Apple zapisuje to, co słyszy, razem z wahaniami, i trzeba je włączać i wyłączać. Dictate mieści się w jednym klawiszu, który trzymasz, usuwa „yyy” i powtórzenia, poprawia terminy techniczne i dopasowuje ton do aplikacji. A Twój głos nie trafia do Apple.",
+    "faq.q5": "Jakie języki?",
+    "faq.a5": "Dwadzieścia pięć języków europejskich: polski, angielski, francuski, niemiecki, hiszpański, włoski, portugalski, niderlandzki, szwedzki, duński, fiński, węgierski, grecki, czeski, rumuński, ukraiński i inne. Język wybierasz w Ustawieniach, a słownictwo dodajesz w leksykonie. Sama aplikacja mówi we wszystkich dwudziestu pięciu, zgodnie z językiem Twojego Maca.",
+    "faq.q6": "O co Dictate prosi podczas konfiguracji?",
+    "faq.a6": "O trzy uprawnienia macOS: mikrofon, monitorowanie wejścia dla klawisza oraz dostępność, by znaleźć pole i w nim pisać. Asystent przeprowadzi Cię przez nie po kolei, a potem pobierze model transkrypcji. Potem Dictate mieszka na pasku menu i sam się aktualizuje.",
+    "faq.q7": "Na jakich Macach?",
+    "faq.a7": "macOS 27 i układ Apple, od M1 po najnowsze. Aplikacja jest podpisana i poświadczona przez Apple.",
+    "dl.title": "Za darmo &amp; open source",
+    "dl.lead": "Inne aplikacje do dyktowania kosztują co miesiąc albo za licencję. Dictate nic nie kosztuje, a jego kod jest publiczny.",
+    "price.wispr": "12&nbsp;€ / mies.",
+    "price.typeless": "12&nbsp;$ / mies.",
+    "price.superwhisper": "8,49&nbsp;$ / mies.",
+    "price.voiceink": "25&nbsp;$ jednorazowo",
+    "price.us": "<b class=\"gradient-text\">Za darmo</b> · open source",
+    "price.note": "Ceny planów płatnych, sprawdzone 17&nbsp;października&nbsp;2026 na stronach producentów. Darmowe wersje Wispr Flow i Typeless ograniczają liczbę słów.",
+    "dl.code": "Zobacz kod",
+    "dl.meta": "<span data-version>Najnowsza wersja</span> · macOS 27 · Apple Silicon",
+    "footer.privacy": "Prywatność",
+    "dl.brew": "Albo przez Homebrew: <code>brew install --cask moifort/tap/dictate</code>",
+    "dl.storeNote": "W Mac App Store: przytrzymaj option + spację, aby dyktować, a potem wklej, naciskając ⌘V. Korektę robi tam Apple Intelligence.",
+    "footer.credit": "Dictate to projekt open source firmy <a href=\"https://github.com/moifort\" rel=\"noopener\">Polyforms</a>. Transkrypcja: Parakeet (NVIDIA) przez FluidAudio. Korekta: Claude (Anthropic) lub Apple Intelligence.",
+    "footer.releases": "Wszystkie wersje",
+    "footer.issues": "Zgłoś problem",
+    "footer.docs": "Dokumentacja",
+    "aria.demo": "Demonstracja",
+    "aria.timeline": "Jak to działa",
+    "aria.prices": "Ceny alternatyw",
+    "aria.store": "Pobierz w Mac App Store",
+    "meta.description": "Przytrzymaj control, mów, puść: czysty tekst, dopasowany do kontekstu, pojawia się tam, gdzie piszesz. Transkrypcja na Twoim Macu, bez konta, za darmo i open source."
+  },
+  "badge": "badges/en.svg",
+  "demo": {
+    "decimal": ",",
+    "version": "Wersja {v}",
+    "emojiWords": "buźka kciuk w górę",
+    "scenarios": [
+      {
+        "to": "Arthur G.",
+        "subject": "Bączki",
+        "prefix": "Cześć Arthur,\n\n",
+        "heard": "yyy no więc ja ja chciałem ci powiedzieć że bączki przyszły yyy możemy je wypróbować w sobotę jeśli chcesz i i powiesz mi który kręci się najdłużej",
+        "clean": "Chciałem ci powiedzieć, że bączki przyszły. Możemy je wypróbować w sobotę, jeśli chcesz, i powiesz mi, który kręci się najdłużej."
+      },
+      {
+        "to": "Colas D.",
+        "subject": "Niedzielny grill",
+        "prefix": "Cześć Colas,\n\n",
+        "heard": "no więc yyy na niedzielę ja zajmę się kotletami schabowymi a a ty weźmiesz chleb yyy i napoje",
+        "clean": "Na niedzielę ja zajmę się kotletami schabowymi, a ty weźmiesz chleb i napoje."
+      }
+    ],
+    "phrases": [
+      {
+        "app": "Mail",
+        "text": "Cześć Marie, dzięki za uwagi, poprawię to dziś rano."
+      },
+      {
+        "app": "Slack",
+        "text": "widzimy się o 14 w sali Lumière?"
+      },
+      {
+        "app": "Notes",
+        "text": "Pomysł: przypomnieć się dostawcy przed końcem miesiąca."
+      },
+      {
+        "app": "Terminal",
+        "text": "uruchom testy modułu płatności"
+      },
+      {
+        "app": "Claude",
+        "text": "Wyjaśnij, co robi ta funkcja."
+      }
+    ],
+    "sends": [
+      {
+        "app": "Claude",
+        "text": "Streść ten PR w trzech punktach."
+      },
+      {
+        "app": "Messages",
+        "text": "Będę za dziesięć minut!"
+      },
+      {
+        "app": "Slack",
+        "text": "Przeczytam specyfikację i dam znać."
+      },
+      {
+        "app": "Notes",
+        "text": "Kupić chleb i jajka."
+      }
+    ]
+  }
+};

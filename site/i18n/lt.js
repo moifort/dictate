@@ -1,0 +1,186 @@
+/* Dictate landing page: its texts in "lt", read by i18n.js and main.js. */
+window.DICTATE_I18N = {
+  "text": {
+    "meta.title": "Dictate — Diktavimas „Mac“ kompiuteriui, nemokamas ir atvirojo kodo",
+    "nav.demo": "Demonstracija",
+    "nav.features": "Funkcijos",
+    "nav.faq": "Klausimai",
+    "nav.compare": "Palyginimas",
+    "cmp.title": "„Dictate“ šalia kitų",
+    "cmp.lead": "Nemokama atvirojo kodo alternatyva „Wispr Flow“, „Typeless“, „Superwhisper“ ir „VoiceInk“.",
+    "cmp.row.transcribe": "Transkripcija",
+    "cmp.row.review": "DI peržiūra",
+    "cmp.row.offline": "Viskas neprisijungus",
+    "cmp.row.oss": "Atvirasis kodas",
+    "cmp.row.langs": "Kalbos",
+    "cmp.row.price": "Kaina",
+    "cmp.cloud": "Debesis",
+    "cmp.onMac": "Vietoje",
+    "cmp.macOrCloud": "„Mac“ arba debesis",
+    "cmp.apiKey": "Jūsų API raktas",
+    "cmp.appleOrClaude": "„Apple Intelligence“ arba „Claude“",
+    "cmp.yes": "Taip",
+    "cmp.no": "Ne",
+    "cmp.localModels": "Vietiniai modeliai",
+    "cmp.noAccount": "Be paskyros ir rakto",
+    "cmp.gpl": "GPL",
+    "cmp.mit": "MIT",
+    "cmp.hundred": "100+",
+    "cmp.european": "25 Europos",
+    "cmp.free": "Nemokamai",
+    "cmp.calloutTitle": "Transkripcija ir peržiūra – abi „Mac“ kompiuteryje.",
+    "cmp.calloutText": "Su „Apple Intelligence“ niekas nekeliauja į internetą: nei paskyros, nei rakto, nei tinklo. Išjunkite „Wi-Fi“ – „Dictate“ vis tiek rašo.",
+    "cmp.note": "Pagal kūrėjų svetaines ir dokumentaciją, 2026&nbsp;m. spalio&nbsp;17&nbsp;d. duomenimis. „Dictate“ aprėpia mažiau kalbų: „Parakeet“ atpažįsta tik Europos kalbas.",
+    "nav.download": "Atsisiųsti",
+    "hero.eyebrow": "Diktavimas „Mac“ kompiuteriui",
+    "hero.title": "Vos pagalvota,<br><span class=\"gradient-text\">jau parašyta.</span>",
+    "hero.subtitle": "Laikykite nuspaudę <kbd class=\"key inline\" data-key-hero><span class=\"key-glyph\">⌃</span><span class=\"key-name\">control</span></kbd>, kalbėkite, atleiskite: švarus, pagal kontekstą peržiūrėtas tekstas atsiranda ten, kur rašote.",
+    "dl.mac": "Atsisiųsti „Mac“ kompiuteriui",
+    "hero.seeDemo": "Žiūrėti demonstraciją",
+    "hero.meta": "Nemokamai · Atvirasis kodas · <span data-version>Naujausia versija</span> · macOS 27 · Apple Silicon",
+    "demo.badge": "<span class=\"live-tag\"><i aria-hidden=\"true\"></i>Live</span>Demo",
+    "demo.title": "Nuo balso iki teksto.",
+    "demo.lead": "Visas el. laiškas nieko nespausdinant. Na, beveik: vienas klavišas, „control“.",
+    "demo.window": "Naujas laiškas",
+    "demo.to": "Kam:",
+    "demo.subject": "Tema:",
+    "tl.hold": "Laikykite",
+    "tl.speak": "Kalbėkite",
+    "tl.release": "Atleiskite",
+    "tl.review": "Peržiūrėjo DI<small class=\"tl-context\"><img src=\"apps/mail.png\" width=\"14\" height=\"14\" alt=\"\">kontekstas: Mail</small>",
+    "tl.written": "Parašyta",
+    "feat.title": "Vos per klavišą.",
+    "feat.lead": "Nereikia atidaryti lango, spausti mygtuko ar taisyti neapdorotos transkripcijos.",
+    "ptt.hint": "laikykite · kalbėkite · atleiskite",
+    "ptt.text": "Vienas klavišas, <kbd><span class=\"kbd-glyph\">⌃</span>control</kbd> arba <kbd><span class=\"kbd-glyph\">🌐︎</span>fn</kbd>, kaip jums patogiau. Laikykite jį nuspaudę, kol kalbate, atleiskite – ir parašyta. Laukti nereikia: laikykite jį vėl, kol peržiūrimas paskutinis sakinys, ir kalbėkite toliau, sakiniai atkeliauja iš eilės.",
+    "clean.raw": "eee nu tai iš tikrųjų aš aš norėjau tau pasakyti kad kad susitikimas perkeltas į antradienį",
+    "clean.clean": "Norėjau tau pasakyti, kad susitikimas perkeltas į antradienį.",
+    "clean.title": "Peržiūrėjo DI",
+    "clean.text": "DI perskaito transkripciją ir užrašo ją švariai: „eee“, pasikartojimai ir netikri pradėjimai dingsta, skyryba ir techniniai terminai pataisomi. Prasmė ir žodžiai lieka jūsų. Tai atlieka „Claude“ su jūsų prenumerata arba „Apple Intelligence“ jūsų „Mac“ kompiuteryje: be tinklo darbą perima jis, ir viskas lieka neprisijungus.",
+    "latency.title": "Apie 1,5 sekundės",
+    "latency.text": "Tai laiko mediana nuo jūsų sakinio pabaigos iki jo pasirodymo ekrane, įskaitant transkripciją ir peržiūrą. Statistika ją seka diena po dienos ir rodo, kuris modelis peržiūrėjo: „Claude“ ar „Apple Intelligence“, kol buvote neprisijungę.",
+    "context.title": "Prisitaiko prie konteksto",
+    "context.text": "Tonas seka programą, kurioje rašote: kiek dailesnis „Mail“, tiesus „Slack“, techninis „Claude Code“, neapdorotas „Terminal“.",
+    "cursor.title": "Visur, kur rašote",
+    "cursor.text": "„Mail“, „Messages“, „Slack“, „Notes“, „Cursor“, „Terminal“, „ChatGPT“ ar „Claude“: sakinys įvedamas į lauką, kuris turi fokusą. Jei tokio nėra, jis laukia iškarpinėje.",
+    "send.title": "Išsiunčiama savaime",
+    "send.text": "Programoje „Claude“ žinutė išsiunčiama vos parašyta: „Dictate“ už jus paspaudžia „Return“. Pasirinkite programas, kuriose jis tai daro, pavyzdžiui, „Messages“ ar „Slack“, arba išjunkite nustatymuose. Visur kitur tekstas laukia, kol jį išsiųsite.",
+    "send.key": "return",
+    "saved.typing": "Spausdinimas",
+    "saved.caption": "Sutaupytas laikas nuo pradžios",
+    "saved.title": "Sutaupytas laikas, suskaičiuotas",
+    "saved.text": "Statistika lygina kiekvieną diktavimą su laiku, kurio būtų reikėję jam surinkti 40 žodžių per minutę greičiu. Kalbėjimo ir teksto laukimo laikas atimamas: lieka iš tiesų sutaupytas laikas, diena po dienos ir nuo pirmojo diktavimo.",
+    "langs.title": "25 kalbos ir jūsų žodynas",
+    "langs.text": "Pasirinkite diktavimo kalbą ir pridėkite savų žodžių: vardų, žargono, produktų pavadinimų. Jie rašomi taip, kaip rašytumėte jūs. Sąsaja taip pat kalba visomis 25.",
+    "offline.airplane": "Lėktuvo režimas",
+    "offline.on": "Įjungta",
+    "offline.off": "Išjungta",
+    "offline.typed": "Leidžiamės 18 val., paskambinsiu, kai išeisiu.",
+    "offline.caption": "„Parakeet“ ir „Apple Intelligence“, šiame „Mac“.",
+    "offline.title": "Veikia neprisijungus",
+    "offline.text": "Transkripcija veikia jūsų „Mac“ kompiuteryje su „Parakeet“ – modeliu, kuriam nereikia tinklo, o peržiūra taip pat, su „Apple Intelligence“. Lėktuve ar traukinyje be ryšio „Dictate“ vis tiek rašo.",
+    "pill.title": "Diskretiškas",
+    "pill.text": "Maža kapsulė ekrano apačioje rodo, kad „Dictate“ klausosi, tada dirba, o paskui išnyksta. Jei nieko neišgirdo, apie tai praneša perbrauktas garsiakalbis. Su „AirPods“ ji palaukia, kol atsilieps jų mikrofonas, ir tik tada rodo, kad klausosi, – taip žinote, kada kalbėti.",
+    "emoji.title": "Ir šypsenėlės",
+    "emoji.text": "Pasakykite „šypsenėlė nykštys aukštyn“, ir „Dictate“ parašys 👍. Visi „Apple“ jaustukai – balsu.",
+    "faq.title": "Dažni klausimai",
+    "faq.q1": "Kodėl tai nemokama?",
+    "faq.a1": "Nes „Dictate“ veikimas nieko nekainuoja: nei serverio, nei paskyros. Transkripcija vyksta jūsų „Mac“ kompiuteryje, o peržiūra atliekama per jau turimą „Claude“ prenumeratą arba per „Apple Intelligence“ jūsų „Mac“. Mums nėra už ką mokėti, tad nėra už ką imti pinigų ir iš jūsų. Jokios „pro“ versijos, jokio riboto bandomojo laikotarpio.",
+    "faq.q2": "Ar reikia „Claude“ prenumeratos?",
+    "faq.a2": "Ne. Kai „Claude Code“ arba programa „Claude“ įdiegta ir prisijungusi prie jūsų paskyros, „Claude“ peržiūri kiekvieną diktavimą komanda <code>claude</code>, su jūsų prenumerata. Be prenumeratos nustatymuose įklijuokite „Claude“, „OpenAI“ ar „Gemini“ API raktą: kiekvienas naudoja greičiausią savo modelį. Jei nieko iš to nėra, peržiūri „Apple Intelligence“ – tiesiog jūsų „Mac“ kompiuteryje. Pasirenkate nustatymuose, o jei peržiūra neatsako, vis tiek įterpiama neapdorota transkripcija. Jei „Claude“ atsijungia, kapsulė apie tai praneša ir darbą perima „Apple Intelligence“.",
+    "faq.q3": "Ar veikia neprisijungus?",
+    "faq.a3": "Taip. Transkripcijos modelis (apie 630 MB, atsisiunčiamas per sąranką) veikia vien jūsų „Mac“ kompiuteryje, o peržiūra taip pat, kai ją atlieka „Apple Intelligence“. Ryšio reikia tik „Claude“ peržiūrai.",
+    "faq.q4": "Kuo skiriasi nuo „macOS“ diktavimo?",
+    "faq.a4": "„Apple“ diktavimas rašo tai, ką girdi, kartu su dvejonėmis, ir jį reikia paleisti bei sustabdyti. „Dictate“ telpa viename klaviše, kurį laikote nuspaudę, pašalina „eee“ ir pasikartojimus, pataiso techninius terminus ir pritaiko toną prie programos. O jūsų balsas nekeliauja į „Apple“.",
+    "faq.q5": "Kokios kalbos?",
+    "faq.a5": "Dvidešimt penkios Europos kalbos: lietuvių, anglų, prancūzų, vokiečių, ispanų, italų, portugalų, olandų, lenkų, švedų, danų, suomių, vengrų, graikų, čekų, rumunų, ukrainiečių ir kitos. Kalbą pasirenkate nustatymuose, o žodyną pridedate leksikone. Pati programa kalba visomis dvidešimt penkiomis – pagal jūsų „Mac“ kalbą.",
+    "faq.q6": "Ko „Dictate“ prašo per sąranką?",
+    "faq.a6": "Trijų „macOS“ leidimų: mikrofono, įvesties stebėjimo klavišui ir pritaikymo neįgaliesiems, kad rastų lauką ir į jį rašytų. Vedlys pereina juos po vieną, tada atsisiunčia transkripcijos modelį. Po to „Dictate“ gyvena meniu juostoje ir pati atsinaujina.",
+    "faq.q7": "Kuriuose „Mac“ kompiuteriuose?",
+    "faq.a7": "„macOS 27“ ir „Apple“ lustas, nuo M1 iki naujausių. Programą pasirašė ir patvirtino „Apple“.",
+    "dl.title": "Nemokamai &amp; atvirasis kodas",
+    "dl.lead": "Kitos diktavimo programos kainuoja kas mėnesį arba už licenciją. „Dictate“ nekainuoja nieko, o jos kodas viešas.",
+    "price.wispr": "12&nbsp;€ / mėn.",
+    "price.typeless": "12&nbsp;$ / mėn.",
+    "price.superwhisper": "8,49&nbsp;$ / mėn.",
+    "price.voiceink": "25&nbsp;$ vieną kartą",
+    "price.us": "<b class=\"gradient-text\">Nemokamai</b> · atvirasis kodas",
+    "price.note": "Mokamų planų kainos, 2026&nbsp;m. spalio&nbsp;17&nbsp;d. paimtos iš kūrėjų svetainių. Nemokamos „Wispr Flow“ ir „Typeless“ versijos riboja žodžių skaičių.",
+    "dl.code": "Žiūrėti kodą",
+    "dl.meta": "<span data-version>Naujausia versija</span> · macOS 27 · Apple Silicon",
+    "footer.privacy": "Privatumas",
+    "dl.brew": "Arba su „Homebrew“: <code>brew install --cask moifort/tap/dictate</code>",
+    "dl.storeNote": "„Mac App Store“: norėdami diktuoti, laikykite nuspaudę „option“ + tarpo klavišą, tada įklijuokite paspaudę ⌘V. Ten peržiūrą atlieka „Apple Intelligence“.",
+    "footer.credit": "„Dictate“ yra atvirojo kodo projektas, kurį kuria <a href=\"https://github.com/moifort\" rel=\"noopener\">Polyforms</a>. Transkripcija: „Parakeet“ (NVIDIA) per „FluidAudio“. Peržiūra: „Claude“ (Anthropic) arba „Apple Intelligence“.",
+    "footer.releases": "Visos versijos",
+    "footer.issues": "Pranešti apie problemą",
+    "footer.docs": "Dokumentacija",
+    "aria.demo": "Demonstracija",
+    "aria.timeline": "Kaip tai veikia",
+    "aria.prices": "Alternatyvų kainos",
+    "aria.store": "Atsisiųskite iš „Mac App Store“",
+    "meta.description": "Laikykite nuspaudę „control“, kalbėkite, atleiskite: švarus, pagal kontekstą peržiūrėtas tekstas atsiranda ten, kur rašote. Transkribuojama jūsų „Mac“, be paskyros, nemokamai ir atviruoju kodu."
+  },
+  "badge": "badges/en.svg",
+  "demo": {
+    "decimal": ",",
+    "version": "Versija {v}",
+    "emojiWords": "šypsenėlė nykštys aukštyn",
+    "scenarios": [
+      {
+        "to": "Arthur G.",
+        "subject": "Vilkeliai",
+        "prefix": "Labas, Arthur,\n\n",
+        "heard": "eee nu tai aš aš norėjau tau pasakyti kad vilkeliai atkeliavo eee galim juos išbandyti šeštadienį jei nori ir ir tu pasakysi kuris sukasi ilgiausiai",
+        "clean": "Norėjau tau pasakyti, kad vilkeliai atkeliavo. Galim juos išbandyti šeštadienį, jei nori, ir tu pasakysi, kuris sukasi ilgiausiai."
+      },
+      {
+        "to": "Colas D.",
+        "subject": "Sekmadienio kepsninė",
+        "prefix": "Labas, Colas,\n\n",
+        "heard": "nu eee sekmadieniui aš pasirūpinsiu kiaulienos kepsniais o o tu atneši duonos eee ir gėrimų",
+        "clean": "Sekmadieniui aš pasirūpinsiu kiaulienos kepsniais, o tu atneši duonos ir gėrimų."
+      }
+    ],
+    "phrases": [
+      {
+        "app": "Mail",
+        "text": "Labas, Marie, ačiū už pastabas, pataisysiu šįryt."
+      },
+      {
+        "app": "Slack",
+        "text": "susitinkam 14 val. „Lumière“ salėje?"
+      },
+      {
+        "app": "Notes",
+        "text": "Mintis: iki mėnesio pabaigos priminti tiekėjui."
+      },
+      {
+        "app": "Terminal",
+        "text": "paleisk mokėjimų modulio testus"
+      },
+      {
+        "app": "Claude",
+        "text": "Paaiškink, ką daro ši funkcija."
+      }
+    ],
+    "sends": [
+      {
+        "app": "Claude",
+        "text": "Apibendrink šį PR trimis punktais."
+      },
+      {
+        "app": "Messages",
+        "text": "Būsiu po dešimties minučių!"
+      },
+      {
+        "app": "Slack",
+        "text": "Perskaitysiu specifikaciją ir parašysiu."
+      },
+      {
+        "app": "Notes",
+        "text": "Nupirkti duonos ir kiaušinių."
+      }
+    ]
+  }
+};

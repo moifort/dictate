@@ -1,0 +1,186 @@
+/* Dictate landing page: its texts in "ro", read by i18n.js and main.js. */
+window.DICTATE_I18N = {
+  "text": {
+    "meta.title": "Dictate — Dictare vocală pentru Mac, gratuită și open source",
+    "nav.demo": "Demo",
+    "nav.features": "Funcții",
+    "nav.faq": "Întrebări",
+    "nav.compare": "Comparație",
+    "cmp.title": "Dictate față de celelalte",
+    "cmp.lead": "O alternativă gratuită și open source la Wispr Flow, Typeless, Superwhisper și VoiceInk.",
+    "cmp.row.transcribe": "Transcriere",
+    "cmp.row.review": "Revizuire cu IA",
+    "cmp.row.offline": "Totul offline",
+    "cmp.row.oss": "Open source",
+    "cmp.row.langs": "Limbi",
+    "cmp.row.price": "Preț",
+    "cmp.cloud": "Cloud",
+    "cmp.onMac": "Pe Mac",
+    "cmp.macOrCloud": "Mac sau cloud",
+    "cmp.apiKey": "Cheia dvs. API",
+    "cmp.appleOrClaude": "Apple Intelligence sau Claude",
+    "cmp.yes": "Da",
+    "cmp.no": "Nu",
+    "cmp.localModels": "Modele locale",
+    "cmp.noAccount": "Fără cont, fără cheie",
+    "cmp.gpl": "GPL",
+    "cmp.mit": "MIT",
+    "cmp.hundred": "100+",
+    "cmp.european": "25 europene",
+    "cmp.free": "Gratuit",
+    "cmp.calloutTitle": "Transcriere și revizuire, ambele pe Mac.",
+    "cmp.calloutText": "Cu Apple Intelligence, nimic nu ajunge online: fără cont, fără cheie, fără rețea. Opriți Wi-Fi-ul și Dictate scrie în continuare.",
+    "cmp.note": "Potrivit site-urilor și documentației producătorilor, la 17&nbsp;octombrie&nbsp;2026. Dictate acoperă mai puține limbi: Parakeet recunoaște doar limbile europene.",
+    "nav.download": "Descarcă",
+    "hero.eyebrow": "Dictare vocală pentru Mac",
+    "hero.title": "Abia gândit,<br><span class=\"gradient-text\">deja scris.</span>",
+    "hero.subtitle": "Țineți apăsat <kbd class=\"key inline\" data-key-hero><span class=\"key-glyph\">⌃</span><span class=\"key-name\">control</span></kbd>, vorbiți, eliberați: un text curat, revizuit după context, apare acolo unde scrieți.",
+    "dl.mac": "Descarcă pentru Mac",
+    "hero.seeDemo": "Vezi demo-ul",
+    "hero.meta": "Gratuit · Open source · <span data-version>Ultima versiune</span> · macOS 27 · Apple Silicon",
+    "demo.badge": "<span class=\"live-tag\"><i aria-hidden=\"true\"></i>Live</span>Demo",
+    "demo.title": "De la voce la text.",
+    "demo.lead": "Un e-mail întreg fără să tastați nimic. Mă rog, aproape: o tastă, control.",
+    "demo.window": "Mesaj nou",
+    "demo.to": "Către:",
+    "demo.subject": "Subiect:",
+    "tl.hold": "Țineți apăsat",
+    "tl.speak": "Vorbiți",
+    "tl.release": "Eliberați",
+    "tl.review": "Revizuit de IA<small class=\"tl-context\"><img src=\"apps/mail.png\" width=\"14\" height=\"14\" alt=\"\">context: Mail</small>",
+    "tl.written": "Scris",
+    "feat.title": "La o tastă distanță.",
+    "feat.lead": "Nicio fereastră de deschis, niciun buton de apăsat, nicio transcriere brută de corectat.",
+    "ptt.hint": "țineți · vorbiți · eliberați",
+    "ptt.text": "O singură tastă, <kbd><span class=\"kbd-glyph\">⌃</span>control</kbd> sau <kbd><span class=\"kbd-glyph\">🌐︎</span>fn</kbd>, la alegere. Țineți-o apăsată cât vorbiți, eliberați, și e scris. Nu trebuie să așteptați: țineți-o din nou apăsată cât se revizuiește ultima frază și continuați să vorbiți, frazele ajung în ordine.",
+    "clean.raw": "ăă deci de fapt eu eu voiam să-ți spun că că ședința s-a mutat marți",
+    "clean.clean": "Voiam să-ți spun că ședința s-a mutat marți.",
+    "clean.title": "Revizuit de IA",
+    "clean.text": "O IA recitește transcrierea și o scrie curat: „ăă”-urile, repetițiile și începuturile greșite dispar, punctuația și termenii tehnici sunt corectați. Sensul și cuvintele rămân ale dvs. De Claude cu abonamentul dvs., sau de Apple Intelligence pe Mac-ul dvs.: fără rețea, preia el și totul rămâne offline.",
+    "latency.title": "Aproximativ 1,5 secunde",
+    "latency.text": "Este timpul median dintre sfârșitul frazei și apariția ei pe ecran, cu transcrierea și revizuirea incluse. Statisticile îl urmăresc zi de zi și arată ce model a făcut revizuirea: Claude, sau Apple Intelligence cât ați fost offline.",
+    "context.title": "Se adaptează la context",
+    "context.text": "Tonul urmează aplicația în care scrieți: puțin mai îngrijit în Mail, direct în Slack, tehnic în Claude Code, brut în Terminal.",
+    "cursor.title": "Oriunde scrieți",
+    "cursor.text": "Mail, Mesaje, Slack, Notițe, Cursor, Terminal, ChatGPT sau Claude: fraza este scrisă în câmpul care are focusul. Dacă nu există niciunul, așteaptă în clipboard.",
+    "send.title": "Trimis de la sine",
+    "send.text": "În Claude, mesajul pleacă imediat ce este scris: Dictate apasă Retur în locul dvs. Alegeți aplicațiile în care face asta, Mesaje sau Slack de exemplu, ori dezactivați din configurări. În rest, textul așteaptă să-l trimiteți.",
+    "send.key": "return",
+    "saved.typing": "Tastare",
+    "saved.caption": "Timp economisit de la început",
+    "saved.title": "Timpul economisit, numărat",
+    "saved.text": "Statisticile compară fiecare dictare cu timpul necesar pentru a o tasta, la 40 de cuvinte pe minut. Timpul de vorbire și de așteptare a textului este scăzut: ce rămâne este timpul economisit cu adevărat, zi după zi și de la prima dictare.",
+    "langs.title": "25 de limbi și vocabularul dvs.",
+    "langs.text": "Alegeți limba de dictare și adăugați propriile cuvinte: nume proprii, jargon, nume de produse. Sunt scrise așa cum le-ați scrie dvs. Și interfața vorbește toate cele 25.",
+    "offline.airplane": "Mod Avion",
+    "offline.on": "Activat",
+    "offline.off": "Dezactivat",
+    "offline.typed": "Aterizăm la 18:00, te sun când ies.",
+    "offline.caption": "Parakeet și Apple Intelligence, pe acest Mac.",
+    "offline.title": "Funcționează offline",
+    "offline.text": "Transcrierea rulează pe Mac-ul dvs. cu Parakeet, un model care nu are nevoie de rețea, iar revizuirea la fel, cu Apple Intelligence. În avion sau în tren, fără semnal, Dictate scrie în continuare.",
+    "pill.title": "Discret",
+    "pill.text": "O mică pastilă în partea de jos a ecranului arată că Dictate ascultă, apoi lucrează, apoi dispare. Dacă nu a auzit nimic, vă spune un difuzor tăiat. Cu AirPods, așteaptă ca microfonul lor să răspundă înainte să arate că ascultă, ca să știți când să vorbiți.",
+    "emoji.title": "Și smiley-urile",
+    "emoji.text": "Spuneți „smiley degetul mare în sus” și Dictate scrie 👍. Toate emojiurile Apple, cu vocea.",
+    "faq.title": "Întrebări frecvente",
+    "faq.q1": "De ce este gratuit?",
+    "faq.a1": "Pentru că Dictate nu costă nimic ca să funcționeze: fără server, fără cont. Transcrierea se face pe Mac-ul dvs., iar revizuirea trece prin abonamentul Claude pe care îl aveți deja, sau prin Apple Intelligence pe Mac-ul dvs. Nu avem nimic de plătit, deci nimic de facturat. Fără versiune pro, fără perioadă de probă limitată.",
+    "faq.q2": "Am nevoie de un abonament Claude?",
+    "faq.a2": "Nu. Cu Claude Code sau aplicația Claude instalate și autentificate în contul dvs., Claude revizuiește fiecare dictare prin comanda <code>claude</code>, cu abonamentul dvs. Fără abonament, lipiți o cheie API Claude, OpenAI sau Gemini în Configurări: fiecare folosește cel mai rapid model al său. Fără niciuna, Apple Intelligence revizuiește direct pe Mac-ul dvs. Alegeți în Configurări, iar dacă revizuirea nu răspunde, transcrierea brută este inserată oricum. Dacă Claude se deconectează, pastila vă anunță și preia Apple Intelligence.",
+    "faq.q3": "Funcționează offline?",
+    "faq.a3": "Da. Modelul de transcriere (aproximativ 630 MB, descărcat la configurare) rulează în întregime pe Mac-ul dvs., iar revizuirea la fel atunci când trece prin Apple Intelligence. Doar revizuirea făcută de Claude are nevoie de conexiune.",
+    "faq.q4": "Prin ce diferă de dictarea din macOS?",
+    "faq.a4": "Dictarea Apple scrie ce aude, cu tot cu ezitări, și trebuie pornită și oprită. Dictate încape într-o tastă pe care o țineți apăsată, elimină „ăă”-urile și repetițiile, corectează termenii tehnici și adaptează tonul la aplicație. Iar vocea dvs. nu ajunge la Apple.",
+    "faq.q5": "Ce limbi?",
+    "faq.a5": "Douăzeci și cinci de limbi europene: română, engleză, franceză, germană, spaniolă, italiană, portugheză, neerlandeză, poloneză, suedeză, daneză, finlandeză, maghiară, greacă, cehă, ucraineană și altele. Limba se alege în Configurări, iar vocabularul se adaugă în lexic. Aplicația însăși le vorbește pe toate cele douăzeci și cinci, după limba Mac-ului dvs.",
+    "faq.q6": "Ce cere Dictate la configurare?",
+    "faq.a6": "Trei permisiuni macOS: microfonul, monitorizarea intrării pentru tastă și accesibilitatea pentru a găsi câmpul și a scrie în el. Un asistent vă ghidează prin ele, una câte una, apoi descarcă modelul de transcriere. După aceea, Dictate stă în bara de meniu și se actualizează singur.",
+    "faq.q7": "Pe ce Mac-uri?",
+    "faq.a7": "macOS 27 și un cip Apple, de la M1 până la cele mai recente. Aplicația este semnată și autentificată de Apple.",
+    "dl.title": "Gratuit &amp; open source",
+    "dl.lead": "Celelalte aplicații de dictare se plătesc lunar sau pe licență. Dictate nu costă nimic, iar codul său este public.",
+    "price.wispr": "12&nbsp;€ / lună",
+    "price.typeless": "12&nbsp;$ / lună",
+    "price.superwhisper": "8,49&nbsp;$ / lună",
+    "price.voiceink": "25&nbsp;$ o singură dată",
+    "price.us": "<b class=\"gradient-text\">Gratuit</b> · open source",
+    "price.note": "Prețurile planurilor cu plată, preluate la 17&nbsp;octombrie&nbsp;2026 de pe site-urile producătorilor. Ofertele gratuite Wispr Flow și Typeless limitează numărul de cuvinte.",
+    "dl.code": "Vezi codul",
+    "dl.meta": "<span data-version>Ultima versiune</span> · macOS 27 · Apple Silicon",
+    "footer.privacy": "Confidențialitate",
+    "dl.brew": "Sau cu Homebrew: <code>brew install --cask moifort/tap/dictate</code>",
+    "dl.storeNote": "În Mac App Store: țineți apăsat opțiune + spațiu pentru a dicta, apoi lipiți cu ⌘V. Acolo, revizuirea este făcută de Apple Intelligence.",
+    "footer.credit": "Dictate este un proiect open source al <a href=\"https://github.com/moifort\" rel=\"noopener\">Polyforms</a>. Transcriere cu Parakeet (NVIDIA) prin FluidAudio. Revizuire cu Claude (Anthropic) sau Apple Intelligence.",
+    "footer.releases": "Toate versiunile",
+    "footer.issues": "Semnalați o problemă",
+    "footer.docs": "Documentație",
+    "aria.demo": "Demonstrație",
+    "aria.timeline": "Cum funcționează",
+    "aria.prices": "Prețurile alternativelor",
+    "aria.store": "Descarcă din Mac App Store",
+    "meta.description": "Țineți apăsat control, vorbiți, eliberați: un text curat, revizuit după context, apare acolo unde scrieți. Transcris pe Mac-ul dvs., fără cont, gratuit și open source."
+  },
+  "badge": "badges/en.svg",
+  "demo": {
+    "decimal": ",",
+    "version": "Versiunea {v}",
+    "emojiWords": "smiley degetul mare în sus",
+    "scenarios": [
+      {
+        "to": "Arthur G.",
+        "subject": "Titirezii",
+        "prefix": "Salut, Arthur,\n\n",
+        "heard": "ăă deci eu eu voiam să-ți spun că titirezii au ajuns ăă putem să-i încercăm sâmbătă dacă vrei și și îmi spui care se învârte cel mai mult",
+        "clean": "Voiam să-ți spun că titirezii au ajuns. Putem să-i încercăm sâmbătă, dacă vrei, și îmi spui care se învârte cel mai mult."
+      },
+      {
+        "to": "Colas D.",
+        "subject": "Grătarul de duminică",
+        "prefix": "Salut, Colas,\n\n",
+        "heard": "deci ăă pentru duminică eu mă ocup de cotletele de porc și și tu iei pâinea ăă și băuturile",
+        "clean": "Pentru duminică, eu mă ocup de cotletele de porc, iar tu iei pâinea și băuturile."
+      }
+    ],
+    "phrases": [
+      {
+        "app": "Mail",
+        "text": "Salut, Marie, mulțumesc pentru feedback, corectez în dimineața asta."
+      },
+      {
+        "app": "Slack",
+        "text": "ne vedem la 14:00 în sala Lumière?"
+      },
+      {
+        "app": "Notes",
+        "text": "Idee: să revin la furnizor înainte de sfârșitul lunii."
+      },
+      {
+        "app": "Terminal",
+        "text": "rulează testele modulului de plăți"
+      },
+      {
+        "app": "Claude",
+        "text": "Explică-mi ce face funcția asta."
+      }
+    ],
+    "sends": [
+      {
+        "app": "Claude",
+        "text": "Rezumă acest PR în trei puncte."
+      },
+      {
+        "app": "Messages",
+        "text": "Ajung în zece minute!"
+      },
+      {
+        "app": "Slack",
+        "text": "Recitesc specificația și îți spun."
+      },
+      {
+        "app": "Notes",
+        "text": "De cumpărat pâine și ouă."
+      }
+    ]
+  }
+};
