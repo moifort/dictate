@@ -1,0 +1,805 @@
+# The Mac App Store listing, one entry per App Store locale, read by listing.rb.
+# Limits: name and subtitle 30 characters, keywords 100, promotional 170,
+# description and whats_new 4000. English and French are the originals; the
+# others were machine-translated from English. Bulgarian, Estonian, Latvian,
+# Lithuanian and Maltese have no App Store locale, and Portuguese is pt-BR.
+en-US:
+  name: "Dictate: Speech to Text"
+  subtitle: "Push-to-talk dictation"
+  keywords: "dictation,voice,speech,transcribe,voice typing,talk,push to talk,offline,notes,writing"
+  promotional: "Hold Option + Space, speak, release: clean text on your clipboard, ready to paste anywhere. Free, private, works offline."
+  whats_new: |
+    New
+    • The interface now speaks 25 languages, following your Mac's language
+    • Emojis by voice: say “emoji rocket” and 🚀 lands in the text
+    • A second shortcut: Control + Option + Space
+    • Settings → General: turn error reports off
+
+    Improved
+    • With AirPods, the first words are no longer lost
+    • A stuck transcription no longer blocks the dictations after it
+    • A cleanup that strays from what you said is dropped: your words stay
+  description: |
+    Hold Option + Space, speak, release: your words land on the clipboard, clean and ready to paste with Command-V.
+
+    Dictate is push-to-talk dictation for the Mac. Paste the text into any app: Mail, Messages, Notes, Slack, your code editor, the Terminal.
+
+    CLEAN TEXT, NOT A RAW TRANSCRIPT
+    Hesitations, repetitions and false starts are removed, punctuation and capitals are fixed, misheard terms are corrected. Your words and meaning stay as you said them.
+
+    ADAPTS TO WHERE YOU ARE
+    A bit more polished in an email, direct in a chat, technical in a code editor.
+
+    PRIVATE BY DESIGN
+    Speech is transcribed on your Mac, and the cleanup is done by Apple Intelligence on your Mac. Your voice and your text never leave it. No account, no subscription.
+
+    WORKS OFFLINE
+    On a plane or a train with no signal, Dictate still writes.
+
+    25 LANGUAGES AND YOUR VOCABULARY
+    Pick the dictation language and add your own words: names, jargon, product names.
+
+    DISCREET
+    A small pill at the bottom of the screen shows that Dictate is listening, then working, then fades away.
+
+    Requires a Mac with Apple silicon. Free and open source, made by Polyforms.
+fr-FR:
+  name: "Dictate : dictée vocale"
+  subtitle: "Maintenez, parlez, c'est écrit"
+  keywords: "dictée,voix,vocale,transcription,parole,saisie vocale,hors ligne,notes,clavier,écrire"
+  promotional: "Maintenez Option + Espace, parlez, relâchez : un texte propre dans le presse-papiers, prêt à coller. Gratuit, privé, hors ligne."
+  whats_new: |
+    Nouveautés
+    • L'interface parle maintenant 25 langues, selon celle de votre Mac
+    • Emojis à la voix : dites « emoji fusée » et 🚀 s'écrit dans le texte
+    • Un second raccourci : Control + Option + Espace
+    • Réglages → Général : désactivez l'envoi des rapports d'erreur
+
+    Améliorations
+    • Avec des AirPods, les premiers mots ne se perdent plus
+    • Une transcription bloquée n'empêche plus les dictées suivantes
+    • Une relecture qui s'écarte de ce que vous avez dit est écartée : vos mots restent
+  description: |
+    Maintenez Option + Espace, parlez, relâchez : vos mots arrivent dans le presse-papiers, propres et prêts à coller avec Commande-V.
+
+    Dictate est une dictée vocale à la demande pour Mac. Collez le texte dans n'importe quelle app : Mail, Messages, Notes, Slack, votre éditeur de code, le Terminal.
+
+    UN TEXTE PROPRE, PAS UNE TRANSCRIPTION BRUTE
+    Les hésitations, répétitions et faux départs disparaissent, la ponctuation et les majuscules sont corrigées, les termes mal entendus aussi. Vos mots et votre sens restent les vôtres.
+
+    S'ADAPTE AU CONTEXTE
+    Un peu plus soigné dans un mail, direct dans une discussion, technique dans un éditeur de code.
+
+    PRIVÉ PAR CONCEPTION
+    La voix est transcrite sur votre Mac, et la relecture est faite par Apple Intelligence sur votre Mac. Votre voix et votre texte n'en sortent jamais. Aucun compte, aucun abonnement.
+
+    FONCTIONNE HORS LIGNE
+    Dans un avion ou un train sans réseau, Dictate écrit toujours.
+
+    25 LANGUES ET VOTRE VOCABULAIRE
+    Choisissez la langue de dictée et ajoutez vos propres mots : noms, jargon, noms de produits.
+
+    DISCRET
+    Une petite pastille en bas de l'écran montre que Dictate écoute, puis travaille, puis s'efface.
+
+    Nécessite un Mac avec puce Apple. Gratuit et open source, conçu par Polyforms.
+de-DE:
+  name: "Dictate: Sprache zu Text"
+  subtitle: "Halten, sprechen, fertig"
+  keywords: "diktieren,diktat,stimme,sprache,transkription,spracheingabe,offline,notizen,schreiben,tastatur"
+  promotional: "Option + Leertaste halten, sprechen, loslassen: sauberer Text in der Zwischenablage, bereit zum Einfügen. Kostenlos, privat, offline."
+  whats_new: |
+    Neu
+    • Die Oberfläche spricht jetzt 25 Sprachen, passend zur Sprache deines Mac
+    • Emojis per Stimme: Sag „Emoji Rakete“ und 🚀 landet im Text
+    • Ein zweiter Kurzbefehl: Control + Option + Leertaste
+    • Einstellungen → Allgemein: Fehlerberichte abschalten
+
+    Verbessert
+    • Mit AirPods gehen die ersten Wörter nicht mehr verloren
+    • Eine hängende Transkription blockiert die folgenden Diktate nicht mehr
+    • Eine Korrektur, die vom Gesagten abweicht, wird verworfen: Deine Worte bleiben
+  description: |
+    Option + Leertaste halten, sprechen, loslassen: Deine Worte landen in der Zwischenablage, sauber und bereit zum Einfügen mit Command-V.
+
+    Dictate ist Diktieren per Tastendruck für den Mac. Füge den Text in jede App ein: Mail, Nachrichten, Notizen, Slack, deinen Code-Editor, das Terminal.
+
+    SAUBERER TEXT, KEIN ROHES TRANSKRIPT
+    Zögern, Wiederholungen und Fehlstarts werden entfernt, Satzzeichen und Großschreibung korrigiert, falsch verstandene Begriffe berichtigt. Deine Worte und dein Sinn bleiben so, wie du sie gesagt hast.
+
+    PASST SICH DEM KONTEXT AN
+    Etwas gepflegter in einer E-Mail, direkt in einem Chat, technisch in einem Code-Editor.
+
+    PRIVAT VON GRUND AUF
+    Die Sprache wird auf deinem Mac transkribiert, und die Korrektur übernimmt Apple Intelligence auf deinem Mac. Deine Stimme und dein Text verlassen ihn nie. Kein Account, kein Abo.
+
+    FUNKTIONIERT OFFLINE
+    Im Flugzeug oder im Zug ohne Netz schreibt Dictate weiter.
+
+    25 SPRACHEN UND DEIN VOKABULAR
+    Wähle die Diktiersprache und füge eigene Wörter hinzu: Namen, Fachbegriffe, Produktnamen.
+
+    DISKRET
+    Eine kleine Pille am unteren Bildschirmrand zeigt, dass Dictate zuhört, dann arbeitet, und verschwindet wieder.
+
+    Erfordert einen Mac mit Apple Chip. Kostenlos und Open Source, entwickelt von Polyforms.
+es-ES:
+  name: "Dictate: voz a texto"
+  subtitle: "Mantén, habla y listo"
+  keywords: "dictado,voz,habla,transcripción,dictar,escritura por voz,sin conexión,notas,escribir,teclado"
+  promotional: "Mantén Opción + Espacio, habla, suelta: un texto limpio en el portapapeles, listo para pegar. Gratis, privado y sin conexión."
+  whats_new: |
+    Novedades
+    • La interfaz ya habla 25 idiomas, según el de tu Mac
+    • Emojis con la voz: di «emoji cohete» y 🚀 aparece en el texto
+    • Un segundo atajo: Control + Opción + Espacio
+    • Ajustes → General: desactiva los informes de errores
+
+    Mejoras
+    • Con AirPods ya no se pierden las primeras palabras
+    • Una transcripción bloqueada ya no impide los dictados siguientes
+    • Una revisión que se aparta de lo que dijiste se descarta: tus palabras se quedan
+  description: |
+    Mantén Opción + Espacio, habla, suelta: tus palabras llegan al portapapeles, limpias y listas para pegar con Comando-V.
+
+    Dictate es un dictado por pulsación para el Mac. Pega el texto en cualquier app: Mail, Mensajes, Notas, Slack, tu editor de código, el Terminal.
+
+    UN TEXTO LIMPIO, NO UNA TRANSCRIPCIÓN EN BRUTO
+    Los titubeos, las repeticiones y los falsos comienzos desaparecen, la puntuación y las mayúsculas se corrigen, y también los términos mal entendidos. Tus palabras y tu sentido se quedan como los dijiste.
+
+    SE ADAPTA AL CONTEXTO
+    Un poco más cuidado en un correo, directo en un chat, técnico en un editor de código.
+
+    PRIVADO POR DISEÑO
+    La voz se transcribe en tu Mac, y la revisión la hace Apple Intelligence en tu Mac. Tu voz y tu texto nunca salen de él. Sin cuenta, sin suscripción.
+
+    FUNCIONA SIN CONEXIÓN
+    En un avión o en un tren sin cobertura, Dictate sigue escribiendo.
+
+    25 IDIOMAS Y TU VOCABULARIO
+    Elige el idioma de dictado y añade tus propias palabras: nombres, jerga, nombres de productos.
+
+    DISCRETO
+    Una pequeña píldora en la parte inferior de la pantalla muestra que Dictate escucha, luego trabaja y después desaparece.
+
+    Requiere un Mac con chip de Apple. Gratuito y de código abierto, creado por Polyforms.
+it:
+  name: "Dictate: da voce a testo"
+  subtitle: "Tieni premuto, parla, fatto"
+  keywords: "dettatura,voce,parlato,trascrizione,dettare,scrittura vocale,offline,note,scrivere,tastiera"
+  promotional: "Tieni premuto Opzione + Spazio, parla, rilascia: testo pulito negli appunti, pronto da incollare. Gratis, privato, funziona offline."
+  whats_new: |
+    Novità
+    • L'interfaccia ora parla 25 lingue, in base a quella del tuo Mac
+    • Emoji con la voce: di' “emoji razzo” e 🚀 compare nel testo
+    • Una seconda abbreviazione: Control + Opzione + Spazio
+    • Impostazioni → Generali: disattiva i report degli errori
+
+    Miglioramenti
+    • Con gli AirPods le prime parole non si perdono più
+    • Una trascrizione bloccata non ferma più le dettature successive
+    • Una rilettura che si allontana da ciò che hai detto viene scartata: restano le tue parole
+  description: |
+    Tieni premuto Opzione + Spazio, parla, rilascia: le tue parole arrivano negli appunti, pulite e pronte da incollare con Comando-V.
+
+    Dictate è la dettatura a pressione per il Mac. Incolla il testo in qualsiasi app: Mail, Messaggi, Note, Slack, il tuo editor di codice, il Terminale.
+
+    UN TESTO PULITO, NON UNA TRASCRIZIONE GREZZA
+    Esitazioni, ripetizioni e false partenze spariscono, punteggiatura e maiuscole vengono sistemate, i termini capiti male vengono corretti. Le tue parole e il tuo senso restano quelli che hai detto.
+
+    SI ADATTA AL CONTESTO
+    Un po' più curato in un'email, diretto in una chat, tecnico in un editor di codice.
+
+    PRIVATO PER PROGETTO
+    La voce viene trascritta sul tuo Mac, e la rilettura è fatta da Apple Intelligence sul tuo Mac. La tua voce e il tuo testo non lo lasciano mai. Nessun account, nessun abbonamento.
+
+    FUNZIONA OFFLINE
+    In aereo o in treno senza rete, Dictate continua a scrivere.
+
+    25 LINGUE E IL TUO VOCABOLARIO
+    Scegli la lingua di dettatura e aggiungi le tue parole: nomi, gergo, nomi di prodotti.
+
+    DISCRETO
+    Una piccola pillola in fondo allo schermo mostra che Dictate ascolta, poi lavora, poi scompare.
+
+    Richiede un Mac con chip Apple. Gratuito e open source, realizzato da Polyforms.
+nl-NL:
+  name: "Dictate: spraak naar tekst"
+  subtitle: "Houd vast, spreek, klaar"
+  keywords: "dicteren,stem,spraak,transcriptie,spraakinvoer,praten,offline,notities,schrijven,toetsenbord"
+  promotional: "Houd Option + Spatie ingedrukt, spreek, laat los: nette tekst op je klembord, klaar om te plakken. Gratis, privé, werkt offline."
+  whats_new: |
+    Nieuw
+    • De interface spreekt nu 25 talen, afhankelijk van de taal van je Mac
+    • Emoji's met je stem: zeg ‘emoji raket’ en 🚀 staat in de tekst
+    • Een tweede toetscombinatie: Control + Option + Spatie
+    • Instellingen → Algemeen: zet foutrapporten uit
+
+    Verbeterd
+    • Met AirPods gaan de eerste woorden niet meer verloren
+    • Een vastgelopen transcriptie blokkeert de volgende dictaten niet meer
+    • Een controle die afwijkt van wat je zei, wordt genegeerd: je woorden blijven staan
+  description: |
+    Houd Option + Spatie ingedrukt, spreek, laat los: je woorden komen op het klembord, netjes en klaar om te plakken met Command-V.
+
+    Dictate is dicteren met één toetscombinatie voor de Mac. Plak de tekst in elke app: Mail, Berichten, Notities, Slack, je code-editor, de Terminal.
+
+    NETTE TEKST, GEEN RUW TRANSCRIPT
+    Aarzelingen, herhalingen en valse starts verdwijnen, interpunctie en hoofdletters worden gecorrigeerd, verkeerd verstane termen ook. Je woorden en je bedoeling blijven zoals je ze zei.
+
+    PAST ZICH AAN DE CONTEXT AAN
+    Iets verzorgder in een e-mail, direct in een chat, technisch in een code-editor.
+
+    PRIVÉ VAN OPZET
+    Spraak wordt op je Mac getranscribeerd, en de controle gebeurt door Apple Intelligence op je Mac. Je stem en je tekst verlaten hem nooit. Geen account, geen abonnement.
+
+    WERKT OFFLINE
+    In een vliegtuig of trein zonder bereik blijft Dictate schrijven.
+
+    25 TALEN EN JOUW WOORDENSCHAT
+    Kies de dicteertaal en voeg je eigen woorden toe: namen, jargon, productnamen.
+
+    DISCREET
+    Een kleine pil onder in het scherm toont dat Dictate luistert, dan werkt, en verdwijnt weer.
+
+    Vereist een Mac met Apple silicon. Gratis en open source, gemaakt door Polyforms.
+pt-BR:
+  name: "Dictate: voz em texto"
+  subtitle: "Segure, fale, está escrito"
+  keywords: "ditado,voz,fala,transcrição,ditar,digitação por voz,offline,notas,escrever,teclado"
+  promotional: "Segure Option + Espaço, fale, solte: texto limpo na área de transferência, pronto para colar. Grátis, privado, funciona offline."
+  whats_new: |
+    Novidades
+    • A interface agora fala 25 idiomas, conforme o idioma do seu Mac
+    • Emojis por voz: diga “emoji foguete” e 🚀 aparece no texto
+    • Um segundo atalho: Control + Option + Espaço
+    • Ajustes → Geral: desative os relatórios de erros
+
+    Melhorias
+    • Com AirPods, as primeiras palavras não se perdem mais
+    • Uma transcrição travada não bloqueia mais os ditados seguintes
+    • Uma revisão que se afasta do que você disse é descartada: suas palavras ficam
+  description: |
+    Segure Option + Espaço, fale, solte: suas palavras chegam à área de transferência, limpas e prontas para colar com Command-V.
+
+    O Dictate é um ditado sob demanda para o Mac. Cole o texto em qualquer app: Mail, Mensagens, Notas, Slack, seu editor de código, o Terminal.
+
+    TEXTO LIMPO, NÃO UMA TRANSCRIÇÃO BRUTA
+    Hesitações, repetições e falsos começos somem, pontuação e maiúsculas são corrigidas, termos mal entendidos também. Suas palavras e seu sentido ficam como você disse.
+
+    ADAPTA-SE AO CONTEXTO
+    Um pouco mais cuidado em um e-mail, direto em um chat, técnico em um editor de código.
+
+    PRIVADO POR CONCEPÇÃO
+    A fala é transcrita no seu Mac, e a revisão é feita pela Apple Intelligence no seu Mac. Sua voz e seu texto nunca saem dele. Sem conta, sem assinatura.
+
+    FUNCIONA OFFLINE
+    Em um avião ou trem sem sinal, o Dictate continua escrevendo.
+
+    25 IDIOMAS E O SEU VOCABULÁRIO
+    Escolha o idioma do ditado e adicione suas próprias palavras: nomes, jargão, nomes de produtos.
+
+    DISCRETO
+    Uma pequena pílula na parte inferior da tela mostra que o Dictate está ouvindo, depois trabalhando, e então desaparece.
+
+    Requer um Mac com chip da Apple. Gratuito e de código aberto, feito pela Polyforms.
+sv:
+  name: "Dictate: tal till text"
+  subtitle: "Håll ned, tala, klart"
+  keywords: "diktering,röst,tal,transkribering,diktera,röstinmatning,offline,anteckningar,skriva,tangentbord"
+  promotional: "Håll ned Option + Mellanslag, tala, släpp: ren text i urklipp, redo att klistra in. Gratis, privat, fungerar offline."
+  whats_new: |
+    Nytt
+    • Gränssnittet talar nu 25 språk, efter språket på din Mac
+    • Emojier med rösten: säg ”emoji raket” så hamnar 🚀 i texten
+    • Ett andra kortkommando: Control + Option + Mellanslag
+    • Inställningar → Allmänt: stäng av felrapporter
+
+    Förbättrat
+    • Med AirPods går de första orden inte längre förlorade
+    • En transkription som hängt sig blockerar inte längre nästa diktering
+    • En granskning som avviker från det du sa förkastas: dina ord står kvar
+  description: |
+    Håll ned Option + Mellanslag, tala, släpp: dina ord hamnar i urklipp, rena och redo att klistras in med Kommando-V.
+
+    Dictate är diktering med ett kortkommando för Mac. Klistra in texten i vilken app som helst: Mail, Meddelanden, Anteckningar, Slack, din kodredigerare, Terminal.
+
+    REN TEXT, INTE EN RÅ TRANSKRIPTION
+    Tvekljud, upprepningar och omstarter tas bort, skiljetecken och versaler rättas, felhörda termer korrigeras. Dina ord och din mening blir som du sa dem.
+
+    ANPASSAR SIG EFTER SAMMANHANGET
+    Lite mer välvårdat i ett mejl, rakt på sak i en chatt, tekniskt i en kodredigerare.
+
+    PRIVAT FRÅN GRUNDEN
+    Talet transkriberas på din Mac, och granskningen görs av Apple Intelligence på din Mac. Din röst och din text lämnar den aldrig. Inget konto, inget abonnemang.
+
+    FUNGERAR OFFLINE
+    På ett flyg eller ett tåg utan täckning skriver Dictate ändå.
+
+    25 SPRÅK OCH DITT ORDFÖRRÅD
+    Välj dikteringsspråk och lägg till egna ord: namn, jargong, produktnamn.
+
+    DISKRET
+    En liten kapsel längst ned på skärmen visar att Dictate lyssnar, sedan arbetar, och tonar sedan bort.
+
+    Kräver en Mac med Apple Silicon. Gratis och öppen källkod, skapad av Polyforms.
+da:
+  name: "Dictate: tale til tekst"
+  subtitle: "Hold nede, tal, færdig"
+  keywords: "diktering,stemme,tale,transskription,dikter,taleindtastning,offline,noter,skrive,tastatur"
+  promotional: "Hold Option + Mellemrum nede, tal, slip: ren tekst på udklipsholderen, klar til at sætte ind. Gratis, privat, virker offline."
+  whats_new: |
+    Nyt
+    • Brugerfladen taler nu 25 sprog, efter sproget på din Mac
+    • Emojis med stemmen: sig “emoji raket”, og 🚀 lander i teksten
+    • En ekstra genvej: Control + Option + Mellemrum
+    • Indstillinger → Generelt: slå fejlrapporter fra
+
+    Forbedret
+    • Med AirPods går de første ord ikke længere tabt
+    • En transskription, der hænger, blokerer ikke længere de næste diktater
+    • En gennemgang, der afviger fra det, du sagde, droppes: dine ord bliver stående
+  description: |
+    Hold Option + Mellemrum nede, tal, slip: dine ord lander på udklipsholderen, rene og klar til at blive sat ind med Kommando-V.
+
+    Dictate er diktering med en genvej til Mac. Sæt teksten ind i enhver app: Mail, Beskeder, Noter, Slack, din kodeeditor, Terminal.
+
+    REN TEKST, IKKE EN RÅ TRANSSKRIPTION
+    Tøven, gentagelser og falske starter fjernes, tegnsætning og store bogstaver rettes, misforståede udtryk korrigeres. Dine ord og din mening bliver, som du sagde dem.
+
+    TILPASSER SIG SAMMENHÆNGEN
+    Lidt mere poleret i en e-mail, direkte i en chat, teknisk i en kodeeditor.
+
+    PRIVAT FRA BUNDEN
+    Talen transskriberes på din Mac, og gennemgangen laves af Apple Intelligence på din Mac. Din stemme og din tekst forlader den aldrig. Ingen konto, intet abonnement.
+
+    VIRKER OFFLINE
+    På et fly eller i et tog uden dækning skriver Dictate stadig.
+
+    25 SPROG OG DIT ORDFORRÅD
+    Vælg dikteringssprog, og tilføj dine egne ord: navne, fagsprog, produktnavne.
+
+    DISKRET
+    En lille pille nederst på skærmen viser, at Dictate lytter, derefter arbejder, og så forsvinder.
+
+    Kræver en Mac med Apple Silicon. Gratis og open source, lavet af Polyforms.
+fi:
+  name: "Dictate: puhe tekstiksi"
+  subtitle: "Paina, puhu, valmista"
+  keywords: "sanelu,ääni,puhe,litterointi,sanele,puheentunnistus,offline,muistiinpanot,kirjoitus,näppäimistö"
+  promotional: "Pidä Optio + välilyönti painettuna, puhu, vapauta: siisti teksti leikepöydällä valmiina sijoitettavaksi. Ilmainen, yksityinen, toimii offline."
+  whats_new: |
+    Uutta
+    • Käyttöliittymä puhuu nyt 25 kieltä Macisi kielen mukaan
+    • Emojit äänellä: sano ”emoji raketti”, ja 🚀 ilmestyy tekstiin
+    • Toinen oikotie: Control + Optio + välilyönti
+    • Asetukset → Yleiset: laita virheraportit pois päältä
+
+    Parannuksia
+    • AirPodsien kanssa ensimmäiset sanat eivät enää katoa
+    • Jumiin jäänyt litterointi ei enää estä seuraavia saneluja
+    • Tarkistus, joka poikkeaa sanomastasi, hylätään: omat sanasi jäävät
+  description: |
+    Pidä Optio + välilyönti painettuna, puhu, vapauta: sanasi päätyvät leikepöydälle siisteinä ja valmiina sijoitettaviksi Komento-V:llä.
+
+    Dictate on Macin sanelu, joka toimii näppäinyhdistelmää painamalla. Sijoita teksti mihin tahansa appiin: Mail, Viestit, Muistiinpanot, Slack, koodieditorisi, Pääte.
+
+    SIISTI TEKSTI, EI RAAKA LITTEROINTI
+    Epäröinnit, toistot ja väärät aloitukset poistetaan, välimerkit ja isot kirjaimet korjataan, väärin kuullut termit oikaistaan. Sanasi ja merkityksesi säilyvät sellaisina kuin ne sanoit.
+
+    MUKAUTUU TILANTEESEEN
+    Hieman viimeistellympi sähköpostissa, suora keskustelussa, tekninen koodieditorissa.
+
+    YKSITYINEN ALUSTA ASTI
+    Puhe litteroidaan Macillasi, ja tarkistuksen tekee Apple Intelligence Macillasi. Äänesi ja tekstisi eivät koskaan poistu siltä. Ei tiliä, ei tilausta.
+
+    TOIMII OFFLINE
+    Lentokoneessa tai junassa ilman verkkoa Dictate kirjoittaa silti.
+
+    25 KIELTÄ JA OMA SANASTOSI
+    Valitse sanelukieli ja lisää omat sanasi: nimet, ammattisanasto, tuotenimet.
+
+    HUOMAAMATON
+    Pieni kapseli näytön alareunassa näyttää, että Dictate kuuntelee, sitten työskentelee ja häipyy pois.
+
+    Vaatii Macin, jossa on Apple-siru. Ilmainen ja avointa lähdekoodia, tekijä Polyforms.
+pl:
+  name: "Dictate: mowa na tekst"
+  subtitle: "Przytrzymaj, mów, gotowe"
+  keywords: "dyktowanie,głos,mowa,transkrypcja,dyktuj,pisanie głosem,offline,notatki,pisanie,klawiatura"
+  promotional: "Przytrzymaj Option + Spację, mów, puść: czysty tekst w schowku, gotowy do wklejenia. Za darmo, prywatnie, działa offline."
+  whats_new: |
+    Nowości
+    • Interfejs mówi teraz w 25 językach, zgodnie z językiem Twojego Maca
+    • Emoji głosem: powiedz „emoji rakieta”, a 🚀 trafi do tekstu
+    • Drugi skrót: Control + Option + Spacja
+    • Ustawienia → Ogólne: wyłącz raporty o błędach
+
+    Ulepszenia
+    • Z AirPods pierwsze słowa już nie giną
+    • Zawieszona transkrypcja nie blokuje już kolejnych dyktowań
+    • Korekta, która odbiega od tego, co powiedziano, jest odrzucana: zostają Twoje słowa
+  description: |
+    Przytrzymaj Option + Spację, mów, puść: Twoje słowa trafiają do schowka, czyste i gotowe do wklejenia przez Command-V.
+
+    Dictate to dyktowanie na żądanie dla Maca. Wklej tekst w dowolnej aplikacji: Mail, Wiadomości, Notatki, Slack, edytor kodu, Terminal.
+
+    CZYSTY TEKST, NIE SUROWA TRANSKRYPCJA
+    Wahania, powtórzenia i falstarty znikają, interpunkcja i wielkie litery są poprawiane, źle usłyszane terminy również. Twoje słowa i sens pozostają takie, jak je wypowiedziano.
+
+    DOPASOWUJE SIĘ DO KONTEKSTU
+    Nieco staranniej w e-mailu, bezpośrednio na czacie, technicznie w edytorze kodu.
+
+    PRYWATNOŚĆ Z ZAŁOŻENIA
+    Mowa jest transkrybowana na Twoim Macu, a korektę wykonuje Apple Intelligence na Twoim Macu. Twój głos i tekst nigdy go nie opuszczają. Bez konta, bez subskrypcji.
+
+    DZIAŁA OFFLINE
+    W samolocie lub pociągu bez zasięgu Dictate nadal pisze.
+
+    25 JĘZYKÓW I TWOJE SŁOWNICTWO
+    Wybierz język dyktowania i dodaj własne słowa: nazwy, żargon, nazwy produktów.
+
+    DYSKRETNY
+    Mała pastylka u dołu ekranu pokazuje, że Dictate słucha, potem pracuje, a następnie znika.
+
+    Wymaga Maca z układem Apple. Darmowy i open source, stworzony przez Polyforms.
+cs:
+  name: "Dictate: řeč na text"
+  subtitle: "Podržte, mluvte, hotovo"
+  keywords: "diktování,hlas,řeč,přepis,diktovat,hlasové psaní,offline,poznámky,psaní,klávesnice"
+  promotional: "Podržte Option + mezerník, mluvte, uvolněte: čistý text ve schránce, připravený k vložení. Zdarma, soukromě, funguje offline."
+  whats_new: |
+    Novinky
+    • Rozhraní teď mluví 25 jazyky, podle jazyka vašeho Macu
+    • Emoji hlasem: řekněte „emoji raketa“ a 🚀 se objeví v textu
+    • Druhá zkratka: Control + Option + mezerník
+    • Nastavení → Obecné: vypněte hlášení o chybách
+
+    Vylepšení
+    • S AirPods se už neztrácejí první slova
+    • Zaseknutý přepis už neblokuje další diktáty
+    • Kontrola, která se odchýlí od toho, co jste řekli, se zahodí: zůstanou vaše slova
+  description: |
+    Podržte Option + mezerník, mluvte, uvolněte: vaše slova přistanou ve schránce, čistá a připravená k vložení pomocí Command-V.
+
+    Dictate je diktování na stisk kláves pro Mac. Vložte text do jakékoli aplikace: Mail, Zprávy, Poznámky, Slack, váš editor kódu, Terminál.
+
+    ČISTÝ TEXT, NE SUROVÝ PŘEPIS
+    Zaváhání, opakování a chybné začátky zmizí, interpunkce a velká písmena se opraví, špatně zaslechnuté výrazy také. Vaše slova a smysl zůstávají tak, jak jste je řekli.
+
+    PŘIZPŮSOBÍ SE KONTEXTU
+    O něco uhlazenější v e-mailu, přímý v chatu, technický v editoru kódu.
+
+    SOUKROMÍ OD ZÁKLADU
+    Řeč se přepisuje na vašem Macu a kontrolu provádí Apple Intelligence na vašem Macu. Váš hlas ani text ho nikdy neopustí. Žádný účet, žádné předplatné.
+
+    FUNGUJE OFFLINE
+    V letadle nebo ve vlaku bez signálu Dictate píše dál.
+
+    25 JAZYKŮ A VAŠE SLOVNÍ ZÁSOBA
+    Vyberte jazyk diktování a přidejte vlastní slova: jména, žargon, názvy produktů.
+
+    DISKRÉTNÍ
+    Malá pilulka u dolního okraje obrazovky ukazuje, že Dictate poslouchá, pak pracuje, a potom zmizí.
+
+    Vyžaduje Mac s čipem Apple. Zdarma a open source, vytvořil Polyforms.
+sk:
+  name: "Dictate: reč na text"
+  subtitle: "Podržte, hovorte, hotovo"
+  keywords: "diktovanie,hlas,reč,prepis,diktovať,hlasové písanie,offline,poznámky,písanie,klávesnica"
+  promotional: "Podržte Option + medzerník, hovorte, pustite: čistý text v schránke, pripravený na vloženie. Zadarmo, súkromne, funguje offline."
+  whats_new: |
+    Novinky
+    • Rozhranie teraz hovorí 25 jazykmi, podľa jazyka vášho Macu
+    • Emoji hlasom: povedzte „emoji raketa“ a 🚀 sa objaví v texte
+    • Druhá skratka: Control + Option + medzerník
+    • Nastavenia → Všeobecné: vypnite hlásenia o chybách
+
+    Vylepšenia
+    • S AirPods sa už nestrácajú prvé slová
+    • Zaseknutý prepis už neblokuje ďalšie diktáty
+    • Kontrola, ktorá sa odchýli od toho, čo ste povedali, sa zahodí: zostanú vaše slová
+  description: |
+    Podržte Option + medzerník, hovorte, pustite: vaše slová pristanú v schránke, čisté a pripravené na vloženie pomocou Command-V.
+
+    Dictate je diktovanie na stlačenie klávesov pre Mac. Vložte text do ktorejkoľvek aplikácie: Mail, Správy, Poznámky, Slack, váš editor kódu, Terminál.
+
+    ČISTÝ TEXT, NIE SUROVÝ PREPIS
+    Zaváhania, opakovania a chybné začiatky zmiznú, interpunkcia a veľké písmená sa opravia, zle začuté výrazy tiež. Vaše slová a zmysel zostávajú tak, ako ste ich povedali.
+
+    PRISPÔSOBÍ SA KONTEXTU
+    O niečo uhladenejší v e-maile, priamy v chate, technický v editore kódu.
+
+    SÚKROMIE OD ZÁKLADU
+    Reč sa prepisuje na vašom Macu a kontrolu vykonáva Apple Intelligence na vašom Macu. Váš hlas ani text ho nikdy neopustia. Žiadny účet, žiadne predplatné.
+
+    FUNGUJE OFFLINE
+    V lietadle alebo vo vlaku bez signálu Dictate píše ďalej.
+
+    25 JAZYKOV A VAŠA SLOVNÁ ZÁSOBA
+    Vyberte jazyk diktovania a pridajte vlastné slová: mená, žargón, názvy produktov.
+
+    DISKRÉTNY
+    Malá pilulka pri dolnom okraji obrazovky ukazuje, že Dictate počúva, potom pracuje, a potom zmizne.
+
+    Vyžaduje Mac s čipom Apple. Zadarmo a open source, vytvoril Polyforms.
+hu:
+  name: "Dictate: beszédből szöveg"
+  subtitle: "Tartsa, beszéljen, kész"
+  keywords: "diktálás,hang,beszéd,átírás,diktál,hangalapú gépelés,offline,jegyzetek,írás,billentyűzet"
+  promotional: "Tartsa lenyomva az Option + szóközt, beszéljen, engedje fel: tiszta szöveg a vágólapon, beillesztésre készen. Ingyenes, privát, offline is működik."
+  whats_new: |
+    Újdonságok
+    • A felület mostantól 25 nyelven beszél, a Mac nyelvéhez igazodva
+    • Emojik hanggal: mondja, hogy „emoji rakéta”, és a 🚀 megjelenik a szövegben
+    • Második billentyűparancs: Control + Option + szóköz
+    • Beállítások → Általános: kapcsolja ki a hibajelentéseket
+
+    Javítások
+    • AirPods használatakor már nem vesznek el az első szavak
+    • Egy elakadt átírás már nem akadályozza a következő diktálásokat
+    • Az elhangzottaktól eltérő ellenőrzést a rendszer elveti: az Ön szavai maradnak
+  description: |
+    Tartsa lenyomva az Option + szóközt, beszéljen, engedje fel: a szavai a vágólapra kerülnek, tisztán, a Command-V paranccsal beillesztésre készen.
+
+    A Dictate billentyűparancsra működő diktálás Macre. Illessze be a szöveget bármely appba: Mail, Üzenetek, Jegyzetek, Slack, a kódszerkesztője, a Terminál.
+
+    TISZTA SZÖVEG, NEM NYERS ÁTIRAT
+    A hezitálások, ismétlések és félbehagyott kezdések eltűnnek, az írásjelek és a nagybetűk javulnak, a félrehallott kifejezések is. A szavai és a mondanivalója úgy maradnak, ahogyan elmondta.
+
+    ALKALMAZKODIK A HELYZETHEZ
+    Kicsit csiszoltabb egy e-mailben, közvetlen egy csevegésben, szakszerű egy kódszerkesztőben.
+
+    ALAPVETŐEN PRIVÁT
+    A beszéd átírása a Macjén történik, az ellenőrzést pedig az Apple Intelligence végzi a Macjén. A hangja és a szövege soha nem hagyja el azt. Nincs fiók, nincs előfizetés.
+
+    OFFLINE IS MŰKÖDIK
+    Repülőn vagy vonaton, térerő nélkül is ír a Dictate.
+
+    25 NYELV ÉS AZ ÖN SZÓKINCSE
+    Válassza ki a diktálás nyelvét, és adja hozzá saját szavait: neveket, szakzsargont, termékneveket.
+
+    DISZKRÉT
+    Egy kis kapszula a képernyő alján jelzi, hogy a Dictate figyel, majd dolgozik, aztán eltűnik.
+
+    Apple-chippel rendelkező Mac szükséges. Ingyenes és nyílt forráskódú, készítette a Polyforms.
+ro:
+  name: "Dictate: voce în text"
+  subtitle: "Țineți apăsat, vorbiți, gata"
+  keywords: "dictare,voce,vorbire,transcriere,dictează,scriere vocală,offline,notițe,scriere,tastatură"
+  promotional: "Țineți apăsat Opțiune + Spațiu, vorbiți, eliberați: text curat în clipboard, gata de lipit. Gratuit, privat, funcționează offline."
+  whats_new: |
+    Noutăți
+    • Interfața vorbește acum 25 de limbi, după limba Mac-ului dvs.
+    • Emojiuri cu vocea: spuneți „emoji rachetă” și 🚀 apare în text
+    • O a doua scurtătură: Control + Opțiune + Spațiu
+    • Configurări → General: dezactivați rapoartele de erori
+
+    Îmbunătățiri
+    • Cu AirPods, primele cuvinte nu se mai pierd
+    • O transcriere blocată nu mai împiedică dictările următoare
+    • O revizuire care se abate de la ce ați spus este respinsă: cuvintele dvs. rămân
+  description: |
+    Țineți apăsat Opțiune + Spațiu, vorbiți, eliberați: cuvintele dvs. ajung în clipboard, curate și gata de lipit cu Comandă-V.
+
+    Dictate este dictare la apăsarea unei scurtături, pentru Mac. Lipiți textul în orice aplicație: Mail, Mesaje, Notițe, Slack, editorul dvs. de cod, Terminal.
+
+    TEXT CURAT, NU O TRANSCRIERE BRUTĂ
+    Ezitările, repetițiile și începuturile greșite dispar, punctuația și majusculele sunt corectate, la fel și termenii înțeleși greșit. Cuvintele și sensul dvs. rămân așa cum le-ați spus.
+
+    SE ADAPTEAZĂ LA CONTEXT
+    Puțin mai îngrijit într-un e-mail, direct într-un chat, tehnic într-un editor de cod.
+
+    PRIVAT PRIN CONCEPȚIE
+    Vorbirea este transcrisă pe Mac-ul dvs., iar revizuirea este făcută de Apple Intelligence pe Mac-ul dvs. Vocea și textul dvs. nu îl părăsesc niciodată. Fără cont, fără abonament.
+
+    FUNCȚIONEAZĂ OFFLINE
+    În avion sau în tren, fără semnal, Dictate scrie în continuare.
+
+    25 DE LIMBI ȘI VOCABULARUL DVS.
+    Alegeți limba de dictare și adăugați propriile cuvinte: nume, jargon, nume de produse.
+
+    DISCRET
+    O mică pastilă în partea de jos a ecranului arată că Dictate ascultă, apoi lucrează, apoi dispare.
+
+    Necesită un Mac cu cip Apple. Gratuit și open source, creat de Polyforms.
+ru:
+  name: "Dictate: речь в текст"
+  subtitle: "Удерживайте, говорите, готово"
+  keywords: "диктовка,голос,речь,расшифровка,диктовать,голосовой ввод,офлайн,заметки,письмо,клавиатура"
+  promotional: "Удерживайте Option + Пробел, говорите, отпустите: чистый текст в буфере обмена, готовый к вставке. Бесплатно, приватно, работает офлайн."
+  whats_new: |
+    Новое
+    • Интерфейс теперь говорит на 25 языках — в зависимости от языка вашего Mac
+    • Эмодзи голосом: скажите «эмодзи ракета», и 🚀 появится в тексте
+    • Второе сочетание клавиш: Control + Option + Пробел
+    • Настройки → Основные: отключите отчёты об ошибках
+
+    Улучшения
+    • С AirPods первые слова больше не теряются
+    • Зависшая расшифровка больше не блокирует следующие диктовки
+    • Проверка, которая отходит от сказанного, отбрасывается: остаются ваши слова
+  description: |
+    Удерживайте Option + Пробел, говорите, отпустите: ваши слова попадают в буфер обмена — чистые и готовые к вставке через Command-V.
+
+    Dictate — это диктовка по нажатию для Mac. Вставляйте текст в любое приложение: Почту, Сообщения, Заметки, Slack, редактор кода, Терминал.
+
+    ЧИСТЫЙ ТЕКСТ, А НЕ СЫРАЯ РАСШИФРОВКА
+    Запинки, повторы и фальстарты убираются, пунктуация и заглавные буквы исправляются, неверно расслышанные термины тоже. Ваши слова и смысл остаются такими, как вы их сказали.
+
+    ПОДСТРАИВАЕТСЯ ПОД КОНТЕКСТ
+    Чуть аккуратнее в письме, прямо в чате, технично в редакторе кода.
+
+    ПРИВАТНОСТЬ ПО УМОЛЧАНИЮ
+    Речь расшифровывается на вашем Mac, а проверку выполняет Apple Intelligence на вашем Mac. Ваш голос и текст никогда его не покидают. Без учётной записи, без подписки.
+
+    РАБОТАЕТ ОФЛАЙН
+    В самолёте или поезде без связи Dictate продолжает писать.
+
+    25 ЯЗЫКОВ И ВАШ СЛОВАРЬ
+    Выберите язык диктовки и добавьте свои слова: имена, жаргон, названия продуктов.
+
+    НЕЗАМЕТНЫЙ
+    Небольшая капсула внизу экрана показывает, что Dictate слушает, затем работает, а потом исчезает.
+
+    Требуется Mac с чипом Apple. Бесплатно и с открытым исходным кодом, разработано Polyforms.
+uk:
+  name: "Dictate: мовлення в текст"
+  subtitle: "Утримуйте, говоріть, готово"
+  keywords: "диктування,голос,мовлення,транскрипція,диктувати,голосовий ввід,офлайн,нотатки,письмо,клавіатура"
+  promotional: "Утримуйте Option + Пробіл, говоріть, відпустіть: чистий текст у буфері обміну, готовий до вставлення. Безкоштовно, приватно, працює офлайн."
+  whats_new: |
+    Нове
+    • Інтерфейс тепер говорить 25 мовами — залежно від мови вашого Mac
+    • Емодзі голосом: скажіть «емодзі ракета», і 🚀 з’явиться в тексті
+    • Друге сполучення клавіш: Control + Option + Пробіл
+    • Параметри → Загальні: вимкніть звіти про помилки
+
+    Покращення
+    • З AirPods перші слова більше не губляться
+    • Зависла транскрипція більше не блокує наступні диктування
+    • Перевірка, яка відходить від сказаного, відкидається: залишаються ваші слова
+  description: |
+    Утримуйте Option + Пробіл, говоріть, відпустіть: ваші слова потрапляють у буфер обміну — чисті й готові до вставлення через Command-V.
+
+    Dictate — це диктування за натисканням для Mac. Вставляйте текст у будь-яку програму: Пошту, Повідомлення, Нотатки, Slack, редактор коду, Термінал.
+
+    ЧИСТИЙ ТЕКСТ, А НЕ СИРА ТРАНСКРИПЦІЯ
+    Вагання, повтори й фальстарти зникають, пунктуація та великі літери виправляються, неправильно почуті терміни також. Ваші слова і зміст залишаються такими, як ви їх сказали.
+
+    ПІДЛАШТОВУЄТЬСЯ ПІД КОНТЕКСТ
+    Трохи охайніше в листі, прямо в чаті, технічно в редакторі коду.
+
+    ПРИВАТНІСТЬ ЗА ЗАДУМОМ
+    Мовлення транскрибується на вашому Mac, а перевірку виконує Apple Intelligence на вашому Mac. Ваш голос і текст ніколи його не залишають. Без облікового запису, без підписки.
+
+    ПРАЦЮЄ ОФЛАЙН
+    У літаку чи потязі без зв’язку Dictate і далі пише.
+
+    25 МОВ І ВАШ СЛОВНИК
+    Виберіть мову диктування й додайте власні слова: імена, жаргон, назви продуктів.
+
+    НЕПОМІТНИЙ
+    Невелика капсула внизу екрана показує, що Dictate слухає, потім працює, а далі зникає.
+
+    Потрібен Mac із чипом Apple. Безкоштовно та з відкритим кодом, створено Polyforms.
+el:
+  name: "Dictate: ομιλία σε κείμενο"
+  subtitle: "Κρατήστε, μιλήστε, έτοιμο"
+  keywords: "υπαγόρευση,φωνή,ομιλία,μεταγραφή,φωνητική πληκτρολόγηση,εκτός σύνδεσης,σημειώσεις,γραφή"
+  promotional: "Κρατήστε Option + Διάστημα, μιλήστε, αφήστε: καθαρό κείμενο στο πρόχειρο, έτοιμο για επικόλληση. Δωρεάν, ιδιωτικό, λειτουργεί εκτός σύνδεσης."
+  whats_new: |
+    Νέα
+    • Η διεπαφή μιλά πλέον 25 γλώσσες, ανάλογα με τη γλώσσα του Mac σας
+    • Emoji με τη φωνή: πείτε «emoji πύραυλος» και το 🚀 μπαίνει στο κείμενο
+    • Δεύτερη συντόμευση: Control + Option + Διάστημα
+    • Ρυθμίσεις → Γενικά: απενεργοποιήστε τις αναφορές σφαλμάτων
+
+    Βελτιώσεις
+    • Με τα AirPods δεν χάνονται πια οι πρώτες λέξεις
+    • Μια μεταγραφή που κόλλησε δεν μπλοκάρει πια τις επόμενες υπαγορεύσεις
+    • Ένας έλεγχος που απομακρύνεται από όσα είπατε απορρίπτεται: μένουν τα λόγια σας
+  description: |
+    Κρατήστε Option + Διάστημα, μιλήστε, αφήστε: τα λόγια σας φτάνουν στο πρόχειρο, καθαρά και έτοιμα για επικόλληση με Command-V.
+
+    Το Dictate είναι υπαγόρευση με το πάτημα μιας συντόμευσης για το Mac. Επικολλήστε το κείμενο σε οποιαδήποτε εφαρμογή: Mail, Μηνύματα, Σημειώσεις, Slack, τον επεξεργαστή κώδικά σας, το Τερματικό.
+
+    ΚΑΘΑΡΟ ΚΕΙΜΕΝΟ, ΟΧΙ ΑΚΑΤΕΡΓΑΣΤΗ ΜΕΤΑΓΡΑΦΗ
+    Οι δισταγμοί, οι επαναλήψεις και οι λανθασμένες εκκινήσεις αφαιρούνται, η στίξη και τα κεφαλαία διορθώνονται, όπως και οι όροι που ακούστηκαν λάθος. Τα λόγια και το νόημά σας μένουν όπως τα είπατε.
+
+    ΠΡΟΣΑΡΜΟΖΕΤΑΙ ΣΤΟ ΠΛΑΙΣΙΟ
+    Λίγο πιο προσεγμένο σε ένα email, άμεσο σε μια συνομιλία, τεχνικό σε έναν επεξεργαστή κώδικα.
+
+    ΙΔΙΩΤΙΚΟ ΕΚ ΣΧΕΔΙΑΣΜΟΥ
+    Η ομιλία μεταγράφεται στο Mac σας και ο έλεγχος γίνεται από το Apple Intelligence στο Mac σας. Η φωνή και το κείμενό σας δεν το εγκαταλείπουν ποτέ. Χωρίς λογαριασμό, χωρίς συνδρομή.
+
+    ΛΕΙΤΟΥΡΓΕΙ ΕΚΤΟΣ ΣΥΝΔΕΣΗΣ
+    Σε αεροπλάνο ή τρένο χωρίς σήμα, το Dictate συνεχίζει να γράφει.
+
+    25 ΓΛΩΣΣΕΣ ΚΑΙ ΤΟ ΛΕΞΙΛΟΓΙΟ ΣΑΣ
+    Επιλέξτε τη γλώσσα υπαγόρευσης και προσθέστε τις δικές σας λέξεις: ονόματα, ορολογία, ονόματα προϊόντων.
+
+    ΔΙΑΚΡΙΤΙΚΟ
+    Μια μικρή κάψουλα στο κάτω μέρος της οθόνης δείχνει ότι το Dictate ακούει, μετά δουλεύει και ύστερα σβήνει.
+
+    Απαιτεί Mac με Apple silicon. Δωρεάν και ανοιχτού κώδικα, από την Polyforms.
+hr:
+  name: "Dictate: govor u tekst"
+  subtitle: "Držite, govorite, gotovo"
+  keywords: "diktiranje,glas,govor,transkripcija,diktat,glasovni unos,izvan mreže,bilješke,pisanje,tipkovnica"
+  promotional: "Držite Option + razmaknicu, govorite, otpustite: čist tekst u međuspremniku, spreman za lijepljenje. Besplatno, privatno, radi izvan mreže."
+  whats_new: |
+    Novo
+    • Sučelje sada govori 25 jezika, prema jeziku vašeg Maca
+    • Emojiji glasom: recite „emoji raketa” i 🚀 se pojavi u tekstu
+    • Drugi prečac: Control + Option + razmaknica
+    • Postavke → Općenito: isključite izvještaje o greškama
+
+    Poboljšanja
+    • Uz AirPods se prve riječi više ne gube
+    • Zaglavljena transkripcija više ne blokira sljedeće diktate
+    • Pregled koji odstupa od onoga što ste rekli odbacuje se: ostaju vaše riječi
+  description: |
+    Držite Option + razmaknicu, govorite, otpustite: vaše riječi stižu u međuspremnik, čiste i spremne za lijepljenje s Command-V.
+
+    Dictate je diktiranje na pritisak prečaca za Mac. Zalijepite tekst u bilo koju aplikaciju: Mail, Poruke, Bilješke, Slack, svoj uređivač koda, Terminal.
+
+    ČIST TEKST, A NE NEOBRAĐENI TRANSKRIPT
+    Oklijevanja, ponavljanja i pogrešni počeci nestaju, interpunkcija i velika slova se ispravljaju, kao i pogrešno čuti izrazi. Vaše riječi i smisao ostaju onakvi kakve ste izgovorili.
+
+    PRILAGOĐAVA SE KONTEKSTU
+    Malo uglađenije u e-pošti, izravno u chatu, tehnički u uređivaču koda.
+
+    PRIVATNO OD TEMELJA
+    Govor se transkribira na vašem Macu, a pregled obavlja Apple Intelligence na vašem Macu. Vaš glas i vaš tekst nikad ga ne napuštaju. Bez računa, bez pretplate.
+
+    RADI IZVAN MREŽE
+    U avionu ili vlaku bez signala Dictate i dalje piše.
+
+    25 JEZIKA I VAŠ VOKABULAR
+    Odaberite jezik diktiranja i dodajte vlastite riječi: imena, žargon, nazive proizvoda.
+
+    DISKRETNO
+    Mala kapsula pri dnu zaslona pokazuje da Dictate sluša, zatim radi, a potom nestaje.
+
+    Zahtijeva Mac s Appleovim čipom. Besplatno i otvorenog koda, izradio Polyforms.
+sl-SI:
+  name: "Dictate: govor v besedilo"
+  subtitle: "Držite, govorite, končano"
+  keywords: "narekovanje,glas,govor,prepis,narek,glasovni vnos,brez povezave,zapiski,pisanje,tipkovnica"
+  promotional: "Držite Option + preslednico, govorite, spustite: čisto besedilo v odložišču, pripravljeno za lepljenje. Brezplačno, zasebno, deluje brez povezave."
+  whats_new: |
+    Novo
+    • Vmesnik zdaj govori 25 jezikov, glede na jezik vašega Maca
+    • Emojiji z glasom: recite »emoji raketa« in 🚀 se pojavi v besedilu
+    • Druga bližnjica: Control + Option + preslednica
+    • Nastavitve → Splošno: izklopite poročila o napakah
+
+    Izboljšave
+    • Z AirPods se prve besede ne izgubijo več
+    • Zataknjen prepis ne blokira več naslednjih narekov
+    • Pregled, ki se oddalji od tega, kar ste rekli, se zavrže: ostanejo vaše besede
+  description: |
+    Držite Option + preslednico, govorite, spustite: vaše besede pristanejo v odložišču, čiste in pripravljene za lepljenje s Command-V.
+
+    Dictate je narekovanje s pritiskom bližnjice za Mac. Besedilo prilepite v katero koli aplikacijo: Mail, Sporočila, Zapiski, Slack, vaš urejevalnik kode, Terminal.
+
+    ČISTO BESEDILO, NE SUROV PREPIS
+    Obotavljanja, ponovitve in napačni začetki izginejo, ločila in velike začetnice se popravijo, napačno slišani izrazi prav tako. Vaše besede in pomen ostanejo takšni, kot ste jih izrekli.
+
+    PRILAGODI SE KONTEKSTU
+    Nekoliko bolj izpiljeno v e-pošti, neposredno v klepetu, strokovno v urejevalniku kode.
+
+    ZASEBNO PO ZASNOVI
+    Govor se prepiše na vašem Macu, pregled pa opravi Apple Intelligence na vašem Macu. Vaš glas in besedilo ga nikoli ne zapustita. Brez računa, brez naročnine.
+
+    DELUJE BREZ POVEZAVE
+    Na letalu ali vlaku brez signala Dictate še vedno piše.
+
+    25 JEZIKOV IN VAŠE BESEDIŠČE
+    Izberite jezik narekovanja in dodajte svoje besede: imena, žargon, imena izdelkov.
+
+    DISKRETNO
+    Majhna kapsula na dnu zaslona pokaže, da Dictate posluša, nato dela, in potem izgine.
+
+    Zahteva Mac z Applovim čipom. Brezplačno in odprtokodno, izdelal Polyforms.

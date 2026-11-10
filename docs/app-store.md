@@ -68,9 +68,9 @@ fastlane `deliver` lane (as in the book project) with `submit_for_review` and
 The app record is "Dictate: Speech to Text" (`com.polyforms.dictate`, SKU
 `polyforms-dictate-macos`, Apple ID 6823997461), created on 2026-10-17.
 
-`scripts/app-store/listing.rb` sets, and can set again, the English and French
-listing (name, subtitle, description, keywords, promotional text, support,
-marketing and privacy URLs), the categories (Productivity, Utilities), the age
+`scripts/app-store/listing.rb` sets, and can set again, the listing in every
+locale of `scripts/app-store/listing.yml` (name, subtitle, description,
+keywords, promotional text, what's new, support, marketing and privacy URLs), the categories (Productivity, Utilities), the age
 rating, the copyright, the free price and the availability in every
 territory. The release workflow runs `scripts/app-store/version.rb` before each
 upload so the App Store version carries the tag's number.

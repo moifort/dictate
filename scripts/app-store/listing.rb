@@ -1,89 +1,37 @@
 # Fills the Mac App Store listing of Dictate through the App Store Connect API:
-# names, subtitle, description, keywords, URLs, categories, age rating,
-# copyright, free price in every territory. Safe to run again: it only
-# overwrites what is written here.
+# names, subtitle, description, keywords, what's new, URLs, categories, age
+# rating, copyright, free price in every territory, in every locale of
+# listing.yml. Safe to run again: it only overwrites what is written here.
 #
 #   ASC_KEY_ID=… ASC_ISSUER_ID=… ruby scripts/app-store/listing.rb
 #
 # The App Privacy answers and the screenshots have no public API: they are set
 # once in App Store Connect (docs/app-store.md).
 require_relative "asc"
+require "yaml"
 
 BUNDLE_ID = ASC::BUNDLE_ID
 SITE = "https://dictate.polyforms.co/"
 SUPPORT = "https://github.com/moifort/dictate/issues"
 
-LISTING = {
-  "en-US" => {
-    name: "Dictate: Speech to Text",
-    subtitle: "Push-to-talk dictation",
-    keywords: "dictation,voice,speech,transcribe,voice typing,talk,push to talk,offline,notes,writing",
-    promotional: "Hold Option + Space, speak, release: clean text on your clipboard, ready to paste anywhere. Free, private, works offline.",
-    description: <<~TEXT
-      Hold Option + Space, speak, release: your words land on the clipboard, clean and ready to paste with Command-V.
-
-      Dictate is push-to-talk dictation for the Mac. Paste the text into any app: Mail, Messages, Notes, Slack, your code editor, the Terminal.
-
-      CLEAN TEXT, NOT A RAW TRANSCRIPT
-      Hesitations, repetitions and false starts are removed, punctuation and capitals are fixed, misheard terms are corrected. Your words and meaning stay as you said them.
-
-      ADAPTS TO WHERE YOU ARE
-      A bit more polished in an email, direct in a chat, technical in a code editor.
-
-      PRIVATE BY DESIGN
-      Speech is transcribed on your Mac, and the cleanup is done by Apple Intelligence on your Mac. Your voice and your text never leave it. No account, no subscription.
-
-      WORKS OFFLINE
-      On a plane or a train with no signal, Dictate still writes.
-
-      25 LANGUAGES AND YOUR VOCABULARY
-      Pick the dictation language and add your own words: names, jargon, product names.
-
-      DISCREET
-      A small pill at the bottom of the screen shows that Dictate is listening, then working, then fades away.
-
-      Requires a Mac with Apple silicon. Free and open source, made by Polyforms.
-    TEXT
-  },
-  "fr-FR" => {
-    name: "Dictate : dictée vocale",
-    subtitle: "Maintenez, parlez, c'est écrit",
-    keywords: "dictée,voix,vocale,transcription,parole,saisie vocale,hors ligne,notes,clavier,écrire",
-    promotional: "Maintenez Option + Espace, parlez, relâchez : un texte propre dans le presse-papiers, prêt à coller. Gratuit, privé, hors ligne.",
-    description: <<~TEXT
-      Maintenez Option + Espace, parlez, relâchez : vos mots arrivent dans le presse-papiers, propres et prêts à coller avec Commande-V.
-
-      Dictate est une dictée vocale à la demande pour Mac. Collez le texte dans n'importe quelle app : Mail, Messages, Notes, Slack, votre éditeur de code, le Terminal.
-
-      UN TEXTE PROPRE, PAS UNE TRANSCRIPTION BRUTE
-      Les hésitations, répétitions et faux départs disparaissent, la ponctuation et les majuscules sont corrigées, les termes mal entendus aussi. Vos mots et votre sens restent les vôtres.
-
-      S'ADAPTE AU CONTEXTE
-      Un peu plus soigné dans un mail, direct dans une discussion, technique dans un éditeur de code.
-
-      PRIVÉ PAR CONCEPTION
-      La voix est transcrite sur votre Mac, et la relecture est faite par Apple Intelligence sur votre Mac. Votre voix et votre texte n'en sortent jamais. Aucun compte, aucun abonnement.
-
-      FONCTIONNE HORS LIGNE
-      Dans un avion ou un train sans réseau, Dictate écrit toujours.
-
-      25 LANGUES ET VOTRE VOCABULAIRE
-      Choisissez la langue de dictée et ajoutez vos propres mots : noms, jargon, noms de produits.
-
-      DISCRET
-      Une petite pastille en bas de l'écran montre que Dictate écoute, puis travaille, puis s'efface.
-
-      Nécessite un Mac avec puce Apple. Gratuit et open source, conçu par Polyforms.
-    TEXT
-  }
-}.freeze
+# Texts per App Store locale: listing.yml.
+LISTING = YAML.safe_load(File.read(File.join(__dir__, "listing.yml")), symbolize_names: true)
+  .to_h { |locale, text| [locale.to_s, text.transform_values(&:strip)] }.freeze
+LIMITS = { name: 30, subtitle: 30, keywords: 100, promotional: 170, description: 4000, whats_new: 4000 }.freeze
+LISTING.each do |locale, text|
+  LIMITS.each do |field, limit|
+    length = text.fetch(field).length
+    abort("#{locale}: #{field} is #{length} characters, over #{limit}") if length > limit
+  end
+end
 
 app = ASC.get("/v1/apps?filter[bundleId]=#{BUNDLE_ID}")["data"].first or abort("No app for #{BUNDLE_ID} in App Store Connect")
 app_id = app["id"]
 info = ASC.get("/v1/apps/#{app_id}/appInfos")["data"].find { |i| i["attributes"]["state"] != "READY_FOR_DISTRIBUTION" }
-version = ASC.get("/v1/apps/#{app_id}/appStoreVersions?filter[platform]=MAC_OS")["data"]
-  .find { |v| %w[PREPARE_FOR_SUBMISSION DEVELOPER_REJECTED REJECTED METADATA_REJECTED].include?(v["attributes"]["appStoreState"]) }
+versions = ASC.get("/v1/apps/#{app_id}/appStoreVersions?filter[platform]=MAC_OS")["data"]
+version = versions.find { |v| %w[PREPARE_FOR_SUBMISSION DEVELOPER_REJECTED REJECTED METADATA_REJECTED].include?(v["attributes"]["appStoreState"]) }
 abort("No editable macOS version") unless info && version
+update = versions.any? { |v| v["attributes"]["appStoreState"] == "READY_FOR_SALE" }
 puts "App #{app_id}, info #{info['id']}, version #{version['attributes']['versionString']} (#{version['id']})"
 
 # Dictate shows no third-party content: the speech model is not content.
@@ -128,8 +76,10 @@ LISTING.each do |locale, text|
 
   # Adding a locale to the app info adds it to the version too: read them now.
   version_locs = ASC.get("/v1/appStoreVersions/#{version['id']}/appStoreVersionLocalizations")["data"]
-  version_attributes = { description: text[:description].strip, keywords: text[:keywords], promotionalText: text[:promotional],
+  version_attributes = { description: text[:description], keywords: text[:keywords], promotionalText: text[:promotional],
                          supportUrl: SUPPORT, marketingUrl: SITE }
+  # The first version of an app has no "What's New": App Store Connect refuses the field.
+  version_attributes[:whatsNew] = text[:whats_new] if update
   if (existing = version_locs.find { |l| l["attributes"]["locale"] == locale })
     ASC.request(:patch, "/v1/appStoreVersionLocalizations/#{existing['id']}", { data: { type: "appStoreVersionLocalizations", id: existing["id"], attributes: version_attributes } })
   else
