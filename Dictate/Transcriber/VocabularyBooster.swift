@@ -19,6 +19,9 @@ final class VocabularyBooster {
     @ObservationIgnored private(set) var lastDuration: Duration?
     @ObservationIgnored let modelFolder: URL
     @ObservationIgnored private let engine: any VocabularyRescoring
+    /// Whether the model should be in memory: the last of `load()` and
+    /// `unload()` wins, even when it came while the other was under way.
+    @ObservationIgnored private var wanted = false
 
     init(modelDirectory: URL = ModelStorage.defaultDirectory) {
         modelFolder = Self.modelFolder(in: modelDirectory)
@@ -41,8 +44,21 @@ final class VocabularyBooster {
 
     var isModelDownloaded: Bool { engine.isModelDownloaded }
 
+    /// Loads the model when `enabled`, frees it otherwise. Synchronous, so
+    /// that calls made in a row take effect in that order.
+    func setEnabled(_ enabled: Bool) {
+        wanted = enabled
+        // What is wanted when the task runs, whatever order the tasks run in.
+        Task { wanted ? await bringIn() : await unload() }
+    }
+
     /// Downloads the model the first time, about 100 MB, then loads it.
     func load() async {
+        wanted = true
+        await bringIn()
+    }
+
+    private func bringIn() async {
         guard !state.isBusy, state != .ready else { return }
         state = .loading
         do {
@@ -58,13 +74,21 @@ final class VocabularyBooster {
             ErrorReporter.capture(error, "vocabulary boosting model failed to load", category: "transcriber")
             state = .failed(error.localizedDescription)
         }
+        // Turned off while it loaded: the unload left it to this load.
+        if !wanted { await release() }
     }
 
-    /// Frees the model once the setting is turned off.
+    /// Frees the model once the setting is turned off. During a load, the
+    /// load frees it as soon as it ends.
     func unload() async {
+        wanted = false
         guard state == .ready || state.isFailed else { return }
-        await engine.unload()
+        await release()
+    }
+
+    private func release() async {
         state = .notLoaded
+        await engine.unload()
     }
 
     /// The transcript rescored against `vocabulary`, or unchanged when there

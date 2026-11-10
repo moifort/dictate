@@ -390,11 +390,7 @@ final class AppModel {
     /// it is wanted, and frees it once it is not: about 130 MB in memory.
     func vocabularyBoostingChanged() {
         reportSettings()
-        if settings.boostedVocabulary.isEmpty {
-            Task { await booster.unload() }
-        } else {
-            Task { await booster.load() }
-        }
+        booster.setEnabled(!settings.boostedVocabulary.isEmpty)
     }
 
     func retryBooster() {

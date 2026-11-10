@@ -119,6 +119,33 @@ struct VocabularyBoosterTests {
         #expect(booster.state == .notLoaded)
     }
 
+    /// Turned off while the model loads: it is freed as soon as the load ends.
+    @Test func turningOffDuringTheLoadFreesTheModel() async throws {
+        let engine = FakeRescorer(result: .success(nil), loadDelay: .milliseconds(200))
+        let booster = VocabularyBooster(engine: engine, modelFolder: URL(filePath: "/tmp/none"))
+        booster.setEnabled(true)
+        try await Task.sleep(for: .milliseconds(50))
+        #expect(booster.state.isBusy)
+        booster.setEnabled(false)
+        for _ in 0..<100 {
+            if booster.state == .notLoaded, await engine.unloaded { break }
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        #expect(booster.state == .notLoaded)
+        #expect(await engine.unloaded)
+    }
+
+    /// On, off, on in a row: the last one wins.
+    @Test func theLastChoiceWins() async throws {
+        let engine = FakeRescorer(result: .success(nil), loadDelay: .milliseconds(100))
+        let booster = VocabularyBooster(engine: engine, modelFolder: URL(filePath: "/tmp/none"))
+        booster.setEnabled(true)
+        booster.setEnabled(false)
+        booster.setEnabled(true)
+        for _ in 0..<100 where booster.state != .ready { try await Task.sleep(for: .milliseconds(20)) }
+        #expect(booster.state == .ready)
+    }
+
     @Test func modelLivesNextToParakeet() {
         let base = URL(filePath: "/tmp/Models", directoryHint: .isDirectory)
         #expect(VocabularyBooster.modelFolder(in: base).deletingLastPathComponent().path == base.path)
@@ -131,20 +158,25 @@ private struct FakeError: Error {}
 private actor FakeRescorer: VocabularyRescoring {
     let result: Result<String?, FakeError>
     let loadError: FakeError?
+    let loadDelay: Duration
     private(set) var vocabularies: [[String]] = []
+    private(set) var unloaded = false
 
-    init(result: Result<String?, FakeError>, loadError: FakeError? = nil) {
+    init(result: Result<String?, FakeError>, loadError: FakeError? = nil, loadDelay: Duration = .zero) {
         self.result = result
         self.loadError = loadError
+        self.loadDelay = loadDelay
     }
 
     nonisolated var isModelDownloaded: Bool { true }
 
     func load(progress: @escaping @Sendable (Double) -> Void) async throws {
+        unloaded = false
+        try? await Task.sleep(for: loadDelay)
         if let loadError { throw loadError }
     }
 
-    func unload() async {}
+    func unload() async { unloaded = true }
 
     func rescore(text: String, tokenTimings: [TokenTiming], samples: [Float], vocabulary: [String]) async throws -> String? {
         vocabularies.append(vocabulary)
