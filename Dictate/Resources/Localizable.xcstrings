@@ -689,22 +689,6 @@
         }
       }
     },
-    "Apple Intelligence s'est écarté de la dictée : texte brut inséré.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Apple Intelligence strayed from the dictation: raw text inserted."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Apple Intelligence s'est écarté de la dictée : texte brut inséré."
-          }
-        }
-      }
-    },
     "Application :": {
       "localizations": {
         "en": {

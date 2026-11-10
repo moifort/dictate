@@ -21,7 +21,6 @@ nonisolated enum ReviewFailure: Equatable, Sendable {
         case let error as ClaudeCLIError where error.isUsageLimit: self = .rateLimited
         case let error as APIReviewError where error.isKeyProblem: self = .disconnected
         case let error as APIReviewError where error.isRateLimited: self = .rateLimited
-        case AppleIntelligenceError.diverged: self = .diverged
         default: self = .other
         }
     }

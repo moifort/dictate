@@ -32,7 +32,6 @@ struct ReviewFailureTests {
         #expect(ReviewFailure(APIReviewError.invalidKey(.openAI)) == .disconnected)
         #expect(ReviewFailure(APIReviewError.missingKey(.gemini)) == .disconnected)
         #expect(ReviewFailure(APIReviewError.rateLimited(.anthropic)) == .rateLimited)
-        #expect(ReviewFailure(AppleIntelligenceError.diverged) == .diverged)
         #expect(ReviewFailure(URLError(.timedOut)) == .other)
     }
 }

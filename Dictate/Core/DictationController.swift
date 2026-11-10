@@ -69,6 +69,9 @@ final class DictationController {
     /// The engine whose model is not in memory yet, nil once dictation can start.
     @ObservationIgnored private let loadingEngine: () -> TranscriptionEngine?
     @ObservationIgnored private let enhancementTimeout: Duration
+    /// Whether a reply left the dictation: `ReviewGuard.diverges`, injected so
+    /// tests can use replies of any shape.
+    @ObservationIgnored private let diverges: (_ reply: String, _ transcript: String) -> Bool
     /// How long a transcription may take, on top of half the audio's length:
     /// a stuck engine call must not hold every later dictation.
     @ObservationIgnored private let transcriptionTimeout: Duration
@@ -147,6 +150,7 @@ final class DictationController {
         transcriptionEngine: @escaping () -> TranscriptionEngine = { .parakeet },
         loadingEngine: @escaping () -> TranscriptionEngine? = { nil },
         enhancementTimeout: Duration = .seconds(8),
+        diverges: @escaping (_ reply: String, _ transcript: String) -> Bool = ReviewGuard.diverges,
         transcriptionTimeout: Duration = .seconds(30),
         releaseTail: Duration = defaultReleaseTail,
         maximumRecording: Duration = defaultMaximumRecording,
@@ -163,6 +167,7 @@ final class DictationController {
         self.transcriptionEngine = transcriptionEngine
         self.loadingEngine = loadingEngine
         self.enhancementTimeout = enhancementTimeout
+        self.diverges = diverges
         self.transcriptionTimeout = transcriptionTimeout
         self.releaseTail = releaseTail
         self.maximumRecording = maximumRecording
@@ -410,8 +415,10 @@ final class DictationController {
             let observer = keep || follow ? insertionObserver : nil
             // Read before the paste: Cmd+V lands some time after it is posted.
             let watch = await observer?.watchFocusedField()
-            // The app in front now, not at the press: the text lands here.
-            let submit = AutoSend.applies(to: focus.frontmostBundleID(), in: autoSendApps())
+            // The app in front now, not at the press: the text lands here. A
+            // raw text is never sent: its review failed or was rejected, and
+            // the user should read it first.
+            let submit = !raw && AutoSend.applies(to: focus.frontmostBundleID(), in: autoSendApps())
             await inserter.paste(text, submit: submit)
             outcome = .pasted(raw: raw)
             // A single read later on, shared by every consumer.
@@ -472,6 +479,14 @@ final class DictationController {
         do {
             var review = try await work.value
             review.text = review.text.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !diverges(review.text, transcript.text) else {
+                // The guard doing its job: a reply that answered the field or
+                // followed something written in it. Never typed, never sent.
+                let name = review.reviewer?.rawValue ?? "reviewer"
+                Log.dictation.notice("\(name, privacy: .public) reply left the dictation, raw transcript inserted")
+                ErrorReporter.breadcrumb("\(name) reply diverged", category: "enhancer")
+                return nil
+            }
             return review
         } catch is CancellationError {
             // The cutoff doing its job: the raw transcript goes in and the
@@ -490,11 +505,6 @@ final class DictationController {
             // Only the user can sign in again, and the indicator tells them.
             Log.dictation.notice("claude signed out, raw transcript inserted: \(error.localizedDescription, privacy: .public)")
             ErrorReporter.breadcrumb("claude signed out", category: "enhancer")
-            return nil
-        } catch AppleIntelligenceError.diverged {
-            // The guard doing its job on the small model's known misses.
-            Log.dictation.notice("apple intelligence reply left the dictation, raw transcript inserted")
-            ErrorReporter.breadcrumb("apple intelligence reply diverged", category: "enhancer")
             return nil
         } catch {
             Log.dictation.error("enhancement failed: \(error.localizedDescription, privacy: .public)")
