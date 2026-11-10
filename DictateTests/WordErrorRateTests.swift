@@ -49,3 +49,29 @@ struct WordErrorRateTests {
         #expect(total.rate == 0.3)
     }
 }
+
+struct SequenceAlignmentTests {
+    @Test func theCommonSubsequenceKeepsTheOrder() {
+        let pairs = SequenceAlignment.commonSubsequence(["a", "b", "c", "d"], ["a", "x", "c", "d"])
+        #expect(pairs.map(\.0) == [0, 2, 3])
+        #expect(pairs.map(\.1) == [0, 2, 3])
+        #expect(SequenceAlignment.commonSubsequence([String](), ["a"]).isEmpty)
+    }
+
+    @Test func theEditDistanceCountsEveryEdit() {
+        #expect(SequenceAlignment.editDistance(Array("kitten"), Array("sitting")) == 3)
+        #expect(SequenceAlignment.editDistance(["a", "b"], []) == 2)
+        #expect(SequenceAlignment.editDistance([Int](), [1, 2, 3]) == 3)
+    }
+
+    @Test func durationsReadInMillisecondsAndSeconds() {
+        #expect(Duration.milliseconds(1_234).milliseconds == 1_234)
+        #expect(Duration.milliseconds(1_500).timeInterval == 1.5)
+    }
+
+    /// The newest bundled CLI is found by comparing versions as numbers.
+    @Test func versionsCompareAsNumbers() {
+        #expect(Version("2.1.10") > Version("2.1.9"))
+        #expect(!(Version("2.1") < Version("2.1.0")))
+    }
+}

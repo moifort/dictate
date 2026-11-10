@@ -24,7 +24,7 @@ nonisolated struct ClaudeCLILocator: Sendable {
         let root = home.appending(path: "Library/Application Support/Claude/claude-code")
         let fileManager = FileManager.default
         let versions = (try? fileManager.contentsOfDirectory(atPath: root.path)) ?? []
-        for version in versions.sorted(by: { Self.isNewer($0, than: $1) }) {
+        for version in versions.sorted { Version($1) < Version($0) } {
             let versionURL = root.appending(path: version)
             let builds = (try? fileManager.contentsOfDirectory(atPath: versionURL.path)) ?? []
             for build in builds {
@@ -84,16 +84,5 @@ nonisolated struct ClaudeCLILocator: Sendable {
 
     private func isExecutable(_ url: URL) -> Bool {
         FileManager.default.isExecutableFile(atPath: url.path)
-    }
-
-    static func isNewer(_ lhs: String, than rhs: String) -> Bool {
-        let left = lhs.split(separator: ".").map { Int($0) ?? 0 }
-        let right = rhs.split(separator: ".").map { Int($0) ?? 0 }
-        for index in 0..<max(left.count, right.count) {
-            let l = index < left.count ? left[index] : 0
-            let r = index < right.count ? right[index] : 0
-            if l != r { return l > r }
-        }
-        return false
     }
 }

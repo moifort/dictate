@@ -196,7 +196,7 @@ final class DictationController {
                 let start = clock.now
                 do {
                     try await recorder.start()
-                    Log.dictation.info("microphone opened in \(Self.milliseconds(clock.now - start)) ms")
+                    Log.dictation.info("microphone opened in \((clock.now - start).milliseconds) ms")
                 } catch {
                     Log.dictation.error("microphone could not start: \(error.localizedDescription, privacy: .public)")
                     ErrorReporter.capture(error, "microphone could not start", category: "recorder")
@@ -286,7 +286,7 @@ final class DictationController {
     private func takeTail(of id: Int) -> [Float] {
         guard tailOwner == id else { return cutTails.removeValue(forKey: id) ?? [] }
         tailOwner = nil
-        Log.dictation.info("kept recording \(Self.milliseconds(self.timing.releaseTail)) ms after release")
+        Log.dictation.info("kept recording \(self.timing.releaseTail.milliseconds) ms after release")
         return recorder.stop()
     }
 
@@ -361,16 +361,16 @@ final class DictationController {
         let start = clock.now
         let outcome = await insert(review, of: transcript, samples: samples, dictation: dictation, context: context)
         let insertion = clock.now - start
-        Log.dictation.info("inserted in \(Self.milliseconds(insertion)) ms")
+        Log.dictation.info("inserted in \(insertion.milliseconds) ms")
         events.onRecord?(DictationRecord(
             date: .now,
             words: DictationRecord.wordCount(of: review.text),
             audio: Double(samples.count) / Double(AudioAnalysis.sampleRate),
             engine: Self.engine,
-            transcription: Self.seconds(transcription),
-            enhancement: review.duration.map(Self.seconds),
+            transcription: transcription.timeInterval,
+            enhancement: review.duration.map(\.timeInterval),
             reviewer: review.reviewer,
-            insertion: Self.seconds(insertion)
+            insertion: insertion.timeInterval
         ))
         complete(id, outcome)
     }
@@ -385,7 +385,7 @@ final class DictationController {
             var (transcript, elapsed) = try await transcribeInTurn(samples)
             transcript.text = transcript.text.trimmingCharacters(in: .whitespacesAndNewlines)
             let doubtful = transcript.words.count { $0.confidence < DoubtfulWords.threshold }
-            Log.dictation.info("transcribed \(audio, format: .fixed(precision: 1)) s of audio in \(Self.milliseconds(elapsed)) ms, \(doubtful) doubtful words")
+            Log.dictation.info("transcribed \(audio, format: .fixed(precision: 1)) s of audio in \(elapsed.milliseconds) ms, \(doubtful) doubtful words")
             return (transcript, elapsed)
         } catch is DeadlineExceeded {
             Log.dictation.error("transcription of \(audio, format: .fixed(precision: 1)) s of audio timed out")
@@ -442,7 +442,7 @@ final class DictationController {
         let elapsed = clock.now - start
         reviewed.duration = elapsed
         reviewed.reviewer = review?.reviewer ?? planned
-        Log.dictation.info("enhanced in \(Self.milliseconds(elapsed)) ms by \(reviewed.reviewer?.rawValue ?? "nobody", privacy: .public), raw: \(reviewed.raw)")
+        Log.dictation.info("enhanced in \(elapsed.milliseconds) ms by \(reviewed.reviewer?.rawValue ?? "nobody", privacy: .public), raw: \(reviewed.raw)")
         return reviewed
     }
 
@@ -486,14 +486,6 @@ final class DictationController {
             ))
         }
         return .pasted(raw: review.raw)
-    }
-
-    private static func milliseconds(_ elapsed: Duration) -> Int {
-        Int(elapsed.components.seconds * 1_000) + Int(elapsed.components.attoseconds / 1_000_000_000_000_000)
-    }
-
-    private static func seconds(_ elapsed: Duration) -> TimeInterval {
-        Double(elapsed.components.seconds) + Double(elapsed.components.attoseconds) / 1e18
     }
 
     private func enhanceWithTimeout(_ transcript: Transcription, context: DictationContext) async -> Review? {

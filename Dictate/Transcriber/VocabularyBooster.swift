@@ -117,7 +117,7 @@ final class VocabularyBooster {
             lastDuration = elapsed
             let replaced = VocabularyBoost.replacedWordCount(from: transcription, to: boosted)
             // Counts only: the words are the user's.
-            Log.dictation.info("vocabulary boosting took \(Self.milliseconds(elapsed)) ms, \(replaced) words replaced")
+            Log.dictation.info("vocabulary boosting took \(elapsed.milliseconds) ms, \(replaced) words replaced")
             return boosted
         } catch {
             Log.dictation.error("vocabulary boosting failed: \(error.localizedDescription, privacy: .public)")
@@ -190,7 +190,7 @@ nonisolated enum VocabularyBoost {
             words += texts.map { Transcription.Word(text: $0, confidence: replacedConfidence) }
         }
 
-        let common = longestCommonSubsequence(old.map(\.text), new)
+        let common = SequenceAlignment.commonSubsequence(old.map(\.text), new)
         for (keptOld, keptNew) in common {
             replacedOld += old[oldIndex..<keptOld]
             replacedNew += new[newIndex..<keptNew]
@@ -212,33 +212,7 @@ nonisolated enum VocabularyBoost {
 
     /// Words of `boosted` that are not in `original`, for the log.
     static func replacedWordCount(from original: Transcription, to boosted: Transcription) -> Int {
-        boosted.words.count - longestCommonSubsequence(original.words.map(\.text), boosted.words.map(\.text)).count
-    }
-
-    /// Index pairs of the words both sequences share, in order.
-    static func longestCommonSubsequence(_ a: [String], _ b: [String]) -> [(Int, Int)] {
-        guard !a.isEmpty, !b.isEmpty else { return [] }
-        var lengths = [[Int]](repeating: [Int](repeating: 0, count: b.count + 1), count: a.count + 1)
-        for i in stride(from: a.count - 1, through: 0, by: -1) {
-            for j in stride(from: b.count - 1, through: 0, by: -1) {
-                lengths[i][j] = a[i] == b[j] ? lengths[i + 1][j + 1] + 1 : max(lengths[i + 1][j], lengths[i][j + 1])
-            }
-        }
-        var pairs: [(Int, Int)] = []
-        var i = 0
-        var j = 0
-        while i < a.count, j < b.count {
-            if a[i] == b[j] {
-                pairs.append((i, j))
-                i += 1
-                j += 1
-            } else if lengths[i + 1][j] >= lengths[i][j + 1] {
-                i += 1
-            } else {
-                j += 1
-            }
-        }
-        return pairs
+        boosted.words.count - SequenceAlignment.commonSubsequence(original.words.map(\.text), boosted.words.map(\.text)).count
     }
 
     private static func trailingPunctuation(of word: String, missingFrom replacement: String) -> String {

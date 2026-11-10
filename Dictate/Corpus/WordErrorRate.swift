@@ -33,7 +33,7 @@ nonisolated enum WordErrorRate {
     static func count(reference: String, hypothesis: String, normalization: Normalization = .standard) -> Count {
         let reference = words(in: reference, normalization: normalization)
         let hypothesis = words(in: hypothesis, normalization: normalization)
-        return Count(errors: editDistance(reference, hypothesis), referenceWords: reference.count)
+        return Count(errors: SequenceAlignment.editDistance(reference, hypothesis), referenceWords: reference.count)
     }
 
     static func rate(reference: String, hypothesis: String, normalization: Normalization = .standard) -> Double? {
@@ -51,22 +51,5 @@ nonisolated enum WordErrorRate {
             })
         }
         return text.split(whereSeparator: \.isWhitespace).map(String.init)
-    }
-
-    /// Levenshtein distance over words, every edit costing one.
-    static func editDistance(_ reference: [String], _ hypothesis: [String]) -> Int {
-        guard !reference.isEmpty else { return hypothesis.count }
-        guard !hypothesis.isEmpty else { return reference.count }
-        var previous = Array(0...hypothesis.count)
-        var current = [Int](repeating: 0, count: hypothesis.count + 1)
-        for i in 1...reference.count {
-            current[0] = i
-            for j in 1...hypothesis.count {
-                let substitution = previous[j - 1] + (reference[i - 1] == hypothesis[j - 1] ? 0 : 1)
-                current[j] = min(substitution, previous[j] + 1, current[j - 1] + 1)
-            }
-            swap(&previous, &current)
-        }
-        return previous[hypothesis.count]
     }
 }

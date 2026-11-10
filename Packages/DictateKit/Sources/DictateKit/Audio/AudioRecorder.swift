@@ -70,8 +70,7 @@ public final class AudioRecorder {
         let clock = ContinuousClock()
         let opened = clock.now
         let heard = await started.tap.waitForSignal(within: Self.signalTimeout)
-        let waited = (clock.now - opened).components
-        let milliseconds = waited.seconds * 1_000 + waited.attoseconds / 1_000_000_000_000_000
+        let milliseconds = (clock.now - opened).milliseconds
         if heard {
             Log.dictation.info("microphone delivered sound \(milliseconds) ms after opening")
         } else {

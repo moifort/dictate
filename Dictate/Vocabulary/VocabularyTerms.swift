@@ -143,7 +143,7 @@ nonisolated enum CorrectedTerms {
         guard !old.isEmpty, !new.isEmpty, old.count <= maxWords, new.count <= maxWords else { return [] }
 
         let oldKeys = old.map(\.key), newKeys = new.map(\.key)
-        let table = lcsTable(oldKeys, newKeys)
+        let table = SequenceAlignment.commonSubsequenceTable(oldKeys, newKeys)
         let unmatched = old.count - table[0][0]
         // A rewrite of most of the text says nothing about any single word.
         guard unmatched <= max(3, old.count / 2) else { return [] }
@@ -154,7 +154,7 @@ nonisolated enum CorrectedTerms {
             guard !wrong.isEmpty, !right.isEmpty, wrong.count <= maxWrongWords, right.count <= maxRightWords,
                   right.contains(where: TermTokenizer.looksLikeTerm) else { return nil }
             let wrongKey = wrong.map(\.key).joined(), rightKey = right.map(\.key).joined()
-            let distance = editDistance(Array(wrongKey), Array(rightKey))
+            let distance = SequenceAlignment.editDistance(Array(wrongKey), Array(rightKey))
             guard Double(distance) <= maxDistanceRatio * Double(max(wrongKey.count, rightKey.count)) else { return nil }
             return TermCorrection(
                 wrong: wrong.map(\.text).joined(separator: " "),
@@ -211,31 +211,6 @@ nonisolated enum CorrectedTerms {
         j = b.count
         close()
         return hunks
-    }
-
-    /// `table[i][j]`: length of the longest common subsequence of `a[i...]` and `b[j...]`.
-    private static func lcsTable(_ a: [String], _ b: [String]) -> [[Int]] {
-        var table = Array(repeating: Array(repeating: 0, count: b.count + 1), count: a.count + 1)
-        for i in stride(from: a.count - 1, through: 0, by: -1) {
-            for j in stride(from: b.count - 1, through: 0, by: -1) {
-                table[i][j] = a[i] == b[j] ? table[i + 1][j + 1] + 1 : max(table[i + 1][j], table[i][j + 1])
-            }
-        }
-        return table
-    }
-
-    static func editDistance(_ a: [Character], _ b: [Character]) -> Int {
-        guard !a.isEmpty else { return b.count }
-        guard !b.isEmpty else { return a.count }
-        var previous = Array(0...b.count)
-        for i in 1...a.count {
-            var current = [i] + Array(repeating: 0, count: b.count)
-            for j in 1...b.count {
-                current[j] = min(previous[j] + 1, current[j - 1] + 1, previous[j - 1] + (a[i - 1] == b[j - 1] ? 0 : 1))
-            }
-            previous = current
-        }
-        return previous[b.count]
     }
 }
 
