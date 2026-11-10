@@ -173,18 +173,37 @@ final class Updater {
     /// passes, from a request GitHub refuses, which does not.
     nonisolated struct ServerError: LocalizedError {
         let statusCode: Int
+        /// GitHub's rate limit for anonymous requests is spent until it resets:
+        /// 429, or 403 with no request left.
+        var isRateLimited = false
+
+        init(statusCode: Int, isRateLimited: Bool = false) {
+            self.statusCode = statusCode
+            self.isRateLimited = isRateLimited
+        }
+
+        /// Reads the status and, for a refusal, GitHub's rate limit headers.
+        init(_ response: HTTPURLResponse) {
+            let remaining = response.value(forHTTPHeaderField: "x-ratelimit-remaining")
+            self.init(
+                statusCode: response.statusCode,
+                isRateLimited: response.statusCode == 429 || (response.statusCode == 403 && remaining == "0")
+            )
+        }
+
         var errorDescription: String? {
             String(localized: "GitHub ne répond pas pour le moment (erreur \(statusCode)). Réessayez plus tard.")
         }
     }
 
     /// Whether `error` is a passing failure, on the way to GitHub or on its side: no
-    /// network, or a 5xx answer such as the 504 its releases API returns now and then.
-    /// Neither is anything the app could fix, so neither is reported to Sentry.
+    /// network, a 5xx answer such as the 504 its releases API returns now and then,
+    /// or its rate limit, shared by every app behind the same address. None is
+    /// anything the app could fix, so none is reported to Sentry.
     nonisolated static func isTransient(_ error: Error) -> Bool {
         if isOffline(error) { return true }
-        guard let status = (error as? ServerError)?.statusCode else { return false }
-        return 500..<600 ~= status
+        guard let error = error as? ServerError else { return false }
+        return error.isRateLimited || 500..<600 ~= error.statusCode
     }
 
     /// Whether `error` says the Mac cannot reach GitHub right now, as opposed to GitHub
@@ -293,8 +312,8 @@ final class Updater {
         var request = URLRequest(url: url)
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
         let (data, response) = try await URLSession.shared.data(for: request)
-        guard let status = (response as? HTTPURLResponse)?.statusCode else { throw URLError(.badServerResponse) }
-        guard 200..<300 ~= status else { throw ServerError(statusCode: status) }
+        guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+        guard 200..<300 ~= http.statusCode else { throw ServerError(http) }
         return data
     }
 
@@ -313,8 +332,8 @@ final class Updater {
         let destination = FileManager.default.temporaryDirectory.appending(path: "Dictate-\(UUID().uuidString).zip")
         do {
             // A 504 page saved as the zip used to fail later as "the archive could not be extracted".
-            guard let status = (response as? HTTPURLResponse)?.statusCode else { throw URLError(.badServerResponse) }
-            guard 200..<300 ~= status else { throw ServerError(statusCode: status) }
+            guard let http = response as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+            guard 200..<300 ~= http.statusCode else { throw ServerError(http) }
             // A connection that ends early leaves a truncated zip: say so, rather than fail extracting it.
             let total = response.expectedContentLength
             let size = try downloaded.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0

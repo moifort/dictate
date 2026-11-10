@@ -365,6 +365,17 @@ struct UpdaterOfflineTests {
     }
 
     /// A 4xx says the request itself is wrong, or the account blocked: worth hearing about.
+    /// GitHub's anonymous rate limit passes like an outage: nothing to report.
+    @Test func gitHubsRateLimitIsTransient() {
+        let headers = ["x-ratelimit-remaining": "0"]
+        let spent = HTTPURLResponse(url: URL(string: "https://api.github.com")!, statusCode: 403, httpVersion: nil, headerFields: headers)!
+        #expect(Updater.isTransient(Updater.ServerError(spent)))
+        let tooMany = HTTPURLResponse(url: URL(string: "https://api.github.com")!, statusCode: 429, httpVersion: nil, headerFields: [:])!
+        #expect(Updater.isTransient(Updater.ServerError(tooMany)))
+        let forbidden = HTTPURLResponse(url: URL(string: "https://api.github.com")!, statusCode: 403, httpVersion: nil, headerFields: ["x-ratelimit-remaining": "42"])!
+        #expect(!Updater.isTransient(Updater.ServerError(forbidden)))
+    }
+
     @Test func anUnexpectedAnswerIsNotTransient() {
         #expect(!Updater.isTransient(Updater.ServerError(statusCode: 404)))
         #expect(!Updater.isTransient(Updater.ServerError(statusCode: 403)))
