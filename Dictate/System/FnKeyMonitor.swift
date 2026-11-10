@@ -15,6 +15,7 @@ final class FnKeyMonitor {
     }
 
     private var gesture = FnKeyGesture()
+    private let watch = KeyStateWatch()
     private var tap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
 
@@ -43,6 +44,7 @@ final class FnKeyMonitor {
     }
 
     func stop() {
+        watch.stop()
         if let tap { CGEvent.tapEnable(tap: tap, enable: false) }
         if let runLoopSource { CFRunLoopRemoveSource(CFRunLoopGetMain(), runLoopSource, .commonModes) }
         tap = nil
@@ -53,6 +55,8 @@ final class FnKeyMonitor {
         switch type {
         case .tapDisabledByTimeout, .tapDisabledByUserInput:
             if let tap { CGEvent.tapEnable(tap: tap, enable: true) }
+            // The key may have gone up while the tap was off.
+            resync()
         default:
             guard let keyEvent = Self.classify(
                 key: key,
@@ -64,7 +68,18 @@ final class FnKeyMonitor {
             if let output = gesture.handle(keyEvent) {
                 onGesture?(output)
             }
+            watch.update(isHeld: gesture.isHeld) { [weak self] in self?.resync() }
         }
+    }
+
+    /// Releases a press whose key-up was missed.
+    private func resync() {
+        let time = ProcessInfo.processInfo.systemUptime
+        if let output = gesture.resync(keyIsDown: KeyStateWatch.isDown(key.flag), at: time) {
+            Log.hotkey.notice("key-up missed: \(String(describing: output), privacy: .public) from the key state")
+            onGesture?(output)
+        }
+        watch.update(isHeld: gesture.isHeld) { [weak self] in self?.resync() }
     }
 
     /// Maps a raw keyboard event to a push-to-talk gesture event.

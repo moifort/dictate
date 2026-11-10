@@ -92,6 +92,11 @@ final class DictationController {
     /// The engine is shared: transcriptions run one after the other.
     @ObservationIgnored private var transcribing: Task<Void, Never>?
     @ObservationIgnored private var starting: Task<Void, Never>?
+    /// Releases the recording once it reaches `maximumRecording`.
+    @ObservationIgnored private var recordingLimit: Task<Void, Never>?
+    /// Longest recording before it is released on its own: a key-up nobody
+    /// received must not leave the microphone open and the audio growing.
+    @ObservationIgnored private let maximumRecording: Duration
     /// A release or cancel that came while the microphone was still starting.
     @ObservationIgnored private var pendingGesture: FnKeyGestureOutput?
 
@@ -125,6 +130,8 @@ final class DictationController {
     /// tap hands audio over in buffers of ~85 ms at 48 kHz: a quarter of a second
     /// keeps that syllable without the user waiting noticeably longer for the text.
     static let defaultReleaseTail: Duration = .milliseconds(250)
+    /// Far longer than anyone dictates in one go: about 38 MB of audio.
+    static let defaultMaximumRecording: Duration = .seconds(10 * 60)
 
     init(
         recorder: AudioRecording,
@@ -140,6 +147,7 @@ final class DictationController {
         loadingEngine: @escaping () -> TranscriptionEngine? = { nil },
         enhancementTimeout: Duration = .seconds(8),
         releaseTail: Duration = defaultReleaseTail,
+        maximumRecording: Duration = defaultMaximumRecording,
         sleep: @escaping (Duration) async -> Void = { try? await Task.sleep(for: $0) }
     ) {
         self.recorder = recorder
@@ -155,6 +163,7 @@ final class DictationController {
         self.loadingEngine = loadingEngine
         self.enhancementTimeout = enhancementTimeout
         self.releaseTail = releaseTail
+        self.maximumRecording = maximumRecording
         self.sleep = sleep
     }
 
@@ -189,6 +198,7 @@ final class DictationController {
                     return finish(.failed(Self.microphoneFailure(error)))
                 }
                 capture = .recording
+                limitRecording()
                 if let gesture = pendingGesture {
                     pendingGesture = nil
                     handle(gesture)
@@ -198,6 +208,7 @@ final class DictationController {
         case .cancelled:
             if capture == .starting { pendingGesture = .cancelled; starting?.cancel(); return }
             guard capture == .recording else { return }
+            recordingLimit?.cancel()
             _ = recorder.stop()
             capture = .idle
 
@@ -206,6 +217,7 @@ final class DictationController {
             // profile: what was said meanwhile could not be heard anyway.
             if capture == .starting { pendingGesture = .released; starting?.cancel(); return }
             guard capture == .recording else { return }
+            recordingLimit?.cancel()
             // Read on release rather than press: Electron apps only build their
             // accessibility tree once asked, which happens on press. The read
             // can take the whole AX messaging timeout, so it runs during the
@@ -233,6 +245,19 @@ final class DictationController {
             }
             processing[id] = task
             lastReleased = task
+        }
+    }
+
+    /// Releases the recording just started once it reaches `maximumRecording`,
+    /// as if the key had come up: what was said is kept and inserted.
+    private func limitRecording() {
+        recordingLimit?.cancel()
+        recordingLimit = Task { [maximumRecording] in
+            try? await Task.sleep(for: maximumRecording)
+            guard !Task.isCancelled, capture == .recording else { return }
+            Log.dictation.notice("recording reached \(maximumRecording) without a release: released")
+            ErrorReporter.breadcrumb("recording reached its maximum duration", category: "dictation")
+            handle(.released)
         }
     }
 

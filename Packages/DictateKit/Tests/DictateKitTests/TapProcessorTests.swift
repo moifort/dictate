@@ -58,4 +58,11 @@ struct TapProcessorTests {
 
         #expect(await waiting.value == false)
     }
+
+    /// A recording nobody stops stops growing at the cap.
+    @Test func samplesStopGrowingAtTheCap() throws {
+        let processor = try TapProcessor(inputFormat: format, maximumSamples: 500, onSpectrum: { _ in })
+        for _ in 0..<5 { processor.consume(try buffer(0.1)) }
+        #expect(processor.drain().count == 500)
+    }
 }

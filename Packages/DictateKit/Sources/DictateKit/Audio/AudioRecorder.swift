@@ -196,14 +196,26 @@ nonisolated final class TapProcessor: @unchecked Sendable {
     private let analyzer = SpectrumAnalyzer()
     private let lock = NSLock()
     private var samples: [Float] = []
+    /// Past this, buffers are dropped: a recording nobody stops (a key-up the
+    /// app never received) must not grow without end. The app releases its
+    /// recordings well before.
+    private let maximumSamples: Int
     /// Set by the first buffer holding anything but digital silence.
     private var hasSignal = false
     private var signalWaiter: CheckedContinuation<Bool, Never>?
     /// Timed out or cancelled: one wait per recording, so it never resets.
     private var waitEnded = false
 
-    init(inputFormat: AVAudioFormat, onSpectrum: @escaping @Sendable (VoiceSpectrum) -> Void) throws {
+    /// Fifteen minutes at 16 kHz, about 58 MB.
+    static let defaultMaximumSamples = AudioAnalysis.sampleRate * 15 * 60
+
+    init(
+        inputFormat: AVAudioFormat,
+        maximumSamples: Int = TapProcessor.defaultMaximumSamples,
+        onSpectrum: @escaping @Sendable (VoiceSpectrum) -> Void
+    ) throws {
         resampler = try AudioResampler(inputFormat: inputFormat)
+        self.maximumSamples = maximumSamples
         self.onSpectrum = onSpectrum
     }
 
@@ -211,7 +223,7 @@ nonisolated final class TapProcessor: @unchecked Sendable {
         let chunk = resampler.convert(buffer)
         guard !chunk.isEmpty else { return }
         lock.lock()
-        samples.append(contentsOf: chunk)
+        samples.append(contentsOf: chunk.prefix(max(0, maximumSamples - samples.count)))
         var heardNow: CheckedContinuation<Bool, Never>?
         // Exact zeros: a real microphone always picks up some room noise.
         if !hasSignal, chunk.contains(where: { $0 != 0 }) {

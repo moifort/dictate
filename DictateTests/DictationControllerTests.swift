@@ -21,6 +21,7 @@ struct DictationControllerTests {
         engine: TranscriptionEngine = .parakeet,
         reviewer: Reviewer? = .claude,
         loadingEngine: TranscriptionEngine? = nil,
+        maximumRecording: Duration = .seconds(60),
         tail: ((Fakes) async -> Void)? = nil
     ) -> (DictationController, Fakes) {
         let events = EventLog()
@@ -45,6 +46,7 @@ struct DictationControllerTests {
             reviewer: { reviewer },
             loadingEngine: { loadingEngine },
             enhancementTimeout: .milliseconds(200),
+            maximumRecording: maximumRecording,
             sleep: { duration in
                 fakes.events.append("tail of \(duration) started")
                 await tail?(fakes)
@@ -716,6 +718,33 @@ struct DictationControllerTests {
         #expect(fakes.transcriber.callCount == 0)
         // A second of holding once the tail is taken off: meant, so unheard.
         #expect(controller.lastOutcome == .unheard)
+    }
+
+    /// A key-up nobody received: the recording ends on its own and what was
+    /// said is inserted, rather than the microphone staying open.
+    @Test func aRecordingWithoutReleaseEndsAtTheMaximumDuration() async throws {
+        let (controller, fakes) = makeController(maximumRecording: .milliseconds(100))
+        controller.handle(.pressed)
+        await controller.waitUntilStarted()
+        for _ in 0..<100 where controller.capture != .idle { try await Task.sleep(for: .milliseconds(20)) }
+        #expect(controller.capture == .idle)
+        await controller.waitUntilIdle()
+        #expect(!fakes.recorder.isRecording)
+        #expect(fakes.inserter.pasted == ["Fais un push."])
+        // The late key-up finds nothing to release.
+        controller.handle(.released)
+        #expect(controller.phase == .idle)
+    }
+
+    @Test func aReleasedRecordingIsNotCutAgainByTheLimit() async throws {
+        let (controller, fakes) = makeController(maximumRecording: .milliseconds(100))
+        await dictate(controller)
+        controller.handle(.pressed)
+        await controller.waitUntilStarted()
+        controller.handle(.cancelled)
+        try await Task.sleep(for: .milliseconds(200))
+        #expect(fakes.inserter.pasted.count == 1)
+        #expect(controller.phase == .idle)
     }
 
     @Test func recorderFailureReportsFailure() async {

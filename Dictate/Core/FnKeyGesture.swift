@@ -25,6 +25,17 @@ nonisolated struct FnKeyGesture: Sendable {
     private var downAt: TimeInterval?
     private var interrupted = false
 
+    /// A press is under way: the key went down and no key-up came yet.
+    var isHeld: Bool { downAt != nil }
+
+    /// Ends the press when the key, read from the system, is no longer down:
+    /// the key-up never reached the monitor (event tap disabled by a timeout,
+    /// secure input), and the microphone would otherwise stay open.
+    mutating func resync(keyIsDown: Bool, at time: TimeInterval) -> FnKeyGestureOutput? {
+        guard isHeld, !keyIsDown else { return nil }
+        return handle(.fnUp(at: time))
+    }
+
     mutating func handle(_ event: FnKeyEvent) -> FnKeyGestureOutput? {
         switch event {
         case .fnDown(let time):

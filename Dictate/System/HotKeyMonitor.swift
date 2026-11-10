@@ -12,6 +12,7 @@ final class HotKeyMonitor {
     var key: PushToTalkKey = .optionSpace
 
     private var gesture = FnKeyGesture()
+    private let watch = KeyStateWatch()
     private var hotKey: EventHotKeyRef?
     private var handler: EventHandlerRef?
 
@@ -44,6 +45,7 @@ final class HotKeyMonitor {
     }
 
     func stop() {
+        watch.stop()
         if let hotKey { UnregisterEventHotKey(hotKey) }
         if let handler { RemoveEventHandler(handler) }
         hotKey = nil
@@ -55,6 +57,16 @@ final class HotKeyMonitor {
         if let output = gesture.handle(pressed ? .fnDown(at: time) : .fnUp(at: time)) {
             onGesture?(output)
         }
+        watch.update(isHeld: gesture.isHeld) { [weak self] in self?.resync() }
+    }
+
+    /// Releases a press whose key-up was missed: option no longer held.
+    private func resync() {
+        let time = ProcessInfo.processInfo.systemUptime
+        if let output = gesture.resync(keyIsDown: KeyStateWatch.isDown(key.flag), at: time) {
+            onGesture?(output)
+        }
+        watch.update(isHeld: gesture.isHeld) { [weak self] in self?.resync() }
     }
 }
 

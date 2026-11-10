@@ -51,4 +51,21 @@ struct FnKeyGestureTests {
         #expect(gesture.handle(.fnDown(at: 20)) == .pressed)
         #expect(gesture.handle(.fnUp(at: 21)) == .released)
     }
+
+    /// A key-up the tap never received: the key state read later ends the press.
+    @Test func aMissedReleaseIsCaughtByTheKeyState() {
+        var gesture = FnKeyGesture()
+        #expect(gesture.handle(.fnDown(at: 10)) == .pressed)
+        #expect(gesture.resync(keyIsDown: true, at: 11) == nil)
+        #expect(gesture.isHeld)
+        #expect(gesture.resync(keyIsDown: false, at: 12) == .released)
+        #expect(!gesture.isHeld)
+        // The next press works as usual.
+        #expect(gesture.handle(.fnDown(at: 20)) == .pressed)
+    }
+
+    @Test func theKeyStateMeansNothingWithoutAPress() {
+        var gesture = FnKeyGesture()
+        #expect(gesture.resync(keyIsDown: false, at: 1) == nil)
+    }
 }
