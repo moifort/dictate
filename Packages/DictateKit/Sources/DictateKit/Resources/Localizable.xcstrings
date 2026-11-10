@@ -3,10 +3,58 @@
   "strings": {
     "Aucun micro disponible": {
       "localizations": {
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Няма наличен микрофон"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Žádný mikrofon není k dispozici"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen mikrofon tilgængelig"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kein Mikrofon verfügbar"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Δεν υπάρχει διαθέσιμο μικρόφωνο"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "No microphone available"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No hay ningún micrófono disponible"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ühtegi mikrofoni pole saadaval"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mikrofonia ei ole käytettävissä"
           }
         },
         "fr": {
@@ -14,21 +62,249 @@
             "state": "translated",
             "value": "Aucun micro disponible"
           }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nema dostupnog mikrofona"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nincs elérhető mikrofon"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nessun microfono disponibile"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nėra pasiekiamo mikrofono"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nav pieejams neviens mikrofons"
+          }
+        },
+        "mt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L-ebda mikrofonu disponibbli"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen microfoon beschikbaar"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Brak dostępnego mikrofonu"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhum microfone disponível"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niciun microfon disponibil"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Нет доступного микрофона"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Žiadny mikrofón nie je k dispozícii"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Na voljo ni nobenega mikrofona"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ingen mikrofon tillgänglig"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Немає доступного мікрофона"
+          }
         }
       }
     },
     "Le micro ne répond pas": {
       "localizations": {
+        "bg": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Микрофонът не отговаря"
+          }
+        },
+        "cs": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mikrofon neodpovídá"
+          }
+        },
+        "da": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mikrofonen svarer ikke"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Das Mikrofon reagiert nicht"
+          }
+        },
+        "el": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Το μικρόφωνο δεν αποκρίνεται"
+          }
+        },
         "en": {
           "stringUnit": {
             "state": "translated",
             "value": "The microphone is not responding"
           }
         },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "El micrófono no responde"
+          }
+        },
+        "et": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mikrofon ei vasta"
+          }
+        },
+        "fi": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mikrofoni ei vastaa"
+          }
+        },
         "fr": {
           "stringUnit": {
             "state": "translated",
             "value": "Le micro ne répond pas"
+          }
+        },
+        "hr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mikrofon ne odgovara"
+          }
+        },
+        "hu": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A mikrofon nem válaszol"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il microfono non risponde"
+          }
+        },
+        "lt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mikrofonas neatsako"
+          }
+        },
+        "lv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mikrofons neatbild"
+          }
+        },
+        "mt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Il-mikrofonu mhux qed iwieġeb"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De microfoon reageert niet"
+          }
+        },
+        "pl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mikrofon nie odpowiada"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "O microfone não responde"
+          }
+        },
+        "ro": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Microfonul nu răspunde"
+          }
+        },
+        "ru": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Микрофон не отвечает"
+          }
+        },
+        "sk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mikrofón neodpovedá"
+          }
+        },
+        "sl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mikrofon se ne odziva"
+          }
+        },
+        "sv": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mikrofonen svarar inte"
+          }
+        },
+        "uk": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Мікрофон не відповідає"
           }
         }
       }

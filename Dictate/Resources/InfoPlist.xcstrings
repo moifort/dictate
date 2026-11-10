@@ -5,16 +5,154 @@
       "comment" : "Privacy - Microphone Usage Description",
       "extractionState" : "extracted_with_value",
       "localizations" : {
+        "bg" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictate записва гласа ви, докато държите клавиша за диктовка, за да го транскрибира на този Mac."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictate nahrává váš hlas, když držíte klávesu diktování, aby ho přepsal na tomto Macu."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictate optager din stemme, mens du holder dikteringstasten nede, for at transskribere den på denne Mac."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictate nimmt deine Stimme auf, solange du die Diktiertaste gedrückt hältst, um sie auf diesem Mac zu transkribieren."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Το Dictate ηχογραφεί τη φωνή σας όσο κρατάτε πατημένο το πλήκτρο υπαγόρευσης, για να τη μεταγράψει σε αυτό το Mac."
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dictate records your voice while you hold the dictation key, to transcribe it on this Mac."
           }
         },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictate graba tu voz mientras mantienes pulsada la tecla de dictado, para transcribirla en este Mac."
+          }
+        },
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictate salvestab teie häält, kuni hoiate dikteerimisklahvi all, et see selles Macis transkribeerida."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictate tallentaa äänesi, kun pidät sanelunäppäintä painettuna, litteroidakseen sen tällä Macilla."
+          }
+        },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dictate enregistre votre voix pendant que vous maintenez la touche de dictée, pour la transcrire sur ce Mac."
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictate snima vaš glas dok držite tipku za diktiranje kako bi ga transkribirao na ovom Macu."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Dictate rögzíti a hangját, amíg lenyomva tartja a diktálóbillentyűt, hogy átírja ezen a Macen."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictate registra la tua voce mentre tieni premuto il tasto di dettatura, per trascriverla su questo Mac."
+          }
+        },
+        "lt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„Dictate“ įrašo jūsų balsą, kol laikote nuspaudę diktavimo klavišą, kad transkribuotų jį šiame „Mac“."
+          }
+        },
+        "lv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictate ieraksta jūsu balsi, kamēr turat nospiestu diktēšanas taustiņu, lai to transkribētu šajā Mac datorā."
+          }
+        },
+        "mt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictate jirrekordja leħnek waqt li żżomm it-tasta tad-dettatura magħfusa, biex jittraskrivih fuq dan il-Mac."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictate neemt je stem op terwijl je de dicteertoets ingedrukt houdt, om die op deze Mac te transcriberen."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictate nagrywa Twój głos, gdy trzymasz klawisz dyktowania, aby transkrybować go na tym Macu."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Dictate grava sua voz enquanto você mantém a tecla de ditado pressionada, para transcrevê-la neste Mac."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictate vă înregistrează vocea cât timp țineți apăsată tasta de dictare, pentru a o transcrie pe acest Mac."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictate записывает ваш голос, пока вы удерживаете клавишу диктовки, чтобы расшифровать его на этом Mac."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictate nahráva váš hlas, keď držíte kláves diktovania, aby ho prepísal na tomto Macu."
+          }
+        },
+        "sl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictate snema vaš glas, dokler držite tipko za narekovanje, da ga prepiše na tem Macu."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictate spelar in din röst medan du håller ned dikteringstangenten, för att transkribera den på den här datorn."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dictate записує ваш голос, поки ви утримуєте клавішу диктування, щоб транскрибувати його на цьому Mac."
           }
         }
       }

@@ -48,9 +48,8 @@ ready-to-send text.
 - **Your language, your words.** Pick the dictation language among 25
   European languages and add your own
   vocabulary — names, jargon, product terms — so they come out spelled right.
-  The app itself speaks English and French, following your Mac's language;
-  the dictation language starts as your Mac's even when the interface falls
-  back to English.
+  The app itself speaks the same 25 languages, following your Mac's language,
+  and falls back to English for any other.
 - **Discreet.** A small pill at the bottom of the screen shows that Dictate is
   listening, then working, and disappears. While you speak, a spinner beside
   the waves tells that earlier sentences are still on their way. When it

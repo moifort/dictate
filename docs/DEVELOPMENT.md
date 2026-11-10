@@ -46,18 +46,24 @@ new macOS deprecates is a migration to plan, not a broken build.
 
 ## Localization
 
-The app speaks French and English. Strings are written in French in the code
-and translated in the String Catalogs `Dictate/Resources/Localizable.xcstrings`
-and `InfoPlist.xcstrings`. The bundle's development region is English, so
-every Mac not set to French gets English; for French not to fall back to
-English as well, every key carries its French value explicitly.
+The app speaks the 25 languages Parakeet transcribes
+(`DictationLanguage.supportedCodes`). Strings are written in French in the code
+and translated in the String Catalogs `Dictate/Resources/Localizable.xcstrings`,
+`InfoPlist.xcstrings` and DictateKit's `Localizable.xcstrings`. The bundle's
+development region is English, so a Mac set to any other language gets
+English; for French not to fall back to English as well, every key carries
+its French value explicitly. The 23 languages besides French and English were
+machine-translated from the English values: where macOS itself is not
+localized (Estonian, Latvian, Lithuanian, Maltese, Slovenian), the names of
+its settings are quoted in English, as the user sees them.
 
 Text shown from a `String` variable is not localized by SwiftUI: build it with
 `String(localized:)`, or type the property as `LocalizedStringKey`. After
 adding strings, build with `SWIFT_EMIT_LOC_STRINGS=YES` and merge them into
 the catalog (Xcode does it on build; on the command line, `xcrun xcstringstool
 sync` with the `.stringsdata` files from the build), then give each new key
-its French and English values. The tests run in French (`language: fr` in the
+its value in each of the 25 languages (plural keys need every CLDR category
+of the language). The tests run in French (`language: fr` in the
 scheme), since some of them read user-facing text.
 
 The disk image's background is one picture for every Mac: its instruction is
