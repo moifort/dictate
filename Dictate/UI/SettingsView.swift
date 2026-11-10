@@ -125,7 +125,7 @@ private struct AutoSendAppList: View {
                 Hint("Aucune app : Entrée n'est jamais pressée.")
             }
             ForEach(settings.autoSendBundleIDs, id: \.self) { bundleID in
-                let app = AppInfo(bundleID: bundleID)
+                let app = AppInfo.named(bundleID)
                 HStack(spacing: 6) {
                     AppIcon(image: app.icon)
                     Text(verbatim: app.name)
@@ -142,6 +142,7 @@ private struct AutoSendAppList: View {
                 .frame(maxWidth: 260)
             }
             Menu("Ajouter une app") {
+                let runningApps = runningApps
                 ForEach(runningApps, id: \.bundleID) { app in
                     Button {
                         settings.addAutoSendApp(app.bundleID)
@@ -163,7 +164,7 @@ private struct AutoSendAppList: View {
             .filter { $0.activationPolicy == .regular }
             .compactMap(\.bundleIdentifier)
             .filter { $0 != Bundle.main.bundleIdentifier && !listed.contains($0) }
-        return Set(ids).map(AppInfo.init(bundleID:))
+        return Set(ids).map(AppInfo.named)
             .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
 
@@ -188,6 +189,18 @@ private struct AppInfo {
     let bundleID: String
     let name: String
     let icon: NSImage?
+
+    /// Looked up once per app: finding it on disk and drawing its icon cost
+    /// more than a render can spend, and the list renders often.
+    private static var cache: [String: AppInfo] = [:]
+
+    static func named(_ bundleID: String) -> AppInfo {
+        if let known = cache[bundleID] { return known }
+        let info = AppInfo(bundleID: bundleID)
+        // An app not found may be installed later: only a found one is kept.
+        if info.icon != nil { cache[bundleID] = info }
+        return info
+    }
 
     init(bundleID: String) {
         self.bundleID = bundleID
