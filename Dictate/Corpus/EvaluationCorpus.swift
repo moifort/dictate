@@ -30,10 +30,11 @@ final class EvaluationCorpus {
     /// Waits for the user's fixes, then keeps the dictation.
     func record(_ sample: DictationSample) async {
         let reference = await sample.followUp?.value?.corrected
-        add(sample, reference: reference)
+        await add(sample, reference: reference)
     }
 
-    func add(_ sample: DictationSample, reference: String?) {
+    /// The audio is encoded and both files written off the main actor.
+    func add(_ sample: DictationSample, reference: String?) async {
         let id = UUID()
         let entry = CorpusEntry(
             id: id,
@@ -51,15 +52,22 @@ final class EvaluationCorpus {
             vocabularyBoosted: sample.vocabularyBoosted
         )
         do {
-            try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-            try WAVFile.data(samples: sample.samples).write(to: audioURL(of: entry))
-            try entriesFile.append(entry)
+            try await Self.write(sample.samples, to: audioURL(of: entry), entry: entry, in: entriesFile)
             entries.append(entry)
             Log.app.info("corpus: kept dictation \(self.entries.count), reference: \(reference != nil)")
         } catch {
             Log.app.error("could not save corpus entry: \(error.localizedDescription, privacy: .public)")
             ErrorReporter.capture(error, "evaluation corpus entry could not be saved", category: "corpus")
         }
+    }
+
+    @concurrent
+    private nonisolated static func write(
+        _ samples: [Float], to audio: URL, entry: CorpusEntry, in file: JSONLinesFile<CorpusEntry>
+    ) async throws {
+        try FileManager.default.createDirectory(at: audio.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try WAVFile.data(samples: samples).write(to: audio)
+        try file.append(entry)
     }
 
     func audioURL(of entry: CorpusEntry) -> URL {

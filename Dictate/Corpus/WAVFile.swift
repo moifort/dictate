@@ -19,9 +19,10 @@ nonisolated enum WAVFile {
         append(UInt16(16), to: &data)                           // bits per sample
         data.append(contentsOf: Array("data".utf8))
         append(UInt32(payload), to: &data)
-        for sample in samples {
-            append(Int16(max(-1, min(1, sample)) * Float(Int16.max)), to: &data)
-        }
+        // Converted in one pass and appended as one block: a minute of audio
+        // is a million samples.
+        let pcm = samples.map { Int16(max(-1, min(1, $0)) * Float(Int16.max)).littleEndian }
+        pcm.withUnsafeBytes { data.append(contentsOf: $0) }
         return data
     }
 

@@ -29,10 +29,10 @@ struct EvaluationCorpusTests {
         #expect(EvaluationCorpus(folder: folder).entries.isEmpty)
     }
 
-    @Test func entriesAndAudioSurviveARelaunch() throws {
+    @Test func entriesAndAudioSurviveARelaunch() async throws {
         let corpus = EvaluationCorpus(folder: folder)
-        corpus.add(sample(), reference: "Fais un push.")
-        corpus.add(sample(), reference: nil)
+        await corpus.add(sample(), reference: "Fais un push.")
+        await corpus.add(sample(), reference: nil)
 
         let reloaded = EvaluationCorpus(folder: folder)
         #expect(reloaded.entries == corpus.entries)
@@ -51,17 +51,17 @@ struct EvaluationCorpusTests {
         #expect(reloaded.entries.last?.reference == nil)
     }
 
-    @Test func boostingIsKeptWithTheEntry() {
+    @Test func boostingIsKeptWithTheEntry() async {
         let corpus = EvaluationCorpus(folder: folder)
-        corpus.add(sample(vocabularyBoosted: true), reference: nil)
-        corpus.add(sample(), reference: nil)
+        await corpus.add(sample(vocabularyBoosted: true), reference: nil)
+        await corpus.add(sample(), reference: nil)
         let reloaded = EvaluationCorpus(folder: folder)
         #expect(reloaded.entries.map(\.vocabularyBoosted) == [true, false])
     }
 
-    @Test func deleteAllRemovesEverything() {
+    @Test func deleteAllRemovesEverything() async {
         let corpus = EvaluationCorpus(folder: folder)
-        corpus.add(sample(), reference: "Fais un push.")
+        await corpus.add(sample(), reference: "Fais un push.")
         corpus.deleteAll()
         #expect(corpus.entries.isEmpty)
         #expect(!FileManager.default.fileExists(atPath: folder.path))
