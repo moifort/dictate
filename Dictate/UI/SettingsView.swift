@@ -341,10 +341,7 @@ private struct LexiconSettings: View {
                         .font(.body.monospaced())
                         .frame(height: 220)
                         .overlay(RoundedRectangle(cornerRadius: 6).stroke(.separator))
-                        .onChange(of: model.settings.vocabularyText) {
-                            model.settingsChanged()
-                            model.vocabularyBoostingChanged()
-                        }
+                        .onChange(of: model.settings.vocabularyText) { model.vocabularyEdited() }
                     Hint("Un par ligne : noms, outils, sigles. La relecture les écrit exactement ainsi.")
                 }
             }

@@ -39,7 +39,10 @@ final class AppModel {
     @ObservationIgnored private let locator = ClaudeCLILocator()
     @ObservationIgnored private var hotkeyRetry: Timer?
     @ObservationIgnored private var setupPoll: Timer?
-    @ObservationIgnored private var resetEnhancerTask: Task<Void, Never>?
+    /// The waiting process is replaced once the settings stop changing.
+    @ObservationIgnored private let enhancerReset = Debouncer(delay: .seconds(2))
+    /// The lexicon is taken into account once the user pauses typing.
+    @ObservationIgnored private let vocabularyEdit = Debouncer(delay: .milliseconds(600))
     @ObservationIgnored private var probeTask: Task<Void, Never>?
 
     init() {
@@ -378,11 +381,15 @@ final class AppModel {
         refreshSetup()
         pollSetupUntilComplete()
         reportSettings()
-        resetEnhancerTask?.cancel()
-        resetEnhancerTask = Task {
-            try? await Task.sleep(for: .seconds(2))
-            guard !Task.isCancelled else { return }
-            enhancer.reset()
+        enhancerReset.schedule { [enhancer] in enhancer.reset() }
+    }
+
+    /// Each keystroke in the lexicon: the CLI lookup, the checklist, the
+    /// Sentry tags and the boosting model follow once the user pauses.
+    func vocabularyEdited() {
+        vocabularyEdit.schedule { [weak self] in
+            self?.settingsChanged()
+            self?.vocabularyBoostingChanged()
         }
     }
 
