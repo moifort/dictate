@@ -54,6 +54,30 @@ struct TextInserterTests {
         #expect(pasteboard.string(forType: .string) == "nouveau")
     }
 
+    /// Conversions macOS derives again, and promised files, are not read.
+    @Test func derivedAndPromisedTypesAreNotSaved() {
+        #expect(!TextInserter.isWorthSaving(NSPasteboard.PasteboardType("dyn.ah62d4rv4gu8yc6durvwwaznwmuuha2pxsvw0e55bsmwca7d3sbwu")))
+        #expect(!TextInserter.isWorthSaving(NSPasteboard.PasteboardType("com.apple.pasteboard.promised-file-url")))
+        #expect(TextInserter.isWorthSaving(.string))
+        #expect(TextInserter.isWorthSaving(.tiff))
+    }
+
+    /// A huge copy is saved up to the cap, its first types first.
+    @Test func aHugeCopyIsSavedUpToTheCap() async throws {
+        pasteboard.clearContents()
+        let item = NSPasteboardItem()
+        item.setString("texte", forType: .string)
+        item.setData(Data(count: TextInserter.maximumSavedBytes + 1), forType: .tiff)
+        item.setData(Data(count: 10), forType: .png)
+        pasteboard.writeObjects([item])
+        let inserter = makeInserter()
+        await inserter.paste("Dictée.", submit: false)
+        try await waitForRestore()
+        #expect(pasteboard.string(forType: .string) == "texte")
+        #expect(pasteboard.data(forType: .tiff)?.count == TextInserter.maximumSavedBytes + 1)
+        #expect(pasteboard.data(forType: .png) == nil)
+    }
+
     @Test func copyingLeavesTheTextInPlace() async throws {
         pasteboard.clearContents()
         pasteboard.setString("ancien", forType: .string)

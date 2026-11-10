@@ -91,10 +91,37 @@ final class TextInserter: TextInserting {
         #endif
     }
 
+    /// Past this, the rest of a large copy (a photo in a dozen formats) is
+    /// left out: the first types, the richest ones, are kept.
+    static let maximumSavedBytes = 20 << 20
+
+    /// The promises a read would make the source app fulfil, writing files out.
+    private nonisolated static let promisedTypes: Set<String> = [
+        "com.apple.NSFilePromiseItemMetaData",
+        "com.apple.pasteboard.promised-file-url",
+        "com.apple.pasteboard.promised-file-content-type",
+        "com.apple.pasteboard.promised-suggested-file-name",
+    ]
+
+    /// Not the conversions macOS derives on demand from the other types
+    /// ("dyn." ones, derived again once restored), nor promised files.
+    nonisolated static func isWorthSaving(_ type: NSPasteboard.PasteboardType) -> Bool {
+        !type.rawValue.hasPrefix("dyn.") && !promisedTypes.contains(type.rawValue)
+    }
+
+    /// The user's content, read on the main actor right before each paste:
+    /// only what is needed to put it back, up to `maximumSavedBytes`.
     private func snapshot() -> [[NSPasteboard.PasteboardType: Data]] {
-        (pasteboard.pasteboardItems ?? []).map { item in
-            // An app can declare a type twice: the first one is kept rather than trapping.
-            Dictionary(item.types.compactMap { type in item.data(forType: type).map { (type, $0) } }) { first, _ in first }
+        var saved = 0
+        return (pasteboard.pasteboardItems ?? []).map { item in
+            var entries: [NSPasteboard.PasteboardType: Data] = [:]
+            for type in item.types where Self.isWorthSaving(type) && saved < Self.maximumSavedBytes {
+                // An app can declare a type twice: the first one is kept.
+                guard entries[type] == nil, let data = item.data(forType: type) else { continue }
+                entries[type] = data
+                saved += data.count
+            }
+            return entries
         }
     }
 
