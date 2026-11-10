@@ -50,14 +50,10 @@ nonisolated struct UpdateInstaller: Sendable {
     }
 
     /// Unzips `archive` and returns the single `.app` it contains.
-    func extract(_ archive: URL, into directory: URL) throws -> URL {
+    func extract(_ archive: URL, into directory: URL) async throws -> URL {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        let ditto = Process()
-        ditto.executableURL = URL(filePath: "/usr/bin/ditto")
-        ditto.arguments = ["-xk", archive.path, directory.path]
-        try ditto.run()
-        ditto.waitUntilExit()
-        guard ditto.terminationStatus == 0 else { throw UpdateError.extractionFailed }
+        let ditto = try await Subprocess.run(URL(filePath: "/usr/bin/ditto"), ["-xk", archive.path, directory.path], timeout: .seconds(120))
+        guard ditto.succeeded else { throw UpdateError.extractionFailed }
 
         let contents = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
         guard let app = contents.first(where: { $0.pathExtension == "app" }) else {
@@ -68,22 +64,19 @@ nonisolated struct UpdateInstaller: Sendable {
 
     /// Rejects anything that is not a validly signed Dictate from the same
     /// team, nested code included, or not the announced `version`.
-    func verify(_ bundle: URL, against expectation: Expectation, version: String? = nil) throws {
+    func verify(_ bundle: URL, against expectation: Expectation, version: String? = nil) async throws {
         if let version {
             let found = Bundle(url: bundle)?.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
             guard found == version else { throw UpdateError.versionMismatch(expected: version, found: found) }
         }
-        let codesign = Process()
-        codesign.executableURL = URL(filePath: "/usr/bin/codesign")
-        codesign.arguments = ["--verify", "--deep", "--strict", "-R=\(expectation.requirement)", bundle.path]
-        let errors = Pipe()
-        codesign.standardError = errors
-        codesign.standardOutput = errors
-        try codesign.run()
-        codesign.waitUntilExit()
-        guard codesign.terminationStatus == 0 else {
-            let output = String(decoding: errors.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
-            throw UpdateError.signatureRejected(output.trimmingCharacters(in: .whitespacesAndNewlines))
+        let codesign = try await Subprocess.run(
+            URL(filePath: "/usr/bin/codesign"),
+            ["--verify", "--deep", "--strict", "-R=\(expectation.requirement)", bundle.path],
+            timeout: .seconds(120),
+            includingStandardError: true
+        )
+        guard codesign.succeeded else {
+            throw UpdateError.signatureRejected(codesign.text.trimmingCharacters(in: .whitespacesAndNewlines))
         }
     }
 

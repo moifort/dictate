@@ -11,14 +11,11 @@ enum ActiveWindow {
         #else
         guard let app = NSWorkspace.shared.frontmostApplication,
               let primary = NSScreen.screens.first else { return nil }
-        let appElement = AXUIElementCreateApplication(app.processIdentifier)
         // Called as `fn` goes down: a busy app must not delay the pill.
-        AXUIElementSetMessagingTimeout(appElement, 0.1)
-        guard let window = copyValue(appElement, kAXFocusedWindowAttribute),
-              CFGetTypeID(window) == AXUIElementGetTypeID() else { return nil }
-        let element = window as! AXUIElement
-        guard let position = point(copyValue(element, kAXPositionAttribute)),
-              let size = size(copyValue(element, kAXSizeAttribute)) else { return nil }
+        let ax = AXReader(messagingTimeout: 0.1)
+        guard let window = ax.focusedWindow(pid: app.processIdentifier),
+              let position = ax.point(window, kAXPositionAttribute),
+              let size = ax.size(window, kAXSizeAttribute) else { return nil }
         return appKitFrame(axOrigin: position, size: size, primaryHeight: primary.frame.height)
         #endif
     }
@@ -41,24 +38,4 @@ enum ActiveWindow {
         }
         return screens.firstIndex { $0.contains(mouse) }
     }
-
-    #if !APP_STORE
-    private static func copyValue(_ element: AXUIElement, _ attribute: String) -> CFTypeRef? {
-        var value: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(element, attribute as CFString, &value) == .success else { return nil }
-        return value
-    }
-
-    private static func point(_ value: CFTypeRef?) -> CGPoint? {
-        guard let value, CFGetTypeID(value) == AXValueGetTypeID() else { return nil }
-        var point = CGPoint.zero
-        return AXValueGetValue(value as! AXValue, .cgPoint, &point) ? point : nil
-    }
-
-    private static func size(_ value: CFTypeRef?) -> CGSize? {
-        guard let value, CFGetTypeID(value) == AXValueGetTypeID() else { return nil }
-        var size = CGSize.zero
-        return AXValueGetValue(value as! AXValue, .cgSize, &size) ? size : nil
-    }
-    #endif
 }

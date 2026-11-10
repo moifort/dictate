@@ -47,7 +47,7 @@ final class FocusInspector: FocusInspecting, FieldReading {
         electronEnabledPIDs.insert(pid)
         Task.detached(priority: .userInitiated) {
             let element = AXUIElementCreateApplication(pid)
-            AXUIElementSetMessagingTimeout(element, AXReader.messagingTimeout)
+            AXUIElementSetMessagingTimeout(element, AXReader.defaultMessagingTimeout)
             AXUIElementSetAttributeValue(element, "AXManualAccessibility" as CFString, kCFBooleanTrue)
         }
     }
@@ -62,8 +62,12 @@ nonisolated struct AXElement: @unchecked Sendable {
 
 /// Accessibility reads, optionally capped by a deadline. Not shared between
 /// threads: each read builds its own.
-private nonisolated final class AXReader {
-    static let messagingTimeout: Float = 0.5
+nonisolated final class AXReader {
+    /// How long one call may wait for an app, in seconds: the system's 6 s
+    /// would hold a dictation for an app that is busy.
+    static let defaultMessagingTimeout: Float = 0.5
+
+    private let messagingTimeout: Float
     /// Web pages nest deeply; past this, the focused element is not in a page.
     private static let maxWebAreaDepth = 60
 
@@ -73,8 +77,28 @@ private nonisolated final class AXReader {
 
     private var deadline: ContinuousClock.Instant?
 
-    init(deadline: ContinuousClock.Instant? = nil) {
+    init(deadline: ContinuousClock.Instant? = nil, messagingTimeout: Float = AXReader.defaultMessagingTimeout) {
         self.deadline = deadline
+        self.messagingTimeout = messagingTimeout
+    }
+
+    /// The app's focused window.
+    func focusedWindow(pid: pid_t) -> AXUIElement? {
+        let appElement = AXUIElementCreateApplication(pid)
+        AXUIElementSetMessagingTimeout(appElement, messagingTimeout)
+        return copyElement(appElement, kAXFocusedWindowAttribute)
+    }
+
+    func point(_ element: AXUIElement, _ attribute: String) -> CGPoint? {
+        guard let value = copyValue(element, attribute), CFGetTypeID(value) == AXValueGetTypeID() else { return nil }
+        var point = CGPoint.zero
+        return AXValueGetValue(value as! AXValue, .cgPoint, &point) ? point : nil
+    }
+
+    func size(_ element: AXUIElement, _ attribute: String) -> CGSize? {
+        guard let value = copyValue(element, attribute), CFGetTypeID(value) == AXValueGetTypeID() else { return nil }
+        var size = CGSize.zero
+        return AXValueGetValue(value as! AXValue, .cgSize, &size) ? size : nil
     }
 
     /// Runs `body` off the main actor with a reader capped by `budget`.
@@ -110,7 +134,7 @@ private nonisolated final class AXReader {
 
     func fieldContext(pid: pid_t, maxLength: Int) -> FieldContext {
         let appElement = AXUIElementCreateApplication(pid)
-        AXUIElementSetMessagingTimeout(appElement, Self.messagingTimeout)
+        AXUIElementSetMessagingTimeout(appElement, messagingTimeout)
         let window = copyElement(appElement, kAXFocusedWindowAttribute)
         let focused = copyElement(appElement, kAXFocusedUIElementAttribute)
 
@@ -129,7 +153,7 @@ private nonisolated final class AXReader {
 
     func focusedElement(pid: pid_t) -> AXUIElement? {
         let appElement = AXUIElementCreateApplication(pid)
-        AXUIElementSetMessagingTimeout(appElement, Self.messagingTimeout)
+        AXUIElementSetMessagingTimeout(appElement, messagingTimeout)
         return copyElement(appElement, kAXFocusedUIElementAttribute)
     }
 
@@ -252,7 +276,7 @@ private nonisolated final class AXReader {
         guard let value = copyValue(element, attribute), CFGetTypeID(value) == AXUIElementGetTypeID() else { return nil }
         let child = value as! AXUIElement
         // The timeout is per element, not inherited from the app element.
-        AXUIElementSetMessagingTimeout(child, Self.messagingTimeout)
+        AXUIElementSetMessagingTimeout(child, messagingTimeout)
         return child
     }
 

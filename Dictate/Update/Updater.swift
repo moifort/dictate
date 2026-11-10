@@ -238,13 +238,10 @@ final class Updater {
                 let archive = try await downloadArchive(of: release)
                 state = .installing
                 let (installer, expectation) = (installer, expectation)
-                let fresh = try await Task.detached {
-                    // Not needed once extracted, whatever happens next.
-                    defer { try? FileManager.default.removeItem(at: archive) }
-                    let fresh = try installer.extract(archive, into: scratch)
-                    try installer.verify(fresh, against: expectation, version: release.version)
-                    return fresh
-                }.value
+                // Not needed once extracted, whatever happens next.
+                defer { try? FileManager.default.removeItem(at: archive) }
+                let fresh = try await installer.extract(archive, into: scratch)
+                try await installer.verify(fresh, against: expectation, version: release.version)
                 // Swapped and relaunched only between dictations: the relaunch
                 // would cut one short, and the swap must not precede it by long.
                 if !isIdle() {

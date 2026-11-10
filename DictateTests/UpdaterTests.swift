@@ -100,12 +100,12 @@ struct UpdateInstallerTests {
         Bundle(url: app)?.infoDictionary?["CFBundleShortVersionString"] as? String
     }
 
-    @Test func extractsVerifiesAndSwapsTheBundle() throws {
+    @Test func extractsVerifiesAndSwapsTheBundle() async throws {
         let installed = try makeApp(named: "Fake", identifier: "test.fake", version: "1.0", at: root.appending(path: "Applications"))
         let archive = try zip(try makeApp(named: "Fake", identifier: "test.fake", version: "2.0", at: root.appending(path: "release")))
 
-        let fresh = try installer.extract(archive, into: root.appending(path: "scratch"))
-        try installer.verify(fresh, against: .init(bundleIdentifier: "test.fake", teamIdentifier: nil))
+        let fresh = try await installer.extract(archive, into: root.appending(path: "scratch"))
+        try await installer.verify(fresh, against: .init(bundleIdentifier: "test.fake", teamIdentifier: nil))
         try installer.replace(installed, with: fresh)
 
         #expect(version(of: installed) == "2.0")
@@ -141,16 +141,16 @@ struct UpdateInstallerTests {
     }
 
     /// The archive must hold the version the release announced.
-    @Test func rejectsAnotherVersionThanAnnounced() throws {
+    @Test func rejectsAnotherVersionThanAnnounced() async throws {
         let app = try makeApp(named: "Fake", identifier: "test.fake", version: "2.0", at: root)
-        #expect(throws: UpdateError.versionMismatch(expected: "3.0", found: "2.0")) {
-            try installer.verify(app, against: .init(bundleIdentifier: "test.fake", teamIdentifier: nil), version: "3.0")
+        await #expect(throws: UpdateError.versionMismatch(expected: "3.0", found: "2.0")) {
+            try await installer.verify(app, against: .init(bundleIdentifier: "test.fake", teamIdentifier: nil), version: "3.0")
         }
-        try installer.verify(app, against: .init(bundleIdentifier: "test.fake", teamIdentifier: nil), version: "2.0")
+        try await installer.verify(app, against: .init(bundleIdentifier: "test.fake", teamIdentifier: nil), version: "2.0")
     }
 
     /// Nested code is checked too: a framework swapped after signing fails.
-    @Test func rejectsATamperedNestedFramework() throws {
+    @Test func rejectsATamperedNestedFramework() async throws {
         let app = try makeApp(named: "Fake", identifier: "test.fake", version: "2.0", at: root)
         let framework = app.appending(path: "Contents/Frameworks/Helper.framework")
         let versions = framework.appending(path: "Versions/A")
@@ -164,37 +164,37 @@ struct UpdateInstallerTests {
         try FileManager.default.createSymbolicLink(atPath: framework.appending(path: "Resources").path, withDestinationPath: "Versions/Current/Resources")
         try run("/usr/bin/codesign", ["--force", "--sign", "-", framework.path])
         try run("/usr/bin/codesign", ["--force", "--sign", "-", app.path])
-        try installer.verify(app, against: .init(bundleIdentifier: "test.fake", teamIdentifier: nil))
+        try await installer.verify(app, against: .init(bundleIdentifier: "test.fake", teamIdentifier: nil))
         // Replaced after both were signed.
         try FileManager.default.removeItem(at: versions.appending(path: "Helper"))
         try FileManager.default.copyItem(at: URL(filePath: "/usr/bin/false"), to: versions.appending(path: "Helper"))
-        #expect(throws: UpdateError.self) {
-            try installer.verify(app, against: .init(bundleIdentifier: "test.fake", teamIdentifier: nil))
+        await #expect(throws: UpdateError.self) {
+            try await installer.verify(app, against: .init(bundleIdentifier: "test.fake", teamIdentifier: nil))
         }
     }
 
-    @Test func rejectsABundleWithAnotherIdentifier() throws {
+    @Test func rejectsABundleWithAnotherIdentifier() async throws {
         let other = try makeApp(named: "Fake", identifier: "test.other", version: "2.0", at: root)
-        #expect(throws: UpdateError.self) {
-            try installer.verify(other, against: .init(bundleIdentifier: "test.fake", teamIdentifier: nil))
+        await #expect(throws: UpdateError.self) {
+            try await installer.verify(other, against: .init(bundleIdentifier: "test.fake", teamIdentifier: nil))
         }
     }
 
-    @Test func rejectsAnAdHocBundleWhenATeamIsRequired() throws {
+    @Test func rejectsAnAdHocBundleWhenATeamIsRequired() async throws {
         let adHoc = try makeApp(named: "Fake", identifier: "test.fake", version: "2.0", at: root)
-        #expect(throws: UpdateError.self) {
-            try installer.verify(adHoc, against: .init(bundleIdentifier: "test.fake", teamIdentifier: "46C337T7YN"))
+        await #expect(throws: UpdateError.self) {
+            try await installer.verify(adHoc, against: .init(bundleIdentifier: "test.fake", teamIdentifier: "46C337T7YN"))
         }
     }
 
-    @Test func rejectsATamperedBundle() throws {
+    @Test func rejectsATamperedBundle() async throws {
         let app = try makeApp(named: "Fake", identifier: "test.fake", version: "2.0", at: root)
         // Swap the executable after signing: the seal no longer matches.
         let executable = app.appending(path: "Contents/MacOS/Fake")
         try FileManager.default.removeItem(at: executable)
         try FileManager.default.copyItem(at: URL(filePath: "/usr/bin/false"), to: executable)
-        #expect(throws: UpdateError.self) {
-            try installer.verify(app, against: .init(bundleIdentifier: "test.fake", teamIdentifier: nil))
+        await #expect(throws: UpdateError.self) {
+            try await installer.verify(app, against: .init(bundleIdentifier: "test.fake", teamIdentifier: nil))
         }
     }
 
