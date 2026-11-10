@@ -302,7 +302,6 @@
   }, { rootMargin: "80px" });
   for (const r of renderers.values()) io.observe(r.canvas);
 
-  let lastFrame = 0;
   function frame(now) {
     const time = now / 1000;
     const slow = reducedMotion ? 0.25 : 1;
@@ -311,7 +310,6 @@
       if (r.canvas.offsetParent === null && !r.canvas.closest(".pill.static")) continue;
       r.draw(time * slow);
     }
-    lastFrame = now;
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);

@@ -55,8 +55,6 @@ nonisolated enum ClaudeCLIError: LocalizedError, Equatable {
 /// One `claude -p` process in stream-json mode, started ahead of time and
 /// used for exactly one message.
 nonisolated final class ClaudeCLIProcess: @unchecked Sendable {
-    let startedAt = ContinuousClock.now
-
     private let process = Process()
     private let input = Pipe()
     private let output = Pipe()

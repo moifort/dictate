@@ -63,8 +63,10 @@ nonisolated enum ModelStorage {
         URL.applicationSupportDirectory.appending(path: "Dictate/Models", directoryHint: .isDirectory)
     }
 
-    /// Whisper was offered until it was removed: its model, about 630 MB,
-    /// stays behind on the Macs that downloaded it. `models` is WhisperKit's
+    /// Whisper was offered until it was removed (2026-10-14): its model,
+    /// about 630 MB, stays behind on the Macs that downloaded it. Kept at every
+    /// launch, a single existence check, for those who update from an older
+    /// version later. `models` is WhisperKit's
     /// download cache, model and tokenizer; Parakeet lives next to it.
     static func removeWhisperModel(in base: URL = defaultDirectory) {
         let folder = base.appending(path: "models", directoryHint: .isDirectory)
