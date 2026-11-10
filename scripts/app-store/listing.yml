@@ -1,6 +1,6 @@
 # The Mac App Store listing, one entry per App Store locale, read by listing.rb.
 # Limits: name and subtitle 30 characters, keywords 100, promotional 170,
-# description and whats_new 4000. English and French are the originals; the
+# description and whats_new 4000, and the store refuses emojis in them. English and French are the originals; the
 # others were machine-translated from English. Bulgarian, Estonian, Latvian,
 # Lithuanian and Maltese have no App Store locale, and Portuguese is pt-BR.
 en-US:
@@ -11,7 +11,7 @@ en-US:
   whats_new: |
     New
     • The interface now speaks 25 languages, following your Mac's language
-    • Emojis by voice: say “emoji rocket” and 🚀 lands in the text
+    • Emojis by voice: say “emoji rocket” and the emoji lands in the text
     • A second shortcut: Control + Option + Space
     • Settings → General: turn error reports off
 
@@ -51,7 +51,7 @@ fr-FR:
   whats_new: |
     Nouveautés
     • L'interface parle maintenant 25 langues, selon celle de votre Mac
-    • Emojis à la voix : dites « emoji fusée » et 🚀 s'écrit dans le texte
+    • Emojis à la voix : dites « emoji fusée » et l'emoji s'écrit dans le texte
     • Un second raccourci : Control + Option + Espace
     • Réglages → Général : désactivez l'envoi des rapports d'erreur
 
@@ -91,7 +91,7 @@ de-DE:
   whats_new: |
     Neu
     • Die Oberfläche spricht jetzt 25 Sprachen, passend zur Sprache deines Mac
-    • Emojis per Stimme: Sag „Emoji Rakete“ und 🚀 landet im Text
+    • Emojis per Stimme: Sag „Emoji Rakete“ und das Emoji landet im Text
     • Ein zweiter Kurzbefehl: Control + Option + Leertaste
     • Einstellungen → Allgemein: Fehlerberichte abschalten
 
@@ -131,7 +131,7 @@ es-ES:
   whats_new: |
     Novedades
     • La interfaz ya habla 25 idiomas, según el de tu Mac
-    • Emojis con la voz: di «emoji cohete» y 🚀 aparece en el texto
+    • Emojis con la voz: di «emoji cohete» y el emoji aparece en el texto
     • Un segundo atajo: Control + Opción + Espacio
     • Ajustes → General: desactiva los informes de errores
 
@@ -171,7 +171,7 @@ it:
   whats_new: |
     Novità
     • L'interfaccia ora parla 25 lingue, in base a quella del tuo Mac
-    • Emoji con la voce: di' “emoji razzo” e 🚀 compare nel testo
+    • Emoji con la voce: di' “emoji razzo” e l'emoji compare nel testo
     • Una seconda abbreviazione: Control + Opzione + Spazio
     • Impostazioni → Generali: disattiva i report degli errori
 
@@ -211,7 +211,7 @@ nl-NL:
   whats_new: |
     Nieuw
     • De interface spreekt nu 25 talen, afhankelijk van de taal van je Mac
-    • Emoji's met je stem: zeg ‘emoji raket’ en 🚀 staat in de tekst
+    • Emoji's met je stem: zeg ‘emoji raket’ en de emoji staat in de tekst
     • Een tweede toetscombinatie: Control + Option + Spatie
     • Instellingen → Algemeen: zet foutrapporten uit
 
@@ -251,7 +251,7 @@ pt-BR:
   whats_new: |
     Novidades
     • A interface agora fala 25 idiomas, conforme o idioma do seu Mac
-    • Emojis por voz: diga “emoji foguete” e 🚀 aparece no texto
+    • Emojis por voz: diga “emoji foguete” e o emoji aparece no texto
     • Um segundo atalho: Control + Option + Espaço
     • Ajustes → Geral: desative os relatórios de erros
 
@@ -291,7 +291,7 @@ sv:
   whats_new: |
     Nytt
     • Gränssnittet talar nu 25 språk, efter språket på din Mac
-    • Emojier med rösten: säg ”emoji raket” så hamnar 🚀 i texten
+    • Emojier med rösten: säg ”emoji raket” så hamnar emojin i texten
     • Ett andra kortkommando: Control + Option + Mellanslag
     • Inställningar → Allmänt: stäng av felrapporter
 
@@ -331,7 +331,7 @@ da:
   whats_new: |
     Nyt
     • Brugerfladen taler nu 25 sprog, efter sproget på din Mac
-    • Emojis med stemmen: sig “emoji raket”, og 🚀 lander i teksten
+    • Emojis med stemmen: sig “emoji raket”, og emojien lander i teksten
     • En ekstra genvej: Control + Option + Mellemrum
     • Indstillinger → Generelt: slå fejlrapporter fra
 
@@ -371,7 +371,7 @@ fi:
   whats_new: |
     Uutta
     • Käyttöliittymä puhuu nyt 25 kieltä Macisi kielen mukaan
-    • Emojit äänellä: sano ”emoji raketti”, ja 🚀 ilmestyy tekstiin
+    • Emojit äänellä: sano ”emoji raketti”, ja emoji ilmestyy tekstiin
     • Toinen oikotie: Control + Optio + välilyönti
     • Asetukset → Yleiset: laita virheraportit pois päältä
 
@@ -411,7 +411,7 @@ pl:
   whats_new: |
     Nowości
     • Interfejs mówi teraz w 25 językach, zgodnie z językiem Twojego Maca
-    • Emoji głosem: powiedz „emoji rakieta”, a 🚀 trafi do tekstu
+    • Emoji głosem: powiedz „emoji rakieta”, a emoji trafi do tekstu
     • Drugi skrót: Control + Option + Spacja
     • Ustawienia → Ogólne: wyłącz raporty o błędach
 
@@ -451,7 +451,7 @@ cs:
   whats_new: |
     Novinky
     • Rozhraní teď mluví 25 jazyky, podle jazyka vašeho Macu
-    • Emoji hlasem: řekněte „emoji raketa“ a 🚀 se objeví v textu
+    • Emoji hlasem: řekněte „emoji raketa“ a emoji se objeví v textu
     • Druhá zkratka: Control + Option + mezerník
     • Nastavení → Obecné: vypněte hlášení o chybách
 
@@ -491,7 +491,7 @@ sk:
   whats_new: |
     Novinky
     • Rozhranie teraz hovorí 25 jazykmi, podľa jazyka vášho Macu
-    • Emoji hlasom: povedzte „emoji raketa“ a 🚀 sa objaví v texte
+    • Emoji hlasom: povedzte „emoji raketa“ a emoji sa objaví v texte
     • Druhá skratka: Control + Option + medzerník
     • Nastavenia → Všeobecné: vypnite hlásenia o chybách
 
@@ -531,7 +531,7 @@ hu:
   whats_new: |
     Újdonságok
     • A felület mostantól 25 nyelven beszél, a Mac nyelvéhez igazodva
-    • Emojik hanggal: mondja, hogy „emoji rakéta”, és a 🚀 megjelenik a szövegben
+    • Emojik hanggal: mondja, hogy „emoji rakéta”, és az emoji megjelenik a szövegben
     • Második billentyűparancs: Control + Option + szóköz
     • Beállítások → Általános: kapcsolja ki a hibajelentéseket
 
@@ -571,7 +571,7 @@ ro:
   whats_new: |
     Noutăți
     • Interfața vorbește acum 25 de limbi, după limba Mac-ului dvs.
-    • Emojiuri cu vocea: spuneți „emoji rachetă” și 🚀 apare în text
+    • Emojiuri cu vocea: spuneți „emoji rachetă” și emojiul apare în text
     • O a doua scurtătură: Control + Opțiune + Spațiu
     • Configurări → General: dezactivați rapoartele de erori
 
@@ -611,7 +611,7 @@ ru:
   whats_new: |
     Новое
     • Интерфейс теперь говорит на 25 языках — в зависимости от языка вашего Mac
-    • Эмодзи голосом: скажите «эмодзи ракета», и 🚀 появится в тексте
+    • Эмодзи голосом: скажите «эмодзи ракета», и эмодзи появится в тексте
     • Второе сочетание клавиш: Control + Option + Пробел
     • Настройки → Основные: отключите отчёты об ошибках
 
@@ -651,7 +651,7 @@ uk:
   whats_new: |
     Нове
     • Інтерфейс тепер говорить 25 мовами — залежно від мови вашого Mac
-    • Емодзі голосом: скажіть «емодзі ракета», і 🚀 з’явиться в тексті
+    • Емодзі голосом: скажіть «емодзі ракета», і емодзі з’явиться в тексті
     • Друге сполучення клавіш: Control + Option + Пробіл
     • Параметри → Загальні: вимкніть звіти про помилки
 
@@ -691,7 +691,7 @@ el:
   whats_new: |
     Νέα
     • Η διεπαφή μιλά πλέον 25 γλώσσες, ανάλογα με τη γλώσσα του Mac σας
-    • Emoji με τη φωνή: πείτε «emoji πύραυλος» και το 🚀 μπαίνει στο κείμενο
+    • Emoji με τη φωνή: πείτε «emoji πύραυλος» και το emoji μπαίνει στο κείμενο
     • Δεύτερη συντόμευση: Control + Option + Διάστημα
     • Ρυθμίσεις → Γενικά: απενεργοποιήστε τις αναφορές σφαλμάτων
 
@@ -731,7 +731,7 @@ hr:
   whats_new: |
     Novo
     • Sučelje sada govori 25 jezika, prema jeziku vašeg Maca
-    • Emojiji glasom: recite „emoji raketa” i 🚀 se pojavi u tekstu
+    • Emojiji glasom: recite „emoji raketa” i emoji se pojavi u tekstu
     • Drugi prečac: Control + Option + razmaknica
     • Postavke → Općenito: isključite izvještaje o greškama
 
@@ -771,7 +771,7 @@ sl-SI:
   whats_new: |
     Novo
     • Vmesnik zdaj govori 25 jezikov, glede na jezik vašega Maca
-    • Emojiji z glasom: recite »emoji raketa« in 🚀 se pojavi v besedilu
+    • Emojiji z glasom: recite »emoji raketa« in emoji se pojavi v besedilu
     • Druga bližnjica: Control + Option + preslednica
     • Nastavitve → Splošno: izklopite poročila o napakah
 
