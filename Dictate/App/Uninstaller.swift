@@ -29,22 +29,6 @@ struct Uninstaller {
         UpdateInstaller.isUpdatable(bundle)
     }
 
-    /// Asks first, then cleans up and quits.
-    func confirmAndRun() {
-        NSApp.activate()
-        let alert = NSAlert()
-        alert.alertStyle = .warning
-        alert.messageText = String(localized: "Désinstaller Dictate ?")
-        alert.informativeText = String(localized: """
-            L'application, les modèles de transcription, les statistiques et les réglages \
-            seront placés dans la Corbeille ou effacés, et Dictate quittera.
-            """)
-        alert.addButton(withTitle: String(localized: "Désinstaller")).hasDestructiveAction = true
-        alert.addButton(withTitle: String(localized: "Annuler"))
-        guard alert.runModal() == .alertFirstButtonReturn else { return }
-        Task { await run() }
-    }
-
     func run() async {
         Log.app.info("uninstalling \(bundleIdentifier, privacy: .public)")
         try? await SMAppService.mainApp.unregister()

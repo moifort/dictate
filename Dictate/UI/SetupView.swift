@@ -361,7 +361,7 @@ private struct ReviewStep: View {
                     .foregroundStyle(.tertiary)
                 if !model.settings.reviewerIsChosen && !Distribution.isAppStore {
                     Actions {
-                        if model.claudeCLIPath == nil {
+                        if model.claudeCLI.path == nil {
                             Link("Télécharger Claude", destination: URL(string: "https://claude.ai/download")!)
                                 .buttonStyle(.glass)
                         } else {
@@ -395,7 +395,7 @@ private struct ReviewStep: View {
 
         case .claude where model.settings.claudeAccess == .apiKey:
             keyReviewer(.anthropic)
-            if model.claudeSubscriptionReady {
+            if model.claudeCLI.subscriptionReady {
                 Actions {
                     Button("Utiliser l'abonnement") { model.selectClaudeAccess(.subscription) }
                         .buttonStyle(.glass)
@@ -403,7 +403,7 @@ private struct ReviewStep: View {
             }
 
         case .claude:
-            if let path = model.claudeCLIPath, model.claudeSignedIn {
+            if let path = model.claudeCLI.path, model.claudeCLI.signedIn {
                 detectedText
                     .font(.caption)
                     .foregroundStyle(.tertiary)
@@ -421,7 +421,7 @@ private struct ReviewStep: View {
                 }
             } else {
                 Actions {
-                    if model.claudeCLIPath == nil {
+                    if model.claudeCLI.path == nil {
                         Link("Télécharger Claude", destination: URL(string: "https://claude.ai/download")!)
                             .buttonStyle(.glassProminent)
                         Button("Revérifier") { model.recheckClaude() }
@@ -525,7 +525,7 @@ private struct ReviewStep: View {
         if model.settings.reviewerIsChosen || Distribution.isAppStore {
             return Text("Apple Intelligence est prêt : la relecture se fait sur ce Mac.")
         }
-        if model.claudeCLIPath == nil {
+        if model.claudeCLI.path == nil {
             return Text("Claude est introuvable : Apple Intelligence relit sur ce Mac. Installez Claude pour qu'il prenne le relais.")
         }
         return Text("Claude n'est connecté à aucun compte : Apple Intelligence relit sur ce Mac. Connectez-vous à Claude pour qu'il prenne le relais.")

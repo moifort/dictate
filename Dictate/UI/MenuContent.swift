@@ -33,7 +33,7 @@ struct MenuContent: View {
             }
         }
         if model.settings.keepEvaluationCorpus {
-            Button("Évaluer le corpus (\(model.corpus.entries.count) dictées)…") { model.evaluateCorpus() }
+            Button("Évaluer le corpus (\(model.corpus.entries.count) dictées)…") { Alerts.showEvaluation(of: model.corpus) }
                 .disabled(model.corpus.entries.isEmpty)
         }
         Button("Réglages…") { open { openSettings() } }

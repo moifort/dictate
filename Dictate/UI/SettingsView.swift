@@ -89,7 +89,7 @@ private struct DictationSettings: View {
                         if !model.corpus.entries.isEmpty {
                             HStack {
                                 Text("\(model.corpus.entries.count) dictées gardées")
-                                Button("Supprimer…") { model.confirmAndDeleteCorpus() }
+                                Button("Supprimer…") { Alerts.confirmDeletion(of: model.corpus) }
                             }
                         }
                     }
@@ -478,7 +478,7 @@ private struct GeneralSettings: View {
                 Hint("À jour, vérifié \(lastCheck.formatted(.relative(presentation: .named)))")
             }
         }
-        Button("Désinstaller Dictate…") { Uninstaller().confirmAndRun() }
+        Button("Désinstaller Dictate…") { Alerts.confirmUninstall() }
             .padding(.top, 8)
         Hint("Met l'application, les modèles et les statistiques à la Corbeille, efface les réglages.")
     }
@@ -617,7 +617,7 @@ private struct ReviewSettings: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 8) {
                 Group {
-                    if model.claudeCLIPath == nil {
+                    if model.claudeCLI.path == nil {
                         Text("Claude introuvable.")
                     } else {
                         Text("Claude n'est connecté à aucun compte.")
@@ -757,11 +757,11 @@ private struct ReviewSettings: View {
                     Text(claudeCLITitle)
                     Spacer()
                     Button("Tester") { Task { await model.testReviewer() } }
-                        .disabled(model.claudeCLIPath == nil)
+                        .disabled(model.claudeCLI.path == nil)
                     Button("Choisir…", action: chooseClaudeCLI)
                 }
-                if let path = model.claudeCLIPath {
-                    Text(model.claudeCLIDisplayPath(path))
+                if let path = model.claudeCLI.path {
+                    Text(model.claudeCLI.displayPath(path))
                         .font(.caption.monospaced())
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
@@ -790,9 +790,9 @@ private struct ReviewSettings: View {
 
     @ViewBuilder
     private var claudeCLIStatusIcon: some View {
-        if model.isProbingClaudeCLI {
+        if model.claudeCLI.isProbing {
             ProgressView().controlSize(.small)
-        } else if model.claudeCLIVersion != nil, model.claudeSignedIn {
+        } else if model.claudeCLI.version != nil, model.claudeCLI.signedIn {
             Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
         } else {
             Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
@@ -800,16 +800,16 @@ private struct ReviewSettings: View {
     }
 
     private var claudeCLITitle: String {
-        if model.claudeCLIPath == nil { return String(localized: "claude introuvable") }
-        if let version = model.claudeCLIVersion {
-            return model.claudeSignedIn ? "claude \(version)" : String(localized: "claude \(version), non connecté")
+        if model.claudeCLI.path == nil { return String(localized: "claude introuvable") }
+        if let version = model.claudeCLI.version {
+            return model.claudeCLI.signedIn ? "claude \(version)" : String(localized: "claude \(version), non connecté")
         }
-        return model.isProbingClaudeCLI ? "claude" : String(localized: "claude ne répond pas")
+        return model.claudeCLI.isProbing ? "claude" : String(localized: "claude ne répond pas")
     }
 
     private var overrideIgnored: Bool {
         let override = model.settings.cliPathOverride
-        return !override.isEmpty && model.claudeCLIPath?.path != override
+        return !override.isEmpty && model.claudeCLI.path?.path != override
     }
 
     private func chooseClaudeCLI() {
@@ -820,7 +820,7 @@ private struct ReviewSettings: View {
         // The bundled CLI lives inside claude.app, and standalone installs in ~/.local.
         panel.treatsFilePackagesAsDirectories = true
         panel.showsHiddenFiles = true
-        panel.directoryURL = model.claudeCLIPath?.deletingLastPathComponent()
+        panel.directoryURL = model.claudeCLI.path?.deletingLastPathComponent()
         panel.message = String(localized: "Choisissez l'exécutable claude")
         panel.prompt = String(localized: "Choisir")
         NSApp.activate()

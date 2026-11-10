@@ -131,13 +131,20 @@ struct ClaudeCLIEnhancerTests {
         echo '{"type":"result","subtype":"success","is_error":false,"result":"ok"}'
         """)
         let enhancer = makeEnhancer(cli)
+        // A loaded machine can take a while to start the script: wait for it, up to 5 s.
+        func waitForStarts(_ count: Int) async throws -> Int {
+            for _ in 0..<100 {
+                let started = (try? String(contentsOf: starts, encoding: .utf8))?.count(of: "started") ?? 0
+                if started >= count { return started }
+                try await Task.sleep(for: .milliseconds(50))
+            }
+            return (try? String(contentsOf: starts, encoding: .utf8))?.count(of: "started") ?? 0
+        }
         enhancer.prewarm()
-        try await Task.sleep(for: .milliseconds(300))
-        #expect(try String(contentsOf: starts, encoding: .utf8).count(of: "started") == 1)
+        #expect(try await waitForStarts(1) == 1)
 
         _ = try await enhancer.enhance(transcript: "x", context: DictationContext())
-        try await Task.sleep(for: .milliseconds(300))
-        #expect(try String(contentsOf: starts, encoding: .utf8).count(of: "started") == 2)
+        #expect(try await waitForStarts(2) == 2)
         enhancer.shutdown()
     }
 

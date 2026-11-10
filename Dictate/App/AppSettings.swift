@@ -146,6 +146,21 @@ final class AppSettings {
         return true
     }
 
+    /// Saves the key and uses it: whoever types a key wants that reviewer.
+    /// An empty key removes it, and its reviewer goes back to the automatic
+    /// choice. False when the keychain refused it, nothing changed then.
+    func saveAPIKey(_ key: String, for provider: APIProvider) -> Bool {
+        guard setAPIKey(key.trimmingCharacters(in: .whitespacesAndNewlines), for: provider) else { return false }
+        let saved = hasAPIKey(provider)
+        if provider == .anthropic { claudeAccess = saved ? .apiKey : .subscription }
+        if saved {
+            reviewer = provider.reviewer
+        } else if reviewerIsChosen, reviewer == provider.reviewer, provider != .anthropic {
+            clearReviewerChoice()
+        }
+        return true
+    }
+
     /// Reads the keys the keychain refused earlier again.
     func reloadUnreadableAPIKeys() {
         for provider in unreadableKeys { loadAPIKey(provider) }
