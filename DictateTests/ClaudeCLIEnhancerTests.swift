@@ -254,3 +254,67 @@ struct ClaudeCLIErrorTests {
         #expect(!ClaudeCLIError.notFound.isDisconnected)
     }
 }
+
+/// The CLI's stream-json output as it comes on a failure, line by line: what
+/// Dictate reads of it must not depend on the wording of its messages.
+struct ClaudeCLIContractTests {
+    private func outcome(_ lines: [String]) -> Result<String?, ClaudeCLIError> {
+        var reading = ClaudeCLIProcess.StreamReading()
+        do {
+            for line in lines {
+                let event = try JSONSerialization.jsonObject(with: Data(line.utf8)) as! [String: Any]
+                if let text = try reading.read(event) { return .success(text) }
+            }
+            return .success(nil)
+        } catch let error as ClaudeCLIError {
+            return .failure(error)
+        } catch {
+            Issue.record("\(error)")
+            return .success(nil)
+        }
+    }
+
+    private func failure(code: String, text: String) -> ClaudeCLIError? {
+        let result = outcome([
+            #"{"type":"system","subtype":"init","model":"claude-haiku-4-5"}"#,
+            #"{"type":"assistant","error":"\#(code)","message":{"model":"<synthetic>","content":[{"type":"text","text":"\#(text)"}]}}"#,
+            #"{"type":"result","subtype":"success","is_error":true,"result":"\#(text)"}"#,
+        ])
+        if case .failure(let error) = result { return error }
+        return nil
+    }
+
+    @Test func aSignInFailureIsReadFromItsCodeWhateverTheWording() throws {
+        let error = try #require(failure(code: "authentication_failed", text: "Something new went wrong"))
+        #expect(error.isDisconnected)
+        #expect(!error.isUsageLimit)
+        #expect(ReviewFailure(error) == .disconnected)
+    }
+
+    @Test func aSpentLimitIsReadFromItsCode() throws {
+        #expect(try #require(failure(code: "rate_limit", text: "Any wording")).isUsageLimit)
+        #expect(try #require(failure(code: "billing_error", text: "Credit balance is too low")).isUsageLimit)
+    }
+
+    /// An "/login" in a server error's text is not a sign-in failure once the code says otherwise.
+    @Test func theCodeWinsOverTheWording() throws {
+        let error = try #require(failure(code: "server_error", text: "Overloaded, try /login later"))
+        #expect(!error.isDisconnected)
+        #expect(!error.isUsageLimit)
+    }
+
+    /// Older CLIs give no code: the wording still tells.
+    @Test func withoutACodeTheWordingIsRead() {
+        #expect(ClaudeCLIError.failed("Failed to authenticate: OAuth session expired").isDisconnected)
+        #expect(ClaudeCLIError.failed("You've hit your session limit · resets 3:20pm").isUsageLimit)
+        #expect(!ClaudeCLIError.failed("Overloaded").isDisconnected)
+    }
+
+    @Test func theModelsReplyIsTheCleanup() {
+        let result = outcome([
+            #"{"type":"assistant","message":{"model":"claude-haiku-4-5","content":[{"type":"thinking","thinking":"…"},{"type":"text","text":"<cleaned>Fais un push.</cleaned>"}]}}"#,
+            #"{"type":"result","subtype":"success","is_error":false,"result":"<cleaned>Fais un push.</cleaned>"}"#,
+        ])
+        #expect(result == .success("<cleaned>Fais un push.</cleaned>"))
+    }
+}

@@ -3,14 +3,25 @@ import Foundation
 
 nonisolated enum ClaudeCLIError: LocalizedError, Equatable {
     case notFound
-    case failed(String)
+    /// The CLI's `result` text, and the `error` code of the reply it made up
+    /// itself when the API or the sign-in failed (see `ErrorCode`).
+    case failed(String, code: String? = nil)
     case noResult(String)
+
+    /// The codes the CLI puts in the `error` field of the assistant message
+    /// it makes up on a failure, as its SDK documents them. Stable, unlike
+    /// the wording of the text, which is only the fallback for older CLIs.
+    enum ErrorCode {
+        static let authenticationFailed = "authentication_failed"
+        static let rateLimit = "rate_limit"
+        static let billingError = "billing_error"
+    }
 
     var errorDescription: String? {
         switch self {
         case .notFound:
             String(localized: "CLI claude introuvable. Installez Claude Code ou indiquez son chemin dans les réglages.")
-        case .failed(let message):
+        case .failed(let message, _):
             String(localized: "Claude a renvoyé une erreur : \(message)")
         case .noResult(let details):
             String(localized: "Claude Code s'est arrêté sans réponse. \(details)")
@@ -23,7 +34,8 @@ nonisolated enum ClaudeCLIError: LocalizedError, Equatable {
     /// Dictate caused it and the raw transcript goes in. Any other wording
     /// stays a failure to look into.
     var isUsageLimit: Bool {
-        guard case .failed(let message) = self else { return false }
+        guard case .failed(let message, let code) = self else { return false }
+        if let code { return code == ErrorCode.rateLimit || code == ErrorCode.billingError }
         let text = message.lowercased()
         if text.contains("usage limit") { return true }
         return text.contains("limit") && (text.contains("hit your") || text.contains("reached your"))
@@ -33,7 +45,8 @@ nonisolated enum ClaudeCLIError: LocalizedError, Equatable {
     /// authenticate: OAuth session expired…", "Please run /login"): every
     /// cleanup fails until the user signs in again, so it must show.
     var isDisconnected: Bool {
-        guard case .failed(let message) = self else { return false }
+        guard case .failed(let message, let code) = self else { return false }
+        if let code { return code == ErrorCode.authenticationFailed }
         let text = message.lowercased()
         return text.contains("/login") || text.contains("failed to authenticate") || text.contains("oauth")
     }
@@ -114,18 +127,31 @@ nonisolated final class ClaudeCLIProcess: @unchecked Sendable {
     /// CLI writes a post-turn summary before `result`, measured at 2.5 to 5 s
     /// on 2026-10-11 with CLI 2.1.293, longer than the cleanup itself.
     private static func readResult(from stdout: FileHandle, stderr: LockedBuffer) async throws -> String {
+        var reading = StreamReading()
         for try await line in stdout.bytes.lines {
             guard let event = try? JSONSerialization.jsonObject(with: Data(line.utf8)) as? [String: Any] else { continue }
-            if let text = assistantText(event) { return text }
-            guard event["type"] as? String == "result" else { continue }
+            if let outcome = try reading.read(event) { return outcome }
+        }
+        throw ClaudeCLIError.noResult(stderr.text)
+    }
+
+    /// What the CLI's stream-json events amount to, one event at a time.
+    struct StreamReading {
+        /// The `error` code of a reply the CLI made up, kept for the `result` event.
+        private var errorCode: String?
+
+        /// The cleanup once known, nil while it is not, or the failure.
+        mutating func read(_ event: [String: Any]) throws -> String? {
+            if event["type"] as? String == "assistant", let code = event["error"] as? String { errorCode = code }
+            if let text = ClaudeCLIProcess.assistantText(event) { return text }
+            guard event["type"] as? String == "result" else { return nil }
             let text = event["result"] as? String ?? ""
             let subtype = event["subtype"] as? String ?? "unknown"
             if event["is_error"] as? Bool == true || subtype != "success" {
-                throw ClaudeCLIError.failed(text.isEmpty ? subtype : text)
+                throw ClaudeCLIError.failed(text.isEmpty ? subtype : text, code: errorCode)
             }
             return text
         }
-        throw ClaudeCLIError.noResult(stderr.text)
     }
 
     /// The text of a model reply. Nil for thinking-only messages and for the
