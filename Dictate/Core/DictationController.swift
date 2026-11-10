@@ -73,6 +73,9 @@ final class DictationController {
     /// The engine whose model is not in memory yet, nil once dictation can start.
     @ObservationIgnored private let loadingEngine: () -> TranscriptionEngine?
     @ObservationIgnored private let enhancementTimeout: Duration
+    /// How long a transcription may take, on top of half the audio's length:
+    /// a stuck engine call must not hold every later dictation.
+    @ObservationIgnored private let transcriptionTimeout: Duration
     /// How long the microphone keeps capturing once the key is released.
     @ObservationIgnored private let releaseTail: Duration
     /// Waits out `releaseTail`; injected so tests control when the tail ends.
@@ -149,6 +152,7 @@ final class DictationController {
         reviewer: @escaping () -> Reviewer? = { nil },
         loadingEngine: @escaping () -> TranscriptionEngine? = { nil },
         enhancementTimeout: Duration = .seconds(8),
+        transcriptionTimeout: Duration = .seconds(30),
         releaseTail: Duration = defaultReleaseTail,
         maximumRecording: Duration = defaultMaximumRecording,
         sleep: @escaping (Duration) async -> Void = { try? await Task.sleep(for: $0) }
@@ -165,6 +169,7 @@ final class DictationController {
         self.reviewer = reviewer
         self.loadingEngine = loadingEngine
         self.enhancementTimeout = enhancementTimeout
+        self.transcriptionTimeout = transcriptionTimeout
         self.releaseTail = releaseTail
         self.maximumRecording = maximumRecording
         self.sleep = sleep
@@ -308,13 +313,20 @@ final class DictationController {
     }
 
     /// Runs after the transcriptions already queued, and times only its own.
+    /// Gives up past its deadline, counted from its own start: the engine call
+    /// is abandoned, and the next dictations no longer wait for it.
     private func transcribeInTurn(_ samples: [Float]) async throws -> (Transcription, Duration) {
         let previous = transcribing
+        let audio = Double(samples.count) / Double(AudioAnalysis.sampleRate)
+        let limit = transcriptionTimeout + .seconds(audio / 2)
         let work = Task { [transcriber, language] in
             await previous?.value
             let clock = ContinuousClock()
             let start = clock.now
-            let transcript = try await transcriber.transcription(samples: samples, language: language())
+            let engine = Task { try await transcriber.transcription(samples: samples, language: language()) }
+            let transcript = try await value(of: engine, within: limit) { _ in
+                Log.dictation.notice("an abandoned transcription finished after all")
+            }
             return (transcript, clock.now - start)
         }
         transcribing = Task { _ = await work.result }
@@ -347,6 +359,10 @@ final class DictationController {
             transcript.text = transcript.text.trimmingCharacters(in: .whitespacesAndNewlines)
             let doubtful = transcript.words.count { $0.confidence < DoubtfulWords.threshold }
             Log.dictation.info("transcribed \(audio, format: .fixed(precision: 1)) s of audio in \(Self.milliseconds(transcription)) ms, \(doubtful) doubtful words")
+        } catch is DeadlineExceeded {
+            Log.dictation.error("transcription of \(audio, format: .fixed(precision: 1)) s of audio timed out")
+            ErrorReporter.capture(message: "transcription with \(engine.rawValue) timed out", category: "transcriber")
+            return complete(id, .failed(String(localized: "Transcription impossible")))
         } catch {
             Log.dictation.error("transcription failed: \(error.localizedDescription, privacy: .public)")
             ErrorReporter.capture(error, "transcription with \(engine.rawValue) failed", category: "transcriber")

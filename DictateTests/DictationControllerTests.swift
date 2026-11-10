@@ -22,6 +22,7 @@ struct DictationControllerTests {
         reviewer: Reviewer? = .claude,
         loadingEngine: TranscriptionEngine? = nil,
         maximumRecording: Duration = .seconds(60),
+        transcriptionTimeout: Duration = .seconds(30),
         tail: ((Fakes) async -> Void)? = nil
     ) -> (DictationController, Fakes) {
         let events = EventLog()
@@ -46,6 +47,7 @@ struct DictationControllerTests {
             reviewer: { reviewer },
             loadingEngine: { loadingEngine },
             enhancementTimeout: .milliseconds(200),
+            transcriptionTimeout: transcriptionTimeout,
             maximumRecording: maximumRecording,
             sleep: { duration in
                 fakes.events.append("tail of \(duration) started")
@@ -745,6 +747,24 @@ struct DictationControllerTests {
         try await Task.sleep(for: .milliseconds(200))
         #expect(fakes.inserter.pasted.count == 1)
         #expect(controller.phase == .idle)
+    }
+
+    /// A stuck engine call fails its dictation without holding the next ones.
+    @Test(.timeLimit(.minutes(1)))
+    func aStuckTranscriptionGivesUpAndFreesTheNextOnes() async throws {
+        let (controller, fakes) = makeController(
+            samples: [Float](repeating: 0.2, count: 8_000),
+            transcriberDelay: .seconds(20), transcriptionTimeout: .milliseconds(100)
+        )
+        controller.handle(.pressed)
+        await controller.waitUntilStarted()
+        controller.handle(.released)
+        let clock = ContinuousClock()
+        let start = clock.now
+        await controller.waitUntilIdle()
+        #expect(clock.now - start < .seconds(5))
+        #expect(controller.lastOutcome == .failed(String(localized: "Transcription impossible")))
+        #expect(fakes.inserter.pasted.isEmpty)
     }
 
     @Test func recorderFailureReportsFailure() async {
