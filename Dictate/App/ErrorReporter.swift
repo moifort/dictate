@@ -5,8 +5,9 @@ import os
 /// Sends errors and crashes to Sentry. Release builds only: a Debug build or
 /// a test run would fill the project with the developer's own mistakes.
 ///
-/// Never given what the user said or wrote: only error descriptions, the
-/// phase they happened in and the settings that matter to reproduce them.
+/// Never given what the user said or wrote: only error descriptions, scrubbed
+/// of paths and secrets, the phase they happened in and the settings that
+/// matter to reproduce them.
 nonisolated enum ErrorReporter {
     static let dsn = "https://62ee408852523f7fe415ffb8442943e5@o4510952263909376.ingest.de.sentry.io/4512244932673616"
 
@@ -37,7 +38,47 @@ nonisolated enum ErrorReporter {
             // with its context, by the code that made the request: the SDK's own
             // event for the same answer only said "504", twice.
             options.enableCaptureFailedRequests = false
+            // A last pass over what the SDK built itself, crash reasons included.
+            options.beforeSend = { event in
+                for exception in event.exceptions ?? [] {
+                    exception.value = exception.value.map(scrubbed)
+                }
+                return event
+            }
         }
+    }
+
+    /// The longest error text sent: enough to tell errors apart, too short
+    /// for a tool's whole output.
+    static let maximumTextLength = 300
+
+    /// An error's text without what could identify the user or leak a
+    /// secret: home folder paths, e-mail addresses and API keys are masked,
+    /// and the text is cut. The `claude` CLI's standard error and the first
+    /// bytes of an API's answer end up in error descriptions.
+    static func scrubbed(_ text: String) -> String {
+        var text = text.replacingOccurrences(of: NSHomeDirectory(), with: "~")
+        let masks: [(pattern: String, replacement: String)] = [
+            (#"/Users/[^/\s"']+"#, "/Users/…"),
+            (#"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}"#, "…@…"),
+            (#"\b(sk-(ant-)?|AIza)[A-Za-z0-9_\-*.]{6,}"#, "[key]"),
+        ]
+        for mask in masks {
+            text = text.replacingOccurrences(
+                of: mask.pattern, with: mask.replacement, options: [.regularExpression, .caseInsensitive]
+            )
+        }
+        guard text.count > maximumTextLength else { return text }
+        return String(text.prefix(maximumTextLength)) + "…"
+    }
+
+    /// What is sent for `error`: its domain, its code and its scrubbed text.
+    /// Never the error itself, whose bridged user info carries its whole text.
+    static func reportable(_ error: Error) -> NSError {
+        let bridged = error as NSError
+        return NSError(domain: bridged.domain, code: bridged.code, userInfo: [
+            NSLocalizedDescriptionKey: scrubbed(error.localizedDescription),
+        ])
     }
 
     /// `dictate@1.2.0+45`, the form Sentry splits into version and build.
@@ -50,11 +91,12 @@ nonisolated enum ErrorReporter {
     /// An error that was caught: `message` says what was being attempted.
     static func capture(_ error: Error, _ message: String, category: String, level: SentryLevel = .error) {
         guard isEnabled else { return }
-        SentrySDK.capture(error: error) { scope in
+        let reported = reportable(error)
+        SentrySDK.capture(error: reported) { scope in
             scope.setLevel(level)
             scope.setTag(value: category, key: "category")
-            scope.setExtra(value: message, key: "message")
-            scope.setExtra(value: error.localizedDescription, key: "description")
+            scope.setExtra(value: scrubbed(message), key: "message")
+            scope.setExtra(value: reported.localizedDescription, key: "description")
         }
     }
 
