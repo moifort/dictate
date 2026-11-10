@@ -53,7 +53,7 @@ struct MenuContent: View {
             case .checking:
                 Text("Recherche d'une mise à jour…")
             case .downloading(let fraction):
-                Text("Téléchargement de la mise à jour… \(fraction.formatted(.percent.precision(.fractionLength(0))))")
+                Text("Téléchargement de la mise à jour… \(fraction.percentText)")
             case .installing:
                 Text("Installation de la mise à jour…")
             case .idle, .available, .failed:
@@ -86,7 +86,7 @@ struct MenuContent: View {
         let engine = model.transcriber.engine.displayName
         return switch model.transcriber.state {
         case .notLoaded, .loading: String(localized: "Chargement de \(engine)…")
-        case .downloading(let fraction): String(localized: "Téléchargement de \(engine)… \(fraction.formatted(.percent.precision(.fractionLength(0))))")
+        case .downloading(let fraction): String(localized: "Téléchargement de \(engine)… \(fraction.percentText)")
         case .failed(let message): String(localized: "\(engine) indisponible : \(message)")
         case .ready: model.hotkeyActive ? boosterStatusLine : String(localized: "Touche \(model.settings.pushToTalkKey.displayName) inactive")
         }
@@ -95,7 +95,7 @@ struct MenuContent: View {
     /// Only its download: the rest is in the settings, and dictation never waits for it.
     private var boosterStatusLine: String? {
         guard case .downloading(let fraction) = model.booster.state else { return nil }
-        return String(localized: "Téléchargement du modèle de vocabulaire… \(fraction.formatted(.percent.precision(.fractionLength(0))))")
+        return String(localized: "Téléchargement du modèle de vocabulaire… \(fraction.percentText)")
     }
 
     /// An accessory app must be activated for its windows to come forward.

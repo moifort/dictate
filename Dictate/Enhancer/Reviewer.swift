@@ -48,6 +48,11 @@ nonisolated enum Reviewer: String, CaseIterable, Codable, Identifiable, Sendable
         }
     }
 
+    /// The name under its tile in the settings, where space is short.
+    var shortName: String {
+        self == .apple ? "Apple" : displayName
+    }
+
     /// The SF Symbol, for the reviewers without a logo of their own.
     var symbol: String {
         switch self {

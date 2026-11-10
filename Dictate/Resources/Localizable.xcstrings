@@ -561,22 +561,6 @@
         }
       }
     },
-    "Apple": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Apple"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Apple"
-          }
-        }
-      }
-    },
     "Apple Intelligence a refusé ce texte.": {
       "localizations": {
         "en": {
@@ -1149,22 +1133,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Choix automatique : Claude, sinon OpenAI, sinon Gemini, sinon Apple Intelligence, selon ce qui est détecté."
-          }
-        }
-      }
-    },
-    "Claude": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Claude"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Claude"
           }
         }
       }
@@ -2125,22 +2093,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Garder les dictées pour mesurer la précision"
-          }
-        }
-      }
-    },
-    "Gemini": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gemini"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gemini"
           }
         }
       }
@@ -3269,22 +3221,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nécessite Claude Code ou l'app Claude connecté à votre abonnement, ou une clé API."
-          }
-        }
-      }
-    },
-    "OpenAI": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OpenAI"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OpenAI"
           }
         }
       }

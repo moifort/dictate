@@ -169,17 +169,12 @@ private struct AutoSendAppList: View {
     }
 
     private func chooseApp() {
-        let panel = NSOpenPanel()
-        panel.canChooseFiles = true
-        panel.canChooseDirectories = false
-        panel.allowsMultipleSelection = false
-        panel.allowedContentTypes = [.applicationBundle]
-        panel.directoryURL = URL(filePath: "/Applications")
-        panel.message = String(localized: "Choisissez une app où appuyer sur Entrée après la dictée")
-        panel.prompt = String(localized: "Ajouter")
-        NSApp.activate()
-        guard panel.runModal() == .OK, let url = panel.url,
-              let bundleID = Bundle(url: url)?.bundleIdentifier else { return }
+        guard let url = FilePicker.chooseFile(
+            types: [.applicationBundle],
+            in: URL(filePath: "/Applications"),
+            message: String(localized: "Choisissez une app où appuyer sur Entrée après la dictée"),
+            prompt: String(localized: "Ajouter")
+        ), let bundleID = Bundle(url: url)?.bundleIdentifier else { return }
         settings.addAutoSendApp(bundleID)
     }
 }
@@ -244,32 +239,16 @@ private struct EngineStatus: View {
         Group {
             switch model.transcriber.state {
             case .notLoaded, .loading:
-                status("Chargement de \(engine)… Dictate est indisponible en attendant.")
+                ProgressStatus("Chargement de \(engine)… Dictate est indisponible en attendant.")
             case .downloading(let fraction):
-                status("Téléchargement de \(engine)… \(fraction.formatted(.percent.precision(.fractionLength(0)))). Dictate est indisponible en attendant.")
+                ProgressStatus("Téléchargement de \(engine)… \(fraction.percentText). Dictate est indisponible en attendant.")
             case .failed(let message):
-                HStack(spacing: 8) {
-                    Label("\(engine) indisponible : \(message)", systemImage: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.orange)
-                    Button("Réessayer") { model.retryTranscriber() }
-                        .controlSize(.small)
-                }
-                .font(.callout)
+                RetryRow(message: "\(engine) indisponible : \(message)") { model.retryTranscriber() }
             case .ready:
                 EmptyView()
             }
         }
         .animation(.snappy, value: model.transcriber.state)
-    }
-
-    private func status(_ text: LocalizedStringKey) -> some View {
-        HStack(spacing: 8) {
-            ProgressView().controlSize(.small)
-            Text(text)
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
     }
 }
 
@@ -282,17 +261,11 @@ private struct BoosterStatus: View {
         Group {
             switch model.booster.state {
             case .loading:
-                status("Chargement du modèle de vocabulaire…")
+                ProgressStatus("Chargement du modèle de vocabulaire…")
             case .downloading(let fraction):
-                status("Téléchargement du modèle de vocabulaire… \(fraction.formatted(.percent.precision(.fractionLength(0)))).")
+                ProgressStatus("Téléchargement du modèle de vocabulaire… \(fraction.percentText).")
             case .failed(let message):
-                HStack(spacing: 8) {
-                    Label("Modèle de vocabulaire indisponible : \(message)", systemImage: "exclamationmark.triangle.fill")
-                        .foregroundStyle(.orange)
-                    Button("Réessayer") { model.retryBooster() }
-                        .controlSize(.small)
-                }
-                .font(.callout)
+                RetryRow(message: "Modèle de vocabulaire indisponible : \(message)") { model.retryBooster() }
             case .notLoaded:
                 if model.settings.vocabulary.isEmpty {
                     Hint("Sans effet tant que le lexique est vide.")
@@ -302,16 +275,6 @@ private struct BoosterStatus: View {
             }
         }
         .animation(.snappy, value: model.booster.state)
-    }
-
-    private func status(_ text: LocalizedStringKey) -> some View {
-        HStack(spacing: 8) {
-            ProgressView().controlSize(.small)
-            Text(text)
-                .font(.callout)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
     }
 }
 
@@ -484,45 +447,6 @@ private struct GeneralSettings: View {
     }
 }
 
-/// Who reviews a dictation: one tile per reviewer, "Aucun" keeps the raw transcription.
-private enum ReviewerTile: String, CaseIterable, Identifiable {
-    case none, apple, claude, openAI, gemini
-
-    var id: String { rawValue }
-
-    init(_ reviewer: Reviewer) {
-        switch reviewer {
-        case .none: self = .none
-        case .apple: self = .apple
-        case .claude: self = .claude
-        case .openAI: self = .openAI
-        case .gemini: self = .gemini
-        }
-    }
-
-    var reviewer: Reviewer {
-        switch self {
-        case .none: Reviewer.none
-        case .apple: .apple
-        case .claude: .claude
-        case .openAI: .openAI
-        case .gemini: .gemini
-        }
-    }
-
-    var displayName: LocalizedStringKey {
-        switch self {
-        case .none: "Aucun"
-        case .apple: "Apple"
-        case .claude: "Claude"
-        case .openAI: "OpenAI"
-        case .gemini: "Gemini"
-        }
-    }
-
-    var isAvailable: Bool { reviewer.isAvailable }
-}
-
 /// A reviewer's logo, or its SF Symbol, at the size of the picker's icons.
 private struct ReviewerIcon: View {
     let reviewer: Reviewer
@@ -546,10 +470,10 @@ private struct ReviewSettings: View {
     /// The key field under a greyed Claude tile, opened on demand.
     @State private var enteringAPIKey = false
 
-    private var reviewer: Binding<ReviewerTile> {
+    private var reviewer: Binding<Reviewer> {
         Binding(
-            get: { ReviewerTile(model.settings.reviewer) },
-            set: { model.selectReviewer($0.reviewer) }
+            get: { model.settings.reviewer },
+            set: { model.selectReviewer($0) }
         )
     }
 
@@ -671,18 +595,13 @@ private struct ReviewSettings: View {
         let saved = model.settings.hasAPIKey(provider)
         return LabeledContent("Clé :") {
             VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 8) {
+                ReviewerStatusRow(ready: saved, canTest: saved, test: testReviewer) {
                     if saved {
-                        Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
                         Text(verbatim: APIKeyField.masked(model.settings.apiKey(provider)))
                             .font(.callout.monospaced())
                     } else {
-                        Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
                         Text("Aucune clé \(provider.displayName) enregistrée")
                     }
-                    Spacer()
-                    Button("Tester") { Task { await model.testReviewer() } }
-                        .disabled(!saved)
                 }
                 APIKeyField(model: model, provider: provider)
                 HStack(spacing: 12) {
@@ -698,6 +617,11 @@ private struct ReviewSettings: View {
                 }
             }
         }
+    }
+
+    /// Runs the chosen reviewer on a sample dictation.
+    private func testReviewer() {
+        Task { await model.testReviewer() }
     }
 
     private var reviewerHint: String {
@@ -722,17 +646,9 @@ private struct ReviewSettings: View {
     private var appleStatus: some View {
         LabeledContent("Modèle :") {
             VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 8) {
-                    if model.appleIntelligence.isAvailable {
-                        Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
-                        Text("Apple Intelligence prêt")
-                    } else {
-                        Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
-                        Text("Apple Intelligence indisponible")
-                    }
-                    Spacer()
-                    Button("Tester") { Task { await model.testReviewer() } }
-                        .disabled(!model.appleIntelligence.isAvailable)
+                let available = model.appleIntelligence.isAvailable
+                ReviewerStatusRow(ready: available, canTest: available, test: testReviewer) {
+                    Text(available ? "Apple Intelligence prêt" : "Apple Intelligence indisponible")
                 }
                 if let explanation = model.appleIntelligence.explanation {
                     Text(explanation)
@@ -752,12 +668,14 @@ private struct ReviewSettings: View {
     private var claudeBinary: some View {
         LabeledContent("Binaire :") {
             VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 8) {
-                    claudeCLIStatusIcon
+                ReviewerStatusRow(
+                    ready: model.claudeCLI.version != nil && model.claudeCLI.signedIn,
+                    checking: model.claudeCLI.isProbing,
+                    canTest: model.claudeCLI.path != nil,
+                    test: testReviewer
+                ) {
                     Text(claudeCLITitle)
-                    Spacer()
-                    Button("Tester") { Task { await model.testReviewer() } }
-                        .disabled(model.claudeCLI.path == nil)
+                } extra: {
                     Button("Choisir…", action: chooseClaudeCLI)
                 }
                 if let path = model.claudeCLI.path {
@@ -788,17 +706,6 @@ private struct ReviewSettings: View {
         }
     }
 
-    @ViewBuilder
-    private var claudeCLIStatusIcon: some View {
-        if model.claudeCLI.isProbing {
-            ProgressView().controlSize(.small)
-        } else if model.claudeCLI.version != nil, model.claudeCLI.signedIn {
-            Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
-        } else {
-            Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
-        }
-    }
-
     private var claudeCLITitle: String {
         if model.claudeCLI.path == nil { return String(localized: "claude introuvable") }
         if let version = model.claudeCLI.version {
@@ -813,18 +720,13 @@ private struct ReviewSettings: View {
     }
 
     private func chooseClaudeCLI() {
-        let panel = NSOpenPanel()
-        panel.canChooseFiles = true
-        panel.canChooseDirectories = false
-        panel.allowsMultipleSelection = false
         // The bundled CLI lives inside claude.app, and standalone installs in ~/.local.
-        panel.treatsFilePackagesAsDirectories = true
-        panel.showsHiddenFiles = true
-        panel.directoryURL = model.claudeCLI.path?.deletingLastPathComponent()
-        panel.message = String(localized: "Choisissez l'exécutable claude")
-        panel.prompt = String(localized: "Choisir")
-        NSApp.activate()
-        guard panel.runModal() == .OK, let url = panel.url else { return }
+        guard let url = FilePicker.chooseFile(
+            in: model.claudeCLI.path?.deletingLastPathComponent(),
+            message: String(localized: "Choisissez l'exécutable claude"),
+            prompt: String(localized: "Choisir"),
+            insidePackages: true
+        ) else { return }
         model.settings.cliPathOverride = url.path
         model.settingsChanged()
     }
@@ -832,26 +734,26 @@ private struct ReviewSettings: View {
 
 /// A row of icon tiles, like the appearance picker in System Settings.
 private struct ReviewerPicker: View {
-    @Binding var selection: ReviewerTile
+    @Binding var selection: Reviewer
     /// Claude's tile is greyed out until its CLI is here and signed in.
     let claudeReady: Bool
 
     var body: some View {
         HStack(spacing: 12) {
             // The App Store build shows only the reviewers it has: no cloud service.
-            ForEach(ReviewerTile.allCases.filter(\.isAvailable)) { reviewer in
+            ForEach(Reviewer.allCases.filter(\.isAvailable)) { reviewer in
                 Button {
                     selection = reviewer
                 } label: {
                     VStack(spacing: 6) {
-                        ReviewerIcon(reviewer: reviewer.reviewer)
+                        ReviewerIcon(reviewer: reviewer)
                             .frame(width: 56, height: 40)
                             .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
                             .overlay {
                                 RoundedRectangle(cornerRadius: 8)
                                     .stroke(selection == reviewer ? Color.accentColor : .clear, lineWidth: 2)
                             }
-                        Text(reviewer.displayName)
+                        Text(reviewer.shortName)
                             .font(.caption)
                     }
                 }
@@ -862,7 +764,7 @@ private struct ReviewerPicker: View {
         }
     }
 
-    private func help(for reviewer: ReviewerTile) -> Text {
+    private func help(for reviewer: Reviewer) -> Text {
         switch reviewer {
         case .claude where !claudeReady:
             Text("Nécessite Claude Code ou l'app Claude connecté à votre abonnement, ou une clé API.")

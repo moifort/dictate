@@ -234,7 +234,7 @@ struct LatencyCard: View {
         case 1: return "\(seconds) · \(used[0].displayName)"
         default:
             let shares = used.map { reviewer in
-                "\(reviewer.displayName) \(bucket.share(of: reviewer).formatted(.percent.precision(.fractionLength(0))))"
+                "\(reviewer.displayName) \(bucket.share(of: reviewer).percentText)"
             }
             return "\(seconds) · \(shares.joined(separator: ", "))"
         }
