@@ -58,7 +58,7 @@ private struct DictationSettings: View {
             LabeledContent("Moteur :") {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(model.transcriber.engine.displayName)
-                    Hint("25 langues européennes, sur cette machine. Le lexique est appliqué par la relecture, et par Parakeet si vous renforcez le vocabulaire (onglet Lexique). 610 Mo à télécharger au premier usage.")
+                    Hint("25 langues européennes, sur cette machine. Le lexique est appliqué par la relecture, et par Parakeet si vous renforcez le vocabulaire (onglet Lexique). \(model.transcriber.engine.downloadSize) Mo à télécharger au premier usage.")
                     ModelWeights(model: model)
                     EngineStatus(model: model)
                 }

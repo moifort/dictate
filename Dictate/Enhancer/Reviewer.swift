@@ -40,7 +40,7 @@ nonisolated enum Reviewer: String, CaseIterable, Codable, Identifiable, Sendable
 
     var displayName: String {
         switch self {
-        case .none: "Aucun"
+        case .none: String(localized: "Aucun")
         case .apple: "Apple Intelligence"
         case .claude: "Claude"
         case .openAI: "OpenAI"

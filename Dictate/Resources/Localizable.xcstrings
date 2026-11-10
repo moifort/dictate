@@ -337,18 +337,18 @@
         }
       }
     },
-    "25 langues européennes, sur cette machine. Le lexique est appliqué par la relecture, et par Parakeet si vous renforcez le vocabulaire (onglet Lexique). 610 Mo à télécharger au premier usage.": {
+    "25 langues européennes, sur cette machine. Le lexique est appliqué par la relecture, et par Parakeet si vous renforcez le vocabulaire (onglet Lexique). %lld Mo à télécharger au premier usage.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "25 European languages, on this Mac. The lexicon is applied by the review, and by Parakeet if you boost the vocabulary (Lexicon tab). 610 MB to download on first use."
+            "value": "25 European languages, on this Mac. The lexicon is applied by the review, and by Parakeet if you boost the vocabulary (Lexicon tab). %lld MB to download on first use."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "25 langues européennes, sur cette machine. Le lexique est appliqué par la relecture, et par Parakeet si vous renforcez le vocabulaire (onglet Lexique). 610 Mo à télécharger au premier usage."
+            "value": "25 langues européennes, sur cette machine. Le lexique est appliqué par la relecture, et par Parakeet si vous renforcez le vocabulaire (onglet Lexique). %lld Mo à télécharger au premier usage."
           }
         }
       }
@@ -541,6 +541,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Année"
+          }
+        }
+      }
+    },
+    "App Claude": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude app"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App Claude"
           }
         }
       }
@@ -4537,18 +4553,18 @@
         }
       }
     },
-    "Un modèle de transcription tourne sur ce Mac, sans réseau. Il se télécharge une seule fois, environ 630 Mo.": {
+    "Un modèle de transcription tourne sur ce Mac, sans réseau. Il se télécharge une seule fois, environ %lld Mo.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "A transcription model runs on this Mac, without a network. It downloads only once, about 630 MB."
+            "value": "A transcription model runs on this Mac, without a network. It downloads only once, about %lld MB."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Un modèle de transcription tourne sur ce Mac, sans réseau. Il se télécharge une seule fois, environ 630 Mo."
+            "value": "Un modèle de transcription tourne sur ce Mac, sans réseau. Il se télécharge une seule fois, environ %lld Mo."
           }
         }
       }

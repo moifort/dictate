@@ -15,10 +15,11 @@ nonisolated enum TranscriptionEngine: String, CaseIterable, Codable, Identifiabl
         }
     }
 
-    /// Approximate size of the one-time model download, in MB.
+    /// Approximate size of the one-time model download, in MB: the one
+    /// figure every screen shows. Parakeet TDT Ultra measured 632 MB on disk.
     var downloadSize: Int {
         switch self {
-        case .parakeet: 610
+        case .parakeet: 630
         }
     }
 

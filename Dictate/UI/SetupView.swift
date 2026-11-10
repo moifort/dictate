@@ -560,7 +560,7 @@ private extension SetupStep {
         case .fnKey:
             "Par défaut, macOS ouvre les emoji ou sa propre dictée quand on appuie sur 🌐 fn. Vous pouvez aussi dicter avec control, qui n'a rien à régler."
         case .transcriptionModel:
-            "Un modèle de transcription tourne sur ce Mac, sans réseau. Il se télécharge une seule fois, environ 630 Mo."
+            "Un modèle de transcription tourne sur ce Mac, sans réseau. Il se télécharge une seule fois, environ \(TranscriptionEngine.parakeet.downloadSize) Mo."
         case .review:
             "Un modèle de langage retire les hésitations et corrige la ponctuation et votre jargon : Claude Haiku avec votre abonnement Claude, détecté automatiquement, ou une clé API Claude, OpenAI ou Gemini ; à défaut Apple Intelligence sur ce Mac. Au choix dans les Réglages."
         }

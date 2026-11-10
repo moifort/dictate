@@ -37,7 +37,7 @@ nonisolated struct ClaudeCLILocator: Sendable {
 
     /// Short form for the settings: the bundled copy hides deep inside the desktop app.
     func displayPath(of url: URL) -> String {
-        if url.path.contains("/Claude/claude-code/") { return "App Claude" }
+        if url.path.contains("/Claude/claude-code/") { return String(localized: "App Claude") }
         let homePath = home.path
         return url.path.hasPrefix(homePath + "/") ? "~" + url.path.dropFirst(homePath.count) : url.path
     }
