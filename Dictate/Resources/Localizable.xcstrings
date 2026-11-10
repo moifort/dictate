@@ -2729,6 +2729,22 @@
         }
       }
     },
+    "Maintenez control + option + espace pour dicter, puis collez le texte avec ⌘V.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold control + option + space to dictate, then paste the text with ⌘V."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maintenez control + option + espace pour dicter, puis collez le texte avec ⌘V."
+          }
+        }
+      }
+    },
     "Maintenez control, parlez, relâchez : le texte apparaît dans le champ actif, dans n'importe quelle app.": {
       "localizations": {
         "en": {
@@ -2777,18 +2793,18 @@
         }
       }
     },
-    "Maintenez option + espace pour dicter, puis collez le texte avec ⌘V.": {
+    "Maintenez option + espace pour dicter, puis collez le texte avec ⌘V. Sur un clavier français, option + espace tape aussi l'espace insécable : préférez alors control + option + espace.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Hold option + space to dictate, then paste the text with ⌘V."
+            "value": "Hold option + space to dictate, then paste the text with ⌘V. On a French keyboard, option + space also types the non-breaking space: pick control + option + space instead."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Maintenez option + espace pour dicter, puis collez le texte avec ⌘V."
+            "value": "Maintenez option + espace pour dicter, puis collez le texte avec ⌘V. Sur un clavier français, option + espace tape aussi l'espace insécable : préférez alors control + option + espace."
           }
         }
       }
@@ -4773,6 +4789,22 @@
           "stringUnit": {
             "state": "new",
             "value": "contre %1$@ %2$@ avant"
+          }
+        }
+      }
+    },
+    "control + option + espace": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "control + option + space"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "control + option + espace"
           }
         }
       }

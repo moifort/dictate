@@ -16,8 +16,10 @@ The `AppStore` configuration sets the `APP_STORE` flag and the
 - **Accessibility and Input Monitoring**: App Review refused both on 2026-10-25
   (guideline 2.4.5), for an app that is not an accessibility tool. The event
   tap, `FocusInspector` and the posted `Cmd+V` are compiled out. Dictation runs
-  on a Carbon global hot key, held ⌥Space (`HotKeyMonitor`, no permission), and
-  the text stays in the pasteboard for the user to paste. With no field to read
+  on a Carbon global hot key, held ⌥Space by default or ⌃⌥Space (Settings →
+  Dictée → Touche: ⌥Space types the non-breaking space on French keyboards),
+  through `HotKeyMonitor`, no permission; the text stays in the pasteboard for
+  the user to paste. With no field to read
   go the field context, the vocabulary suggestions and the evaluation corpus;
   the frontmost app still sets the tone of the cleanup.
 

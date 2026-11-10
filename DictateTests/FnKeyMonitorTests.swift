@@ -1,3 +1,4 @@
+import Carbon.HIToolbox
 import CoreGraphics
 import Testing
 @testable import Dictate
@@ -50,5 +51,19 @@ struct FnKeyMonitorTests {
 
     @Test func withControlTheFnKeyIsNotThePushToTalkKey() {
         #expect(FnKeyMonitor.classify(key: .control, type: .flagsChanged, keyCode: 63, flags: .maskSecondaryFn, time: 0) == nil)
+    }
+}
+
+/// The App Store build's hot keys.
+struct HotKeyMonitorTests {
+    @Test func eachShortcutHasItsModifiers() {
+        #expect(HotKeyMonitor.modifiers(of: .optionSpace) == UInt32(optionKey))
+        #expect(HotKeyMonitor.modifiers(of: .controlOptionSpace) == UInt32(optionKey | controlKey))
+    }
+
+    /// ⌃⌥Space ends when either modifier is let go.
+    @Test func bothModifiersMustStayHeld() {
+        #expect(PushToTalkKey.controlOptionSpace.flag == [.maskControl, .maskAlternate])
+        #expect(!CGEventFlags.maskAlternate.contains(PushToTalkKey.controlOptionSpace.flag))
     }
 }

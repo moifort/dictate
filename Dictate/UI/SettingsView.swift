@@ -107,7 +107,9 @@ private struct DictationSettings: View {
         case .control:
             String(localized: "Maintenez l'une des touches control pour dicter. Un raccourci comme control-C n'enregistre rien.")
         case .optionSpace:
-            String(localized: "Maintenez option + espace pour dicter, puis collez le texte avec ⌘V.")
+            String(localized: "Maintenez option + espace pour dicter, puis collez le texte avec ⌘V. Sur un clavier français, option + espace tape aussi l'espace insécable : préférez alors control + option + espace.")
+        case .controlOptionSpace:
+            String(localized: "Maintenez control + option + espace pour dicter, puis collez le texte avec ⌘V.")
         }
     }
 }

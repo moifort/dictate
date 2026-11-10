@@ -1,6 +1,6 @@
 import Carbon.HIToolbox
 
-/// Reports push-to-talk gestures from a global hot key, ⌥Space.
+/// Reports push-to-talk gestures from a global hot key, ⌥Space or ⌃⌥Space.
 ///
 /// The App Store build's monitor: Carbon hot keys need no permission and the
 /// app sees this one shortcut only, never the rest of the keyboard, which is
@@ -8,8 +8,17 @@ import Carbon.HIToolbox
 final class HotKeyMonitor {
     var onGesture: ((FnKeyGestureOutput) -> Void)?
 
-    /// There is only one shortcut: kept to match `FnKeyMonitor`.
-    var key: PushToTalkKey = .optionSpace
+    /// Registered again when it changes while the monitor runs.
+    var key: PushToTalkKey = .optionSpace {
+        didSet {
+            guard key != oldValue else { return }
+            gesture = key.gesture
+            if isRunning {
+                stop()
+                start()
+            }
+        }
+    }
 
     private var gesture = FnKeyGesture()
     private let watch = KeyStateWatch()
@@ -36,12 +45,20 @@ final class HotKeyMonitor {
 
         let id = EventHotKeyID(signature: 0x4449_4354, id: 1)
         guard RegisterEventHotKey(
-            UInt32(kVK_Space), UInt32(optionKey), id, GetEventDispatcherTarget(), 0, &hotKey
+            UInt32(kVK_Space), Self.modifiers(of: key), id, GetEventDispatcherTarget(), 0, &hotKey
         ) == noErr else {
             stop()
             return false
         }
         return true
+    }
+
+    /// Carbon's modifier mask for the shortcut.
+    nonisolated static func modifiers(of key: PushToTalkKey) -> UInt32 {
+        switch key {
+        case .controlOptionSpace: UInt32(optionKey | controlKey)
+        default: UInt32(optionKey)
+        }
     }
 
     func stop() {
