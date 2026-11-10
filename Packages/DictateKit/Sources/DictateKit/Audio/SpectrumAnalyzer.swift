@@ -57,6 +57,13 @@ nonisolated final class SpectrumAnalyzer {
     /// Median of highs minus lows while speaking: unlike the mean, the brief
     /// spikes of sibilants do not pull it to the right.
     private var balance: Float = 0
+    /// Working buffers of `bandDecibels`, allocated once: it runs on the
+    /// audio thread every 21 ms.
+    private var windowed = [Float](repeating: 0, count: size)
+    private var real = [Float](repeating: 0, count: size / 2)
+    private var imaginary = [Float](repeating: 0, count: size / 2)
+    private var power = [Float](repeating: 0, count: size / 2)
+    private var decibels = [Float](repeating: 0, count: bands.count)
 
     init() {
         let binWidth = Double(AudioAnalysis.sampleRate) / Double(Self.size)
@@ -106,10 +113,7 @@ nonisolated final class SpectrumAnalyzer {
     /// level: a full-band signal reads the same either way.
     private func bandDecibels() -> [Float] {
         let half = Self.size / 2
-        let windowed = vDSP.multiply(history, window)
-        var real = [Float](repeating: 0, count: half)
-        var imaginary = [Float](repeating: 0, count: half)
-        var power = [Float](repeating: 0, count: half)
+        vDSP.multiply(history, window, result: &windowed)
         real.withUnsafeMutableBufferPointer { realPointer in
             imaginary.withUnsafeMutableBufferPointer { imaginaryPointer in
                 var split = DSPSplitComplex(realp: realPointer.baseAddress!, imagp: imaginaryPointer.baseAddress!)
@@ -125,9 +129,10 @@ nonisolated final class SpectrumAnalyzer {
         // vDSP's real FFT doubles the amplitudes; one side of the spectrum holds
         // half the power; the Hann window keeps 37.5 % of it.
         let scale = 1 / (2 * Float(Self.size * Self.size) * 0.375)
-        return bandBins.map { bins in
-            let meanSquare = power[bins].reduce(0, +) * scale
-            return 10 * log10(max(meanSquare, 1e-12))
+        for (index, bins) in bandBins.enumerated() {
+            let meanSquare = vDSP.sum(power[bins]) * scale
+            decibels[index] = 10 * log10(max(meanSquare, 1e-12))
         }
+        return decibels
     }
 }
