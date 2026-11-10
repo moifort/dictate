@@ -4,14 +4,22 @@ nonisolated enum UpdateError: LocalizedError, Equatable {
     case extractionFailed
     case appBundleNotFound
     case signatureRejected(String)
+    /// The archive holds another version than the release announced.
+    case versionMismatch(expected: String, found: String)
     case notInstalled
+    /// This copy has no Team ID to require of the update: anyone's ad-hoc
+    /// signed bundle with the same identifier would pass.
+    case unsignedCopy
 
     var errorDescription: String? {
         switch self {
         case .extractionFailed: String(localized: "L'archive téléchargée n'a pas pu être extraite.")
         case .appBundleNotFound: String(localized: "L'archive ne contient pas d'application.")
         case .signatureRejected(let details): String(localized: "La signature de la mise à jour est invalide. \(details)")
+        case .versionMismatch(let expected, let found):
+            String(localized: "La mise à jour contient la version \(found) au lieu de \(expected).")
         case .notInstalled: String(localized: "Dictate ne tourne pas depuis un emplacement où il peut se mettre à jour.")
+        case .unsignedCopy: String(localized: "Cette copie de Dictate n'est pas signée : elle ne peut pas vérifier ses mises à jour. Téléchargez la dernière version sur le site.")
         }
     }
 }
@@ -58,11 +66,16 @@ nonisolated struct UpdateInstaller: Sendable {
         return app
     }
 
-    /// Rejects anything that is not a validly signed Dictate from the same team.
-    func verify(_ bundle: URL, against expectation: Expectation) throws {
+    /// Rejects anything that is not a validly signed Dictate from the same
+    /// team, nested code included, or not the announced `version`.
+    func verify(_ bundle: URL, against expectation: Expectation, version: String? = nil) throws {
+        if let version {
+            let found = Bundle(url: bundle)?.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
+            guard found == version else { throw UpdateError.versionMismatch(expected: version, found: found) }
+        }
         let codesign = Process()
         codesign.executableURL = URL(filePath: "/usr/bin/codesign")
-        codesign.arguments = ["--verify", "--strict", "-R=\(expectation.requirement)", bundle.path]
+        codesign.arguments = ["--verify", "--deep", "--strict", "-R=\(expectation.requirement)", bundle.path]
         let errors = Pipe()
         codesign.standardError = errors
         codesign.standardOutput = errors

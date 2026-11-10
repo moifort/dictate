@@ -73,8 +73,12 @@ struct UpdateView: View {
         case .failed(let message):
             Label(message, systemImage: "exclamationmark.triangle").foregroundStyle(.orange).font(.callout)
         default:
-            if !updater.canInstall {
+            if updater.installBlocker == .notInstalled {
                 Text("Cette copie tourne depuis un dossier de build : installez-la dans Applications pour la mettre à jour.")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            } else if let blocker = updater.installBlocker {
+                Text(blocker.localizedDescription)
                     .font(.caption)
                     .foregroundStyle(.tertiary)
             }

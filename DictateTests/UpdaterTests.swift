@@ -140,6 +140,39 @@ struct UpdateInstallerTests {
         #expect(try volume(scratch) == volume(root))
     }
 
+    /// The archive must hold the version the release announced.
+    @Test func rejectsAnotherVersionThanAnnounced() throws {
+        let app = try makeApp(named: "Fake", identifier: "test.fake", version: "2.0", at: root)
+        #expect(throws: UpdateError.versionMismatch(expected: "3.0", found: "2.0")) {
+            try installer.verify(app, against: .init(bundleIdentifier: "test.fake", teamIdentifier: nil), version: "3.0")
+        }
+        try installer.verify(app, against: .init(bundleIdentifier: "test.fake", teamIdentifier: nil), version: "2.0")
+    }
+
+    /// Nested code is checked too: a framework swapped after signing fails.
+    @Test func rejectsATamperedNestedFramework() throws {
+        let app = try makeApp(named: "Fake", identifier: "test.fake", version: "2.0", at: root)
+        let framework = app.appending(path: "Contents/Frameworks/Helper.framework")
+        let versions = framework.appending(path: "Versions/A")
+        try FileManager.default.createDirectory(at: versions.appending(path: "Resources"), withIntermediateDirectories: true)
+        try FileManager.default.copyItem(at: URL(filePath: "/usr/bin/true"), to: versions.appending(path: "Helper"))
+        let plist: [String: Any] = ["CFBundleIdentifier": "test.helper", "CFBundleExecutable": "Helper", "CFBundlePackageType": "FMWK"]
+        try PropertyListSerialization.data(fromPropertyList: plist, format: .xml, options: 0)
+            .write(to: versions.appending(path: "Resources/Info.plist"))
+        try FileManager.default.createSymbolicLink(atPath: framework.appending(path: "Versions/Current").path, withDestinationPath: "A")
+        try FileManager.default.createSymbolicLink(atPath: framework.appending(path: "Helper").path, withDestinationPath: "Versions/Current/Helper")
+        try FileManager.default.createSymbolicLink(atPath: framework.appending(path: "Resources").path, withDestinationPath: "Versions/Current/Resources")
+        try run("/usr/bin/codesign", ["--force", "--sign", "-", framework.path])
+        try run("/usr/bin/codesign", ["--force", "--sign", "-", app.path])
+        try installer.verify(app, against: .init(bundleIdentifier: "test.fake", teamIdentifier: nil))
+        // Replaced after both were signed.
+        try FileManager.default.removeItem(at: versions.appending(path: "Helper"))
+        try FileManager.default.copyItem(at: URL(filePath: "/usr/bin/false"), to: versions.appending(path: "Helper"))
+        #expect(throws: UpdateError.self) {
+            try installer.verify(app, against: .init(bundleIdentifier: "test.fake", teamIdentifier: nil))
+        }
+    }
+
     @Test func rejectsABundleWithAnotherIdentifier() throws {
         let other = try makeApp(named: "Fake", identifier: "test.other", version: "2.0", at: root)
         #expect(throws: UpdateError.self) {
@@ -235,9 +268,11 @@ struct UpdaterFlowTests {
         try FileManager.default.copyItem(at: Bundle.main.bundleURL, to: installed)
         let archive = root.appending(path: "Dictate.zip")
         try shell("/usr/bin/ditto", ["-c", "-k", "--keepParent", Bundle.main.bundleURL.path, archive.path])
+        // The archive holds this very test host: announce its version.
+        let version = try #require(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String)
         let feed = """
-        [{"tag_name": "v9.9.9", "draft": false, "prerelease": false, "body": "",
-          "assets": [{"name": "Dictate-9.9.9.zip", "browser_download_url": "\(archive.absoluteString)"}]}]
+        [{"tag_name": "v\(version)", "draft": false, "prerelease": false, "body": "",
+          "assets": [{"name": "Dictate-\(version).zip", "browser_download_url": "\(archive.absoluteString)"}]}]
         """
         var relaunched: URL?
         var dictating = true
@@ -261,6 +296,27 @@ struct UpdaterFlowTests {
         for _ in 0..<100 where relaunched == nil { try await Task.sleep(for: .milliseconds(50)) }
         #expect(relaunched == installed)
         try? FileManager.default.removeItem(at: root)
+    }
+
+    /// Without a Team ID to require, any ad-hoc bundle with the identifier
+    /// would pass: a Release copy refuses to update itself.
+    @Test func anUnsignedReleaseCopyRefusesToUpdate() {
+        let updater = Updater(
+            currentVersion: "0.1.0",
+            bundleURL: FileManager.default.temporaryDirectory.appending(path: "Dictate.app"),
+            expectation: .init(bundleIdentifier: "test.fake", teamIdentifier: nil),
+            fetch: { _ in Data() }, download: { url, _ in url }, finish: { _ in },
+            allowsUnsignedCopy: false
+        )
+        #expect(updater.installBlocker == .unsignedCopy)
+        let signed = Updater(
+            currentVersion: "0.1.0",
+            bundleURL: FileManager.default.temporaryDirectory.appending(path: "Dictate.app"),
+            expectation: .init(bundleIdentifier: "test.fake", teamIdentifier: "46C337T7YN"),
+            fetch: { _ in Data() }, download: { url, _ in url }, finish: { _ in },
+            allowsUnsignedCopy: false
+        )
+        #expect(signed.canInstall)
     }
 
     @Test func keepsTheReleaseWhileDownloadingAndAfterAFailure() async throws {

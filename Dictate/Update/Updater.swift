@@ -77,8 +77,20 @@ final class Updater {
     private(set) var lastCheck: Date?
     let currentVersion: String
 
-    /// Whether this copy can replace itself: false for builds run from Xcode.
-    let canInstall: Bool
+    /// Why this copy cannot replace itself: run from a build folder, or
+    /// without a Team ID to require of the update. Nil when it can.
+    let installBlocker: UpdateError?
+
+    var canInstall: Bool { installBlocker == nil }
+
+    /// Debug builds are ad-hoc signed: they may still try an update.
+    nonisolated static var isDebugBuild: Bool {
+        #if DEBUG
+        true
+        #else
+        false
+        #endif
+    }
 
     @ObservationIgnored private let bundleURL: URL
     @ObservationIgnored private let expectation: UpdateInstaller.Expectation
@@ -102,7 +114,8 @@ final class Updater {
         expectation: UpdateInstaller.Expectation = Updater.expectation(),
         fetch: @escaping @Sendable (URL) async throws -> Data = Updater.fetchFromGitHub,
         download: @escaping @Sendable (URL, @escaping @Sendable (Double) -> Void) async throws -> URL = Updater.downloadWithProgress,
-        finish: @escaping @MainActor (URL) -> Void = Updater.relaunchAndQuit
+        finish: @escaping @MainActor (URL) -> Void = Updater.relaunchAndQuit,
+        allowsUnsignedCopy: Bool = Updater.isDebugBuild
     ) {
         self.currentVersion = currentVersion
         self.bundleURL = bundleURL
@@ -110,7 +123,13 @@ final class Updater {
         self.fetch = fetch
         self.download = download
         self.finish = finish
-        canInstall = UpdateInstaller.isUpdatable(bundleURL)
+        installBlocker = if !UpdateInstaller.isUpdatable(bundleURL) {
+            .notInstalled
+        } else if expectation.teamIdentifier == nil, !allowsUnsignedCopy {
+            .unsignedCopy
+        } else {
+            nil
+        }
     }
 
     static func relaunchAndQuit(_ bundle: URL) {
@@ -223,8 +242,8 @@ final class Updater {
     /// Downloads, verifies, swaps the bundle and relaunches the app.
     func install() {
         guard let release = available, installTask == nil else { return }
-        guard canInstall else {
-            state = .failed(UpdateError.notInstalled.localizedDescription)
+        if let installBlocker {
+            state = .failed(installBlocker.localizedDescription)
             return
         }
         installTask = Task {
@@ -241,7 +260,7 @@ final class Updater {
                     // Not needed once extracted, whatever happens next.
                     defer { try? FileManager.default.removeItem(at: archive) }
                     let fresh = try installer.extract(archive, into: scratch)
-                    try installer.verify(fresh, against: expectation)
+                    try installer.verify(fresh, against: expectation, version: release.version)
                     return fresh
                 }.value
                 // Swapped and relaunched only between dictations: the relaunch

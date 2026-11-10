@@ -977,6 +977,22 @@
         }
       }
     },
+    "Cette copie de Dictate n'est pas signée : elle ne peut pas vérifier ses mises à jour. Téléchargez la dernière version sur le site.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This copy of Dictate is not signed: it cannot verify its updates. Download the latest version from the website."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cette copie de Dictate n'est pas signée : elle ne peut pas vérifier ses mises à jour. Téléchargez la dernière version sur le site."
+          }
+        }
+      }
+    },
     "Cette copie tourne depuis un dossier de build : installez-la dans Applications pour la mettre à jour.": {
       "localizations": {
         "en": {
@@ -2445,6 +2461,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "La clé n'a pas pu être enregistrée dans le trousseau."
+          }
+        }
+      }
+    },
+    "La mise à jour contient la version %@ au lieu de %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The update holds version %1$@ instead of %2$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La mise à jour contient la version %1$@ au lieu de %2$@."
           }
         }
       }
