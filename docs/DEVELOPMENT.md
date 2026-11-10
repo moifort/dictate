@@ -83,8 +83,9 @@ update themselves.
   scripts/build-dmg.sh build/Build/Products/Release/Dictate.app Dictate.dmg && open Dictate.dmg
   ```
 
-Repository secrets for a signed, notarized build (without them the release is
-ad-hoc signed and Gatekeeper asks for right-click → Open):
+Repository secrets for a signed, notarized build. Without the certificate a
+tag fails before building; a manual run still builds an ad-hoc signed app,
+left as a run artifact:
 
 | Secret | Content |
 |---|---|

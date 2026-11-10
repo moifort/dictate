@@ -81,14 +81,22 @@ jobs:
     runs-on: xcode-27
     timeout-minutes: 60
     env:
-      # Without a Developer ID certificate the app is still published, ad-hoc
-      # signed and not notarized: Gatekeeper then asks for a right-click → Open.
+      # Without a Developer ID certificate a manual run still builds an ad-hoc
+      # signed, non-notarized app to try; a tag fails rather than publish it.
       SIGNED: ${{ secrets.DEVELOPER_ID_P12 != '' }}
       # Without a Sentry token the crashes still arrive, with bare addresses
       # instead of function names.
       SYMBOLICATED: ${{ secrets.SENTRY_AUTH_TOKEN != '' }}
       APP: build/Build/Products/Release/Dictate.app
     steps:
+      # Every installed copy would refuse an ad-hoc signed update, and
+      # Gatekeeper a manual install: a tag never publishes one.
+      - name: Require the Developer ID certificate on tags
+        if: env.SIGNED != 'true' && github.ref_type == 'tag'
+        run: |
+          echo "::error::DEVELOPER_ID_P12 is not set: a tag must not publish an ad-hoc signed, non-notarized build"
+          exit 1
+
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0   # the build number depends on it
@@ -185,7 +193,7 @@ jobs:
             IDENTITY="Developer ID Application"
             TIMESTAMP=--timestamp
           else
-            echo "::warning::DEVELOPER_ID_P12 is not set: publishing an ad-hoc signed, non-notarized build"
+            echo "::warning::DEVELOPER_ID_P12 is not set: ad-hoc signed, non-notarized build, not published"
             IDENTITY=-
             TIMESTAMP=
           fi
@@ -268,8 +276,6 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    env:
-      SIGNED: ${{ secrets.DEVELOPER_ID_P12 != '' }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -290,9 +296,6 @@ jobs:
           git tag -l --format='%(contents:body)' "$GITHUB_REF_NAME" > notes.txt
           if [ ! -s notes.txt ]; then
             git tag -l --format='%(contents:subject)' "$GITHUB_REF_NAME" > notes.txt
-          fi
-          if [ "$SIGNED" != "true" ]; then
-            printf '\n> Not notarized: on first launch, right-click Dictate → Open.\n' >> notes.txt
           fi
           echo "---- Notes ----"; cat notes.txt
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
