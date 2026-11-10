@@ -229,15 +229,16 @@ section {
 .store-badge:hover { opacity: 0.85; }
 .store-badge:active { transform: scale(0.97); }
 .store-badge img { display: block; height: 50px; width: auto; }
-/* The star sits at the badge's corner, off Apple's artwork, and points to the note on what the store build leaves out. */
+/* The star closes the "Mac App Store" wordmark, in the 10 units every badge leaves at its right edge, and points to the note on what the store build leaves out. */
 .store-star {
   position: absolute;
-  top: -5px;
-  right: -11px;
-  font-size: 17px;
-  font-weight: 600;
+  top: 19px;
+  right: 3.5px;
+  font-size: 16px;
+  font-weight: 700;
   line-height: 1;
-  color: var(--text-dim);
+  color: #fff;
+  pointer-events: none;
 }
 .brew.store-note { max-width: 560px; margin-left: auto; margin-right: auto; line-height: 1.5; scroll-margin-top: calc(var(--nav-h) + 24px); }
 .store-note a { text-decoration: underline; text-underline-offset: 2px; }
