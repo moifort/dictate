@@ -24,8 +24,9 @@ on:
     tags: ['v*']
   workflow_dispatch:
 
+# Read-only by default: only the publish job writes, to create the release.
 permissions:
-  contents: write   # publish the tag's GitHub release
+  contents: read
 
 concurrency:
   group: release
@@ -39,16 +40,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Select Xcode 27
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest
-
-      - name: Generate the Xcode project
-        run: |
-          set -euo pipefail
-          brew install xcodegen
-          xcodegen generate
+      - name: Set up Xcode 27 and the project
+        uses: ./.github/actions/setup-xcode
 
       - name: Restore the Debug build
         id: derived-data
@@ -101,10 +94,8 @@ jobs:
         with:
           fetch-depth: 0   # the build number depends on it
 
-      - name: Select Xcode 27
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest
+      - name: Set up Xcode 27 and the project
+        uses: ./.github/actions/setup-xcode
 
       - name: Compute version numbers
         run: |
@@ -118,12 +109,6 @@ jobs:
           echo "BUILD=$BUILD" >> "$GITHUB_ENV"
           echo "MARKETING=$MARKETING" >> "$GITHUB_ENV"
           echo "Releasing Dictate $MARKETING ($BUILD)"
-
-      - name: Generate the Xcode project
-        run: |
-          set -euo pipefail
-          brew install xcodegen
-          xcodegen generate
 
       - name: Restore the Release build
         id: derived-data
@@ -158,8 +143,12 @@ jobs:
           SENTRY_PROJECT: dictate-macos
         run: |
           set -euo pipefail
-          brew install getsentry/tools/sentry-cli
-          sentry-cli debug-files upload --include-sources build/Build/Products/Release
+          # A pinned release checked by hash, rather than whatever brew has today.
+          SENTRY_CLI="$RUNNER_TEMP/sentry-cli"
+          curl -fsSL -o "$SENTRY_CLI" https://github.com/getsentry/sentry-cli/releases/download/3.8.2/sentry-cli-Darwin-arm64
+          echo "c80d92b6d34eb64fe7402f56cc7968fbb15aab1c763254ad428b55cc98ec7dcf  $SENTRY_CLI" | shasum -a 256 -c -
+          chmod +x "$SENTRY_CLI"
+          "$SENTRY_CLI" debug-files upload --include-sources build/Build/Products/Release
 
       - name: Import the Developer ID identity
         if: env.SIGNED == 'true'
@@ -276,6 +265,8 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: write   # create the tag's GitHub release
     steps:
       - uses: actions/checkout@v7
         with:
@@ -328,11 +319,12 @@ jobs:
         with:
           fetch-depth: 0   # the build number depends on it
 
-      - name: Select Xcode 27
+      # The script generates the project itself.
+      - name: Set up Xcode 27
         if: env.ENABLED == 'true'
-        uses: maxim-lobanov/setup-xcode@v1
+        uses: ./.github/actions/setup-xcode
         with:
-          xcode-version: latest
+          generate: 'false'
 
       - name: Compute version numbers
         if: env.ENABLED == 'true'
@@ -400,7 +392,6 @@ jobs:
         if: env.ENABLED == 'true'
         run: |
           set -euo pipefail
-          brew install xcodegen
           scripts/build-app-store.sh
 
       # A manual run proves the archive and the signature without spending a

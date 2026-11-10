@@ -26,16 +26,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Select Xcode 27
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest
-
-      - name: Generate the Xcode project
-        run: |
-          set -euo pipefail
-          brew install xcodegen
-          xcodegen generate
+      - name: Set up Xcode 27 and the project
+        uses: ./.github/actions/setup-xcode
 
       - name: Restore the Debug build
         id: derived-data
@@ -89,10 +81,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Select Xcode 27
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest
+      - name: Set up Xcode 27 and the project
+        uses: ./.github/actions/setup-xcode
 
       - name: Look for the Release build
         id: derived-data
@@ -103,11 +93,7 @@ jobs:
 
       - name: Build the app in Release
         if: steps.derived-data.outputs.hit != 'true'
-        run: |
-          set -euo pipefail
-          brew install xcodegen
-          xcodegen generate
-          scripts/ci-build-release.sh
+        run: scripts/ci-build-release.sh
 
       - name: Save the Release build
         if: steps.derived-data.outputs.hit != 'true'

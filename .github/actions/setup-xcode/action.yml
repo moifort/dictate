@@ -1,0 +1,39 @@
+name: Set up Xcode
+description: >-
+  Selects Xcode 27, installs XcodeGen at a pinned version checked against its
+  checksum, and generates the project (unless `generate` is 'false', for jobs
+  that call a script generating it themselves).
+
+inputs:
+  generate:
+    description: Generate Dictate.xcodeproj
+    default: 'true'
+
+runs:
+  using: composite
+  steps:
+    # Pinned by commit, not by tag: a third-party action runs with the job's
+    # token and secrets, and a tag can be moved. v1.7.0.
+    - uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90
+      with:
+        xcode-version: latest
+
+    # The release zip rather than `brew install`, which installs whatever
+    # version is current: this one is the version tested, checked by hash.
+    - name: Install XcodeGen
+      shell: bash
+      env:
+        XCODEGEN_VERSION: 2.46.0
+        XCODEGEN_SHA256: 4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806
+      run: |
+        set -euo pipefail
+        ZIP="$RUNNER_TEMP/xcodegen.zip"
+        curl -fsSL -o "$ZIP" "https://github.com/yonaskolb/XcodeGen/releases/download/$XCODEGEN_VERSION/xcodegen.zip"
+        echo "$XCODEGEN_SHA256  $ZIP" | shasum -a 256 -c -
+        unzip -q -o "$ZIP" -d "$RUNNER_TEMP"
+        echo "$RUNNER_TEMP/xcodegen/bin" >> "$GITHUB_PATH"
+
+    - name: Generate the Xcode project
+      if: inputs.generate == 'true'
+      shell: bash
+      run: "$RUNNER_TEMP/xcodegen/bin/xcodegen generate"
