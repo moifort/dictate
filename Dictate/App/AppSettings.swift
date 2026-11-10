@@ -240,7 +240,7 @@ final class AppSettings {
 
     init(
         defaults: UserDefaults = .standard,
-        apiKeyStores: @escaping (APIProvider) -> SecretStore = { KeychainSecret(account: $0.keychainAccount) }
+        apiKeyStores: @escaping (APIProvider) -> SecretStore = KeychainSecret.apiKey
     ) {
         self.defaults = defaults
         self.apiKeyStores = apiKeyStores

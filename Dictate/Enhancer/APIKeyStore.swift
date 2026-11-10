@@ -22,8 +22,21 @@ nonisolated struct KeychainError: LocalizedError, Equatable {
 
 /// A generic password in the login keychain.
 nonisolated struct KeychainSecret: SecretStore {
-    var service = AppIdentity.current + ".anthropic"
+    /// One service for every provider's key, told apart by the account.
+    static func service(for identifier: String = AppIdentity.current) -> String { identifier + ".api-keys" }
+    /// Named when only Anthropic had a key; every provider's went there since.
+    static func legacyService(for identifier: String = AppIdentity.current) -> String { identifier + ".anthropic" }
+
+    var service = KeychainSecret.service()
     var account: String
+
+    /// This copy's item for `provider`, moved from the legacy service on first read.
+    static func apiKey(_ provider: APIProvider) -> SecretStore {
+        MovingSecret(
+            to: KeychainSecret(service: service(), account: provider.keychainAccount),
+            from: KeychainSecret(service: legacyService(), account: provider.keychainAccount)
+        )
+    }
 
     private var query: [String: Any] {
         [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service, kSecAttrAccount as String: account]
@@ -57,6 +70,27 @@ nonisolated struct KeychainSecret: SecretStore {
             status = SecItemAdd(query.merging(attributes) { $1 } as CFDictionary, nil)
         }
         guard status == errSecSuccess else { throw KeychainError(status: status) }
+    }
+}
+
+/// A secret moving from an old store to a new one: read from the new one,
+/// else taken from the old one, saved in the new and removed from the old.
+/// Written and removed in both, so nothing is left behind.
+nonisolated struct MovingSecret: SecretStore {
+    let to: any SecretStore
+    let from: any SecretStore
+
+    func read() throws -> String? {
+        if let value = try to.read() { return value }
+        guard let old = try from.read(), !old.isEmpty else { return nil }
+        try to.write(old)
+        try? from.write("")
+        return old
+    }
+
+    func write(_ value: String) throws {
+        try to.write(value)
+        try? from.write("")
     }
 }
 

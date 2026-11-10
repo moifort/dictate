@@ -35,3 +35,31 @@ nonisolated enum TestKeychain {
         return (try? probe.write("probe")) != nil && (try? probe.read()) == "probe"
     }
 }
+
+/// The keys move from the service named after Anthropic to the shared one.
+struct MovingSecretTests {
+    @Test func aKeyLeftInTheOldServiceMovesOnFirstRead() throws {
+        let new = InMemorySecret(), old = InMemorySecret("sk-old")
+        let secret = MovingSecret(to: new, from: old)
+        #expect(try secret.read() == "sk-old")
+        #expect(try new.read() == "sk-old")
+        #expect(try old.read() == nil)
+    }
+
+    @Test func theNewServiceWins() throws {
+        let secret = MovingSecret(to: InMemorySecret("sk-new"), from: InMemorySecret("sk-old"))
+        #expect(try secret.read() == "sk-new")
+    }
+
+    @Test func savingOrRemovingClearsTheOldService() throws {
+        let new = InMemorySecret(), old = InMemorySecret("sk-old")
+        try MovingSecret(to: new, from: old).write("")
+        #expect(try old.read() == nil)
+        #expect(try new.read() == nil)
+    }
+
+    @Test func theServiceNoLongerNamesAnthropic() {
+        #expect(KeychainSecret.service(for: "a.b") == "a.b.api-keys")
+        #expect(KeychainSecret.legacyService(for: "a.b") == "a.b.anthropic")
+    }
+}
