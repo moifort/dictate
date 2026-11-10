@@ -141,6 +141,24 @@ struct ClaudeCLIEnhancerTests {
         enhancer.shutdown()
     }
 
+    /// Left idle, the waiting process is stopped, not replaced; the next press starts one.
+    @Test func anIdleProcessIsStoppedUntilTheNextPress() async throws {
+        let starts = directory.appending(path: "starts.txt")
+        let cli = try fakeCLI("""
+        echo started >> "\(starts.path)"
+        cat > /dev/null
+        """)
+        let enhancer = ClaudeCLIEnhancer(locate: { cli }, systemPrompt: { "prompt" }, idleTimeout: .milliseconds(200))
+        enhancer.prewarm()
+        #expect(enhancer.isWarm)
+        try await Task.sleep(for: .milliseconds(600))
+        #expect(!enhancer.isWarm)
+        #expect(try String(contentsOf: starts, encoding: .utf8).count(of: "started") == 1)
+        enhancer.prewarm()
+        #expect(enhancer.isWarm)
+        enhancer.shutdown()
+    }
+
     /// The `haiku` alias follows the newest Haiku, and Haiku 5.5 thinks before answering.
     @Test func defaultModelIsPinnedToHaiku45() {
         #expect(ClaudeCLIEnhancer.defaultModel == "claude-haiku-4-5")

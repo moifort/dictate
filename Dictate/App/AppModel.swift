@@ -122,6 +122,8 @@ final class AppModel {
         fnMonitor.onGesture = { [weak self] gesture in
             guard let self else { return }
             Log.hotkey.info("gesture \(String(describing: gesture), privacy: .public) in phase \(String(describing: self.controller.phase), privacy: .public)")
+            // A reviewer stopped after a long idle starts again while the user speaks.
+            if gesture == .pressed { self.enhancer.prewarm() }
             self.controller.handle(gesture)
         }
         fnMonitor.key = settings.pushToTalkKey

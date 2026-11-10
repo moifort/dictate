@@ -4,18 +4,23 @@ import DictateKit
 /// Cleans up transcripts with Claude through the official `claude` CLI, so the
 /// user's Claude subscription is used.
 ///
-/// Starting the CLI takes seconds, so one process is always started ahead of
-/// time and waits for its single message. After each use a fresh process is
-/// started, which keeps every cleanup independent of the previous ones.
+/// Starting the CLI takes seconds, so one process is started ahead of time
+/// and waits for its single message. After each use a fresh process is
+/// started, which keeps every cleanup independent of the previous ones. A
+/// process left idle for `idleTimeout` is stopped rather than kept for ever:
+/// the next press of the dictation key starts one again.
 final class ClaudeCLIEnhancer: Enhancer {
     private let locate: () -> URL?
     private let systemPrompt: () -> String
     private let model: String
-    private let recycleAfter: Duration
+    private let idleTimeout: Duration
     private let workingDirectory: URL
 
     private var warm: ClaudeCLIProcess?
-    private var recycleTask: Task<Void, Never>?
+    private var idleStop: Task<Void, Never>?
+
+    /// Whether a process is waiting for the next dictation.
+    var isWarm: Bool { warm?.isRunning == true }
 
     /// Haiku 4.5, pinned: the `haiku` alias now means Haiku 5.5, which thinks
     /// before answering whatever the CLI is told. On 60 real dictations
@@ -27,12 +32,12 @@ final class ClaudeCLIEnhancer: Enhancer {
         locate: @escaping () -> URL?,
         systemPrompt: @escaping () -> String,
         model: String = ClaudeCLIEnhancer.defaultModel,
-        recycleAfter: Duration = .seconds(15 * 60)
+        idleTimeout: Duration = .seconds(15 * 60)
     ) {
         self.locate = locate
         self.systemPrompt = systemPrompt
         self.model = model
-        self.recycleAfter = recycleAfter
+        self.idleTimeout = idleTimeout
         workingDirectory = FileManager.default.temporaryDirectory.appending(path: "Dictate", directoryHint: .isDirectory)
         try? FileManager.default.createDirectory(at: workingDirectory, withIntermediateDirectories: true)
     }
@@ -65,7 +70,7 @@ final class ClaudeCLIEnhancer: Enhancer {
             ErrorReporter.capture(error, "claude process could not be started ahead of time", category: "enhancer")
             warm = nil
         }
-        scheduleRecycle()
+        scheduleIdleStop()
     }
 
     /// Replaces the waiting process, e.g. after the vocabulary or CLI path changed.
@@ -76,7 +81,7 @@ final class ClaudeCLIEnhancer: Enhancer {
     }
 
     func shutdown() {
-        recycleTask?.cancel()
+        idleStop?.cancel()
         warm?.terminate()
         warm = nil
     }
@@ -104,13 +109,16 @@ final class ClaudeCLIEnhancer: Enhancer {
         )
     }
 
-    /// A process idle for a long time is replaced, so its session never goes stale.
-    private func scheduleRecycle() {
-        recycleTask?.cancel()
-        recycleTask = Task { [recycleAfter] in
-            try? await Task.sleep(for: recycleAfter)
-            guard !Task.isCancelled else { return }
-            reset()
+    /// A process idle for a long time is stopped: it would hold memory for
+    /// nothing, and its session would go stale. `prewarm()` starts the next.
+    private func scheduleIdleStop() {
+        idleStop?.cancel()
+        idleStop = Task { [idleTimeout] in
+            try? await Task.sleep(for: idleTimeout)
+            guard !Task.isCancelled, warm != nil else { return }
+            Log.dictation.info("claude process idle for \(idleTimeout): stopped until the next press")
+            warm?.terminate()
+            warm = nil
         }
     }
 }
