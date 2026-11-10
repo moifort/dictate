@@ -449,3 +449,45 @@ struct UpdaterOfflineTests {
         #expect(updater.lastCheck != nil)
     }
 }
+
+/// The real download, against a stubbed GitHub.
+@Suite(.serialized)
+struct UpdateDownloadTests {
+    @Test func downloadsToAFileOfItsOwn() async throws {
+        StubbedGitHub.answer = (200, Data(repeating: 7, count: 300_000))
+        URLProtocol.registerClass(StubbedGitHub.self)
+        defer { URLProtocol.unregisterClass(StubbedGitHub.self) }
+        let file = try await Updater.downloadWithProgress(URL(string: "https://updates.test/Dictate.zip")!) { _ in }
+        defer { try? FileManager.default.removeItem(at: file) }
+        #expect(try Data(contentsOf: file).count == 300_000)
+    }
+
+    @Test func aServerErrorIsNotSavedAsTheArchive() async throws {
+        StubbedGitHub.answer = (504, Data("<html>Gateway Timeout</html>".utf8))
+        URLProtocol.registerClass(StubbedGitHub.self)
+        defer { URLProtocol.unregisterClass(StubbedGitHub.self) }
+        await #expect(throws: Updater.ServerError.self) {
+            try await Updater.downloadWithProgress(URL(string: "https://updates.test/Dictate.zip")!) { _ in }
+        }
+    }
+}
+
+private nonisolated final class StubbedGitHub: URLProtocol, @unchecked Sendable {
+    nonisolated(unsafe) static var answer: (status: Int, body: Data) = (200, Data())
+
+    override class func canInit(with request: URLRequest) -> Bool { request.url?.host() == "updates.test" }
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+
+    override func startLoading() {
+        let (status, body) = Self.answer
+        let response = HTTPURLResponse(
+            url: request.url!, statusCode: status, httpVersion: "HTTP/1.1",
+            headerFields: ["Content-Length": "\(body.count)"]
+        )!
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: body)
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
+}
