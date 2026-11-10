@@ -6,7 +6,7 @@ import Carbon.HIToolbox
 /// app sees this one shortcut only, never the rest of the keyboard, which is
 /// what App Review asks for (guideline 2.4.5).
 final class HotKeyMonitor {
-    var onGesture: ((FnKeyGestureOutput) -> Void)?
+    var onGesture: ((PushToTalkGestureOutput) -> Void)?
 
     /// Registered again when it changes while the monitor runs.
     var key: PushToTalkKey = .optionSpace {
@@ -20,7 +20,7 @@ final class HotKeyMonitor {
         }
     }
 
-    private var gesture = FnKeyGesture()
+    private var gesture = PushToTalkGesture()
     private let watch = KeyStateWatch()
     private var hotKey: EventHotKeyRef?
     private var handler: EventHandlerRef?
@@ -71,7 +71,7 @@ final class HotKeyMonitor {
 
     fileprivate func handle(pressed: Bool) {
         let time = ProcessInfo.processInfo.systemUptime
-        if let output = gesture.handle(pressed ? .fnDown(at: time) : .fnUp(at: time)) {
+        if let output = gesture.handle(pressed ? .keyDown(at: time) : .keyUp(at: time)) {
             onGesture?(output)
         }
         watch.update(isHeld: gesture.isHeld) { [weak self] in self?.resync() }

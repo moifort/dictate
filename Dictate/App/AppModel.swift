@@ -30,7 +30,7 @@ final class AppModel {
     @ObservationIgnored private let enhancer: SelectedEnhancer
     /// Claude needs the network; without it the on-device model steps in.
     @ObservationIgnored private let network = NetworkMonitor()
-    @ObservationIgnored private let fnMonitor = PushToTalkMonitor()
+    @ObservationIgnored private let keyMonitor = PushToTalkMonitor()
     @ObservationIgnored private var hotkeyRetry: Timer?
     @ObservationIgnored private var setupMonitor: SetupMonitor?
     /// The waiting process is replaced once the settings stop changing.
@@ -115,14 +115,14 @@ final class AppModel {
                 suggestions.consider(precedingText: text, vocabulary: settings.vocabulary)
             }
         )
-        fnMonitor.onGesture = { [weak self] gesture in
+        keyMonitor.onGesture = { [weak self] gesture in
             guard let self else { return }
             Log.hotkey.info("gesture \(String(describing: gesture), privacy: .public) in phase \(String(describing: self.controller.phase), privacy: .public)")
             // A reviewer stopped after a long idle starts again while the user speaks.
             if gesture == .pressed { self.enhancer.prewarm() }
             self.controller.handle(gesture)
         }
-        fnMonitor.key = settings.pushToTalkKey
+        keyMonitor.key = settings.pushToTalkKey
         settings.defaultReviewer = { [weak self] in self?.availability.automatic ?? (Distribution.isAppStore ? .apple : .claude) }
         claudeCLI.onUpdate = { [weak self] apply in
             guard let self else { return apply() }
@@ -253,7 +253,7 @@ final class AppModel {
 
     /// Takes effect on the next press: no need to restart the event tap.
     func pushToTalkKeyChanged() {
-        fnMonitor.key = settings.pushToTalkKey
+        keyMonitor.key = settings.pushToTalkKey
         Log.hotkey.info("push-to-talk key: \(self.settings.pushToTalkKey.rawValue, privacy: .public)")
         refreshSetup()
         pollSetupUntilComplete()
@@ -285,13 +285,13 @@ final class AppModel {
     /// Without the grant macOS still creates the tap, but only delivers the
     /// keys typed in Dictate's own windows: wait for the grant before creating it.
     func startHotkey() {
-        hotkeyActive = Permissions.inputMonitoring && fnMonitor.start()
+        hotkeyActive = Permissions.inputMonitoring && keyMonitor.start()
         Log.hotkey.info("event tap active: \(self.hotkeyActive)")
         guard !hotkeyActive, hotkeyRetry == nil else { return }
         hotkeyRetry = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated {
                 guard let self else { return }
-                self.hotkeyActive = Permissions.inputMonitoring && self.fnMonitor.start()
+                self.hotkeyActive = Permissions.inputMonitoring && self.keyMonitor.start()
                 if self.hotkeyActive {
                     Log.hotkey.info("event tap active after retry")
                     self.hotkeyRetry?.invalidate()
@@ -373,7 +373,7 @@ final class AppModel {
     func shutdown() {
         enhancer.shutdown()
         network.stop()
-        fnMonitor.stop()
+        keyMonitor.stop()
     }
 
     private func handle(_ outcome: DictationOutcome) {

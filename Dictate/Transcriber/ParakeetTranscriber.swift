@@ -6,7 +6,7 @@ import DictateKit
 
 /// Local transcription with Parakeet TDT Ultra through FluidAudio, on the
 /// Neural Engine. It takes no vocabulary prompt: the jargon is left to
-/// Claude, unless the experimental vocabulary boosting rescores its output.
+/// the reviewer, unless the experimental vocabulary boosting rescores its output.
 @Observable
 final class ParakeetTranscriber: Transcriber {
     nonisolated static let modelVersion = ParakeetEngine.modelVersion

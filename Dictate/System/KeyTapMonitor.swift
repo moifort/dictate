@@ -6,8 +6,8 @@ import CoreGraphics
 ///
 /// Uses a listen-only event tap, so it needs the Input Monitoring permission.
 /// With `fn`, the system action of the 🌐 key must be set to "Do Nothing".
-final class FnKeyMonitor {
-    var onGesture: ((FnKeyGestureOutput) -> Void)?
+final class KeyTapMonitor {
+    var onGesture: ((PushToTalkGestureOutput) -> Void)?
 
     /// Switching keys mid-press drops the press rather than leaving it stuck.
     var key: PushToTalkKey = .fn {
@@ -31,7 +31,7 @@ final class FnKeyMonitor {
             place: .headInsertEventTap,
             options: .listenOnly,
             eventsOfInterest: CGEventMask(mask),
-            callback: fnKeyTapCallback,
+            callback: keyTapCallback,
             userInfo: Unmanaged.passUnretained(self).toOpaque()
         ) else { return false }
 
@@ -89,12 +89,12 @@ final class FnKeyMonitor {
         keyCode: Int64,
         flags: CGEventFlags,
         time: TimeInterval
-    ) -> FnKeyEvent? {
+    ) -> PushToTalkEvent? {
         let otherModifiers = CGEventFlags([.maskShift, .maskControl, .maskAlternate, .maskCommand]).subtracting(key.flag)
         return switch type {
         case .flagsChanged where key.keyCodes.contains(keyCode):
             // With both controls held, the flag stays set until the last one is released.
-            flags.contains(key.flag) ? .fnDown(at: time) : .fnUp(at: time)
+            flags.contains(key.flag) ? .keyDown(at: time) : .keyUp(at: time)
         case .flagsChanged:
             // Only a modifier going down counts: releasing Shift mid-dictation is not a shortcut.
             flags.isDisjoint(with: otherModifiers) ? nil : .otherModifierDown(at: time)
@@ -107,7 +107,7 @@ final class FnKeyMonitor {
 }
 
 /// The tap is installed on the main run loop, so callbacks arrive on the main thread.
-nonisolated private func fnKeyTapCallback(
+nonisolated private func keyTapCallback(
     proxy: CGEventTapProxy,
     type: CGEventType,
     event: CGEvent,
@@ -115,7 +115,7 @@ nonisolated private func fnKeyTapCallback(
 ) -> Unmanaged<CGEvent>? {
     // Our own Cmd+V: not the user's keyboard.
     if let userInfo, event.getIntegerValueField(.eventSourceUserData) != TextInserter.eventMarker {
-        let monitor = Unmanaged<FnKeyMonitor>.fromOpaque(userInfo).takeUnretainedValue()
+        let monitor = Unmanaged<KeyTapMonitor>.fromOpaque(userInfo).takeUnretainedValue()
         let keyCode = event.getIntegerValueField(.keyboardEventKeycode)
         let flags = event.flags
         MainActor.assumeIsolated {

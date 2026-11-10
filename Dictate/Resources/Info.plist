@@ -2,6 +2,9 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<!-- English on purpose, though the code's strings are French: it is the
+	     fallback of every Mac set to neither language. French keys carry their
+	     value explicitly (docs/DEVELOPMENT.md, Localization). -->
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>

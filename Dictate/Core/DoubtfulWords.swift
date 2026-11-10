@@ -1,7 +1,7 @@
 import Foundation
 import DictateKit
 
-/// Marks the words the transcriber was unsure of, so Claude knows where a
+/// Marks the words the transcriber was unsure of, so the reviewer knows where a
 /// correction may be due and where to leave the text alone.
 nonisolated enum DoubtfulWords {
     static let open = "<?>"
@@ -37,13 +37,13 @@ nonisolated enum DoubtfulWords {
             .joined(separator: " ")
     }
 
-    /// Removes any marker Claude copied into its reply.
+    /// Removes any marker the reviewer copied into its reply.
     static func strip(_ text: String) -> String {
         text.replacingOccurrences(of: close, with: "").replacingOccurrences(of: open, with: "")
     }
 
     private static func wrap(_ word: String) -> String {
-        // Claude has its own rule for it, and `<<?>unk</?>>` would hide it.
+        // The reviewer has its own rule for it, and `<<?>unk</?>>` would hide it.
         guard !word.contains(UnknownTokens.token) else { return word }
         let scalars = word.unicodeScalars
         guard let first = scalars.firstIndex(where: { CharacterSet.alphanumerics.contains($0) }),

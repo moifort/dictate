@@ -9,7 +9,7 @@ enum DictationPhase: Equatable {
     case recording
     /// The engine is turning the audio into text.
     case transcribing
-    /// Claude is cleaning up the transcript.
+    /// The reviewer is cleaning up the transcript.
     case enhancing
 
     var isBusy: Bool { self == .transcribing || self == .enhancing }
@@ -40,7 +40,7 @@ struct PendingDictation: Identifiable, Equatable {
 ///
 /// The microphone serves one dictation at a time, but a released one is
 /// processed while the next is recorded: the user keeps talking instead of
-/// waiting for Claude. Texts land in the order the key was released.
+/// waiting for the reviewer. Texts land in the order the key was released.
 @Observable
 final class DictationController {
     /// The microphone's side: `.idle`, `.starting` or `.recording`.
@@ -145,7 +145,7 @@ final class DictationController {
     /// Releases the recording once it reaches `timing.maximumRecording`.
     @ObservationIgnored private var recordingLimit: Task<Void, Never>?
     /// A release or cancel that came while the microphone was still starting.
-    @ObservationIgnored private var pendingGesture: FnKeyGestureOutput?
+    @ObservationIgnored private var pendingGesture: PushToTalkGestureOutput?
 
     private static let minimumSampleCount = AudioAnalysis.sampleRate * 3 / 10
     /// Below a second of holding, an empty dictation is taken for a slip of
@@ -171,7 +171,7 @@ final class DictationController {
         self.timing = timing
     }
 
-    func handle(_ gesture: FnKeyGestureOutput) {
+    func handle(_ gesture: PushToTalkGestureOutput) {
         switch gesture {
         case .pressed:
             // Earlier dictations still being processed do not hold the microphone.

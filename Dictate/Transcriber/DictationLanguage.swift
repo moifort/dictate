@@ -2,7 +2,7 @@ import Foundation
 
 /// The language being dictated, as an ISO 639-1 code ("fr").
 ///
-/// Parakeet uses it to drop tokens from another alphabet, and Claude to know
+/// Parakeet uses it to drop tokens from another alphabet, and the reviewer to know
 /// which language it is cleaning up.
 nonisolated enum DictationLanguage {
     /// The 25 European languages Parakeet TDT v3 and its Ultra post-training cover.
@@ -24,7 +24,7 @@ nonisolated enum DictationLanguage {
             .first(where: supportedCodes.contains) ?? fallback
     }
 
-    /// The language's name in French, for the Claude prompt, which is written in French.
+    /// The language's name in French, for the review prompt, which is written in French.
     static func name(of code: String) -> String {
         name(of: code, in: Locale(identifier: "fr"))
     }

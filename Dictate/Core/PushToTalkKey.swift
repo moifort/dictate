@@ -63,7 +63,7 @@ nonisolated enum PushToTalkKey: String, CaseIterable, Identifiable, Sendable {
     var cancelsOnAnyKey: Bool { self == .control }
 
     /// A fresh gesture recognizer for this key.
-    var gesture: FnKeyGesture { FnKeyGesture(cancelsOnAnyKey: cancelsOnAnyKey) }
+    var gesture: PushToTalkGesture { PushToTalkGesture(cancelsOnAnyKey: cancelsOnAnyKey) }
 
     /// Only fn has a system action of its own that must be disabled.
     var needsSystemKeyFreed: Bool { self == .fn }

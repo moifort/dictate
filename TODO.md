@@ -56,10 +56,9 @@ Improvements to transcript quality and latency, in the recommended order.
 
 Haiku dominates the total (~0.9 s, against ~0.2 s for Parakeet).
 
-- [ ] **Direct API call with thinking disabled** — Haiku 5.5 thinks ~250
-  tokens through the CLI whatever is passed. Calling the API directly would
-  likely save several hundred ms, but needs an API key instead of the Claude
-  subscription. Decision pending.
+- [x] **Direct API call with thinking disabled** — done: Claude, OpenAI and
+  Gemini through the user's API key (`APIEnhancer`), each on its fastest
+  model without thinking; the subscription keeps going through the CLI.
 - [ ] **Skip Haiku when it adds nothing** — short dictation, every token above
   a confidence threshold, no vocabulary term: paste Parakeet's text directly.
   Decide on the evaluation corpus (punctuation may suffer).

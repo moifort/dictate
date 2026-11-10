@@ -32,7 +32,7 @@ nonisolated enum StatsPeriod: String, CaseIterable, Identifiable, Sendable {
 }
 
 /// The dictations of one period, one column per unit of time, as a Health
-/// chart draws them. Timings are medians, never means: one Claude timeout of
+/// chart draws them. Timings are medians, never means: one review timeout of
 /// eight seconds would otherwise drag a whole column up.
 nonisolated struct DictationSeries: Equatable {
     struct Bucket: Identifiable, Equatable {

@@ -11,7 +11,7 @@ struct LanguagePicker: View {
                 Text(DictationLanguage.displayName(of: code).localizedCapitalized).tag(code)
             }
         }
-        // The Claude prompt names the language: the waiting process is stale.
+        // The review prompt names the language: the waiting process is stale.
         .onChange(of: model.settings.language) { model.settingsChanged() }
     }
 }

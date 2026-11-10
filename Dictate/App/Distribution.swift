@@ -24,6 +24,6 @@ nonisolated enum Distribution {
 typealias PushToTalkMonitor = HotKeyMonitor
 typealias FieldInspector = FrontmostApp
 #else
-typealias PushToTalkMonitor = FnKeyMonitor
+typealias PushToTalkMonitor = KeyTapMonitor
 typealias FieldInspector = FocusInspector
 #endif

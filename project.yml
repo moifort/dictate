@@ -21,6 +21,10 @@ configs:
   AppStore: release
 settings:
   base:
+    # The same language settings as the DictateKit manifests: Swift 6 mode,
+    # main actor by default, and approachable concurrency, which there reads
+    # NonisolatedNonsendingByDefault and InferIsolatedConformances (the rest
+    # of it is already on in Swift 6). Change them together.
     SWIFT_VERSION: "6.0"
     SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
     SWIFT_APPROACHABLE_CONCURRENCY: YES

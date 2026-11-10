@@ -30,7 +30,9 @@ let package = Package(
     ]
 )
 
-/// The same as the apps: main actor by default, approachable concurrency.
+/// The same as the app (project.yml): Swift 6 mode, main actor by default,
+/// and approachable concurrency, whose two features not already on in Swift 6
+/// are these. Change them together.
 var settings: [SwiftSetting] {
     [
         .defaultIsolation(MainActor.self),

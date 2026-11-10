@@ -15,11 +15,11 @@ nonisolated struct CorpusEntry: Codable, Equatable, Identifiable, Sendable {
     let bundleID: String?
     /// `AppCategory` raw value.
     let category: String
-    /// What the engine produced, before Claude.
+    /// What the engine produced, before the review.
     let transcript: String
-    /// What was pasted: Claude's version, or the transcript when Claude was off or failed.
+    /// What was pasted: the reviewer's version, or the transcript when the review was off or failed.
     let inserted: String
-    /// Whether `inserted` went through Claude.
+    /// Whether `inserted` went through a reviewer.
     let enhanced: Bool
     /// The inserted text as the user left it; nil when the field could not
     /// be read again or no longer held it.

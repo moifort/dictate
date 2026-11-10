@@ -3,7 +3,7 @@ import Foundation
 /// The highlights of the statistics page: the last week against the four
 /// before it, as the Fitness app compares weeks.
 ///
-/// Timings are medians, never means: one Claude timeout of eight seconds
+/// Timings are medians, never means: one review timeout of eight seconds
 /// would otherwise drag a whole week's figure up.
 nonisolated struct DictationStats {
     static let recentDays = 7

@@ -1,15 +1,15 @@
 import Foundation
 
-nonisolated enum FnKeyEvent: Equatable, Sendable {
-    case fnDown(at: TimeInterval)
-    case fnUp(at: TimeInterval)
+nonisolated enum PushToTalkEvent: Equatable, Sendable {
+    case keyDown(at: TimeInterval)
+    case keyUp(at: TimeInterval)
     /// Any other key pressed while `fn` may be held.
     case otherKeyDown(at: TimeInterval)
     /// Another modifier going down while `fn` may be held.
     case otherModifierDown(at: TimeInterval)
 }
 
-nonisolated enum FnKeyGestureOutput: Equatable, Sendable {
+nonisolated enum PushToTalkGestureOutput: Equatable, Sendable {
     case pressed
     case released
     case cancelled
@@ -25,7 +25,7 @@ nonisolated enum FnKeyGestureOutput: Equatable, Sendable {
 /// With `cancelsOnAnyKey` (control), a key typed while the modifier is held
 /// cancels at any time: control held a while before a shortcut is a shortcut,
 /// and recording on would transcribe the room and paste it.
-nonisolated struct FnKeyGesture: Sendable {
+nonisolated struct PushToTalkGesture: Sendable {
     var minimumDuration: TimeInterval = 0.3
     var cancelsOnAnyKey = false
 
@@ -38,14 +38,14 @@ nonisolated struct FnKeyGesture: Sendable {
     /// Ends the press when the key, read from the system, is no longer down:
     /// the key-up never reached the monitor (event tap disabled by a timeout,
     /// secure input), and the microphone would otherwise stay open.
-    mutating func resync(keyIsDown: Bool, at time: TimeInterval) -> FnKeyGestureOutput? {
+    mutating func resync(keyIsDown: Bool, at time: TimeInterval) -> PushToTalkGestureOutput? {
         guard isHeld, !keyIsDown else { return nil }
-        return handle(.fnUp(at: time))
+        return handle(.keyUp(at: time))
     }
 
-    mutating func handle(_ event: FnKeyEvent) -> FnKeyGestureOutput? {
+    mutating func handle(_ event: PushToTalkEvent) -> PushToTalkGestureOutput? {
         switch event {
-        case .fnDown(let time):
+        case .keyDown(let time):
             guard downAt == nil else { return nil }
             downAt = time
             interrupted = false
@@ -61,7 +61,7 @@ nonisolated struct FnKeyGesture: Sendable {
             interrupted = true
             return .cancelled
 
-        case .fnUp(let time):
+        case .keyUp(let time):
             guard let start = downAt else { return nil }
             downAt = nil
             if interrupted { return nil }

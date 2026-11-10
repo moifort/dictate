@@ -4,7 +4,7 @@ import Observation
 import DictateKit
 
 /// Searches the audio for the custom vocabulary and rewrites the words
-/// Parakeet mangled, before Claude sees the transcript.
+/// Parakeet mangled, before the reviewer sees the transcript.
 ///
 /// FluidAudio's CTC keyword spotting: a second, smaller model (Parakeet CTC
 /// 110M) scores each term against the audio, and a term replaces the words it
@@ -132,7 +132,7 @@ nonisolated enum VocabularyBoost {
     /// boost, on another scale than Parakeet's token probabilities: mapping
     /// one to the other would be arbitrary. A replacement both matches a term
     /// the user listed and beat Parakeet's word on the audio, so it counts as
-    /// certain: flagged as doubtful, Claude could "fix" it back.
+    /// certain: flagged as doubtful, the reviewer could "fix" it back.
     static let replacedConfidence: Float = 1
 
     /// `rescored` laid over `transcription`: the words it kept keep their

@@ -153,7 +153,7 @@ The last page has a scratch field to try a dictation end to end.
 
 | Step | Component |
 |---|---|
-| `fn` or `control` held / released | `FnKeyMonitor` → `FnKeyGesture` |
+| `fn` or `control` held / released | `KeyTapMonitor` → `PushToTalkGesture` |
 | Microphone → 16 kHz mono | `AudioRecorder`, in the DictateKit package |
 | Local transcription | `ParakeetTranscriber`: Parakeet TDT Ultra through FluidAudio, 25 European languages, no vocabulary prompt. `TranscriptionEngine` only names it in the statistics and the corpus. |
 | Vocabulary boosting (experimental, off by default) | `VocabularyBooster`: FluidAudio's CTC keyword spotting with Parakeet CTC 110M (~100 MB, in `Models/parakeet-ctc-110m-coreml`) rescores Parakeet's transcript against the vocabulary before Claude. Never waits for the model, falls back to the plain transcript on any failure. |

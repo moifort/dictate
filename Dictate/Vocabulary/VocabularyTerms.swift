@@ -41,7 +41,7 @@ nonisolated enum TermTokenizer {
         return tokens
     }
 
-    /// Whether the word is worth spelling out to Claude: a name, an acronym,
+    /// Whether the word is worth spelling out to the reviewer: a name, an acronym,
     /// mixed case, digits, or a technical token like `node.js` or `C++`.
     static func looksLikeTerm(_ token: TermToken) -> Bool {
         let text = token.text

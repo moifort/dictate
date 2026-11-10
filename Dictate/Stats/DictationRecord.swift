@@ -5,7 +5,7 @@ import DictateKit
 /// long each step took. Never the text itself.
 nonisolated struct DictationRecord: Codable, Equatable, Sendable {
     let date: Date
-    /// Words of the text that was inserted, after Claude's cleanup.
+    /// Words of the text that was inserted, after the review.
     let words: Int
     /// Seconds of speech recorded while `fn` was held.
     let audio: TimeInterval

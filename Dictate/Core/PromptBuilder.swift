@@ -140,7 +140,7 @@ nonisolated enum PromptBuilder {
         }
     }
 
-    /// The user message with the words the transcriber doubted marked for Claude.
+    /// The user message with the words the transcriber doubted marked for the reviewer.
     static func userMessage(transcription: Transcription, context: DictationContext) -> String {
         userMessage(transcript: DoubtfulWords.mark(transcription), context: context)
     }

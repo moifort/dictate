@@ -6,3 +6,4 @@ DerivedData/
 xcuserdata/
 .claude/worktrees/
 docs/superpowers/
+build-release/
