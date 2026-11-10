@@ -8,8 +8,9 @@ require_relative "asc"
 NOTES = <<~TEXT.strip
   Dictate is push-to-talk dictation. Hold Option + Space, speak, release: the text is placed on the clipboard, and the user pastes it with Command-V.
 
-  This build answers the review of October 25, 2026. It no longer requests Accessibility or Input Monitoring and does not link those APIs. The shortcut is a Carbon global hot key (RegisterEventHotKey), which reports this one shortcut only, and nothing is pasted or read in other apps.
-  The microphone button before the system prompt now says "Continue".
+  New since the approved 1.2.2: the interface is translated into 25 languages, a second shortcut (Control + Option + Space) can be picked in Settings, emojis can be dictated ("emoji rocket"), and error reports can be turned off in Settings, General.
+
+  As in 1.2.2, the app requests neither Accessibility nor Input Monitoring and does not link those APIs. The shortcut is a Carbon global hot key (RegisterEventHotKey), which reports this one shortcut only, and nothing is pasted or read in other apps.
   Microphone: recorded only while the shortcut is held. It is the only permission requested.
 
   Audio and text never leave the Mac: transcription runs locally (Parakeet, downloaded once from Hugging Face on first launch, about 600 MB) and the cleanup uses Apple Intelligence on device. No account, no login.
@@ -34,4 +35,4 @@ else
   ASC.request(:post, "/v1/appStoreReviewDetails", { data: { type: "appStoreReviewDetails", attributes: attributes,
     relationships: { appStoreVersion: { data: { type: "appStoreVersions", id: version["id"] } } } } })
 end
-puts "Review information set (contact #{contact['contactEmail']})"
+puts "Review information set"
