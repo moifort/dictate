@@ -15,9 +15,10 @@ final class RecordingIndicator {
         case failed(String)
         /// `fn` pressed before the engine's model is in memory.
         case loading(TranscriptionEngine)
-        /// The `claude` CLI is signed out: Apple Intelligence reviewed the
-        /// text instead, or it went in raw.
-        case claudeDisconnected(raw: Bool)
+        /// The chosen reviewer cannot answer until the user acts or its limit
+        /// resets (`problem`: "Claude déconnecté", "Clé OpenAI refusée"…):
+        /// Apple Intelligence reviewed the text instead, or it went in raw.
+        case reviewerUnavailable(problem: String, raw: Bool)
     }
 
     @Observable
@@ -56,12 +57,12 @@ final class RecordingIndicator {
 
     /// Briefly shows how a finished dictation ended, when it needs attention.
     /// A dictation that went well leaves an earlier one's flash in place.
-    /// A signed-out Claude wins over the rest: it degrades every dictation
-    /// until the user signs in again.
-    func show(_ outcome: DictationOutcome, claudeDisconnected: Bool = false) {
+    /// An unavailable reviewer wins over the rest: it degrades every
+    /// dictation until the user acts. `reviewerProblem` says what is wrong.
+    func show(_ outcome: DictationOutcome, reviewerProblem: String? = nil) {
         let flash: Flash? = switch outcome {
-        case .pasted(let raw) where claudeDisconnected, .copied(let raw) where claudeDisconnected:
-            .claudeDisconnected(raw: raw)
+        case .pasted(let raw) where reviewerProblem != nil, .copied(let raw) where reviewerProblem != nil:
+            .reviewerUnavailable(problem: reviewerProblem ?? "", raw: raw)
         case .copied: .copied
         case .unheard: .unheard
         case .failed(let message): .failed(message)
@@ -77,7 +78,7 @@ final class RecordingIndicator {
             case .copied, .unheard: .seconds(1.6)
             case .loading: .seconds(2.5)
             case .failed: .seconds(3)
-            case .claudeDisconnected: .seconds(4)
+            case .reviewerUnavailable: .seconds(4)
             }
             try? await Task.sleep(for: duration)
             guard !Task.isCancelled else { return }
@@ -319,16 +320,16 @@ private struct IndicatorView: View {
                 }
             }
             .id("failed")
-        case .claudeDisconnected(let raw):
+        case .reviewerUnavailable(let problem, let raw):
             HStack(spacing: 8) {
                 BouncingSymbol(name: "exclamationmark.triangle.fill", color: .orange)
                 if !compact {
-                    Text(raw ? "Claude déconnecté · texte brut" : "Claude déconnecté · relu par Apple")
+                    Text(raw ? "\(problem) · texte brut" : "\(problem) · relu par Apple")
                         .font(.callout)
                         .lineLimit(1)
                 }
             }
-            .id("claudeDisconnected")
+            .id("reviewerUnavailable")
         case .loading(let engine):
             HStack(spacing: 8) {
                 Spinner()

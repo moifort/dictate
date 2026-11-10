@@ -27,9 +27,20 @@ extension Transcriber {
 @MainActor protocol Enhancer: AnyObject, Sendable {
     /// Must honour task cancellation: the controller cancels on timeout.
     func enhance(_ transcription: Transcription, context: DictationContext) async throws -> String
+    /// The cleanup with the reviewer that made it. Returned rather than kept:
+    /// dictations overlap, and a property would credit the wrong one.
+    func review(_ transcription: Transcription, context: DictationContext) async throws -> Review
+    /// The reviewer the next cleanup is meant for, before any fallback.
+    var plannedReviewer: Reviewer? { get }
 }
 
 extension Enhancer {
+    func review(_ transcription: Transcription, context: DictationContext) async throws -> Review {
+        Review(text: try await enhance(transcription, context: context), reviewer: nil)
+    }
+
+    var plannedReviewer: Reviewer? { nil }
+
     func enhance(transcript: String, context: DictationContext) async throws -> String {
         try await enhance(Transcription(text: transcript), context: context)
     }

@@ -29,7 +29,7 @@ struct DictationControllerTests {
         let fakes = Fakes(
             recorder: FakeRecorder(samples: samples ?? speech, events: events),
             transcriber: FakeTranscriber(result: transcript, words: words, delay: transcriberDelay, events: events),
-            enhancer: FakeEnhancer(result: enhanced, delay: enhancerDelay),
+            enhancer: FakeEnhancer(result: enhanced, delay: enhancerDelay, reviewer: reviewer),
             focus: FakeFocus(editable: editableFocus, bundleID: "com.apple.Terminal", delay: precedingTextDelay, events: events),
             inserter: FakeInserter(),
             events: events
@@ -44,7 +44,6 @@ struct DictationControllerTests {
             enhancementEnabled: { enhancementEnabled },
             shareFieldContext: { shareFieldContext },
             transcriptionEngine: { engine },
-            reviewer: { reviewer },
             loadingEngine: { loadingEngine },
             enhancementTimeout: .milliseconds(200),
             transcriptionTimeout: transcriptionTimeout,
@@ -409,6 +408,24 @@ struct DictationControllerTests {
         await controller.waitUntilIdle()
         #expect(fakes.inserter.pasted == ["Première.", "Seconde."])
         #expect(fakes.enhancer.maxConcurrent == 2)
+    }
+
+    /// Two cleanups overlap and fall back differently: each dictation is
+    /// credited to the reviewer that did its own cleanup.
+    @Test func overlappingDictationsAreCreditedToTheirOwnReviewer() async {
+        let (controller, fakes) = makeController(reviewer: .claude)
+        fakes.enhancer.replies = [("Première.", .milliseconds(150)), ("Seconde.", .milliseconds(10))]
+        fakes.enhancer.replyReviewers = [.apple, .claude]
+        var records: [DictationRecord] = []
+        controller.onRecord = { records.append($0) }
+        controller.handle(.pressed)
+        await controller.waitUntilStarted()
+        controller.handle(.released)
+        controller.handle(.pressed)
+        await controller.waitUntilStarted()
+        controller.handle(.released)
+        await controller.waitUntilIdle()
+        #expect(records.map(\.reviewer) == [.apple, .claude])
     }
 
     @Test func transcriptionsRunOneAfterTheOther() async {
@@ -871,13 +888,17 @@ private final class FakeEnhancer: Enhancer {
     let delay: Duration
     /// One reply and delay per call, in order, instead of `result` and `delay`.
     var replies: [(text: String, delay: Duration)] = []
+    /// The reviewer each call says it went to, in order; none past the end.
+    var replyReviewers: [Reviewer] = []
     var received: [(transcription: Transcription, context: DictationContext)] = []
     private var running = 0
     private(set) var maxConcurrent = 0
+    let plannedReviewer: Reviewer?
 
-    init(result: Result<String, Error>, delay: Duration) {
+    init(result: Result<String, Error>, delay: Duration, reviewer: Reviewer?) {
         self.result = result
         self.delay = delay
+        plannedReviewer = reviewer
     }
 
     func enhance(_ transcription: Transcription, context: DictationContext) async throws -> String {
@@ -892,6 +913,12 @@ private final class FakeEnhancer: Enhancer {
         }
         try await Task.sleep(for: delay)
         return try result.get()
+    }
+
+    func review(_ transcription: Transcription, context: DictationContext) async throws -> Review {
+        let call = received.count
+        let text = try await enhance(transcription, context: context)
+        return Review(text: text, reviewer: call < replyReviewers.count ? replyReviewers[call] : nil)
     }
 }
 

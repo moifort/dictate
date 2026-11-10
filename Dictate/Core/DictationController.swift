@@ -66,10 +66,6 @@ final class DictationController {
     @ObservationIgnored private let shareFieldContext: () -> Bool
     /// The engine behind `transcriber`, for the statistics.
     @ObservationIgnored private let transcriptionEngine: () -> TranscriptionEngine
-    /// The model behind `enhancer` for the cleanup just done, for the
-    /// statistics: read once the cleanup is over, since the enhancer may
-    /// fall back to another model along the way.
-    @ObservationIgnored private let reviewer: () -> Reviewer?
     /// The engine whose model is not in memory yet, nil once dictation can start.
     @ObservationIgnored private let loadingEngine: () -> TranscriptionEngine?
     @ObservationIgnored private let enhancementTimeout: Duration
@@ -149,7 +145,6 @@ final class DictationController {
         enhancementEnabled: @escaping () -> Bool,
         shareFieldContext: @escaping () -> Bool,
         transcriptionEngine: @escaping () -> TranscriptionEngine = { .parakeet },
-        reviewer: @escaping () -> Reviewer? = { nil },
         loadingEngine: @escaping () -> TranscriptionEngine? = { nil },
         enhancementTimeout: Duration = .seconds(8),
         transcriptionTimeout: Duration = .seconds(30),
@@ -166,7 +161,6 @@ final class DictationController {
         self.enhancementEnabled = enhancementEnabled
         self.shareFieldContext = shareFieldContext
         self.transcriptionEngine = transcriptionEngine
-        self.reviewer = reviewer
         self.loadingEngine = loadingEngine
         self.enhancementTimeout = enhancementTimeout
         self.transcriptionTimeout = transcriptionTimeout
@@ -391,14 +385,17 @@ final class DictationController {
         if enhancementEnabled() {
             setPhase(.enhancing, of: id)
             let start = clock.now
-            if let enhanced = await enhanceWithTimeout(transcript, context: context), !enhanced.isEmpty {
-                text = UnknownTokens.resolved(enhanced)
+            // Who was asked, for the statistics when no review comes back.
+            let planned = enhancer.plannedReviewer
+            let review = await enhanceWithTimeout(transcript, context: context)
+            if let review, !review.text.isEmpty {
+                text = UnknownTokens.resolved(review.text)
             } else {
                 raw = true
             }
             let elapsed = clock.now - start
             enhancement = elapsed
-            reviewer = self.reviewer()
+            reviewer = review?.reviewer ?? planned
             Log.dictation.info("enhanced in \(Self.milliseconds(elapsed)) ms by \(reviewer?.rawValue ?? "nobody", privacy: .public), raw: \(raw)")
         }
 
@@ -463,9 +460,9 @@ final class DictationController {
         Double(elapsed.components.seconds) + Double(elapsed.components.attoseconds) / 1e18
     }
 
-    private func enhanceWithTimeout(_ transcript: Transcription, context: DictationContext) async -> String? {
+    private func enhanceWithTimeout(_ transcript: Transcription, context: DictationContext) async -> Review? {
         let work = Task { [enhancer, context] in
-            try await enhancer.enhance(transcript, context: context)
+            try await enhancer.review(transcript, context: context)
         }
         let timer = Task { [enhancementTimeout] in
             try await Task.sleep(for: enhancementTimeout)
@@ -473,7 +470,9 @@ final class DictationController {
         }
         defer { timer.cancel() }
         do {
-            return try await work.value.trimmingCharacters(in: .whitespacesAndNewlines)
+            var review = try await work.value
+            review.text = review.text.trimmingCharacters(in: .whitespacesAndNewlines)
+            return review
         } catch is CancellationError {
             // The cutoff doing its job: the raw transcript goes in and the
             // record keeps no enhancement time, which is where a slow Claude

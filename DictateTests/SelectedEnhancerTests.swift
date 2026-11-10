@@ -61,17 +61,13 @@ struct SelectedEnhancerTests {
         #expect(enhancer.effectiveReviewer == .apple)
     }
 
-    @Test func theReviewerActuallyUsedIsRemembered() async throws {
+    @Test func theReviewerActuallyUsedComesWithTheText() async throws {
         let (chosen, _, _) = make(reviewer: .claude)
-        #expect(chosen.lastUsed == nil)
-        _ = try await chosen.enhance(transcript: "x", context: DictationContext())
-        #expect(chosen.lastUsed == .claude)
+        #expect(try await chosen.review(Transcription(text: "x"), context: DictationContext()) == Review(text: "claude", reviewer: .claude))
         let (offline, _, _) = make(reviewer: .claude, online: false)
-        _ = try await offline.enhance(transcript: "x", context: DictationContext())
-        #expect(offline.lastUsed == .apple)
+        #expect(try await offline.review(Transcription(text: "x"), context: DictationContext()).reviewer == .apple)
         let (failing, _, _) = make(reviewer: .claude, claude: FakeEnhancer(.failure(FakeError())))
-        _ = try await failing.enhance(transcript: "x", context: DictationContext())
-        #expect(failing.lastUsed == .apple)
+        #expect(try await failing.review(Transcription(text: "x"), context: DictationContext()).reviewer == .apple)
     }
 
     @Test func offlineWithoutAppleIntelligenceStillAsksClaude() async throws {
@@ -98,23 +94,23 @@ struct SelectedEnhancerTests {
     @Test func aSignedOutClaudeIsRememberedUntilItAnswersAgain() async throws {
         let signedOut = FakeEnhancer(.failure(ClaudeCLIError.failed("Failed to authenticate: OAuth session expired")))
         let (enhancer, _, _) = make(reviewer: .claude, claude: signedOut)
-        #expect(!enhancer.isClaudeDisconnected)
+        #expect(enhancer.problem(of: .claude) == nil)
         #expect(try await enhancer.enhance(transcript: "x", context: DictationContext()) == "apple")
-        #expect(enhancer.isClaudeDisconnected)
+        #expect(enhancer.problem(of: .claude) == .disconnected)
 
         let (other, _, _) = make(reviewer: .claude, claude: FakeEnhancer(.failure(FakeError())))
         _ = try await other.enhance(transcript: "x", context: DictationContext())
-        #expect(!other.isClaudeDisconnected)
+        #expect(other.problem(of: .claude) == nil)
     }
 
     @Test func aRefusedAPIKeyShowsLikeASignedOutClaude() async throws {
         let (enhancer, _, _) = make(reviewer: .claude, claude: FakeEnhancer(.failure(APIReviewError.invalidKey(.anthropic))))
         #expect(try await enhancer.enhance(transcript: "x", context: DictationContext()) == "apple")
-        #expect(enhancer.isClaudeDisconnected)
+        #expect(enhancer.problem(of: .claude) == .disconnected)
 
         let (limited, _, _) = make(reviewer: .claude, claude: FakeEnhancer(.failure(APIReviewError.rateLimited(.anthropic))))
         #expect(try await limited.enhance(transcript: "x", context: DictationContext()) == "apple")
-        #expect(!limited.isClaudeDisconnected)
+        #expect(limited.problem(of: .claude) == .rateLimited)
     }
 
     @Test func openAIAndGeminiAreAskedAndFallBackLikeClaude() async throws {
@@ -129,10 +125,14 @@ struct SelectedEnhancerTests {
         #expect(try await offline.enhance(transcript: "x", context: DictationContext()) == "apple")
 
         let (refused, _, _) = make(reviewer: .openAI, others: [.openAI: FakeEnhancer(.failure(APIReviewError.invalidKey(.openAI)))])
-        #expect(try await refused.enhance(transcript: "x", context: DictationContext()) == "apple")
-        #expect(refused.lastUsed == .apple)
-        // The indicator's warning is about Claude's sign-in only.
-        #expect(!refused.isClaudeDisconnected)
+        #expect(try await refused.review(Transcription(text: "x"), context: DictationContext()).reviewer == .apple)
+        // Every reviewer's refused key is shown, not only Claude's.
+        #expect(refused.problem(of: .openAI) == .disconnected)
+        #expect(refused.problem(of: .claude) == nil)
+
+        let (limited, _, _) = make(reviewer: .gemini, others: [.gemini: FakeEnhancer(.failure(APIReviewError.rateLimited(.gemini)))])
+        _ = try await limited.enhance(transcript: "x", context: DictationContext())
+        #expect(limited.problem(of: .gemini) == .rateLimited)
     }
 
     @Test func aSignedOutClaudeWithoutAppleIntelligenceIsRememberedToo() async {
@@ -141,7 +141,7 @@ struct SelectedEnhancerTests {
         await #expect(throws: ClaudeCLIError.self) {
             try await enhancer.enhance(transcript: "x", context: DictationContext())
         }
-        #expect(enhancer.isClaudeDisconnected)
+        #expect(enhancer.problem(of: .claude) == .disconnected)
     }
 
     @Test func aCancelledClaudeIsNotRetriedOnApple() async {

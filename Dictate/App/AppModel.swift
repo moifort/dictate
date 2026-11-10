@@ -86,7 +86,6 @@ final class AppModel {
             enhancementEnabled: { settings.enhancementEnabled },
             shareFieldContext: { settings.shareFieldContext },
             transcriptionEngine: { [transcriber] in transcriber.engine },
-            reviewer: { [enhancer] in enhancer.lastUsed },
             loadingEngine: { [transcriber] in
                 // A failed load is retried by the dictation itself.
                 transcriber.state.isBusy || transcriber.state == .notLoaded ? transcriber.engine : nil
@@ -94,7 +93,7 @@ final class AppModel {
         )
         indicator = RecordingIndicator(controller: controller, recorder: recorder)
         if let flash = ScreenshotMode.flash, flash.hasPrefix("claudeDisconnected") {
-            indicator.show(.pasted(raw: flash.hasSuffix("Raw")), claudeDisconnected: true)
+            indicator.show(.pasted(raw: flash.hasSuffix("Raw")), reviewerProblem: String(localized: "Claude déconnecté"))
         } else if ScreenshotMode.flash == "unheard" {
             indicator.show(.unheard)
         }
@@ -494,12 +493,31 @@ final class AppModel {
         default:
             lastError = nil
         }
-        let claudeDisconnected = settings.reviewer == .claude && enhancer.isClaudeDisconnected
-        if claudeDisconnected {
-            lastError = settings.claudeAccess == .apiKey
-                ? APIReviewError.invalidKey(.anthropic).localizedDescription
-                : String(localized: "Claude est déconnecté : lancez « claude auth login » dans un terminal.")
+        let reviewer = settings.reviewer
+        let problem = enhancer.problem(of: reviewer)
+        if let problem { lastError = Self.explanation(of: problem, reviewer: reviewer, access: settings.claudeAccess) }
+        indicator.show(outcome, reviewerProblem: problem.map { Self.title(of: $0, reviewer: reviewer, access: settings.claudeAccess) })
+    }
+
+    /// The reviewer's lasting problem in a few words, for the indicator.
+    static func title(of problem: ReviewFailure, reviewer: Reviewer, access: ClaudeAccess) -> String {
+        let name = reviewer.displayName
+        let throughKey = reviewer != .claude || access == .apiKey
+        return switch problem {
+        case .rateLimited: String(localized: "Limite \(name) atteinte")
+        case .disconnected where throughKey: String(localized: "Clé \(name) refusée")
+        default: String(localized: "\(name) déconnecté")
         }
-        indicator.show(outcome, claudeDisconnected: claudeDisconnected)
+    }
+
+    /// The reviewer's lasting problem and what to do about it, for the menu.
+    static func explanation(of problem: ReviewFailure, reviewer: Reviewer, access: ClaudeAccess) -> String {
+        let provider = reviewer == .claude && access == .subscription ? nil : reviewer.apiProvider
+        return switch (problem, provider) {
+        case (.rateLimited, let provider?): APIReviewError.rateLimited(provider).localizedDescription
+        case (.rateLimited, nil): String(localized: "Limite d'utilisation de Claude atteinte : réessayez après sa réinitialisation.")
+        case (_, let provider?): APIReviewError.invalidKey(provider).localizedDescription
+        case (_, nil): String(localized: "Claude est déconnecté : lancez « claude auth login » dans un terminal.")
+        }
     }
 }

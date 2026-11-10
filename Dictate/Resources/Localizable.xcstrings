@@ -1,6 +1,22 @@
 {
   "sourceLanguage": "fr",
   "strings": {
+    " Apple Intelligence prend le relais hors ligne.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " Apple Intelligence takes over offline."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": " Apple Intelligence prend le relais hors ligne."
+          }
+        }
+      }
+    },
     "%@ (%lld/%lld mots)": {
       "localizations": {
         "en": {
@@ -45,6 +61,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "%@ avec lexique renforcé"
+          }
+        }
+      }
+    },
+    "%@ déconnecté": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ signed out"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ déconnecté"
           }
         }
       }
@@ -97,6 +129,22 @@
         }
       }
     },
+    "%@ relit vos dictées avec votre clé API %@.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ reviews your dictations with your API key %2$@."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ relit vos dictées avec votre clé API %2$@."
+          }
+        }
+      }
+    },
     "%@ se prépare, encore un instant…": {
       "localizations": {
         "en": {
@@ -125,6 +173,38 @@
           "stringUnit": {
             "state": "new",
             "value": "%1$@ seul : WER %2$@ sur %3$lld dictées"
+          }
+        }
+      }
+    },
+    "%@ · relu par Apple": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · reviewed by Apple"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · relu par Apple"
+          }
+        }
+      }
+    },
+    "%@ · texte brut": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · raw text"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · texte brut"
           }
         }
       }
@@ -289,6 +369,86 @@
         }
       }
     },
+    "Abonnement": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Subscription"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abonnement"
+          }
+        }
+      }
+    },
+    "Abonnement Claude détecté : Claude relit vos dictées.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude subscription detected: Claude reviews your dictations."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abonnement Claude détecté : Claude relit vos dictées."
+          }
+        }
+      }
+    },
+    "Abonnement Claude détecté.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude subscription detected."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abonnement Claude détecté."
+          }
+        }
+      }
+    },
+    "Accès": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Access"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accès"
+          }
+        }
+      }
+    },
+    "Accès :": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Access:"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accès :"
+          }
+        }
+      }
+    },
     "Afficher dans le Finder": {
       "localizations": {
         "en": {
@@ -333,6 +493,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ajouter au lexique"
+          }
+        }
+      }
+    },
+    "Ajouter une app": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add an app"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ajouter une app"
           }
         }
       }
@@ -529,6 +705,22 @@
         }
       }
     },
+    "Appuyer sur Entrée après la dictée": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Press Return after dictating"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Appuyer sur Entrée après la dictée"
+          }
+        }
+      }
+    },
     "Aucun": {
       "localizations": {
         "en": {
@@ -545,86 +737,6 @@
         }
       }
     },
-    "Claude déconnecté · relu par Apple": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Claude signed out · reviewed by Apple"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Claude déconnecté · relu par Apple"
-          }
-        }
-      }
-    },
-    "Claude déconnecté · texte brut": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Claude signed out · raw text"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Claude déconnecté · texte brut"
-          }
-        }
-      }
-    },
-    "Claude est déconnecté : lancez « claude auth login » dans un terminal.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Claude is signed out: run “claude auth login” in a terminal."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Claude est déconnecté : lancez « claude auth login » dans un terminal."
-          }
-        }
-      }
-    },
-    "Envoi :": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sending:"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Envoi :"
-          }
-        }
-      }
-    },
-    "Installation de la mise à jour…": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Installing Update…"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Installation de la mise à jour…"
-          }
-        }
-      }
-    },
     "Aucun relecteur choisi.": {
       "localizations": {
         "en": {
@@ -637,6 +749,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aucun relecteur choisi."
+          }
+        }
+      }
+    },
+    "Aucune app : Entrée n'est jamais pressée.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No app: Return is never pressed."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune app : Entrée n'est jamais pressée."
+          }
+        }
+      }
+    },
+    "Aucune clé %@ enregistrée": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No %@ key saved"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune clé %@ enregistrée"
+          }
+        }
+      }
+    },
+    "Aucune clé API %@ enregistrée.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No %@ API key saved."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aucune clé API %@ enregistrée."
           }
         }
       }
@@ -673,6 +833,22 @@
         }
       }
     },
+    "Aussi détectés : %@. %@ passe en premier.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Also detected: %1$@. %2$@ comes first."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aussi détectés : %1$@. %2$@ passe en premier."
+          }
+        }
+      }
+    },
     "Autoriser": {
       "localizations": {
         "en": {
@@ -705,18 +881,34 @@
         }
       }
     },
-    "Bientôt": {
+    "Autre…": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Coming soon"
+            "value": "Other…"
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bientôt"
+            "value": "Autre…"
+          }
+        }
+      }
+    },
+    "Avec votre clé API, facturée à l'usage.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With your API key, billed by usage."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Avec votre clé API, facturée à l'usage."
           }
         }
       }
@@ -865,22 +1057,6 @@
         }
       }
     },
-    "ChatGPT": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ChatGPT"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ChatGPT"
-          }
-        }
-      }
-    },
     "Choisir": {
       "localizations": {
         "en": {
@@ -925,6 +1101,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "Choisissez l'exécutable claude"
+          }
+        }
+      }
+    },
+    "Choisissez une app où appuyer sur Entrée après la dictée": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose an app where Return is pressed after dictating"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choisissez une app où appuyer sur Entrée après la dictée"
+          }
+        }
+      }
+    },
+    "Choix automatique : Claude, sinon OpenAI, sinon Gemini, sinon Apple Intelligence, selon ce qui est détecté.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic choice: Claude, else OpenAI, else Gemini, else Apple Intelligence, depending on what is detected."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choix automatique : Claude, sinon OpenAI, sinon Gemini, sinon Apple Intelligence, selon ce qui est détecté."
           }
         }
       }
@@ -977,6 +1185,38 @@
         }
       }
     },
+    "Claude déconnecté": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude signed out"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude déconnecté"
+          }
+        }
+      }
+    },
+    "Claude est déconnecté : lancez « claude auth login » dans un terminal.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude is signed out: run “claude auth login” in a terminal."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude est déconnecté : lancez « claude auth login » dans un terminal."
+          }
+        }
+      }
+    },
     "Claude est introuvable : Apple Intelligence relit sur ce Mac. Installez Claude pour qu'il prenne le relais.": {
       "localizations": {
         "en": {
@@ -989,6 +1229,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Claude est introuvable : Apple Intelligence relit sur ce Mac. Installez Claude pour qu'il prenne le relais."
+          }
+        }
+      }
+    },
+    "Claude introuvable.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude not found."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude introuvable."
           }
         }
       }
@@ -1009,18 +1265,194 @@
         }
       }
     },
-    "Cliquez dans le champ, maintenez fn, parlez, relâchez.": {
+    "Claude n'est connecté à aucun compte : Apple Intelligence relit sur ce Mac. Connectez-vous à Claude pour qu'il prenne le relais.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Click in the field, hold fn, speak, release."
+            "value": "Claude is not signed in to any account: Apple Intelligence reviews on this Mac. Sign in to Claude for it to take over."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cliquez dans le champ, maintenez fn, parlez, relâchez."
+            "value": "Claude n'est connecté à aucun compte : Apple Intelligence relit sur ce Mac. Connectez-vous à Claude pour qu'il prenne le relais."
+          }
+        }
+      }
+    },
+    "Claude n'est connecté à aucun compte.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude is not signed in to any account."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude n'est connecté à aucun compte."
+          }
+        }
+      }
+    },
+    "Claude relit vos dictées avec votre abonnement.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude reviews your dictations with your subscription."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude relit vos dictées avec votre abonnement."
+          }
+        }
+      }
+    },
+    "Cliquez dans le champ, maintenez %@, parlez, relâchez, puis collez avec ⌘V.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Click in the field, hold %@, speak, release, then paste with ⌘V."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cliquez dans le champ, maintenez %@, parlez, relâchez, puis collez avec ⌘V."
+          }
+        }
+      }
+    },
+    "Cliquez dans le champ, maintenez %@, parlez, relâchez.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Click in the field, hold %@, speak, release."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cliquez dans le champ, maintenez %@, parlez, relâchez."
+          }
+        }
+      }
+    },
+    "Clé %@ refusée": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ key refused"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clé %@ refusée"
+          }
+        }
+      }
+    },
+    "Clé :": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Key:"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clé :"
+          }
+        }
+      }
+    },
+    "Clé API": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API key"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clé API"
+          }
+        }
+      }
+    },
+    "Clé API %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ API key"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clé API %@"
+          }
+        }
+      }
+    },
+    "Clé API %@ refusée : vérifiez-la dans les Réglages.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ API key refused: check it in Settings."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clé API %@ refusée : vérifiez-la dans les Réglages."
+          }
+        }
+      }
+    },
+    "Clé API…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "API key…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clé API…"
+          }
+        }
+      }
+    },
+    "Collez une clé API %@, facturée à l'usage.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paste a %@ API key, billed by usage."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Collez une clé API %@, facturée à l'usage."
           }
         }
       }
@@ -1185,6 +1617,22 @@
         }
       }
     },
+    "Copié, collez avec ⌘V": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied, paste with ⌘V"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copié, collez avec ⌘V"
+          }
+        }
+      }
+    },
     "Corrigé depuis « %@ »": {
       "localizations": {
         "en": {
@@ -1201,6 +1649,22 @@
         }
       }
     },
+    "Créer une clé": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create a key"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Créer une clé"
+          }
+        }
+      }
+    },
     "Date": {
       "localizations": {
         "en": {
@@ -1213,6 +1677,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Date"
+          }
+        }
+      }
+    },
+    "Depuis le début : %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Since the start: %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Depuis le début : %@"
           }
         }
       }
@@ -1377,6 +1857,22 @@
         }
       }
     },
+    "Dites « émoji fusée » ou « smiley qui pleure de rire » : 🚀, 😂.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Say “emoji rocket” or “smiley crying with laughter”: 🚀, 😂."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dites « émoji fusée » ou « smiley qui pleure de rire » : 🚀, 😂."
+          }
+        }
+      }
+    },
     "Débit de parole": {
       "localizations": {
         "en": {
@@ -1485,6 +1981,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "Détection automatique"
+          }
+        }
+      }
+    },
+    "Enregistrer": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Save"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enregistrer"
+          }
+        }
+      }
+    },
+    "Envoi :": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sending:"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoi :"
+          }
+        }
+      }
+    },
+    "Envoie le message une fois le texte collé, seulement dans ces apps :": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sends the message once the text is pasted, only in these apps:"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Envoie le message une fois le texte collé, seulement dans ces apps :"
           }
         }
       }
@@ -1633,6 +2177,22 @@
         }
       }
     },
+    "Installation de la mise à jour…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installing Update…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Installation de la mise à jour…"
+          }
+        }
+      }
+    },
     "Installation…": {
       "localizations": {
         "en": {
@@ -1697,6 +2257,22 @@
         }
       }
     },
+    "Insérer les émojis dictés": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insert dictated emojis"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Insérer les émojis dictés"
+          }
+        }
+      }
+    },
     "Je vous écoute…": {
       "localizations": {
         "en": {
@@ -1725,6 +2301,54 @@
           "stringUnit": {
             "state": "translated",
             "value": "Jour"
+          }
+        }
+      }
+    },
+    "L'API %@ a renvoyé une erreur %lld : %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The %1$@ API returned error %2$lld: %3$@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'API %1$@ a renvoyé une erreur %2$lld : %3$@"
+          }
+        }
+      }
+    },
+    "L'API %@ n'a pas répondu : texte brut inséré.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The %@ API did not answer: raw text inserted."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'API %@ n'a pas répondu : texte brut inséré."
+          }
+        }
+      }
+    },
+    "L'API %@ n'a renvoyé aucun texte.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The %@ API returned no text."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'API %@ n'a renvoyé aucun texte."
           }
         }
       }
@@ -2009,6 +2633,54 @@
         }
       }
     },
+    "Limite %@ atteinte": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ limit reached"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limite %@ atteinte"
+          }
+        }
+      }
+    },
+    "Limite d'utilisation de Claude atteinte : réessayez après sa réinitialisation.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Claude usage limit reached: try again once it resets."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limite d'utilisation de Claude atteinte : réessayez après sa réinitialisation."
+          }
+        }
+      }
+    },
+    "Limite de l'API %@ atteinte.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ API limit reached."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Limite de l'API %@ atteinte."
+          }
+        }
+      }
+    },
     "Lire le texte autour du curseur": {
       "localizations": {
         "en": {
@@ -2089,6 +2761,38 @@
         }
       }
     },
+    "Maintenez option + espace pour dicter, puis collez le texte avec ⌘V.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold option + space to dictate, then paste the text with ⌘V."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maintenez option + espace pour dicter, puis collez le texte avec ⌘V."
+          }
+        }
+      }
+    },
+    "Maintenez option + espace, parlez, relâchez : le texte est dans le presse-papiers, prêt à coller dans n'importe quelle app.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hold option + space, speak, release: the text is on the clipboard, ready to paste into any app."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maintenez option + espace, parlez, relâchez : le texte est dans le presse-papiers, prêt à coller dans n'importe quelle app."
+          }
+        }
+      }
+    },
     "Maintenez 🌐 fn pour dicter. macOS doit la laisser libre : Clavier → « Appuyer sur la touche 🌐 pour » → « Ne rien faire ».": {
       "localizations": {
         "en": {
@@ -2153,6 +2857,22 @@
         }
       }
     },
+    "Minutes": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minutes"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minutes"
+          }
+        }
+      }
+    },
     "Mise à jour": {
       "localizations": {
         "en": {
@@ -2185,18 +2905,66 @@
         }
       }
     },
-    "Modèle Haiku, via votre compte Claude Code. Un peu plus rapide et plus sûr sur le jargon.": {
+    "Modèle GPT-5.4 nano sans raisonnement, le plus rapide d'OpenAI, via votre clé API.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The Haiku model, through your Claude Code account. A bit faster and surer with jargon."
+            "value": "GPT-5.4 nano without reasoning, OpenAI's fastest model, through your API key."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Modèle Haiku, via votre compte Claude Code. Un peu plus rapide et plus sûr sur le jargon."
+            "value": "Modèle GPT-5.4 nano sans raisonnement, le plus rapide d'OpenAI, via votre clé API."
+          }
+        }
+      }
+    },
+    "Modèle Gemini 3.5 Flash-Lite, le plus rapide de Google, via votre clé API.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemini 3.5 Flash-Lite, Google's fastest model, through your API key."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modèle Gemini 3.5 Flash-Lite, le plus rapide de Google, via votre clé API."
+          }
+        }
+      }
+    },
+    "Modèle Haiku, via votre abonnement Claude. Un peu plus rapide et plus sûr sur le jargon.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haiku model, through your Claude subscription. A little faster and more reliable with jargon."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modèle Haiku, via votre abonnement Claude. Un peu plus rapide et plus sûr sur le jargon."
+          }
+        }
+      }
+    },
+    "Modèle Haiku, via votre clé API Anthropic. Un peu plus rapide et plus sûr sur le jargon.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Haiku model, through your Anthropic API key. A little faster and more reliable with jargon."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modèle Haiku, via votre clé API Anthropic. Un peu plus rapide et plus sûr sur le jargon."
           }
         }
       }
@@ -2377,6 +3145,38 @@
         }
       }
     },
+    "Nécessite Claude Code ou l'app Claude connecté à votre abonnement, ou une clé API.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Requires Claude Code or the Claude app signed in to your subscription, or an API key."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nécessite Claude Code ou l'app Claude connecté à votre abonnement, ou une clé API."
+          }
+        }
+      }
+    },
+    "OpenAI": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenAI"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "OpenAI"
+          }
+        }
+      }
+    },
     "Ouvrez les Réglages et activez Dictate dans la liste.": {
       "localizations": {
         "en": {
@@ -2441,6 +3241,22 @@
         }
       }
     },
+    "Ouvrir les éléments de connexion…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open Login Items…"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ouvrir les éléments de connexion…"
+          }
+        }
+      }
+    },
     "Ouvrir à l'ouverture de session": {
       "localizations": {
         "en": {
@@ -2457,6 +3273,22 @@
         }
       }
     },
+    "Par défaut : votre abonnement Claude, via la commande claude. Rien à payer en plus.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "By default: your Claude subscription, through the claude command. Nothing extra to pay."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Par défaut : votre abonnement Claude, via la commande claude. Rien à payer en plus."
+          }
+        }
+      }
+    },
     "Par défaut, macOS ouvre les emoji ou sa propre dictée quand on appuie sur 🌐 fn. Vous pouvez aussi dicter avec control, qui n'a rien à régler.": {
       "localizations": {
         "en": {
@@ -2469,6 +3301,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Par défaut, macOS ouvre les emoji ou sa propre dictée quand on appuie sur 🌐 fn. Vous pouvez aussi dicter avec control, qui n'a rien à régler."
+          }
+        }
+      }
+    },
+    "Par rapport à une frappe au clavier à %lld mots/min, temps de parole et d'attente déduits.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Compared with typing at %lld words/min, speaking and waiting time deducted."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Par rapport à une frappe au clavier à %lld mots/min, temps de parole et d'attente déduits."
           }
         }
       }
@@ -2809,6 +3657,22 @@
         }
       }
     },
+    "Retirer %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove %@"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Retirer %@"
+          }
+        }
+      }
+    },
     "Revérifier": {
       "localizations": {
         "en": {
@@ -2821,6 +3685,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Revérifier"
+          }
+        }
+      }
+    },
+    "Rien entendu": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing heard"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rien entendu"
           }
         }
       }
@@ -2905,6 +3785,38 @@
         }
       }
     },
+    "Sans abonnement : Claude via votre clé API Anthropic, facturée à l'usage.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Without a subscription: Claude through your Anthropic API key, billed by usage."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sans abonnement : Claude via votre clé API Anthropic, facturée à l'usage."
+          }
+        }
+      }
+    },
+    "Sans abonnement : votre clé API, facturée à l'usage.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Without a subscription: your API key, billed by usage."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sans abonnement : votre clé API, facturée à l'usage."
+          }
+        }
+      }
+    },
     "Sans effet tant que le lexique est vide.": {
       "localizations": {
         "en": {
@@ -2933,6 +3845,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Semaine"
+          }
+        }
+      }
+    },
+    "Service": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Service"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Service"
           }
         }
       }
@@ -3049,6 +3977,22 @@
         }
       }
     },
+    "Supprimer la clé": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove the key"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Supprimer la clé"
+          }
+        }
+      }
+    },
     "Supprimer le corpus d'évaluation ?": {
       "localizations": {
         "en": {
@@ -3109,6 +4053,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Taux d'erreur sur le corpus"
+          }
+        }
+      }
+    },
+    "Temps gagné": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time saved"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Temps gagné"
           }
         }
       }
@@ -3513,18 +4473,18 @@
         }
       }
     },
-    "Un modèle de langage retire les hésitations et corrige la ponctuation et votre jargon : Claude Haiku avec votre abonnement Claude, via la commande claude, ou à défaut Apple Intelligence sur ce Mac. Au choix dans les Réglages.": {
+    "Un modèle de langage retire les hésitations et corrige la ponctuation et votre jargon : Claude Haiku avec votre abonnement Claude, détecté automatiquement, ou une clé API Claude, OpenAI ou Gemini ; à défaut Apple Intelligence sur ce Mac. Au choix dans les Réglages.": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "A language model removes hesitations and fixes punctuation and your jargon: Claude Haiku on your Claude subscription, through the claude command, or else Apple Intelligence on this Mac. Your choice in Settings."
+            "value": "A language model removes hesitations and fixes punctuation and your jargon: Claude Haiku with your Claude subscription, detected automatically, or a Claude, OpenAI or Gemini API key; otherwise Apple Intelligence on this Mac. Your choice in Settings."
           }
         },
         "fr": {
           "stringUnit": {
             "state": "translated",
-            "value": "Un modèle de langage retire les hésitations et corrige la ponctuation et votre jargon : Claude Haiku avec votre abonnement Claude, via la commande claude, ou à défaut Apple Intelligence sur ce Mac. Au choix dans les Réglages."
+            "value": "Un modèle de langage retire les hésitations et corrige la ponctuation et votre jargon : Claude Haiku avec votre abonnement Claude, détecté automatiquement, ou une clé API Claude, OpenAI ou Gemini ; à défaut Apple Intelligence sur ce Mac. Au choix dans les Réglages."
           }
         }
       }
@@ -3577,6 +4537,22 @@
         }
       }
     },
+    "Un seul raccourci": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A single shortcut"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un seul raccourci"
+          }
+        }
+      }
+    },
     "Une seule touche": {
       "localizations": {
         "en": {
@@ -3625,6 +4601,22 @@
         }
       }
     },
+    "Utiliser l'abonnement": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use the subscription"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Utiliser l'abonnement"
+          }
+        }
+      }
+    },
     "Version %@": {
       "localizations": {
         "en": {
@@ -3641,6 +4633,22 @@
         }
       }
     },
+    "Votre clé API Anthropic, facturée à l'usage. Pour qui n'a pas d'abonnement Claude.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your Anthropic API key, billed by usage. For those without a Claude subscription."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Votre clé API Anthropic, facturée à l'usage. Pour qui n'a pas d'abonnement Claude."
+          }
+        }
+      }
+    },
     "Vous utilisez la version %@.": {
       "localizations": {
         "en": {
@@ -3653,6 +4661,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vous utilisez la version %@."
+          }
+        }
+      }
+    },
+    "claude %@, non connecté": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "claude %@, not signed in"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "claude %@, non connecté"
           }
         }
       }
@@ -3685,6 +4709,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "claude ne répond pas"
+          }
+        }
+      }
+    },
+    "clé %@": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ key"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "clé %@"
           }
         }
       }
@@ -3769,6 +4809,22 @@
         }
       }
     },
+    "macOS attend votre accord dans Réglages Système.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS is waiting for your approval in System Settings."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "macOS attend votre accord dans Réglages Système."
+          }
+        }
+      }
+    },
     "mots": {
       "localizations": {
         "en": {
@@ -3797,6 +4853,38 @@
           "stringUnit": {
             "state": "translated",
             "value": "mots/min"
+          }
+        }
+      }
+    },
+    "option + espace": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "option + space"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "option + espace"
+          }
+        }
+      }
+    },
+    "option + espace suffit, même par-dessus une app en plein écran.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "option + space is all it takes, even over a full-screen app."
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "option + espace suffit, même par-dessus une app en plein écran."
           }
         }
       }
@@ -3881,6 +4969,22 @@
         }
       }
     },
+    "Émojis :": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Emojis:"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Émojis :"
+          }
+        }
+      }
+    },
     "Évaluation :": {
       "localizations": {
         "en": {
@@ -3933,470 +5037,6 @@
                 }
               }
             }
-          }
-        }
-      }
-    },
-    "Choix automatique : Claude si sa commande est installée et connectée à un compte, sinon Apple Intelligence, sinon aucun.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Automatic choice: Claude if its command is installed and signed in to an account, otherwise Apple Intelligence, otherwise none."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choix automatique : Claude si sa commande est installée et connectée à un compte, sinon Apple Intelligence, sinon aucun."
-          }
-        }
-      }
-    },
-    "Claude n'est connecté à aucun compte : Apple Intelligence relit sur ce Mac. Connectez-vous à Claude pour qu'il prenne le relais.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Claude is not signed in to any account: Apple Intelligence reviews on this Mac. Sign in to Claude for it to take over."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Claude n'est connecté à aucun compte : Apple Intelligence relit sur ce Mac. Connectez-vous à Claude pour qu'il prenne le relais."
-          }
-        }
-      }
-    },
-    "claude %@, non connecté": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "claude %@, not signed in"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "claude %@, non connecté"
-          }
-        }
-      }
-    },
-    "Nécessite Claude Code ou l'app Claude, connecté à votre abonnement Claude.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Requires Claude Code or the Claude app, signed in to your Claude subscription."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nécessite Claude Code ou l'app Claude, connecté à votre abonnement Claude."
-          }
-        }
-      }
-    },
-    "Claude introuvable.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Claude not found."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Claude introuvable."
-          }
-        }
-      }
-    },
-    "Claude n'est connecté à aucun compte.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Claude is not signed in to any account."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Claude n'est connecté à aucun compte."
-          }
-        }
-      }
-    },
-    "Temps gagné": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Time saved"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Temps gagné"
-          }
-        }
-      }
-    },
-    "Par rapport à une frappe au clavier à %lld mots/min, temps de parole et d'attente déduits.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Compared with typing at %lld words/min, speaking and waiting time deducted."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Par rapport à une frappe au clavier à %lld mots/min, temps de parole et d'attente déduits."
-          }
-        }
-      }
-    },
-    "Depuis le début : %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Since the start: %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Depuis le début : %@"
-          }
-        }
-      }
-    },
-    "option + espace": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "option + space"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "option + espace"
-          }
-        }
-      }
-    },
-    "Maintenez option + espace, parlez, relâchez : le texte est dans le presse-papiers, prêt à coller dans n'importe quelle app.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hold option + space, speak, release: the text is on the clipboard, ready to paste into any app."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Maintenez option + espace, parlez, relâchez : le texte est dans le presse-papiers, prêt à coller dans n'importe quelle app."
-          }
-        }
-      }
-    },
-    "Un seul raccourci": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A single shortcut"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Un seul raccourci"
-          }
-        }
-      }
-    },
-    "option + espace suffit, même par-dessus une app en plein écran.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "option + space is all it takes, even over a full-screen app."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "option + espace suffit, même par-dessus une app en plein écran."
-          }
-        }
-      }
-    },
-    "Cliquez dans le champ, maintenez %@, parlez, relâchez, puis collez avec ⌘V.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Click in the field, hold %@, speak, release, then paste with ⌘V."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cliquez dans le champ, maintenez %@, parlez, relâchez, puis collez avec ⌘V."
-          }
-        }
-      }
-    },
-    "Maintenez option + espace pour dicter, puis collez le texte avec ⌘V.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hold option + space to dictate, then paste the text with ⌘V."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Maintenez option + espace pour dicter, puis collez le texte avec ⌘V."
-          }
-        }
-      }
-    },
-    "Copié, collez avec ⌘V": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Copied, paste with ⌘V"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Copié, collez avec ⌘V"
-          }
-        }
-      }
-    },
-    "Rien entendu": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nothing heard"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rien entendu"
-          }
-        }
-      }
-    },
-    "macOS attend votre accord dans Réglages Système.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "macOS is waiting for your approval in System Settings."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "macOS attend votre accord dans Réglages Système."
-          }
-        }
-      }
-    },
-    "Ouvrir les éléments de connexion…": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Open Login Items…"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ouvrir les éléments de connexion…"
-          }
-        }
-      }
-    },
-    "Appuyer sur Entrée après la dictée": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Press Return after dictating"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Appuyer sur Entrée après la dictée"
-          }
-        }
-      }
-    },
-    "Envoie le message une fois le texte collé, seulement dans ces apps :": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sends the message once the text is pasted, only in these apps:"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Envoie le message une fois le texte collé, seulement dans ces apps :"
-          }
-        }
-      }
-    },
-    "Aucune app : Entrée n'est jamais pressée.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No app: Return is never pressed."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aucune app : Entrée n'est jamais pressée."
-          }
-        }
-      }
-    },
-    "Retirer %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remove %@"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Retirer %@"
-          }
-        }
-      }
-    },
-    "Ajouter une app": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add an app"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ajouter une app"
-          }
-        }
-      }
-    },
-    "Autre…": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Other…"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Autre…"
-          }
-        }
-      }
-    },
-    "Choisissez une app où appuyer sur Entrée après la dictée": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose an app where Return is pressed after dictating"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choisissez une app où appuyer sur Entrée après la dictée"
-          }
-        }
-      }
-    },
-    "Émojis :": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Emojis:"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Émojis :"
-          }
-        }
-      }
-    },
-    "Insérer les émojis dictés": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Insert dictated emojis"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Insérer les émojis dictés"
-          }
-        }
-      }
-    },
-    "Dites « émoji fusée » ou « smiley qui pleure de rire » : 🚀, 😂.": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Say “emoji rocket” or “smiley crying with laughter”: 🚀, 😂."
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dites « émoji fusée » ou « smiley qui pleure de rire » : 🚀, 😂."
           }
         }
       }

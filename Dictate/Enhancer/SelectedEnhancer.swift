@@ -31,13 +31,11 @@ final class SelectedEnhancer: Enhancer {
     let claude: any WarmableEnhancer
     /// OpenAI and Gemini, through the user's keys: nothing to keep warm.
     let others: [Reviewer: any Enhancer]
-    /// The reviewer the last dictation actually went to, fallbacks included;
-    /// nil before the first one. Read by the statistics after each cleanup.
-    private(set) var lastUsed: Reviewer?
-    /// The last Claude cleanup failed because the CLI is signed out or the
-    /// API key was refused. Every dictation then silently goes to the
-    /// fallback: the indicator says so.
-    private(set) var isClaudeDisconnected = false
+    /// The reviewers whose last cleanup failed in a way that lasts: signed
+    /// out, key refused, limit reached. Every dictation then goes to the
+    /// fallback or in raw until the reviewer answers again: the indicator
+    /// and the menu say so.
+    private(set) var problems: [Reviewer: ReviewFailure] = [:]
 
     init(
         reviewer: @escaping () -> Reviewer,
@@ -54,6 +52,8 @@ final class SelectedEnhancer: Enhancer {
         self.claude = claude
         self.others = others
     }
+
+    var plannedReviewer: Reviewer? { effectiveReviewer }
 
     /// The reviewer the next dictation will actually go to.
     var effectiveReviewer: Reviewer {
@@ -91,51 +91,67 @@ final class SelectedEnhancer: Enhancer {
         claude.shutdown()
     }
 
+    /// The lasting problem of `reviewer`'s last cleanup, nil once it answered.
+    func problem(of reviewer: Reviewer) -> ReviewFailure? { problems[reviewer] }
+
     func enhance(_ transcription: Transcription, context: DictationContext) async throws -> String {
+        try await review(transcription, context: context).text
+    }
+
+    func review(_ transcription: Transcription, context: DictationContext) async throws -> Review {
         let chosen = reviewer()
         switch chosen {
         case .none:
             throw SelectedEnhancerError.noReviewer
         case .apple:
-            lastUsed = .apple
-            return try await apple.enhance(transcription, context: context)
+            return try await ask(.apple, apple, transcription, context)
         case .claude, .openAI, .gemini:
             if !isOnline(), appleAvailable() {
                 Log.dictation.info("offline: Apple Intelligence reviews instead of \(chosen.rawValue, privacy: .public)")
-                lastUsed = .apple
-                return try await apple.enhance(transcription, context: context)
+                return Review(text: try await apple.enhance(transcription, context: context), reviewer: .apple)
             }
             guard let remote = chosen == .claude ? claude : others[chosen] else {
                 throw SelectedEnhancerError.noReviewer
             }
-            lastUsed = chosen
             do {
-                let text = try await remote.enhance(transcription, context: context)
-                if chosen == .claude { isClaudeDisconnected = false }
-                return text
+                return try await ask(chosen, remote, transcription, context)
             } catch is CancellationError {
                 throw CancellationError()
             } catch {
-                let apiError = error as? APIReviewError
-                let disconnected = (error as? ClaudeCLIError)?.isDisconnected == true || apiError?.isKeyProblem == true
-                if chosen == .claude { isClaudeDisconnected = disconnected }
                 guard appleAvailable() else { throw error }
                 let name = chosen.rawValue
-                if (error as? ClaudeCLIError)?.isUsageLimit == true || apiError?.isRateLimited == true {
+                switch ReviewFailure(error) {
+                case .rateLimited:
                     // The limit is spent until it resets: not a failure to look into.
                     Log.dictation.notice("\(name, privacy: .public) usage limit reached, Apple Intelligence reviews instead")
                     ErrorReporter.breadcrumb("\(name) usage limit reached, falling back to Apple Intelligence", category: "enhancer")
-                } else if disconnected {
+                case .disconnected:
                     // Only the user can sign in again or fix the key: the indicator or the menu tells them.
                     Log.dictation.notice("\(name, privacy: .public) signed out or key refused, Apple Intelligence reviews instead")
                     ErrorReporter.breadcrumb("\(name) signed out or key refused, falling back to Apple Intelligence", category: "enhancer")
-                } else {
+                case .timedOut, .diverged, .other:
                     Log.dictation.error("\(name, privacy: .public) failed, Apple Intelligence reviews instead: \(error.localizedDescription, privacy: .public)")
                     ErrorReporter.capture(error, "\(name) failed, falling back to Apple Intelligence", category: "enhancer", level: .warning)
                 }
-                lastUsed = .apple
-                return try await apple.enhance(transcription, context: context)
+                return Review(text: try await apple.enhance(transcription, context: context), reviewer: .apple)
             }
+        }
+    }
+
+    /// One reviewer's cleanup, remembering a lasting problem until it answers again.
+    private func ask(
+        _ reviewer: Reviewer, _ enhancer: any Enhancer, _ transcription: Transcription, _ context: DictationContext
+    ) async throws -> Review {
+        do {
+            let text = try await enhancer.enhance(transcription, context: context)
+            problems[reviewer] = nil
+            return Review(text: text, reviewer: reviewer)
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            let failure = ReviewFailure(error)
+            problems[reviewer] = failure.lasts ? failure : nil
+            throw error
         }
     }
 }
