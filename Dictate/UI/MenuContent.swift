@@ -14,10 +14,10 @@ struct MenuContent: View {
             Text(error)
         }
         if !model.setup.isComplete {
-            Button("Terminer la configuration…") { open { openWindow(id: "setup") } }
+            Button("Terminer la configuration…") { open { openWindow(.setup) } }
         }
         Divider()
-        Button("Statistiques…") { open { openWindow(id: "stats") } }
+        Button("Statistiques…") { open { openWindow(.stats) } }
         if model.settings.suggestVocabulary {
             let suggestions = model.pendingVocabularySuggestions
             if !suggestions.isEmpty {
@@ -63,13 +63,13 @@ struct MenuContent: View {
                         if updater.canInstall, !isFailed(updater.state) {
                             updater.install()
                         } else {
-                            open { openWindow(id: "update") }
+                            open { openWindow(.update) }
                         }
                     }
                 } else {
                     // The update window shows the search, then the result: up to date or what is new.
                     Button("Rechercher une mise à jour…") {
-                        open { openWindow(id: "update") }
+                        open { openWindow(.update) }
                         Task { await updater.check() }
                     }
                 }

@@ -28,7 +28,7 @@ struct UpdateView: View {
 
             HStack {
                 Spacer()
-                Button("Plus tard") { dismissWindow(id: "update") }
+                Button("Plus tard") { dismissWindow(.update) }
                     .buttonStyle(.glass)
                     .keyboardShortcut(.cancelAction)
                 Button("Installer et relancer") { updater.install() }

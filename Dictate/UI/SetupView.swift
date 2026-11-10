@@ -107,7 +107,7 @@ struct SetupView: View {
         case .welcome, .checklist:
             go(to: index + 1)
         case .tryIt:
-            dismissWindow(id: "setup")
+            dismissWindow(.setup)
         }
     }
 
@@ -783,16 +783,21 @@ private struct TryItPage: View {
         .onAppear { focused = true }
     }
 
-    private var statusKey: String {
+    /// What the try-it page says under the field.
+    private enum TrialStatus {
+        case recording, transcribing, enhancing, failed, preparing, success, ready
+    }
+
+    private var statusKey: TrialStatus {
         switch model.controller.phase {
-        case .starting, .recording: "recording"
-        case .transcribing: "transcribing"
-        case .enhancing: "enhancing"
+        case .starting, .recording: .recording
+        case .transcribing: .transcribing
+        case .enhancing: .enhancing
         case .idle:
-            if case .failed = model.transcriber.state { "failed" }
-            else if model.transcriber.state != .ready { "preparing" }
-            else if !text.isEmpty, dictationLanded { "success" }
-            else { "ready" }
+            if case .failed = model.transcriber.state { .failed }
+            else if model.transcriber.state != .ready { .preparing }
+            else if !text.isEmpty, dictationLanded { .success }
+            else { .ready }
         }
     }
 
@@ -808,21 +813,21 @@ private struct TryItPage: View {
     @ViewBuilder
     private var status: some View {
         switch statusKey {
-        case "recording":
+        case .recording:
             Label("Je vous écoute…", systemImage: "mic.fill").foregroundStyle(.red)
-        case "transcribing":
+        case .transcribing:
             Label("Transcription…", systemImage: "waveform").foregroundStyle(.secondary)
-        case "enhancing":
+        case .enhancing:
             Label("Relecture…", systemImage: "sparkles").foregroundStyle(.secondary)
-        case "failed":
+        case .failed:
             if case .failed(let message) = model.transcriber.state {
                 Label(message, systemImage: "exclamationmark.triangle").foregroundStyle(.orange)
             }
-        case "preparing":
+        case .preparing:
             Label("\(model.transcriber.engine.displayName) se prépare, encore un instant…", systemImage: "hourglass").foregroundStyle(.secondary)
-        case "success":
+        case .success:
             Label("Ça marche.", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
-        default:
+        case .ready:
             let key = model.settings.pushToTalkKey
             Label("Maintenez \(key.displayName) pour dicter", systemImage: key.symbol).foregroundStyle(.secondary)
         }

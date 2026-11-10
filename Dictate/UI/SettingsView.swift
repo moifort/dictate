@@ -7,20 +7,20 @@ import DictateKit
 /// the words it must get right, the review pass.
 struct SettingsView: View {
     @Bindable var model: AppModel
-    @State private var tab = ScreenshotMode.settingsTab ?? "general"
+    @State private var tab = ScreenshotMode.settingsTab ?? .general
 
     var body: some View {
         TabView(selection: $tab) {
-            Tab("Général", systemImage: "gearshape", value: "general") {
+            Tab("Général", systemImage: "gearshape", value: SettingsTab.general) {
                 GeneralSettings(model: model)
             }
-            Tab("Dictée", systemImage: "mic", value: "dictation") {
+            Tab("Dictée", systemImage: "mic", value: SettingsTab.dictation) {
                 DictationSettings(model: model)
             }
-            Tab("Lexique", systemImage: "character.book.closed", value: "lexicon") {
+            Tab("Lexique", systemImage: "character.book.closed", value: SettingsTab.lexicon) {
                 LexiconSettings(model: model)
             }
-            Tab("Relecture", systemImage: "sparkles", value: "review") {
+            Tab("Relecture", systemImage: "sparkles", value: SettingsTab.review) {
                 ReviewSettings(model: model)
             }
         }
@@ -429,7 +429,7 @@ private struct GeneralSettings: View {
             if let release = model.updater.available {
                 Button("Installer \(release.version)…") {
                     NSApp.activate()
-                    openWindow(id: "update")
+                    openWindow(.update)
                 }
             } else {
                 Button("Rechercher") { Task { await model.updater.check() } }

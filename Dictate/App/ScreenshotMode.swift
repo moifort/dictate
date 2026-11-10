@@ -11,13 +11,13 @@ import SwiftUI
 /// `-ScreenshotReviewer apple` opens the delay chart on that model.
 nonisolated enum ScreenshotMode {
     #if DEBUG
-    static let window = UserDefaults.standard.string(forKey: "ScreenshotWindow")
-    static let settingsTab = UserDefaults.standard.string(forKey: "ScreenshotTab")
+    static let window = UserDefaults.standard.string(forKey: "ScreenshotWindow").flatMap(WindowID.init(rawValue:))
+    static let settingsTab = UserDefaults.standard.string(forKey: "ScreenshotTab").flatMap(SettingsTab.init(rawValue:))
     static let flash = UserDefaults.standard.string(forKey: "ScreenshotFlash")
     static let reviewer = UserDefaults.standard.string(forKey: "ScreenshotReviewer").flatMap(Reviewer.init(rawValue:))
     #else
-    static let window: String? = nil
-    static let settingsTab: String? = nil
+    static let window: WindowID? = nil
+    static let settingsTab: SettingsTab? = nil
     static let flash: String? = nil
     static let reviewer: Reviewer? = nil
     #endif
@@ -31,9 +31,9 @@ struct ScreenshotSettingsOpener: ViewModifier {
 
     func body(content: Content) -> some View {
         content.task {
-            guard ScreenshotMode.window == "settings" else { return }
+            guard ScreenshotMode.window == .settings else { return }
             openSettings()
-            dismissWindow(id: "stats")
+            dismissWindow(.stats)
         }
     }
 }

@@ -17,22 +17,22 @@ struct DictateApp: App {
             SettingsView(model: appDelegate.model)
         }
 
-        Window("Configuration de Dictate", id: "setup") {
+        Window("Configuration de Dictate", id: WindowID.setup.rawValue) {
             SetupView(model: appDelegate.model)
         }
         .windowResizability(.contentSize)
         .windowStyle(.hiddenTitleBar)
-        .defaultLaunchBehavior(appDelegate.needsSetup || ScreenshotMode.window == "setup" ? .presented : .suppressed)
+        .defaultLaunchBehavior(appDelegate.needsSetup || ScreenshotMode.window == .setup ? .presented : .suppressed)
 
-        Window("Statistiques", id: "stats") {
+        Window("Statistiques", id: WindowID.stats.rawValue) {
             StatsView(history: appDelegate.model.history)
                 .modifier(ScreenshotSettingsOpener())
         }
         .defaultSize(width: 560, height: 860)
-        .defaultLaunchBehavior(["stats", "settings"].contains(ScreenshotMode.window) ? .presented : .suppressed)
+        .defaultLaunchBehavior([.stats, .settings].contains(ScreenshotMode.window) ? .presented : .suppressed)
 
         #if !APP_STORE
-        Window("Mise à jour", id: "update") {
+        Window("Mise à jour", id: WindowID.update.rawValue) {
             UpdateView(updater: appDelegate.model.updater)
         }
         .windowResizability(.contentSize)
