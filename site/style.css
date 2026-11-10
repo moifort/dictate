@@ -225,10 +225,23 @@ section {
 .button.ghost:hover { background: rgba(0, 0, 0, 0.09); }
 
 /* Apple's own badge, unaltered, as tall as the buttons: i18n.js swaps in the page's language. */
-.store-badge { display: inline-flex; border-radius: 9px; transition: transform 0.15s ease, opacity 0.15s ease; }
+.store-badge { position: relative; display: inline-flex; border-radius: 9px; transition: transform 0.15s ease, opacity 0.15s ease; }
 .store-badge:hover { opacity: 0.85; }
 .store-badge:active { transform: scale(0.97); }
 .store-badge img { display: block; height: 50px; width: auto; }
+/* The star sits at the badge's corner, off Apple's artwork, and points to the note on what the store build leaves out. */
+.store-star {
+  position: absolute;
+  top: -5px;
+  right: -11px;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text-dim);
+}
+.brew.store-note { max-width: 560px; margin-left: auto; margin-right: auto; line-height: 1.5; scroll-margin-top: calc(var(--nav-h) + 24px); }
+.store-note a { text-decoration: underline; text-underline-offset: 2px; }
+.store-note a:hover { color: var(--text); }
 
 .hero-meta {
   margin: 22px 0 0;
