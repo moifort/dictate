@@ -16,9 +16,27 @@ final class TextInserter: TextInserting {
     /// read as a shortcut and cancel it.
     nonisolated static let eventMarker: Int64 = 0x4449_4354
 
-    private let pasteboard = NSPasteboard.general
+    /// How long the target app has to read the pasteboard after `Cmd+V`.
+    /// A fixed delay: macOS tells no one when another app reads it, and a
+    /// data promise would be read early by clipboard managers too.
+    static let defaultRestoreDelay: Duration = .milliseconds(400)
+
+    private let pasteboard: NSPasteboard
+    private let restoreDelay: Duration
+    /// Posts a key with its modifiers; injected so tests never type into the Mac.
+    private let postKey: (Int, CGEventFlags) -> Void
     /// The user's content while one of our pastes waits to be undone.
     private var pendingRestore: (saved: [[NSPasteboard.PasteboardType: Data]], task: Task<Void, Never>)?
+
+    init(
+        pasteboard: NSPasteboard = .general,
+        restoreDelay: Duration = TextInserter.defaultRestoreDelay,
+        postKey: ((Int, CGEventFlags) -> Void)? = nil
+    ) {
+        self.pasteboard = pasteboard
+        self.restoreDelay = restoreDelay
+        self.postKey = postKey ?? Self.postSystemKey
+    }
 
     func paste(_ text: String, submit: Bool) async {
         // Back-to-back dictations: the pasteboard still holds the previous
@@ -31,19 +49,19 @@ final class TextInserter: TextInserting {
         let ourChange = pasteboard.changeCount
 
         #if !APP_STORE
-        postKey(kVK_ANSI_V, flags: .maskCommand)
+        postKey(kVK_ANSI_V, .maskCommand)
         if submit {
             try? await Task.sleep(for: Self.submitDelay)
             // No flags: Shift or Command held with Return mean a new line or
             // something else in most composers.
-            postKey(kVK_Return, flags: [])
+            postKey(kVK_Return, [])
         }
         #endif
         // The dictation is over for the user once Cmd+V is posted. The target
         // app needs a moment to read the pasteboard, so it is restored later,
         // off the critical path.
-        let task = Task { [self] in
-            try? await Task.sleep(for: .milliseconds(400))
+        let task = Task { [self, restoreDelay] in
+            try? await Task.sleep(for: restoreDelay)
             guard !Task.isCancelled else { return }
             pendingRestore = nil
             guard pasteboard.changeCount == ourChange else { return }
@@ -60,8 +78,8 @@ final class TextInserter: TextInserting {
         pasteboard.setString(text, forType: .string)
     }
 
-    #if !APP_STORE
-    private func postKey(_ key: Int, flags: CGEventFlags) {
+    private static func postSystemKey(_ key: Int, flags: CGEventFlags) {
+        #if !APP_STORE
         let source = CGEventSource(stateID: .combinedSessionState)
         let keyCode = CGKeyCode(key)
         for keyDown in [true, false] {
@@ -70,14 +88,13 @@ final class TextInserter: TextInserting {
             event?.setIntegerValueField(.eventSourceUserData, value: Self.eventMarker)
             event?.post(tap: .cghidEventTap)
         }
+        #endif
     }
-    #endif
 
     private func snapshot() -> [[NSPasteboard.PasteboardType: Data]] {
         (pasteboard.pasteboardItems ?? []).map { item in
-            Dictionary(uniqueKeysWithValues: item.types.compactMap { type in
-                item.data(forType: type).map { (type, $0) }
-            })
+            // An app can declare a type twice: the first one is kept rather than trapping.
+            Dictionary(item.types.compactMap { type in item.data(forType: type).map { (type, $0) } }) { first, _ in first }
         }
     }
 
