@@ -81,7 +81,7 @@ struct ClaudeCLILocatorTests {
 
     @Test func givesUpOnACLIThatHangs() async throws {
         let script = try executable("#!/bin/sh\nexec sleep 30\n")
-        #expect(await ClaudeCLILocator.isSignedIn(script, timeout: 0.5) == nil)
+        #expect(await ClaudeCLILocator.isSignedIn(script, timeout: .milliseconds(500)) == nil)
     }
 
     private func executable(_ contents: String) throws -> URL {
@@ -96,5 +96,41 @@ struct ClaudeCLILocatorTests {
         #expect(locator.displayPath(of: home.appending(path: ".local/bin/claude")) == "~/.local/bin/claude")
         #expect(locator.displayPath(of: home.appending(path: bundled("2.1.293"))) == "App Claude")
         #expect(locator.displayPath(of: URL(filePath: "/opt/homebrew/bin/claude")) == "/opt/homebrew/bin/claude")
+    }
+}
+
+struct SubprocessTests {
+    @Test func returnsTheOutputAndStatus() async throws {
+        let output = try await Subprocess.run(URL(filePath: "/bin/sh"), ["-c", "echo hello; exit 3"])
+        #expect(output.text == "hello\n")
+        #expect(output.status == 3)
+        #expect(!output.succeeded)
+    }
+
+    /// A tool reading its input gets an empty one rather than waiting for the app's.
+    @Test func standardInputIsEmpty() async throws {
+        let output = try await Subprocess.run(URL(filePath: "/bin/cat"), [], timeout: .seconds(5))
+        #expect(output.succeeded)
+        #expect(output.data.isEmpty)
+    }
+
+    @Test func aHangingToolIsTerminated() async throws {
+        let clock = ContinuousClock()
+        let start = clock.now
+        let output = try await Subprocess.run(URL(filePath: "/bin/sleep"), ["30"], timeout: .milliseconds(200))
+        #expect(output.timedOut)
+        #expect(clock.now - start < .seconds(5))
+    }
+
+    /// More than a pipe holds: read as it comes, or the tool would never exit.
+    @Test func aLargeOutputIsReadWhole() async throws {
+        let output = try await Subprocess.run(URL(filePath: "/bin/sh"), ["-c", "head -c 300000 /dev/zero"])
+        #expect(output.data.count == 300_000)
+    }
+
+    @Test func aMissingToolThrows() async {
+        await #expect(throws: (any Error).self) {
+            try await Subprocess.run(URL(filePath: "/nonexistent/tool"), [])
+        }
     }
 }

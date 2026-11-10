@@ -42,54 +42,30 @@ nonisolated struct ClaudeCLILocator: Sendable {
         return url.path.hasPrefix(homePath + "/") ? "~" + url.path.dropFirst(homePath.count) : url.path
     }
 
-    /// Runs `claude --version`; nil when the binary does not answer like Claude Code.
-    static func version(of executable: URL) async -> String? {
-        await Task.detached {
-            let process = Process()
-            let output = Pipe()
-            process.executableURL = executable
-            process.arguments = ["--version"]
-            process.standardOutput = output
-            process.standardError = FileHandle.nullDevice
-            do {
-                try process.run()
-            } catch {
-                ErrorReporter.capture(error, "claude --version could not be run", category: "enhancer", level: .warning)
-                return nil
-            }
-            let data = output.fileHandleForReading.readDataToEndOfFile()
-            process.waitUntilExit()
-            guard process.terminationStatus == 0 else { return nil }
-            return parseVersion(String(decoding: data, as: UTF8.self))
-        }.value
+    /// Runs `claude --version`; nil when the binary does not answer like
+    /// Claude Code, or not within `timeout`.
+    static func version(of executable: URL, timeout: Duration = .seconds(5)) async -> String? {
+        do {
+            let output = try await Subprocess.run(executable, ["--version"], timeout: timeout)
+            return output.succeeded ? parseVersion(output.text) : nil
+        } catch {
+            ErrorReporter.capture(error, "claude --version could not be run", category: "enhancer", level: .warning)
+            return nil
+        }
     }
 
     /// Runs `claude auth status`: whether an account is signed in, nil when the
-    /// CLI does not answer in JSON (versions without the command) or hangs.
-    static func isSignedIn(_ executable: URL, timeout: TimeInterval = 5) async -> Bool? {
-        await Task.detached {
-            let process = Process()
-            let output = Pipe()
-            process.executableURL = executable
-            process.arguments = ["auth", "status"]
-            process.standardInput = FileHandle.nullDevice
-            process.standardOutput = output
-            process.standardError = FileHandle.nullDevice
-            do {
-                try process.run()
-            } catch {
-                ErrorReporter.capture(error, "claude auth status could not be run", category: "enhancer", level: .warning)
-                return nil
-            }
-            // An older CLI may take "auth status" for a prompt and wait.
-            DispatchQueue.global().asyncAfter(deadline: .now() + timeout) {
-                if process.isRunning { process.terminate() }
-            }
-            let data = output.fileHandleForReading.readDataToEndOfFile()
-            process.waitUntilExit()
+    /// CLI does not answer in JSON (versions without the command) or hangs:
+    /// an older CLI may take "auth status" for a prompt and wait.
+    static func isSignedIn(_ executable: URL, timeout: Duration = .seconds(5)) async -> Bool? {
+        do {
+            let output = try await Subprocess.run(executable, ["auth", "status"], timeout: timeout)
             // Signed out exits non-zero but still answers in JSON.
-            return parseSignedIn(data)
-        }.value
+            return output.timedOut ? nil : parseSignedIn(output.data)
+        } catch {
+            ErrorReporter.capture(error, "claude auth status could not be run", category: "enhancer", level: .warning)
+            return nil
+        }
     }
 
     /// `{"loggedIn": true, …}` → `true`.
