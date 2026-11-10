@@ -17,58 +17,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # The same job the release runs before publishing: one definition.
   test:
     name: 🎙️ Unit tests
-    # The app targets macOS 27, so the test host only launches on a macOS 27
-    # runner. `xcode-27` is GitHub's macOS 27 + Xcode 27 image.
-    runs-on: xcode-27
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7
-
-      - name: Set up Xcode 27 and the project
-        uses: ./.github/actions/setup-xcode
-
-      - name: Restore the Debug build
-        id: derived-data
-        uses: ./.github/actions/derived-data
-        with:
-          configuration: Debug
-
-      - name: Run the unit tests
-        # No signing identity on a runner: ad-hoc signing is enough to run tests.
-        run: |
-          set -euo pipefail
-          xcodebuild test \
-            -project Dictate.xcodeproj -scheme Dictate \
-            -destination 'platform=macOS' \
-            -derivedDataPath build \
-            -onlyUsePackageVersionsFromResolvedFile \
-            CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM=
-
-      # The microphone, audio analysis and Parakeet package has its own tests.
-      - name: Run the DictateKit tests
-        run: swift test --package-path Packages/DictateKit
-
-      # Builds the root manifest the way an app depending on this repository does,
-      # in a copy so that the app's Package.resolved stays as it is.
-      - name: Build DictateKit as other apps get it
-        run: |
-          set -euo pipefail
-          copy=$(mktemp -d)
-          git archive HEAD | tar -x -C "$copy"
-          rm "$copy/Package.resolved"
-          swift build --package-path "$copy"
-
-      - name: Save the Debug build
-        if: steps.derived-data.outputs.hit != 'true' && github.ref == 'refs/heads/main'
-        uses: actions/cache/save@v6
-        with:
-          path: |
-            build
-            !build/Logs
-            !build/Index.noindex
-          key: ${{ steps.derived-data.outputs.key }}
+    uses: ./.github/workflows/unit-tests.yml
 
   # A tag cannot reuse the cache of another tag, only the one of main: this
   # compiles the Release packages on main whenever Xcode or a package changes,
