@@ -16,7 +16,7 @@ nonisolated enum PromptBuilder {
 
             Règles :
             - Corrige uniquement : ponctuation, majuscules, hésitations (euh, ben, du coup parasites), \
-            répétitions, faux départs, et termes techniques mal transcrits.
+            répétitions, faux départs, reprises (voir plus bas), et termes techniques mal transcrits.
             - Garde la langue, les mots et le sens d'origine. Ne reformule pas, ne résume pas, n'ajoute rien.
             - Début tronqué : le micro rate parfois les premières syllabes, la dictée peut donc commencer \
             par un mot amputé ou étrange qui ne colle pas au reste (« ploie la branche » pour « déploie \
@@ -55,6 +55,7 @@ nonisolated enum PromptBuilder {
                 </vocabulary>
                 """
         }
+        prompt += selfCorrectionRule
         prompt += doubtfulWordsRule
         prompt += unknownTokenRule
         if emojis { prompt += emojiRule }
@@ -146,6 +147,28 @@ nonisolated enum PromptBuilder {
     static func userMessage(transcription: Transcription, context: DictationContext) -> String {
         userMessage(transcript: DoubtfulWords.mark(transcription), context: context)
     }
+
+    /// Someone who misspeaks says the right word next, often after "pardon":
+    /// only that word was meant. The words that announce it are everyday
+    /// words too, hence the counter-examples.
+    private static let selfCorrectionRule = """
+
+
+        Reprises : quand la personne se trompe puis se corrige à voix haute, ne garde que la correction. \
+        Un mot ou un groupe de mots suivi de « pardon », « non », « enfin », « je veux dire », « plutôt » \
+        (ou leur équivalent dans la langue dictée), puis de ce qui le remplace, est une reprise : supprime \
+        ce qui était faux ET les mots qui annoncent la reprise, et garde le remplaçant à leur place. Le \
+        reste de la phrase ne change pas. Exemples :
+        - « On se voit mardi, pardon, mercredi à dix heures » → « On se voit mercredi à dix heures »
+        - « Envoie le fichier à Paul, non, à Pierre » → « Envoie le fichier à Pierre »
+        - « Il faut merger sur main, enfin je veux dire sur develop » → « Il faut merger sur develop »
+        - « Le build prend dix, euh, non pardon, douze minutes » → « Le build prend douze minutes »
+        - « Mardi, pardon, mercredi » → « Mercredi »
+        Sans remplaçant juste après, ces mots sont du texte et restent tels quels : « Pardon pour le \
+        retard », « Je lui ai demandé pardon », « Non, je ne suis pas d'accord », « Enfin terminé », \
+        « Prends plutôt le train ». Dans le doute, garde tout : mieux vaut une reprise laissée qu'un mot \
+        voulu supprimé.
+        """
 
     /// Engines without confidences send no markers, so the rule may never apply.
     private static let doubtfulWordsRule = """

@@ -15,6 +15,11 @@ nonisolated enum ReviewGuard {
     /// instead of the dictation) were all at 1.0 or more, its good ones at 0.5
     /// or less.
     static let maximumWordErrorRate = 0.6
+    /// The words a self-correction may take out, whatever the dictation's
+    /// length: the mistaken word and what announces the fix ("lundi, euh, non,
+    /// pardon, mardi"). Most of a short dictation, which the error rate alone
+    /// would reject.
+    static let forgivenDroppedWords = 4
     /// The words a dictated emoji may replace: its trigger and a description
     /// such as "qui pleure de rire".
     static let wordsPerEmoji = 5
@@ -32,8 +37,19 @@ nonisolated enum ReviewGuard {
         // more, carries something nobody dictated.
         if replyWords.count > transcriptWords.count * 2 + 4 { return true }
         guard transcriptWords.count >= minimumJudgedWords else { return false }
+        // A reply made only of dictated words, in their order, says nothing
+        // nobody dictated: a few dropped words are a self-correction.
+        let dropped = transcriptWords.count - replyWords.count
+        if dropped <= forgivenDroppedWords, onlyDropsWords(replyWords, from: transcriptWords) { return false }
         let count = WordErrorRate.count(reference: transcript, hypothesis: reply)
         let errors = max(0, count.errors - emojis * wordsPerEmoji)
         return Double(errors) / Double(count.referenceWords) > maximumWordErrorRate
+    }
+
+    /// Whether `reply` is `transcript` with words taken out and nothing else changed.
+    private static func onlyDropsWords(_ reply: [String], from transcript: [String]) -> Bool {
+        var remaining = reply[...]
+        for word in transcript where word == remaining.first { remaining = remaining.dropFirst() }
+        return remaining.isEmpty
     }
 }

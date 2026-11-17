@@ -207,9 +207,23 @@ struct SelectedEnhancerTests {
         ("Smiley qui pleure de rire.", "😂"),
         ("Super, émoji pouce levé.", "Super 👍"),
         ("C'est en prod, émoji fusée, merci à tous.", "C'est en prod 🚀, merci à tous."),
+        // A self-correction takes out most of a short dictation.
+        ("Mardi, pardon, mercredi.", "Mercredi."),
+        ("Lundi, euh, non, pardon, mardi.", "Mardi."),
+        ("On se voit mardi, pardon, mercredi à dix heures.", "On se voit mercredi à dix heures."),
     ])
     func aCleanedUpDictationIsKept(transcript: String, reply: String) {
         #expect(!ReviewGuard.diverges(reply, from: transcript))
+    }
+
+    /// Dropping words is only forgiven for a few of them, and only when nothing else changed.
+    @Test(arguments: [
+        ("Tu peux relancer le build de la branche main et me prévenir quand c'est fini ?", "Tu peux."),
+        ("Mardi, pardon, mercredi.", "Jeudi."),
+        ("Relance le build, pardon, le déploiement.", "Supprime le déploiement."),
+    ])
+    func aReplyThatDropsOrSwapsTooMuchIsRejected(transcript: String, reply: String) {
+        #expect(ReviewGuard.diverges(reply, from: transcript))
     }
 
     @Test func aShortFieldIsKeptWhole() {

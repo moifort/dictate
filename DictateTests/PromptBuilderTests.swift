@@ -25,6 +25,14 @@ struct PromptBuilderTests {
         #expect(!PromptBuilder.systemPrompt(vocabulary: [], language: "fr", emojis: false).contains("Émojis dictés"))
     }
 
+    @Test func systemPromptKeepsOnlyTheCorrectionOfASelfCorrection() {
+        let prompt = PromptBuilder.systemPrompt(vocabulary: [], language: "fr")
+        #expect(prompt.contains("Reprises :"))
+        #expect(prompt.contains("« On se voit mardi, pardon, mercredi à dix heures » → « On se voit mercredi à dix heures »"))
+        // A real apology stays.
+        #expect(prompt.contains("« Pardon pour le retard »"))
+    }
+
     @Test func userMessageWrapsTranscriptAndCarriesCategory() {
         let message = PromptBuilder.userMessage(transcript: "fais un push", context: DictationContext(category: .code))
         #expect(message.contains("<dictation>\nfais un push\n</dictation>"))
