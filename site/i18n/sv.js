@@ -84,6 +84,8 @@ window.DICTATE_I18N = {
     "pill.text": "En liten kapsel längst ned på skärmen visar att Dictate lyssnar, sedan arbetar, och tonar sedan bort. Om den inte hörde något visar en överstruken högtalare det. Med AirPods väntar den tills deras mikrofon svarar innan den visar att den lyssnar, så att du vet när du kan tala.",
     "emoji.title": "Smileys också",
     "emoji.text": "Säg ”smiley tummen upp” så skriver Dictate 👍. Alla Apples emojier, med rösten.",
+    "fix.title": "Sa du fel? Rätta dig bara",
+    "fix.text": "Blev det fel ord? Säg ”förlåt” eller ”nej” och sedan det rätta: Dictate skriver bara rättelsen. ”Tisdag, förlåt, onsdag” blir ”onsdag”. Ett riktigt ”förlåt” står kvar i texten.",
     "faq.title": "Vanliga frågor",
     "faq.q1": "Varför är det gratis?",
     "faq.a1": "För att Dictate inte kostar något att driva: ingen server, inget konto. Transkriptionen sker på din Mac, och granskningen går via Claude-abonnemanget du redan har, eller via Apple Intelligence på din Mac. Vi har inget att betala, så inget att ta betalt för. Ingen pro-version, ingen begränsad provperiod.",
@@ -127,6 +129,7 @@ window.DICTATE_I18N = {
     "decimal": ",",
     "version": "Version {v}",
     "emojiWords": "smiley tummen upp",
+    "fixWords": ["Vi ses ", "på tisdag, förlåt, ", "på onsdag klockan 10"],
     "scenarios": [
       {
         "to": "Arthur G.",

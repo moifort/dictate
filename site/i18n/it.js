@@ -84,6 +84,8 @@ window.DICTATE_I18N = {
     "pill.text": "Una piccola pillola in fondo allo schermo mostra che Dictate ascolta, poi lavora, poi scompare. Se non ha sentito nulla, te lo dice un altoparlante barrato. Con gli AirPods aspetta che il loro microfono risponda prima di mostrare l'ascolto, così sai quando parlare.",
     "emoji.title": "Anche gli smiley",
     "emoji.text": "Di' «smiley pollice in su» e Dictate scrive 👍. Tutte le emoji di Apple, con la voce.",
+    "fix.title": "Ti correggi? Dictate ti segue",
+    "fix.text": "Hai sbagliato parola? Di' «scusa» o «no», poi quella giusta: Dictate scrive solo la correzione. «Martedì, scusa, mercoledì» diventa «mercoledì». Un vero «scusa» resta scritto.",
     "faq.title": "Domande frequenti",
     "faq.q1": "Perché è gratis?",
     "faq.a1": "Perché far funzionare Dictate non costa nulla: nessun server, nessun account. La trascrizione avviene sul tuo Mac e la rilettura passa dall'abbonamento Claude che hai già, o da Apple Intelligence sul tuo Mac. Non abbiamo nulla da pagare, quindi nulla da farti pagare. Nessuna versione pro, nessuna prova limitata.",
@@ -127,6 +129,7 @@ window.DICTATE_I18N = {
     "decimal": ",",
     "version": "Versione {v}",
     "emojiWords": "smiley pollice in su",
+    "fixWords": ["Ci vediamo ", "martedì, scusa, ", "mercoledì alle 10"],
     "scenarios": [
       {
         "to": "Arthur G.",

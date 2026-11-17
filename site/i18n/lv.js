@@ -84,6 +84,8 @@ window.DICTATE_I18N = {
     "pill.text": "Maza kapsula ekrāna apakšā rāda, ka Dictate klausās, tad strādā, un pēc tam izgaist. Ja tas neko nesadzirdēja, to pasaka pārsvītrots skaļrunis. Ar AirPods tas pagaida, līdz atbild to mikrofons, pirms rāda klausīšanos, lai jūs zinātu, kad runāt.",
     "emoji.title": "Arī smaidiņi",
     "emoji.text": "Sakiet “smaidiņš īkšķis uz augšu”, un Dictate uzraksta 👍. Visas Apple emocijzīmes, ar balsi.",
+    "fix.title": "Pārteicāties? Vienkārši izlabojiet",
+    "fix.text": "Pateicāt nepareizo vārdu? Sakiet “atvainojiet” vai “nē” un pēc tam pareizo: Dictate uzraksta tikai labojumu. No “otrdien, atvainojiet, trešdien” paliek “trešdien”. Īsts “atvainojiet” paliek tekstā.",
     "faq.title": "Biežāk uzdotie jautājumi",
     "faq.q1": "Kāpēc tas ir bez maksas?",
     "faq.a1": "Tāpēc, ka Dictate darbināšana neko nemaksā: nav servera, nav konta. Transkripcija notiek jūsu Mac datorā, un pārskatīšana iet caur Claude abonementu, kas jums jau ir, vai caur Apple Intelligence jūsu Mac datorā. Mums nav par ko maksāt, tātad nav par ko prasīt samaksu no jums. Nav pro versijas, nav ierobežota izmēģinājuma.",
@@ -127,6 +129,7 @@ window.DICTATE_I18N = {
     "decimal": ",",
     "version": "Versija {v}",
     "emojiWords": "smaidiņš īkšķis uz augšu",
+    "fixWords": ["Tiekamies ", "otrdien, atvainojiet, ", "trešdien pulksten 10"],
     "scenarios": [
       {
         "to": "Arthur G.",

@@ -84,6 +84,8 @@ window.DICTATE_I18N = {
     "pill.text": "Pillola żgħira fil-qiegħ tal-iskrin turi li Dictate qed jisma’, imbagħad jaħdem, u mbagħad tisparixxi. Jekk ma sema’ xejn, jgħidlek speaker maqtugħ. Bl-AirPods, jistenna li l-mikrofonu tagħhom iwieġeb qabel ma juri li qed jisma’, biex tkun taf meta titkellem.",
     "emoji.title": "L-ismileys ukoll",
     "emoji.text": "Għid “smiley saba’ ’l fuq” u Dictate jikteb 👍. L-emojis kollha ta’ Apple, bil-vuċi.",
+    "fix.title": "Żbaljajt? Ikkoreġi ruħek biss",
+    "fix.text": "Għidt il-kelma l-ħażina? Għid “skużani” jew “le”, imbagħad it-tajba: Dictate jikteb biss il-korrezzjoni. “It-Tlieta, skużani, l-Erbgħa” ssir “l-Erbgħa”. “Skużani” vera tibqa’ fit-test.",
     "faq.title": "Mistoqsijiet frekwenti",
     "faq.q1": "Għaliex huwa b’xejn?",
     "faq.a1": "Għax Dictate ma jiswa xejn biex jaħdem: l-ebda server, l-ebda kont. It-traskrizzjoni ssir fuq il-Mac tiegħek, u r-reviżjoni tgħaddi mill-abbonament ta’ Claude li diġà għandek, jew minn Apple Intelligence fuq il-Mac tiegħek. M’għandna xejn x’inħallsu, allura xejn x’inżommulek. L-ebda verżjoni pro, l-ebda prova limitata.",
@@ -127,6 +129,7 @@ window.DICTATE_I18N = {
     "decimal": ",",
     "version": "Verżjoni {v}",
     "emojiWords": "smiley saba’ ’l fuq",
+    "fixWords": ["Narak ", "it-Tlieta, skużani, ", "l-Erbgħa fl-10"],
     "scenarios": [
       {
         "to": "Arthur G.",

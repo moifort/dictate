@@ -84,6 +84,8 @@ window.DICTATE_I18N = {
     "pill.text": "Mala kapsula pri dnu zaslona pokazuje da Dictate sluša, zatim radi, a potom nestaje. Ako ništa nije čuo, to vam kaže prekriženi zvučnik. Uz AirPods čeka da njihov mikrofon odgovori prije nego što pokaže da sluša, kako biste znali kada govoriti.",
     "emoji.title": "I smajlići",
     "emoji.text": "Recite „smajlić palac gore” i Dictate napiše 👍. Svi Appleovi emojiji, glasom.",
+    "fix.title": "Zabunili ste se? Samo se ispravite",
+    "fix.text": "Rekli ste krivu riječ? Recite „oprostite” ili „ne”, a zatim pravu: Dictate napiše samo ispravak. Od „u utorak, oprostite, u srijedu” ostaje „u srijedu”. Pravo „oprostite” ostaje u tekstu.",
     "faq.title": "Česta pitanja",
     "faq.q1": "Zašto je besplatno?",
     "faq.a1": "Zato što rad Dictatea ništa ne košta: nema poslužitelja, nema računa. Transkripcija se odvija na vašem Macu, a pregled ide preko pretplate na Claude koju već imate ili preko Apple Intelligencea na vašem Macu. Nemamo što platiti pa nemamo što ni naplatiti. Nema pro verzije, nema ograničenog probnog razdoblja.",
@@ -127,6 +129,7 @@ window.DICTATE_I18N = {
     "decimal": ",",
     "version": "Verzija {v}",
     "emojiWords": "smajlić palac gore",
+    "fixWords": ["Vidimo se ", "u utorak, oprostite, ", "u srijedu u 10"],
     "scenarios": [
       {
         "to": "Arthur G.",

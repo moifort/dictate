@@ -84,6 +84,8 @@ window.DICTATE_I18N = {
     "pill.text": "Egy kis kapszula a képernyő alján jelzi, hogy a Dictate figyel, majd dolgozik, aztán eltűnik. Ha semmit sem hallott, egy áthúzott hangszóró jelzi. AirPodsszal megvárja, hogy a mikrofonjuk válaszoljon, mielőtt figyelést mutatna, így tudja, mikor beszélhet.",
     "emoji.title": "Szmájlik is",
     "emoji.text": "Mondja: „szmájli hüvelykujj fel”, és a Dictate ezt írja: 👍. Az Apple összes emojija, hanggal.",
+    "fix.title": "Tévesztett? Csak javítsa ki magát",
+    "fix.text": "Rossz szót mondott? Mondja: „bocsánat” vagy „nem”, majd a helyeset: a Dictate csak a javítást írja le. A „kedden, bocsánat, szerdán” helyett csak „szerdán” marad. A valódi „bocsánat” a szövegben marad.",
     "faq.title": "Gyakori kérdések",
     "faq.q1": "Miért ingyenes?",
     "faq.a1": "Mert a Dictate működtetése semmibe sem kerül: nincs szerver, nincs fiók. Az átírás a Macjén történik, az ellenőrzés pedig a már meglévő Claude-előfizetésén vagy a Macjén futó Apple Intelligence-en keresztül megy. Nekünk nincs mit fizetnünk, így Önnek sincs mit kiszámláznunk. Nincs pro verzió, nincs korlátozott próbaidő.",
@@ -127,6 +129,7 @@ window.DICTATE_I18N = {
     "decimal": ",",
     "version": "{v} verzió",
     "emojiWords": "szmájli hüvelykujj fel",
+    "fixWords": ["Találkozunk ", "kedden, bocsánat, ", "szerdán 10-kor"],
     "scenarios": [
       {
         "to": "Arthur G.",

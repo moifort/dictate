@@ -682,6 +682,33 @@
     })();
   }
 
+  // The self-correction card: the sentence is typed as it was said, slip and
+  // "pardon" included, then the slip is struck out and only the fix is left.
+  const fixWrong = document.querySelector("[data-fix-wrong]");
+  if (fixWrong) {
+    const fixBefore = document.querySelector("[data-fix-before]");
+    const fixAfter = document.querySelector("[data-fix-after]");
+    const fixWords = demoTexts ? demoTexts.fixWords : ["On se voit ", "mardi, pardon, ", "mercredi à 10 h"];
+    const parts = [fixBefore, fixWrong, fixAfter];
+    (async () => {
+      for (;;) {
+        fixWrong.classList.remove("struck");
+        parts.forEach((part) => (part.textContent = ""));
+        for (const [index, part] of parts.entries()) {
+          for (let i = 1; i <= fixWords[index].length; i++) {
+            part.textContent = fixWords[index].slice(0, i);
+            await sleep(reducedMotion ? 5 : 45);
+          }
+        }
+        await sleep(600);
+        fixWrong.classList.add("struck");
+        await sleep(1100);
+        fixWrong.textContent = "";
+        await sleep(2800);
+      }
+    })();
+  }
+
   // The auto-send card: in each app switched on, the sentence is typed, Return
   // goes down and the message joins the thread. In Notes, switched off, the
   // text stays in the field.

@@ -84,6 +84,8 @@ window.DICTATE_I18N = {
     "pill.text": "Väike kapsel ekraani allservas näitab, et Dictate kuulab, seejärel töötab, ja siis kaob. Kui ta midagi ei kuulnud, annab sellest märku läbikriipsutatud kõlar. AirPodsidega ootab ta enne kuulamise näitamist, kuni nende mikrofon vastab, et teaksite, millal rääkida.",
     "emoji.title": "Naerunäod ka",
     "emoji.text": "Öelge „naerunägu pöial püsti“ ja Dictate kirjutab 👍. Kõik Apple’i emojid, häälega.",
+    "fix.title": "Ütlesite valesti? Lihtsalt parandage",
+    "fix.text": "Ütlesite vale sõna? Öelge „vabandust“ või „ei“ ja seejärel õige: Dictate kirjutab ainult paranduse. „Teisipäeval, vabandust, kolmapäeval“ asemel jääb „kolmapäeval“. Päris „vabandust“ jääb teksti alles.",
     "faq.title": "Korduma kippuvad küsimused",
     "faq.q1": "Miks see on tasuta?",
     "faq.a1": "Sest Dictate’i käitamine ei maksa midagi: pole serverit, pole kontot. Transkriptsioon toimub teie Macis ja ülevaatus käib teil juba olemasoleva Claude’i tellimuse või teie Maci Apple Intelligence’i kaudu. Meil pole millegi eest maksta, seega pole ka teilt midagi küsida. Pole pro-versiooni, pole piiratud prooviaega.",
@@ -127,6 +129,7 @@ window.DICTATE_I18N = {
     "decimal": ",",
     "version": "Versioon {v}",
     "emojiWords": "naerunägu pöial püsti",
+    "fixWords": ["Näeme ", "teisipäeval, vabandust, ", "kolmapäeval kell 10"],
     "scenarios": [
       {
         "to": "Arthur G.",

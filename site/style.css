@@ -1096,6 +1096,10 @@ section {
 @keyframes emoji-pop { from { transform: scale(0.3); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .emoji-result.shown { animation: none; } }
 
+/* Self-corrections: the cursor card's field, where the slip and its "pardon"
+   are struck out like the raw transcript of the review card, then go. */
+.fix-wrong.struck { color: var(--text-dim); text-decoration: line-through; text-decoration-color: rgba(237, 23, 199, 0.6); }
+
 /* Auto-send: a composer where the sentence lands, the Return key Dictate
    presses, and the app list from the settings, each with its switch. */
 .send-demo {

@@ -84,6 +84,8 @@ window.DICTATE_I18N = {
     "pill.text": "A small pill at the bottom of the screen shows that Dictate is listening, then working, then fades away. If it heard nothing, a crossed-out speaker tells you. With AirPods, it waits for their microphone to answer before it shows listening, so you know when to speak.",
     "emoji.title": "Smileys too",
     "emoji.text": "Say “smiley thumbs up” and Dictate writes 👍. Every Apple emoji, by voice.",
+    "fix.title": "Misspoke? Just correct yourself",
+    "fix.text": "Said the wrong word? Say “sorry” or “no”, then the right one: Dictate writes only the correction. “Tuesday, sorry, Wednesday” becomes “Wednesday”. A real “sorry” stays in the text.",
     "faq.title": "Frequently asked questions",
     "faq.q1": "Why is it free?",
     "faq.a1": "Because Dictate costs nothing to run: no server, no account. Transcription happens on your Mac, and the review goes through the Claude subscription you already have, or through Apple Intelligence on your Mac. There's nothing to pay us, so nothing to bill you. No pro version, no limited trial.",
@@ -127,6 +129,7 @@ window.DICTATE_I18N = {
     "decimal": ".",
     "version": "Version {v}",
     "emojiWords": "smiley thumbs up",
+    "fixWords": ["See you ", "Tuesday, sorry, ", "Wednesday at 10"],
     "scenarios": [
       {
         "to": "Arthur G.",

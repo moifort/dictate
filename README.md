@@ -28,6 +28,9 @@ ready-to-send text.
 - **Clean text, not a raw transcript.** Hesitations ("euh", "um"), repetitions
   and false starts are removed, punctuation and capitals are fixed, misheard
   technical terms are corrected. Your words and meaning stay as you said them.
+- **Follows your self-corrections.** Say the wrong word, then "pardon" (or
+  "sorry", "no", "I mean") and the right one: only the correction is written.
+  "Tuesday, sorry, Wednesday" becomes "Wednesday". A real "sorry" stays.
 - **Emojis by voice.** Say "emoji rocket" or "smiley crying with laughter" and
   🚀 or 😂 lands in the text. Just mentioning one ("send me a smiley") stays
   words. Turn it off in Settings → Review.

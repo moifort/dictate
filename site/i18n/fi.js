@@ -84,6 +84,8 @@ window.DICTATE_I18N = {
     "pill.text": "Pieni kapseli näytön alareunassa näyttää, että Dictate kuuntelee, sitten työskentelee ja häipyy pois. Jos se ei kuullut mitään, yliviivattu kaiutin kertoo sen. AirPodsien kanssa se odottaa, että niiden mikrofoni vastaa, ennen kuin näyttää kuuntelevansa, jotta tiedät, milloin puhua.",
     "emoji.title": "Hymiötkin",
     "emoji.text": "Sano ”hymiö peukku ylös”, ja Dictate kirjoittaa 👍. Kaikki Applen emojit, äänellä.",
+    "fix.title": "Sanoitko väärin? Korjaa vain",
+    "fix.text": "Tuliko väärä sana? Sano ”anteeksi” tai ”ei” ja sitten oikea: Dictate kirjoittaa vain korjauksen. ”Tiistaina, anteeksi, keskiviikkona” on lopulta ”keskiviikkona”. Oikea ”anteeksi” jää tekstiin.",
     "faq.title": "Usein kysytyt kysymykset",
     "faq.q1": "Miksi se on ilmainen?",
     "faq.a1": "Koska Dictaten pyörittäminen ei maksa mitään: ei palvelinta, ei tiliä. Litterointi tapahtuu Macillasi, ja tarkistus kulkee sinulla jo olevan Claude-tilauksen tai Macisi Apple Intelligencen kautta. Meillä ei ole mitään maksettavaa, joten ei mitään laskutettavaa. Ei pro-versiota, ei rajoitettua kokeilua.",
@@ -127,6 +129,7 @@ window.DICTATE_I18N = {
     "decimal": ",",
     "version": "Versio {v}",
     "emojiWords": "hymiö peukku ylös",
+    "fixWords": ["Nähdään ", "tiistaina, anteeksi, ", "keskiviikkona kello 10"],
     "scenarios": [
       {
         "to": "Arthur G.",

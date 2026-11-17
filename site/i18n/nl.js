@@ -84,6 +84,8 @@ window.DICTATE_I18N = {
     "pill.text": "Een kleine pil onder in het scherm toont dat Dictate luistert, dan werkt, en verdwijnt weer. Heeft hij niets gehoord, dan zie je een doorgestreepte luidspreker. Met AirPods wacht hij tot hun microfoon antwoordt voordat hij ‘luisteren’ toont, zodat je weet wanneer je kunt spreken.",
     "emoji.title": "Smileys ook",
     "emoji.text": "Zeg ‘smiley duim omhoog’ en Dictate schrijft 👍. Elke Apple-emoji, met je stem.",
+    "fix.title": "Verspreek je je? Verbeter jezelf gewoon",
+    "fix.text": "Verkeerde woord gezegd? Zeg ‘sorry’ of ‘nee’ en dan het juiste: Dictate schrijft alleen de correctie. ‘Dinsdag, sorry, woensdag’ wordt ‘woensdag’. Een echte ‘sorry’ blijft gewoon staan.",
     "faq.title": "Veelgestelde vragen",
     "faq.q1": "Waarom is het gratis?",
     "faq.a1": "Omdat Dictate draaien niets kost: geen server, geen account. De transcriptie gebeurt op je Mac en de controle loopt via het Claude-abonnement dat je al hebt, of via Apple Intelligence op je Mac. Wij hoeven niets te betalen, dus jij ook niet. Geen pro-versie, geen beperkte proefperiode.",
@@ -127,6 +129,7 @@ window.DICTATE_I18N = {
     "decimal": ",",
     "version": "Versie {v}",
     "emojiWords": "smiley duim omhoog",
+    "fixWords": ["We zien elkaar ", "dinsdag, sorry, ", "woensdag om 10 uur"],
     "scenarios": [
       {
         "to": "Arthur G.",

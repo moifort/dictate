@@ -84,6 +84,8 @@ window.DICTATE_I18N = {
     "pill.text": "Maža kapsulė ekrano apačioje rodo, kad „Dictate“ klausosi, tada dirba, o paskui išnyksta. Jei nieko neišgirdo, apie tai praneša perbrauktas garsiakalbis. Su „AirPods“ ji palaukia, kol atsilieps jų mikrofonas, ir tik tada rodo, kad klausosi, – taip žinote, kada kalbėti.",
     "emoji.title": "Ir šypsenėlės",
     "emoji.text": "Pasakykite „šypsenėlė nykštys aukštyn“, ir „Dictate“ parašys 👍. Visi „Apple“ jaustukai – balsu.",
+    "fix.title": "Suklydote? Tiesiog pasitaisykite",
+    "fix.text": "Pasakėte ne tą žodį? Pasakykite „atsiprašau“ arba „ne“, o tada tinkamą: „Dictate“ parašys tik pataisymą. Iš „antradienį, atsiprašau, trečiadienį“ liks „trečiadienį“. Tikras „atsiprašau“ lieka tekste.",
     "faq.title": "Dažni klausimai",
     "faq.q1": "Kodėl tai nemokama?",
     "faq.a1": "Nes „Dictate“ veikimas nieko nekainuoja: nei serverio, nei paskyros. Transkripcija vyksta jūsų „Mac“ kompiuteryje, o peržiūra atliekama per jau turimą „Claude“ prenumeratą arba per „Apple Intelligence“ jūsų „Mac“. Mums nėra už ką mokėti, tad nėra už ką imti pinigų ir iš jūsų. Jokios „pro“ versijos, jokio riboto bandomojo laikotarpio.",
@@ -127,6 +129,7 @@ window.DICTATE_I18N = {
     "decimal": ",",
     "version": "Versija {v}",
     "emojiWords": "šypsenėlė nykštys aukštyn",
+    "fixWords": ["Susitinkame ", "antradienį, atsiprašau, ", "trečiadienį 10 val."],
     "scenarios": [
       {
         "to": "Arthur G.",

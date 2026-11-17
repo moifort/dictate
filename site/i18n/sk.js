@@ -84,6 +84,8 @@ window.DICTATE_I18N = {
     "pill.text": "Malá pilulka pri dolnom okraji obrazovky ukazuje, že Dictate počúva, potom pracuje, a potom zmizne. Ak nič nepočula, povie vám to preškrtnutý reproduktor. S AirPods počká, kým ich mikrofón odpovie, než ukáže počúvanie, aby ste vedeli, kedy hovoriť.",
     "emoji.title": "Smajlíky tiež",
     "emoji.text": "Povedzte „smajlík palec hore“ a Dictate napíše 👍. Všetky emoji od Applu, hlasom.",
+    "fix.title": "Preriekli ste sa? Stačí sa opraviť",
+    "fix.text": "Povedali ste nesprávne slovo? Povedzte „pardon“ alebo „nie“ a potom to správne: Dictate napíše len opravu. Z „v utorok, pardon, v stredu“ zostane „v stredu“. Skutočné „pardon“ v texte zostane.",
     "faq.title": "Časté otázky",
     "faq.q1": "Prečo je to zadarmo?",
     "faq.a1": "Pretože prevádzka Dictate nič nestojí: žiadny server, žiadny účet. Prepis prebieha na vašom Macu a kontrola ide cez predplatné Claude, ktoré už máte, alebo cez Apple Intelligence na vašom Macu. Nemáme čo platiť, takže vám nemáme čo účtovať. Žiadna verzia pro, žiadna obmedzená skúšobná doba.",
@@ -127,6 +129,7 @@ window.DICTATE_I18N = {
     "decimal": ",",
     "version": "Verzia {v}",
     "emojiWords": "smajlík palec hore",
+    "fixWords": ["Uvidíme sa ", "v utorok, pardon, ", "v stredu o 10"],
     "scenarios": [
       {
         "to": "Arthur G.",

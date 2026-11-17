@@ -84,6 +84,8 @@ window.DICTATE_I18N = {
     "pill.text": "En lille pille nederst på skærmen viser, at Dictate lytter, derefter arbejder, og så forsvinder. Hvis den intet hørte, fortæller en overstreget højttaler dig det. Med AirPods venter den på, at deres mikrofon svarer, før den viser, at den lytter, så du ved, hvornår du kan tale.",
     "emoji.title": "Smileys også",
     "emoji.text": "Sig “smiley tommel op”, og Dictate skriver 👍. Alle Apples emojis, med stemmen.",
+    "fix.title": "Sagde du forkert? Ret dig selv",
+    "fix.text": "Fik du sagt det forkerte ord? Sig “undskyld” eller “nej” og så det rigtige: Dictate skriver kun rettelsen. “Tirsdag, undskyld, onsdag” bliver til “onsdag”. Et ægte “undskyld” bliver stående i teksten.",
     "faq.title": "Ofte stillede spørgsmål",
     "faq.q1": "Hvorfor er det gratis?",
     "faq.a1": "Fordi Dictate ikke koster noget at drive: ingen server, ingen konto. Transskriptionen sker på din Mac, og gennemgangen går via det Claude-abonnement, du allerede har, eller via Apple Intelligence på din Mac. Vi har intet at betale, så der er intet at opkræve. Ingen pro-version, ingen begrænset prøveperiode.",
@@ -127,6 +129,7 @@ window.DICTATE_I18N = {
     "decimal": ",",
     "version": "Version {v}",
     "emojiWords": "smiley tommel op",
+    "fixWords": ["Vi ses ", "tirsdag, undskyld, ", "onsdag klokken 10"],
     "scenarios": [
       {
         "to": "Arthur G.",

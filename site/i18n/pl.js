@@ -84,6 +84,8 @@ window.DICTATE_I18N = {
     "pill.text": "Mała pastylka u dołu ekranu pokazuje, że Dictate słucha, potem pracuje, a następnie znika. Jeśli nic nie usłyszała, informuje o tym przekreślony głośnik. Z AirPods czeka, aż ich mikrofon odpowie, zanim pokaże słuchanie, żebyś wiedział, kiedy mówić.",
     "emoji.title": "Buźki też",
     "emoji.text": "Powiedz „buźka kciuk w górę”, a Dictate napisze 👍. Wszystkie emoji Apple, głosem.",
+    "fix.title": "Pomyłka? Po prostu się popraw",
+    "fix.text": "Padło nie to słowo? Powiedz „przepraszam” albo „nie”, a potem właściwe: Dictate zapisze tylko poprawkę. „We wtorek, przepraszam, w środę” zmieni się w „w środę”. Prawdziwe „przepraszam” zostaje w tekście.",
     "faq.title": "Często zadawane pytania",
     "faq.q1": "Dlaczego jest za darmo?",
     "faq.a1": "Bo działanie Dictate nic nie kosztuje: bez serwera, bez konta. Transkrypcja odbywa się na Twoim Macu, a korekta przechodzi przez subskrypcję Claude, którą już masz, albo przez Apple Intelligence na Twoim Macu. Nie mamy nic do zapłacenia, więc nie mamy czego Ci naliczać. Bez wersji pro, bez ograniczonego okresu próbnego.",
@@ -127,6 +129,7 @@ window.DICTATE_I18N = {
     "decimal": ",",
     "version": "Wersja {v}",
     "emojiWords": "buźka kciuk w górę",
+    "fixWords": ["Widzimy się ", "we wtorek, przepraszam, ", "w środę o 10"],
     "scenarios": [
       {
         "to": "Arthur G.",
